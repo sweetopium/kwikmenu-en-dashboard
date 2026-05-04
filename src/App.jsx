@@ -6,11 +6,12 @@ import HelpPage from "./pages/HelpPage.jsx";
 import UploadPage from "./pages/UploadPage.jsx";
 import MenuEditor from "./pages/MenuEditor.jsx";
 import QrManager from "./pages/QrManager.jsx";
+import SettingsPage from "./pages/SettingsPage.jsx";
 
 const ProcessingPage = () => <div className="p-20 text-center space-y-4">Экран ИИ-парсинга (Skeletons & Progress)</div>;
 const DashboardHome = () => <div className="p-6 font-bold text-2xl">Обзор (Статистика заведений)</div>;
 
-const SettingsPage = () => <div className="p-6 font-bold text-2xl">Настройки профиля</div>;
+
 
 // --- КОМПОНЕНТЫ ЛЕЙАУТОВ ---
 
