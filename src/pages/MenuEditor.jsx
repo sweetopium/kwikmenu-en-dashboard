@@ -1,22 +1,24 @@
 import { useState } from 'react';
 import {
   Search, Plus, MoreHorizontal, Settings,
-  GripVertical, Image as ImageIcon, X, Trash2, Edit2, Check
+  GripVertical, Image as ImageIcon, X, Trash2, Edit2, Check,
+  ChevronUp, ChevronDown
 } from 'lucide-react';
-import {simpleMenuPayload} from "../data/menu_mock.js";
+
+import { simpleMenuPayload } from "../data/menu_mock.js";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
 import { Switch } from "../components/ui/switch";
 
-
 const MenuEditor = () => {
   const [menu, setMenu] = useState(simpleMenuPayload);
-  const [activeCategoryId, setActiveCategoryId] = useState(menu.categories[0].id);
+  const [activeCategoryId, setActiveCategoryId] = useState(menu.categories[0]?.id);
   const [searchQuery, setSearchQuery] = useState('');
 
-  // Состояние модалки редактирования
+  // Состояния модалок
   const [editingItem, setEditingItem] = useState(null);
+  const [editingCategory, setEditingCategory] = useState(null);
 
   // Текущая категория и отфильтрованные товары
   const activeCategory = menu.categories.find(c => c.id === activeCategoryId);
@@ -24,14 +26,68 @@ const MenuEditor = () => {
     item.name.toLowerCase().includes(searchQuery.toLowerCase())
   ) || [];
 
-  // --- ЛОГИКА МОДАЛКИ РЕДАКТИРОВАНИЯ ---
+  // ==========================================
+  // ЛОГИКА КАТЕГОРИЙ
+  // ==========================================
+
+  const handleAddCategory = () => {
+    setEditingCategory({ id: `cat-${Date.now()}`, name: '', description: '', items: [] });
+  };
+
+  const handleEditCategory = () => {
+    if (!activeCategory) return;
+    setEditingCategory(JSON.parse(JSON.stringify(activeCategory)));
+  };
+
+  const handleSaveCategory = () => {
+    const isExisting = menu.categories.find(c => c.id === editingCategory.id);
+    let newCategories;
+
+    if (isExisting) {
+      newCategories = menu.categories.map(c => c.id === editingCategory.id ? editingCategory : c);
+    } else {
+      newCategories = [...menu.categories, editingCategory];
+    }
+
+    setMenu({ ...menu, categories: newCategories });
+    setActiveCategoryId(editingCategory.id);
+    setEditingCategory(null);
+  };
+
+  const handleDeleteCategory = () => {
+    if (!activeCategory) return;
+    if (window.confirm(`Вы уверены, что хотите удалить категорию «${activeCategory.name}» и все её блюда?`)) {
+      const newCategories = menu.categories.filter(c => c.id !== activeCategoryId);
+      setMenu({ ...menu, categories: newCategories });
+      if (newCategories.length > 0) {
+        setActiveCategoryId(newCategories[0].id);
+      } else {
+        setActiveCategoryId(null);
+      }
+    }
+  };
+
+  const moveCategory = (index, direction) => {
+    const newCategories = [...menu.categories];
+    if (direction === -1 && index > 0) {
+      // Вверх
+      [newCategories[index - 1], newCategories[index]] = [newCategories[index], newCategories[index - 1]];
+    } else if (direction === 1 && index < newCategories.length - 1) {
+      // Вниз
+      [newCategories[index + 1], newCategories[index]] = [newCategories[index], newCategories[index + 1]];
+    }
+    setMenu({ ...menu, categories: newCategories });
+  };
+
+  // ==========================================
+  // ЛОГИКА БЛЮД (ITEMS)
+  // ==========================================
+
   const handleEditClick = (item) => {
-    // Делаем глубокую копию, чтобы не мутировать стейт до нажатия "Сохранить"
     setEditingItem(JSON.parse(JSON.stringify(item)));
   };
 
   const handleSaveItem = () => {
-    // В реальном проекте тут будет API запрос
     const updatedCategories = menu.categories.map(cat => {
       if (cat.id === activeCategoryId) {
         return {
@@ -56,7 +112,7 @@ const MenuEditor = () => {
     setEditingItem({
       ...editingItem,
       variants: editingItem.variants ? [...editingItem.variants, newVariant] : [newVariant],
-      price: '' // Очищаем основную цену, так как теперь используются варианты
+      price: ''
     });
   };
 
@@ -68,37 +124,60 @@ const MenuEditor = () => {
     });
   };
 
+
   return (
     <div className="bg-card border border-border/60 rounded-3xl shadow-sm flex flex-col md:flex-row overflow-hidden min-h-[calc(100vh-8rem)] relative">
 
       {/* --- САЙДБАР КАТЕГОРИЙ --- */}
-      <div className="w-full md:w-72 border-b md:border-b-0 md:border-r border-border/60 bg-secondary/10 flex flex-col shrink-0">
-        <div className="p-4 sm:p-5 flex items-center justify-between border-b border-border/60">
-          <h2 className="font-bold text-foreground tracking-tight">Категории</h2>
-          <button className="text-brand-purple hover:bg-brand-purple/10 p-1.5 rounded-lg transition-colors">
-            <Plus size={18} />
+      <div className="w-full md:w-[320px] border-b md:border-b-0 md:border-r border-border/60 bg-secondary/10 flex flex-col shrink-0">
+        <div className="p-4 sm:p-5 flex items-center justify-between border-b border-border/60 bg-card/50">
+          <h2 className="font-extrabold text-foreground tracking-tight text-lg">КАТЕГОРИИ</h2>
+          <button
+            onClick={handleAddCategory}
+            className="text-brand-purple hover:bg-brand-purple/10 p-1.5 rounded-lg transition-colors"
+          >
+            <Plus size={20} strokeWidth={3} />
           </button>
         </div>
 
-        {/* Скроллируемый список категорий (горизонтальный на мобилках, вертикальный на десктопе) */}
+        {/* Скроллируемый список категорий */}
         <div className="flex-1 overflow-x-auto md:overflow-y-auto p-3 sm:p-4 flex md:flex-col gap-2 no-scrollbar">
-          {menu.categories.map((cat) => (
-            <button
-              key={cat.id}
-              onClick={() => setActiveCategoryId(cat.id)}
-              className={`flex items-center justify-between px-3 sm:px-4 py-2.5 sm:py-3 rounded-xl transition-all whitespace-nowrap md:whitespace-normal text-left ${
-                activeCategoryId === cat.id 
-                  ? 'bg-background shadow-sm border border-border/50 text-brand-purple font-semibold' 
-                  : 'text-muted-foreground hover:bg-secondary/50 font-medium border border-transparent'
-              }`}
-            >
-              <span className="truncate mr-3 text-sm sm:text-base">{cat.name}</span>
-              <span className={`text-[10px] sm:text-xs px-2 py-0.5 rounded-full ${
-                activeCategoryId === cat.id ? 'bg-brand-purple/10 text-brand-purple' : 'bg-secondary text-muted-foreground'
-              }`}>
-                {cat.items.length}
-              </span>
-            </button>
+          {menu.categories.map((cat, idx) => (
+            <div key={cat.id} className="flex items-center gap-1.5">
+              <button
+                onClick={() => setActiveCategoryId(cat.id)}
+                className={`flex-1 flex items-center justify-between px-3 sm:px-4 py-2.5 sm:py-3 rounded-xl transition-all whitespace-nowrap md:whitespace-normal text-left ${
+                  activeCategoryId === cat.id 
+                    ? 'bg-background shadow-sm border border-border/50 text-brand-purple font-bold' 
+                    : 'text-muted-foreground hover:bg-secondary/50 font-semibold border border-transparent'
+                }`}
+              >
+                <span className="truncate mr-3 text-sm sm:text-base">{cat.name}</span>
+                <span className={`text-[10px] sm:text-xs px-2 py-0.5 rounded-full font-bold ${
+                  activeCategoryId === cat.id ? 'bg-brand-purple/10 text-brand-purple' : 'bg-secondary text-muted-foreground'
+                }`}>
+                  {cat.items?.length || 0}
+                </span>
+              </button>
+
+              {/* Шевроны сортировки (только десктоп) */}
+              <div className="hidden md:flex flex-col gap-0.5">
+                <button
+                  onClick={() => moveCategory(idx, -1)}
+                  disabled={idx === 0}
+                  className="p-1 rounded-md text-muted-foreground hover:bg-secondary hover:text-foreground disabled:opacity-20 disabled:hover:bg-transparent transition-colors"
+                >
+                  <ChevronUp size={16} strokeWidth={3} />
+                </button>
+                <button
+                  onClick={() => moveCategory(idx, 1)}
+                  disabled={idx === menu.categories.length - 1}
+                  className="p-1 rounded-md text-muted-foreground hover:bg-secondary hover:text-foreground disabled:opacity-20 disabled:hover:bg-transparent transition-colors"
+                >
+                  <ChevronDown size={16} strokeWidth={3} />
+                </button>
+              </div>
+            </div>
           ))}
         </div>
       </div>
@@ -107,40 +186,63 @@ const MenuEditor = () => {
       <div className="flex-1 flex flex-col bg-background relative">
 
         {/* Хедер категории */}
-        <div className="p-4 sm:p-6 lg:p-8 border-b border-border/60 flex flex-col sm:flex-row gap-4 sm:items-center justify-between bg-card z-10 sticky top-0">
-          <div>
-            <h1 className="text-2xl sm:text-3xl font-extrabold text-foreground tracking-tight">
-              {activeCategory?.name}
-            </h1>
-            {activeCategory?.description && (
-              <p className="text-sm text-muted-foreground mt-1 max-w-2xl leading-relaxed">
-                {activeCategory.description}
-              </p>
-            )}
-          </div>
-
-          <div className="flex items-center gap-3 w-full sm:w-auto">
-            <div className="relative flex-1 sm:w-64">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={16} />
-              <Input
-                placeholder="Поиск блюда..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-9 bg-secondary/30 border-transparent focus:bg-background h-10 w-full rounded-xl"
-              />
+        {activeCategory ? (
+          <div className="p-4 sm:p-6 lg:p-8 border-b border-border/60 flex flex-col sm:flex-row gap-4 sm:items-start justify-between bg-card z-10 sticky top-0">
+            <div className="flex flex-col min-w-0">
+              <div className="flex items-center gap-3">
+                <h1 className="text-2xl sm:text-3xl font-extrabold text-foreground tracking-tight truncate">
+                  {activeCategory.name}
+                </h1>
+                <div className="flex items-center gap-1 shrink-0">
+                  <button
+                    onClick={handleEditCategory}
+                    className="w-8 h-8 rounded-lg flex items-center justify-center text-muted-foreground hover:text-brand-purple hover:bg-brand-purple/10 border border-border/60 hover:border-brand-purple/30 transition-all bg-secondary/30 shadow-sm"
+                  >
+                    <Edit2 size={15} />
+                  </button>
+                  <button
+                    onClick={handleDeleteCategory}
+                    className="w-8 h-8 rounded-lg flex items-center justify-center text-muted-foreground hover:text-destructive hover:bg-destructive/10 border border-border/60 hover:border-destructive/30 transition-all bg-secondary/30 shadow-sm"
+                  >
+                    <Trash2 size={15} />
+                  </button>
+                </div>
+              </div>
+              {activeCategory.description && (
+                <p className="text-sm text-muted-foreground mt-1.5 max-w-2xl leading-relaxed truncate whitespace-normal line-clamp-2">
+                  {activeCategory.description}
+                </p>
+              )}
             </div>
-            <Button className="bg-brand-purple hover:bg-brand-purple/90 text-white rounded-xl h-10 px-4 shrink-0 shadow-sm">
-              <Plus size={18} className="mr-2" />
-              Блюдо
-            </Button>
-          </div>
-        </div>
 
-        {/* Список карточек */}
+            <div className="flex items-center gap-3 w-full sm:w-auto shrink-0 mt-2 sm:mt-0">
+              <div className="relative flex-1 sm:w-64">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={16} />
+                <Input
+                  placeholder="Поиск блюда..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-9 bg-secondary/30 border-transparent focus:bg-background h-10 w-full rounded-xl"
+                />
+              </div>
+              {/* Заглушка, в будущем сюда можно повесить функцию создания нового блюда */}
+              <Button className="bg-brand-purple hover:bg-brand-purple/90 text-white rounded-xl h-10 px-4 shadow-sm">
+                <Plus size={18} className="mr-2" />
+                Блюдо
+              </Button>
+            </div>
+          </div>
+        ) : (
+          <div className="p-8 border-b border-border/60 bg-card">
+            <h1 className="text-xl font-bold text-muted-foreground">Выберите категорию</h1>
+          </div>
+        )}
+
+        {/* Список карточек блюд */}
         <div className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 space-y-3 bg-secondary/5">
           {filteredItems.length === 0 ? (
             <div className="text-center py-20 text-muted-foreground">
-              <p>Ничего не найдено</p>
+              <p>Нет блюд в этой категории</p>
             </div>
           ) : (
             filteredItems.map((item) => (
@@ -148,7 +250,7 @@ const MenuEditor = () => {
                 key={item.id}
                 className="group flex flex-col sm:flex-row sm:items-center gap-4 p-3 sm:p-4 bg-card border border-border/60 rounded-2xl shadow-sm hover:shadow-md hover:border-brand-purple/30 transition-all"
               >
-                {/* Левая часть: Драг-хэндл + Картинка + Инфо */}
+                {/* Левая часть */}
                 <div className="flex items-center gap-3 sm:gap-4 flex-1">
                   <button className="text-muted-foreground/40 hover:text-foreground cursor-grab active:cursor-grabbing hidden sm:block">
                     <GripVertical size={20} />
@@ -164,7 +266,6 @@ const MenuEditor = () => {
                       {item.description || "Описания нет"} {item.volume && ` • ${item.volume}`}
                     </p>
 
-                    {/* Бейджи вариантов (если есть) */}
                     {item.variants && item.variants.length > 0 && (
                       <div className="flex flex-wrap gap-1.5 mt-2">
                         {item.variants.map(v => (
@@ -177,7 +278,7 @@ const MenuEditor = () => {
                   </div>
                 </div>
 
-                {/* Правая часть: Цена (если нет вариантов) + Свитч + Действия */}
+                {/* Правая часть */}
                 <div className="flex items-center justify-between sm:justify-end gap-4 sm:gap-6 pl-14 sm:pl-0 border-t border-border/50 sm:border-0 pt-3 sm:pt-0">
                   {(!item.variants || item.variants.length === 0) && (
                     <div className="font-extrabold text-sm sm:text-base whitespace-nowrap text-foreground">
@@ -204,14 +305,81 @@ const MenuEditor = () => {
         </div>
       </div>
 
-      {/* --- МОДАЛКА РЕДАКТИРОВАНИЯ БЛЮДА --- */}
+
+      {/* ========================================== */}
+      {/* МОДАЛКА РЕДАКТИРОВАНИЯ КАТЕГОРИИ          */}
+      {/* ========================================== */}
+      {editingCategory && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-black/40 backdrop-blur-sm animate-in fade-in duration-200">
+          <div
+            className="bg-card w-full max-w-md rounded-[2rem] shadow-2xl flex flex-col overflow-hidden border border-border/50 animate-in zoom-in-95 duration-200"
+            onClick={e => e.stopPropagation()}
+          >
+            <div className="p-6 border-b border-border/60 flex items-center justify-between bg-secondary/20">
+              <div>
+                <h2 className="text-xl font-bold text-foreground">
+                  {editingCategory.name ? 'Настройки категории' : 'Новая категория'}
+                </h2>
+              </div>
+              <button
+                onClick={() => setEditingCategory(null)}
+                className="w-8 h-8 flex items-center justify-center rounded-full bg-background border border-border hover:bg-secondary transition-colors text-muted-foreground"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            <div className="p-6 space-y-5 bg-background">
+              <div className="space-y-2">
+                <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Название</Label>
+                <Input
+                  value={editingCategory.name}
+                  onChange={e => setEditingCategory({...editingCategory, name: e.target.value})}
+                  className="h-11 bg-secondary/30 border-transparent focus:bg-background rounded-xl text-base"
+                  placeholder="Например: Десерты"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Описание (опционально)</Label>
+                <textarea
+                  value={editingCategory.description || ''}
+                  onChange={e => setEditingCategory({...editingCategory, description: e.target.value})}
+                  className="w-full min-h-[80px] bg-secondary/30 border-transparent focus:border-ring focus:bg-background rounded-xl p-3 text-sm outline-none resize-y transition-colors"
+                  placeholder="Показывать под заголовком категории..."
+                />
+              </div>
+            </div>
+
+            <div className="p-4 sm:p-6 border-t border-border/60 flex justify-end gap-3 bg-card">
+              <Button
+                variant="outline"
+                onClick={() => setEditingCategory(null)}
+                className="rounded-xl border-border/60 hover:bg-secondary font-semibold"
+              >
+                Отмена
+              </Button>
+              <Button
+                onClick={handleSaveCategory}
+                disabled={!editingCategory.name.trim()}
+                className="rounded-xl bg-brand-purple hover:bg-brand-purple/90 text-white font-semibold shadow-md shadow-brand-purple/20 px-6"
+              >
+                Сохранить
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+
+      {/* ========================================== */}
+      {/* МОДАЛКА РЕДАКТИРОВАНИЯ БЛЮДА               */}
+      {/* ========================================== */}
       {editingItem && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-black/40 backdrop-blur-sm animate-in fade-in duration-200">
           <div
             className="bg-card w-full max-w-2xl rounded-[2rem] shadow-2xl flex flex-col max-h-[90vh] overflow-hidden border border-border/50 animate-in zoom-in-95 duration-200"
             onClick={e => e.stopPropagation()}
           >
-            {/* Хедер модалки */}
             <div className="p-6 border-b border-border/60 flex items-center justify-between bg-secondary/20">
               <div>
                 <h2 className="text-xl font-bold text-foreground">Редактирование блюда</h2>
@@ -225,9 +393,7 @@ const MenuEditor = () => {
               </button>
             </div>
 
-            {/* Тело модалки */}
             <div className="p-6 overflow-y-auto space-y-6 bg-background custom-scrollbar">
-
               <div className="space-y-2">
                 <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Название</Label>
                 <Input
@@ -247,7 +413,6 @@ const MenuEditor = () => {
                 />
               </div>
 
-              {/* БЛОК: ЦЕНА И ВАРИАНТЫ */}
               <div className="bg-secondary/20 p-5 rounded-2xl border border-border/50 space-y-4">
                 <div className="flex items-center justify-between">
                   <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
@@ -261,7 +426,6 @@ const MenuEditor = () => {
                   </button>
                 </div>
 
-                {/* Если НЕТ вариантов — показываем простую цену и объем */}
                 {(!editingItem.variants || editingItem.variants.length === 0) ? (
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
@@ -284,7 +448,6 @@ const MenuEditor = () => {
                     </div>
                   </div>
                 ) : (
-                  /* Если ЕСТЬ варианты — показываем список редакторов */
                   <div className="space-y-3">
                     {editingItem.variants.map((variant, idx) => (
                       <div key={variant.id || idx} className="flex items-start gap-3 p-3 bg-background border border-border/60 rounded-xl relative group">
@@ -294,7 +457,6 @@ const MenuEditor = () => {
                         >
                           <X size={12} />
                         </button>
-
                         <div className="flex-1 space-y-1.5">
                           <Label className="text-[10px] text-muted-foreground">Название опции</Label>
                           <Input
@@ -328,7 +490,6 @@ const MenuEditor = () => {
               </div>
             </div>
 
-            {/* Футер модалки */}
             <div className="p-4 sm:p-6 border-t border-border/60 flex justify-end gap-3 bg-card">
               <Button
                 variant="outline"
