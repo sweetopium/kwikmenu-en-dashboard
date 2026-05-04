@@ -1,7 +1,7 @@
 import {useState} from 'react';
 import {Link} from 'react-router-dom';
 import {
-    ArrowLeft, CheckCircle2, Send, Sparkles,
+    ArrowLeft, CheckCircle2, Send,
     UploadCloud, Link as LinkIcon, FileText
 } from 'lucide-react';
 import { FaTelegram } from "react-icons/fa6";
