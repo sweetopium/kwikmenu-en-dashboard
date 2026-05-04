@@ -2,7 +2,7 @@ import { useState } from 'react';
 import {
   Search, Plus, MoreHorizontal, Settings,
   GripVertical, Image as ImageIcon, X, Trash2, Edit2, Check,
-  ChevronUp, ChevronDown
+  ChevronUp, ChevronDown, AlertCircle
 } from 'lucide-react';
 
 import { simpleMenuPayload } from "../data/menu_mock.js";
@@ -10,6 +10,22 @@ import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
 import { Switch } from "../components/ui/switch";
+
+// Словарь для красивого отображения единиц измерения
+const MEASURE_UNITS = [
+  { value: 'ml', label: 'мл' },
+  { value: 'l', label: 'л' },
+  { value: 'g', label: 'г' },
+  { value: 'kg', label: 'кг' },
+  { value: 'pcs', label: 'шт' },
+  { value: 'portion', label: 'порция' }
+];
+
+const formatMeasure = (value, unitCode) => {
+  if (!value) return '';
+  const unit = MEASURE_UNITS.find(u => u.value === unitCode);
+  return `${value} ${unit ? unit.label : ''}`.trim();
+};
 
 const MenuEditor = () => {
   const [menu, setMenu] = useState(simpleMenuPayload);
@@ -24,6 +40,9 @@ const MenuEditor = () => {
   const [modalMode, setModalMode] = useState('edit'); // 'add' | 'edit'
   const [originalCategoryId, setOriginalCategoryId] = useState(null);
   const [targetCategoryId, setTargetCategoryId] = useState(null);
+
+  // Состояние модалки подтверждения удаления (универсальная)
+  const [deleteConfirm, setDeleteConfirm] = useState(null); // { type: 'category' | 'item', id: string, name: string, categoryId?: string }
 
   // Текущая категория и отфильтрованные товары
   const activeCategory = menu.categories.find(c => c.id === activeCategoryId);
@@ -59,26 +78,20 @@ const MenuEditor = () => {
     setEditingCategory(null);
   };
 
-  const handleDeleteCategory = () => {
+  const handleDeleteCategoryClick = () => {
     if (!activeCategory) return;
-    if (window.confirm(`Вы уверены, что хотите удалить категорию «${activeCategory.name}» и все её блюда?`)) {
-      const newCategories = menu.categories.filter(c => c.id !== activeCategoryId);
-      setMenu({ ...menu, categories: newCategories });
-      if (newCategories.length > 0) {
-        setActiveCategoryId(newCategories[0].id);
-      } else {
-        setActiveCategoryId(null);
-      }
-    }
+    setDeleteConfirm({
+      type: 'category',
+      id: activeCategory.id,
+      name: activeCategory.name
+    });
   };
 
   const moveCategory = (index, direction) => {
     const newCategories = [...menu.categories];
     if (direction === -1 && index > 0) {
-      // Вверх
       [newCategories[index - 1], newCategories[index]] = [newCategories[index], newCategories[index - 1]];
     } else if (direction === 1 && index < newCategories.length - 1) {
-      // Вниз
       [newCategories[index + 1], newCategories[index]] = [newCategories[index], newCategories[index + 1]];
     }
     setMenu({ ...menu, categories: newCategories });
@@ -88,7 +101,6 @@ const MenuEditor = () => {
   // ЛОГИКА БЛЮД (ITEMS)
   // ==========================================
 
-  // Открытие модалки для ДОБАВЛЕНИЯ
   const handleAddItemClick = () => {
     setModalMode('add');
     setOriginalCategoryId(null);
@@ -98,12 +110,12 @@ const MenuEditor = () => {
       name: '',
       description: '',
       price: '',
-      volume: '',
+      measureValue: '',
+      measureUnit: 'ml',
       variants: []
     });
   };
 
-  // Открытие модалки для РЕДАКТИРОВАНИЯ
   const handleEditClick = (item) => {
     setModalMode('edit');
     setOriginalCategoryId(activeCategoryId);
@@ -111,7 +123,15 @@ const MenuEditor = () => {
     setEditingItem(JSON.parse(JSON.stringify(item)));
   };
 
-  // Сохранение блюда (Добавление нового ИЛИ обновление/перенос старого)
+  const handleDeleteItemClick = (item) => {
+    setDeleteConfirm({
+      type: 'item',
+      id: item.id,
+      name: item.name,
+      categoryId: activeCategoryId
+    });
+  };
+
   const handleSaveItem = () => {
     if (!editingItem.name.trim()) {
       alert('Пожалуйста, введите название блюда');
@@ -121,7 +141,6 @@ const MenuEditor = () => {
     let newCategories = [...menu.categories];
 
     if (modalMode === 'add') {
-      // Добавляем новое блюдо в выбранную targetCategoryId
       newCategories = newCategories.map(cat => {
         if (cat.id === targetCategoryId) {
           return { ...cat, items: [...(cat.items || []), editingItem] };
@@ -130,7 +149,6 @@ const MenuEditor = () => {
       });
     } else if (modalMode === 'edit') {
       if (originalCategoryId === targetCategoryId) {
-        // Категория не изменилась — просто обновляем блюдо
         newCategories = newCategories.map(cat => {
           if (cat.id === originalCategoryId) {
             return {
@@ -141,7 +159,6 @@ const MenuEditor = () => {
           return cat;
         });
       } else {
-        // Категория ИЗМЕНИЛАСЬ — удаляем из старой, добавляем в новую
         newCategories = newCategories.map(cat => {
           if (cat.id === originalCategoryId) {
             return { ...cat, items: cat.items.filter(i => i.id !== editingItem.id) };
@@ -157,7 +174,6 @@ const MenuEditor = () => {
     setMenu({ ...menu, categories: newCategories });
     setEditingItem(null);
 
-    // Автоматически переключаем активную категорию на ту, куда добавили/перенесли блюдо
     if (targetCategoryId !== activeCategoryId) {
       setActiveCategoryId(targetCategoryId);
     }
@@ -170,11 +186,19 @@ const MenuEditor = () => {
   };
 
   const addVariant = () => {
-    const newVariant = { id: `var-${Date.now()}`, label: '', price: '', volume: '' };
+    const newVariant = {
+      id: `var-${Date.now()}`,
+      label: '',
+      price: '',
+      measureValue: '',
+      measureUnit: 'ml'
+    };
     setEditingItem({
       ...editingItem,
       variants: editingItem.variants ? [...editingItem.variants, newVariant] : [newVariant],
-      price: '' // Очищаем простую цену, переходим на варианты
+      price: '',
+      measureValue: '',
+      measureUnit: 'ml'
     });
   };
 
@@ -184,6 +208,33 @@ const MenuEditor = () => {
       ...editingItem,
       variants: updatedVariants.length > 0 ? updatedVariants : undefined
     });
+  };
+
+  // ==========================================
+  // ВЫПОЛНЕНИЕ УДАЛЕНИЯ (Из модалки)
+  // ==========================================
+  const executeDelete = () => {
+    if (!deleteConfirm) return;
+
+    if (deleteConfirm.type === 'category') {
+      const newCategories = menu.categories.filter(c => c.id !== deleteConfirm.id);
+      setMenu({ ...menu, categories: newCategories });
+      if (newCategories.length > 0) {
+        setActiveCategoryId(newCategories[0].id);
+      } else {
+        setActiveCategoryId(null);
+      }
+    } else if (deleteConfirm.type === 'item') {
+      const newCategories = menu.categories.map(cat => {
+        if (cat.id === deleteConfirm.categoryId) {
+          return { ...cat, items: cat.items.filter(i => i.id !== deleteConfirm.id) };
+        }
+        return cat;
+      });
+      setMenu({ ...menu, categories: newCategories });
+    }
+
+    setDeleteConfirm(null);
   };
 
 
@@ -222,7 +273,6 @@ const MenuEditor = () => {
                 </span>
               </button>
 
-              {/* Шевроны сортировки (только десктоп) */}
               <div className="hidden md:flex flex-col gap-0.5">
                 <button
                   onClick={() => moveCategory(idx, -1)}
@@ -263,7 +313,7 @@ const MenuEditor = () => {
                     <Edit2 size={15} />
                   </button>
                   <button
-                    onClick={handleDeleteCategory}
+                    onClick={handleDeleteCategoryClick}
                     className="w-8 h-8 rounded-lg flex items-center justify-center text-muted-foreground hover:text-destructive hover:bg-destructive/10 border border-border/60 hover:border-destructive/30 transition-all bg-secondary/30 shadow-sm"
                   >
                     <Trash2 size={15} />
@@ -327,14 +377,15 @@ const MenuEditor = () => {
                   <div className="flex flex-col flex-1 min-w-0">
                     <h3 className="font-bold text-sm sm:text-base text-foreground truncate">{item.name}</h3>
                     <p className="text-xs text-muted-foreground truncate mt-0.5">
-                      {item.description || "Описания нет"} {item.volume && ` • ${item.volume}`}
+                      {item.description || "Описания нет"}
+                      {item.measureValue && ` • ${formatMeasure(item.measureValue, item.measureUnit)}`}
                     </p>
 
                     {item.variants && item.variants.length > 0 && (
                       <div className="flex flex-wrap gap-1.5 mt-2">
                         {item.variants.map(v => (
                           <div key={v.id} className="text-[10px] font-medium bg-brand-purple/10 text-brand-purple px-2 py-0.5 rounded-md border border-brand-purple/20">
-                            {v.label || v.volume}: <span className="font-bold">{v.price}</span>
+                            {v.label || formatMeasure(v.measureValue, v.measureUnit)}: <span className="font-bold">{v.price}</span>
                           </div>
                         ))}
                       </div>
@@ -358,7 +409,10 @@ const MenuEditor = () => {
                     >
                       <Edit2 size={18} />
                     </button>
-                    <button className="text-muted-foreground hover:text-destructive hover:bg-destructive/10 p-2 rounded-lg transition-colors">
+                    <button
+                      onClick={() => handleDeleteItemClick(item)}
+                      className="text-muted-foreground hover:text-destructive hover:bg-destructive/10 p-2 rounded-lg transition-colors"
+                    >
                       <Trash2 size={18} />
                     </button>
                   </div>
@@ -368,6 +422,49 @@ const MenuEditor = () => {
           )}
         </div>
       </div>
+
+
+      {/* ========================================== */}
+      {/* МОДАЛКА УДАЛЕНИЯ (УНИВЕРСАЛЬНАЯ)             */}
+      {/* ========================================== */}
+      {deleteConfirm && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 sm:p-6 bg-black/40 backdrop-blur-sm animate-in fade-in duration-200">
+          <div
+            className="bg-card w-full max-w-sm rounded-[2rem] shadow-2xl flex flex-col overflow-hidden border border-border/50 animate-in zoom-in-95 duration-200"
+            onClick={e => e.stopPropagation()}
+          >
+            <div className="p-6 text-center space-y-4 pt-8">
+              <div className="w-16 h-16 bg-destructive/10 text-destructive rounded-full flex items-center justify-center mx-auto mb-2">
+                <Trash2 size={28} />
+              </div>
+              <h2 className="text-xl font-bold text-foreground">
+                {deleteConfirm.type === 'category' ? 'Удалить категорию?' : 'Удалить блюдо?'}
+              </h2>
+              <p className="text-sm text-muted-foreground leading-relaxed px-2">
+                Вы уверены, что хотите удалить <span className="font-bold text-foreground">«{deleteConfirm.name}»</span>?
+                {deleteConfirm.type === 'category' && ' Все блюда внутри этой категории также будут навсегда удалены.'} Это действие нельзя отменить.
+              </p>
+            </div>
+
+            <div className="p-4 sm:p-6 border-t border-border/60 flex flex-col-reverse sm:flex-row justify-end gap-3 bg-secondary/10">
+              <Button
+                variant="outline"
+                onClick={() => setDeleteConfirm(null)}
+                className="w-full sm:w-auto rounded-xl border-border/60 hover:bg-secondary font-semibold"
+              >
+                Отмена
+              </Button>
+              <Button
+                onClick={executeDelete}
+                className="w-full sm:w-auto rounded-xl bg-destructive hover:bg-destructive/90 text-white font-semibold shadow-md px-6"
+              >
+                Удалить
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
 
       {/* ========================================== */}
       {/* МОДАЛКА РЕДАКТИРОВАНИЯ КАТЕГОРИИ           */}
@@ -468,7 +565,7 @@ const MenuEditor = () => {
                   <select
                     value={targetCategoryId}
                     onChange={(e) => setTargetCategoryId(e.target.value)}
-                    className="flex h-11 w-full items-center rounded-xl border border-transparent bg-secondary/30 px-3 text-sm sm:text-base transition-colors focus:bg-background focus:outline-none focus:ring-2 focus:ring-brand-purple/50 appearance-none cursor-pointer font-medium"
+                    className="flex h-11 w-full items-center rounded-xl border border-input bg-secondary/30 px-3 text-sm sm:text-base transition-colors focus:bg-background focus:outline-none focus:ring-2 focus:ring-brand-purple/50 appearance-none cursor-pointer font-medium"
                   >
                     {menu.categories.map(cat => (
                       <option key={cat.id} value={cat.id}>{cat.name}</option>
@@ -500,7 +597,7 @@ const MenuEditor = () => {
               </div>
 
               {/* БЛОК: ЦЕНА И ВАРИАНТЫ */}
-              <div className="bg-secondary/20 p-5 rounded-2xl border border-border/50 space-y-4">
+              <div className="bg-secondary/20 p-4 sm:p-5 rounded-2xl border border-border/50 space-y-4">
                 <div className="flex items-center justify-between">
                   <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                     Стоимость и объем
@@ -509,57 +606,103 @@ const MenuEditor = () => {
                     onClick={addVariant}
                     className="text-xs font-bold text-brand-purple flex items-center gap-1 hover:bg-brand-purple/10 px-2 py-1 rounded-md transition-colors"
                   >
-                    <Plus size={14} /> Добавить опцию (объем/вес)
+                    <Plus size={14} /> Добавить опцию
                   </button>
                 </div>
 
                 {(!editingItem.variants || editingItem.variants.length === 0) ? (
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                     <div className="space-y-2">
                       <Label className="text-xs text-muted-foreground">Цена (₽)</Label>
                       <Input
                         value={editingItem.price || ''}
                         onChange={e => setEditingItem({...editingItem, price: e.target.value})}
-                        className="bg-background rounded-lg"
+                        className="bg-background rounded-lg border border-input h-10"
                         placeholder="Например: 350"
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label className="text-xs text-muted-foreground">Объем / Вес</Label>
+                      <Label className="text-xs text-muted-foreground">Значение</Label>
                       <Input
-                        value={editingItem.volume || ''}
-                        onChange={e => setEditingItem({...editingItem, volume: e.target.value})}
-                        className="bg-background rounded-lg"
-                        placeholder="Например: 350 мл"
+                        type="number"
+                        value={editingItem.measureValue || ''}
+                        onChange={e => setEditingItem({...editingItem, measureValue: e.target.value})}
+                        className="bg-background rounded-lg border border-input h-10"
+                        placeholder="Например: 250"
                       />
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="text-xs text-muted-foreground">Ед. изм.</Label>
+                      <div className="relative">
+                        <select
+                          value={editingItem.measureUnit || 'ml'}
+                          onChange={e => setEditingItem({...editingItem, measureUnit: e.target.value})}
+                          className="flex h-10 w-full items-center rounded-lg border border-input bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand-purple/50 appearance-none cursor-pointer"
+                        >
+                          {MEASURE_UNITS.map(u => (
+                            <option key={u.value} value={u.value}>{u.label}</option>
+                          ))}
+                        </select>
+                        <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-muted-foreground">
+                          <ChevronDown size={14} />
+                        </div>
+                      </div>
                     </div>
                   </div>
                 ) : (
                   <div className="space-y-3">
                     {editingItem.variants.map((variant, idx) => (
-                      <div key={variant.id || idx} className="flex items-start gap-3 p-3 bg-background border border-border/60 rounded-xl relative group">
+                      <div key={variant.id || idx} className="flex flex-wrap sm:flex-nowrap items-end gap-2 sm:gap-3 p-3 bg-background border border-border/60 rounded-xl relative group">
                         <button
                           onClick={() => removeVariant(idx)}
-                          className="absolute -top-2 -right-2 w-6 h-6 bg-card border border-border rounded-full flex items-center justify-center text-muted-foreground hover:text-destructive hover:border-destructive shadow-sm opacity-0 group-hover:opacity-100 transition-opacity"
+                          className="absolute -top-2 -right-2 w-6 h-6 bg-card border border-border rounded-full flex items-center justify-center text-muted-foreground hover:text-destructive hover:border-destructive shadow-sm opacity-0 group-hover:opacity-100 transition-opacity z-10"
                         >
                           <X size={12} />
                         </button>
-                        <div className="flex-1 space-y-1.5">
+
+                        <div className="flex-1 min-w-[120px] space-y-1.5">
                           <Label className="text-[10px] text-muted-foreground">Название опции</Label>
                           <Input
                             value={variant.label || ''}
                             onChange={e => handleVariantChange(idx, 'label', e.target.value)}
-                            className="h-8 text-xs bg-secondary/30"
-                            placeholder="Например: Маленький (250мл)"
+                            className="h-9 text-xs bg-secondary/30"
+                            placeholder="Например: Гранд"
                           />
                         </div>
-                        <div className="w-24 space-y-1.5">
-                          <Label className="text-[10px] text-muted-foreground">Цена</Label>
+                        <div className="w-[80px] sm:w-[90px] space-y-1.5">
+                          <Label className="text-[10px] text-muted-foreground">Значение</Label>
+                          <Input
+                            type="number"
+                            value={variant.measureValue || ''}
+                            onChange={e => handleVariantChange(idx, 'measureValue', e.target.value)}
+                            className="h-9 text-xs bg-secondary/30"
+                            placeholder="400"
+                          />
+                        </div>
+                        <div className="w-[80px] sm:w-[90px] space-y-1.5">
+                          <Label className="text-[10px] text-muted-foreground">Ед. изм.</Label>
+                          <div className="relative">
+                            <select
+                              value={variant.measureUnit || 'ml'}
+                              onChange={e => handleVariantChange(idx, 'measureUnit', e.target.value)}
+                              className="flex h-9 w-full items-center rounded-lg border border-transparent bg-secondary/30 px-2 text-xs focus:outline-none focus:ring-2 focus:ring-brand-purple/50 appearance-none cursor-pointer"
+                            >
+                              {MEASURE_UNITS.map(u => (
+                                <option key={u.value} value={u.value}>{u.label}</option>
+                              ))}
+                            </select>
+                            <div className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none text-muted-foreground">
+                              <ChevronDown size={12} />
+                            </div>
+                          </div>
+                        </div>
+                        <div className="w-[90px] sm:w-[100px] space-y-1.5">
+                          <Label className="text-[10px] text-muted-foreground">Цена (₽)</Label>
                           <Input
                             value={variant.price || ''}
                             onChange={e => handleVariantChange(idx, 'price', e.target.value)}
-                            className="h-8 text-xs bg-secondary/30"
-                            placeholder="300 ₽"
+                            className="h-9 text-xs bg-secondary/30"
+                            placeholder="300"
                           />
                         </div>
                       </div>

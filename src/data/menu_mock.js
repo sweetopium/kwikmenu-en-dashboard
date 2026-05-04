@@ -50,21 +50,24 @@ export const simpleMenuPayload = {
                             "id": "americano-250ml",
                             "label": "250 мл",
                             "price": "250 ₽",
-                            "volume": "250 мл",
+                            "measureValue": 250,
+                            "measureUnit": "ml",
                             "sortOrder": 1
                         },
                         {
                             "id": "americano-350ml",
                             "label": "350 мл",
                             "price": "310 ₽",
-                            "volume": "350 мл",
+                            "measureValue": 350,
+                            "measureUnit": "ml",
                             "sortOrder": 2
                         },
                         {
                             "id": "americano-450ml",
                             "label": "450 мл",
                             "price": "390 ₽",
-                            "volume": "450 мл",
+                            "measureValue": 450,
+                            "measureUnit": "ml",
                             "sortOrder": 3
                         }
                     ]
@@ -77,21 +80,24 @@ export const simpleMenuPayload = {
                             "id": "filter-coffee-250ml",
                             "label": "250 мл",
                             "price": "310 ₽",
-                            "volume": "250 мл",
+                            "measureValue": 250,
+                            "measureUnit": "ml",
                             "sortOrder": 1
                         },
                         {
                             "id": "filter-coffee-350ml",
                             "label": "350 мл",
                             "price": "370 ₽",
-                            "volume": "350 мл",
+                            "measureValue": 350,
+                            "measureUnit": "ml",
                             "sortOrder": 2
                         },
                         {
                             "id": "filter-coffee-450ml",
                             "label": "450 мл",
                             "price": "450 ₽",
-                            "volume": "450 мл",
+                            "measureValue": 450,
+                            "measureUnit": "ml",
                             "sortOrder": 3
                         }
                     ]
@@ -100,7 +106,8 @@ export const simpleMenuPayload = {
                     "id": "filter-coffee-cherry",
                     "name": "Фильтр-кофе с вишней",
                     "price": "370 ₽",
-                    "volume": "350 мл"
+                    "measureValue": 350,
+                    "measureUnit": "ml"
                 },
                 {
                     "id": "v60",
@@ -115,21 +122,24 @@ export const simpleMenuPayload = {
                             "id": "cappuccino-250ml",
                             "label": "250 мл",
                             "price": "290 ₽",
-                            "volume": "250 мл",
+                            "measureValue": 250,
+                            "measureUnit": "ml",
                             "sortOrder": 1
                         },
                         {
                             "id": "cappuccino-350ml",
                             "label": "350 мл",
                             "price": "370 ₽",
-                            "volume": "350 мл",
+                            "measureValue": 350,
+                            "measureUnit": "ml",
                             "sortOrder": 2
                         },
                         {
                             "id": "cappuccino-450ml",
                             "label": "450 мл",
                             "price": "420 ₽",
-                            "volume": "450 мл",
+                            "measureValue": 450,
+                            "measureUnit": "ml",
                             "sortOrder": 3
                         }
                     ]
@@ -142,14 +152,16 @@ export const simpleMenuPayload = {
                             "id": "latte-350ml",
                             "label": "350 мл",
                             "price": "370 ₽",
-                            "volume": "350 мл",
+                            "measureValue": 350,
+                            "measureUnit": "ml",
                             "sortOrder": 1
                         },
                         {
                             "id": "latte-450ml",
                             "label": "450 мл",
                             "price": "420 ₽",
-                            "volume": "450 мл",
+                            "measureValue": 450,
+                            "measureUnit": "ml",
                             "sortOrder": 2
                         }
                     ]
@@ -167,21 +179,24 @@ export const simpleMenuPayload = {
                             "id": "matcha-latte-250ml",
                             "label": "250 мл",
                             "price": "430 ₽",
-                            "volume": "250 мл",
+                            "measureValue": 250,
+                            "measureUnit": "ml",
                             "sortOrder": 1
                         },
                         {
                             "id": "matcha-latte-350ml",
                             "label": "350 мл",
                             "price": "490 ₽",
-                            "volume": "350 мл",
+                            "measureValue": 350,
+                            "measureUnit": "ml",
                             "sortOrder": 2
                         },
                         {
                             "id": "matcha-latte-450ml",
                             "label": "450 мл",
                             "price": "530 ₽",
-                            "volume": "450 мл",
+                            "measureValue": 450,
+                            "measureUnit": "ml",
                             "sortOrder": 3
                         }
                     ]
@@ -193,14 +208,16 @@ export const simpleMenuPayload = {
                         {
                             "id": "cocoa-250ml",
                             "label": "250 мл",
-                            "volume": "250 мл",
-                            "price": "450 ₽"
+                            "price": "450 ₽",
+                            "measureValue": 250,
+                            "measureUnit": "ml"
                         },
                         {
                             "id": "cocoa-350ml",
                             "label": "350 мл",
-                            "volume": "350 мл",
-                            "price": "490 ₽"
+                            "price": "490 ₽",
+                            "measureValue": 350,
+                            "measureUnit": "ml"
                         }
                     ]
                 },
@@ -211,8 +228,9 @@ export const simpleMenuPayload = {
                         {
                             "id": "bean-to-bar-cocoa-350ml",
                             "label": "350 мл",
-                            "volume": "350 мл",
-                            "price": "510 ₽"
+                            "price": "510 ₽",
+                            "measureValue": 350,
+                            "measureUnit": "ml"
                         }
                     ]
                 },
@@ -262,7 +280,8 @@ export const simpleMenuPayload = {
                     "id": "bumble",
                     "name": "Бамбл",
                     "price": "550 ₽",
-                    "volume": "300 мл"
+                    "measureValue": 300,
+                    "measureUnit": "ml"
                 },
                 {
                     "id": "espresso-tonic",
@@ -271,14 +290,16 @@ export const simpleMenuPayload = {
                         {
                             "id": "espresso-tonic-400ml",
                             "label": "400 мл",
-                            "volume": "400 мл",
-                            "price": "410 ₽"
+                            "price": "410 ₽",
+                            "measureValue": 400,
+                            "measureUnit": "ml"
                         },
                         {
                             "id": "espresso-tonic-500ml",
                             "label": "500 мл",
-                            "volume": "500 мл",
-                            "price": "470 ₽"
+                            "price": "470 ₽",
+                            "measureValue": 500,
+                            "measureUnit": "ml"
                         }
                     ]
                 },
@@ -289,14 +310,16 @@ export const simpleMenuPayload = {
                         {
                             "id": "homemade-lemonade-400ml",
                             "label": "400 мл",
-                            "volume": "400 мл",
-                            "price": "390 ₽"
+                            "price": "390 ₽",
+                            "measureValue": 400,
+                            "measureUnit": "ml"
                         },
                         {
                             "id": "homemade-lemonade-500ml",
                             "label": "500 мл",
-                            "volume": "500 мл",
-                            "price": "430 ₽"
+                            "price": "430 ₽",
+                            "measureValue": 500,
+                            "measureUnit": "ml"
                         }
                     ]
                 },
@@ -336,20 +359,23 @@ export const simpleMenuPayload = {
                         {
                             "id": "filter-strawberry-tarragon-250ml",
                             "label": "250 мл",
-                            "volume": "250 мл",
-                            "price": "310 ₽"
+                            "price": "310 ₽",
+                            "measureValue": 250,
+                            "measureUnit": "ml"
                         },
                         {
                             "id": "filter-strawberry-tarragon-350ml",
                             "label": "350 мл",
-                            "volume": "350 мл",
-                            "price": "370 ₽"
+                            "price": "370 ₽",
+                            "measureValue": 350,
+                            "measureUnit": "ml"
                         },
                         {
                             "id": "filter-strawberry-tarragon-450ml",
                             "label": "450 мл",
-                            "volume": "450 мл",
-                            "price": "450 ₽"
+                            "price": "450 ₽",
+                            "measureValue": 450,
+                            "measureUnit": "ml"
                         }
                     ]
                 },
@@ -360,14 +386,16 @@ export const simpleMenuPayload = {
                         {
                             "id": "matcha-raspberry-foam-350ml",
                             "label": "350 мл",
-                            "volume": "350 мл",
-                            "price": "470 ₽"
+                            "price": "470 ₽",
+                            "measureValue": 350,
+                            "measureUnit": "ml"
                         },
                         {
                             "id": "matcha-raspberry-foam-450ml",
                             "label": "450 мл",
-                            "volume": "450 мл",
-                            "price": "490 ₽"
+                            "price": "490 ₽",
+                            "measureValue": 450,
+                            "measureUnit": "ml"
                         }
                     ]
                 },
@@ -378,14 +406,16 @@ export const simpleMenuPayload = {
                         {
                             "id": "mint-melissa-latte-350ml",
                             "label": "350 мл",
-                            "volume": "350 мл",
-                            "price": "450 ₽"
+                            "price": "450 ₽",
+                            "measureValue": 350,
+                            "measureUnit": "ml"
                         },
                         {
                             "id": "mint-melissa-latte-450ml",
                             "label": "450 мл",
-                            "volume": "450 мл",
-                            "price": "490 ₽"
+                            "price": "490 ₽",
+                            "measureValue": 450,
+                            "measureUnit": "ml"
                         }
                     ]
                 },
