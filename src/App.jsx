@@ -12,10 +12,9 @@ import {
 } from 'lucide-react';
 import WelcomePage from "./pages/WelcomePage.jsx";
 import HelpPage from "./pages/HelpPage.jsx";
+import UploadPage from "./pages/UploadPage.jsx";
 // --- ЗАГЛУШКИ СТРАНИЦ (Будем наполнять их дальше) ---
 
-
-const UploadPage = () => <div className="p-20 border-2 border-dashed rounded-3xl text-center bg-card">Экран загрузки файлов (Dropzone)</div>;
 const ProcessingPage = () => <div className="p-20 text-center space-y-4">Экран ИИ-парсинга (Skeletons & Progress)</div>;
 const DashboardHome = () => <div className="p-6 font-bold text-2xl">Обзор (Статистика заведений)</div>;
 const MenuEditor = () => <div className="p-6 font-bold text-2xl">Редактор Меню (Твой новый JSON-flow)</div>;
