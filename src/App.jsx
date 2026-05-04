@@ -8,7 +8,7 @@ import QrManager from "./pages/QrManager.jsx";
 import SettingsPage from "./pages/SettingsPage.jsx";
 import DashboardHome from "./pages/DashboardHome.jsx";
 import OnboardingLayout from "./layouts/OnboardingLayout.jsx";
-
+import MenuListPage from "./pages/MenuListPage.jsx";
 
 function App() {
     return (
@@ -21,7 +21,9 @@ function App() {
 
                 {/* Dashboard Flow */}
                 <Route path="/dashboard" element={<DashboardLayout><DashboardHome/></DashboardLayout>}/>
-                <Route path="/dashboard/menu" element={<DashboardLayout><MenuEditor/></DashboardLayout>}/>
+                {/* НОВЫЙ РОУТИНГ ДЛЯ МЕНЮ */}
+                <Route path="/dashboard/menu" element={<DashboardLayout><MenuListPage/></DashboardLayout>}/>
+                <Route path="/dashboard/menu/:id" element={<DashboardLayout><MenuEditor/></DashboardLayout>}/>
                 <Route path="/dashboard/qr" element={<DashboardLayout><QrManager/></DashboardLayout>}/>
                 <Route path="/dashboard/settings" element={<DashboardLayout><SettingsPage/></DashboardLayout>}/>
 

@@ -55,7 +55,7 @@ const QrManager = () => {
   };
 
   return (
-    <div className="flex flex-col xl:flex-row gap-6 lg:gap-8 relative min-h-[calc(100vh-8rem)]">
+    <div className=" flex flex-col xl:flex-row gap-6 lg:gap-8 relative min-h-[calc(100vh-8rem)]">
 
       {/* ЛЕВАЯ КОЛОНКА: НАСТРОЙКИ */}
       <div className="flex-1 space-y-6">
