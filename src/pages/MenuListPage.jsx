@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
   Plus, Search, Utensils, Wine, Coffee,
-  MoreHorizontal, Calendar, LayoutGrid, ArrowRight
+  MoreHorizontal, Calendar, LayoutGrid, ArrowRight, FolderOpen
 } from 'lucide-react';
 
 import { Button } from "../components/ui/button";
@@ -76,7 +76,7 @@ const MenuListPage = () => {
               className="pl-9 h-11 bg-secondary/30 rounded-xl w-full"
             />
           </div>
-          <Button className="bg-brand-purple hover:bg-brand-purple/90 text-white rounded-xl shadow-md px-6 h-11 transition-all">
+          <Button className="bg-brand-purple hover:bg-brand-purple/90 text-white rounded-xl shadow-md px-6 h-11 transition-all cursor-pointer">
             <Plus size={18} className="mr-2" />
             Создать меню
           </Button>
@@ -128,21 +128,18 @@ const MenuListPage = () => {
               </p>
             </div>
 
-            {/* Статистика */}
-            <div className="grid grid-cols-2 gap-4 mb-6">
-              <div className="bg-secondary/30 p-3 rounded-2xl border border-border/50">
-                <div className="flex items-center gap-1.5 text-muted-foreground mb-1">
-                  <LayoutGrid size={14} />
-                  <span className="text-[10px] font-bold uppercase tracking-wider">Категории</span>
-                </div>
-                <p className="text-lg font-black text-foreground">{menu.categoriesCount}</p>
+            {/* Статистика - в виде аккуратных капсул */}
+            <div className="flex items-center gap-3 mb-6">
+              <div className="flex items-center gap-2 bg-secondary/50 px-3 py-1.5 rounded-xl border border-border/50">
+                <LayoutGrid size={14} className="text-muted-foreground" />
+                <span className="text-xs font-semibold text-muted-foreground">Категории:</span>
+                <span className="text-xs font-black text-foreground">{menu.categoriesCount}</span>
               </div>
-              <div className="bg-secondary/30 p-3 rounded-2xl border border-border/50">
-                <div className="flex items-center gap-1.5 text-muted-foreground mb-1">
-                  <Utensils size={14} />
-                  <span className="text-[10px] font-bold uppercase tracking-wider">Блюда</span>
-                </div>
-                <p className="text-lg font-black text-foreground">{menu.itemsCount}</p>
+
+              <div className="flex items-center gap-2 bg-secondary/50 px-3 py-1.5 rounded-xl border border-border/50">
+                <FolderOpen size={14} className="text-muted-foreground" />
+                <span className="text-xs font-semibold text-muted-foreground">Блюда:</span>
+                <span className="text-xs font-black text-foreground">{menu.itemsCount}</span>
               </div>
             </div>
 
@@ -154,13 +151,12 @@ const MenuListPage = () => {
               </div>
 
               <div className="flex items-center gap-2">
-                <button className="w-10 h-10 rounded-xl bg-secondary hover:bg-secondary/80 flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors">
+                <button className="w-10 h-10 rounded-xl bg-secondary hover:bg-secondary/80 flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors cursor-pointer">
                   <MoreHorizontal size={18} />
                 </button>
-                {/* Ссылка на конкретный редактор меню */}
                 <Link
                   to={`/dashboard/menu/${menu.id}`}
-                  className="h-10 px-4 rounded-xl bg-foreground hover:bg-foreground/90 text-background font-bold text-sm flex items-center gap-2 transition-all shadow-sm"
+                  className="h-10 px-4 rounded-xl bg-foreground hover:bg-foreground/90 text-background font-bold text-sm flex items-center gap-2 transition-all shadow-sm cursor-pointer"
                 >
                   Открыть
                   <ArrowRight size={16} />
@@ -170,7 +166,7 @@ const MenuListPage = () => {
           </div>
         ))}
 
-        {/* Карточка "Добавить новое" */}
+        {/* Карточка создания нового меню */}
         <div className="border-2 border-dashed border-border/60 rounded-3xl p-6 sm:p-7 flex flex-col items-center justify-center text-center cursor-pointer hover:bg-secondary/20 hover:border-brand-purple/30 transition-all group min-h-[350px]">
           <div className="w-16 h-16 rounded-2xl bg-secondary/50 flex items-center justify-center text-muted-foreground group-hover:text-brand-purple group-hover:bg-brand-purple/10 group-hover:scale-110 transition-all duration-300 mb-4">
             <Plus size={32} />
