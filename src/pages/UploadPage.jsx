@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
   ArrowLeft, ArrowRight, Sparkles,
-  UploadCloud, Link as LinkIcon, FileText, Image as ImageIcon
+  UploadCloud, Link as LinkIcon, FileText, Image as ImageIcon, Check
 } from 'lucide-react';
 
 import { Button } from "../components/ui/button";
@@ -33,8 +33,14 @@ const COUNTRIES = [
   { id: 'tm', name: 'Туркменистан', flag: '🇹🇲', dial: '+993' }
 ];
 
+const STEPS = [
+  { id: 1, label: 'Данные' },
+  { id: 2, label: 'Меню' },
+  { id: 3, label: 'Обработка' }
+];
+
 const UploadPage = () => {
-  const [step, setStep] = useState(1);
+  const [step, setStep] = useState(1); // 1: Базовая инфа, 2: Загрузка меню, 3: Прелоадер обработки
   const [isSubmitted, setIsSubmitted] = useState(false);
 
   // Состояния полей Шаг 1
@@ -42,22 +48,26 @@ const UploadPage = () => {
   const [phone, setPhone] = useState('');
   const [city, setCity] = useState('');
 
+  // Состояния для синхронизации страны и кода телефона
   const [selectedCountry, setSelectedCountry] = useState('ru');
   const [selectedDial, setSelectedDial] = useState('+7');
 
   // Состояния полей Шаг 2
-  const [menuSource, setMenuSource] = useState('file');
-  const [files, setFiles] = useState([]);
+  const [menuSource, setMenuSource] = useState('file'); // 'file' | 'link'
+  const [files, setFiles] = useState([]); // Массив файлов
   const [menuLink, setMenuLink] = useState('');
 
+  // Обработчик 1 шага
   const handleStep1Submit = (e) => {
     e.preventDefault();
     setStep(2);
   };
 
+  // Обработчик финальной отправки (Шаг 2 -> 3)
   const handleFinalSubmit = (e) => {
     e.preventDefault();
 
+    // Валидация
     if (menuSource === 'file' && files.length === 0) {
       alert("Пожалуйста, выберите хотя бы один файл.");
       return;
@@ -67,6 +77,7 @@ const UploadPage = () => {
       return;
     }
 
+    // Переводим на 3й шаг (заглушка обработки)
     setIsSubmitted(true);
     setStep(3);
   };
@@ -90,41 +101,84 @@ const UploadPage = () => {
   const inputBaseClasses = "flex h-11 w-full items-center rounded-lg border border-input bg-secondary/30 px-3 sm:px-4 text-sm sm:text-base transition-colors focus:bg-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground placeholder:text-xs sm:placeholder:text-sm disabled:cursor-not-allowed disabled:opacity-50 appearance-none";
 
   return (
-    <div className="max-w-2xl mx-auto space-y-6 sm:space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700 ease-out w-full">
+    <div className="max-w-2xl mx-auto flex flex-col space-y-6 py-3 sm:py-4 animate-in fade-in slide-in-from-bottom-4 duration-700 ease-out w-full">
 
+      {/* Навигация (Кнопка назад) */}
       {!isSubmitted && (
-        step === 1 ? (
-          <Link
-            to="/"
-            className="inline-flex items-center gap-2 text-xs sm:text-sm font-medium text-muted-foreground hover:text-foreground transition-colors group w-fit"
-          >
-            <ArrowLeft size={16} className="group-hover:-translate-x-1 transition-transform" />
-            Назад к выбору
-          </Link>
-        ) : (
-          <button
-            type="button"
-            onClick={() => setStep(1)}
-            className="inline-flex items-center gap-2 text-xs sm:text-sm font-medium text-muted-foreground hover:text-foreground transition-colors group bg-transparent border-0 p-0 cursor-pointer w-fit"
-          >
-            <ArrowLeft size={16} className="group-hover:-translate-x-1 transition-transform" />
-            Назад
-          </button>
-        )
+        <div className="flex items-center">
+          {step === 1 ? (
+            <Link
+              to="/"
+              className="inline-flex items-center gap-2 text-xs sm:text-sm font-semibold text-muted-foreground hover:text-foreground bg-card border border-border/60 shadow-sm hover:shadow-md px-4 py-2.5 rounded-full transition-all group"
+            >
+              <ArrowLeft size={16} className="group-hover:-translate-x-1 transition-transform" />
+              К выбору
+            </Link>
+          ) : (
+            <button
+              type="button"
+              onClick={() => setStep(1)}
+              className="inline-flex items-center gap-2 text-xs sm:text-sm font-semibold text-muted-foreground hover:text-foreground bg-card border border-border/60 shadow-sm hover:shadow-md px-4 py-2.5 rounded-full transition-all group cursor-pointer"
+            >
+              <ArrowLeft size={16} className="group-hover:-translate-x-1 transition-transform" />
+              Назад
+            </button>
+          )}
+        </div>
       )}
 
-      <div className="bg-card border border-border/60 p-6 sm:p-8 md:p-10 rounded-[1.5rem] sm:rounded-[2rem] shadow-sm relative overflow-hidden">
+      {/* Основная карточка */}
+      <div className="bg-card border border-border/60 p-6 sm:p-8 md:p-10 rounded-[1.5rem] sm:rounded-[2rem] shadow-sm relative overflow-hidden flex flex-col min-h-[540px] sm:min-h-[600px]">
 
         <div className="absolute top-0 right-0 w-64 h-64 bg-brand-purple/5 rounded-full blur-3xl -z-10 translate-x-1/3 -translate-y-1/3"></div>
 
+        {/* --- СТЕППЕР (Горизонтальный прогресс) --- */}
+        <div className="relative flex items-center justify-between w-full mb-8 sm:mb-10 px-2 sm:px-6 z-10">
+          {/* Серая линия фона */}
+          <div className="absolute left-[10%] right-[10%] top-[14px] sm:top-[18px] h-[2px] bg-secondary -z-10"></div>
+          {/* Цветная линия прогресса */}
+          <div
+            className="absolute left-[10%] top-[14px] sm:top-[18px] h-[2px] bg-brand-purple -z-10 transition-all duration-500 ease-out"
+            style={{ width: step === 1 ? '0%' : step === 2 ? '40%' : '80%' }}
+          ></div>
+
+          {STEPS.map((s) => {
+            const isActive = step === s.id;
+            const isCompleted = step > s.id;
+
+            return (
+              <div key={s.id} className="flex flex-col items-center gap-2 relative bg-card px-2">
+                <div
+                  className={`w-7 h-7 sm:w-9 sm:h-9 rounded-full flex items-center justify-center text-[11px] sm:text-sm font-bold border-2 transition-all duration-300 ${
+                    isActive
+                      ? 'border-brand-purple bg-brand-purple text-white shadow-md shadow-brand-purple/30 scale-110'
+                      : isCompleted
+                      ? 'border-brand-purple bg-brand-purple text-white'
+                      : 'border-input bg-secondary/50 text-muted-foreground'
+                  }`}
+                >
+                  {isCompleted ? <Check size={16} strokeWidth={3} /> : s.id}
+                </div>
+                <span
+                  className={`text-[10px] sm:text-xs font-semibold absolute -bottom-5 whitespace-nowrap transition-colors duration-300 ${
+                    isActive ? 'text-foreground' : isCompleted ? 'text-foreground/80' : 'text-muted-foreground/60'
+                  }`}
+                >
+                  {s.label}
+                </span>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Отступ под надписи степпера */}
+        <div className="pt-2 sm:pt-4"></div>
+
+
         {/* --- ШАГ 1: БАЗОВАЯ ИНФА --- */}
         {step === 1 && (
-          <div className="animate-in fade-in slide-in-from-right-4 duration-500">
-            <div className="space-y-2 sm:space-y-3 mb-6 sm:mb-8">
-              <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-secondary flex items-center justify-center text-foreground mb-4 sm:mb-6 shadow-sm">
-                <Sparkles size={20} className="sm:w-6 sm:h-6" />
-              </div>
-              <p className="text-[10px] sm:text-xs font-bold tracking-wider text-brand-purple uppercase">Шаг 1 из 2</p>
+          <div className="flex flex-col flex-1 animate-in fade-in slide-in-from-right-4 duration-500">
+            <div className="space-y-1.5 sm:space-y-2 mb-6 sm:mb-8 text-center sm:text-left">
               <h2 className="text-xl sm:text-3xl font-extrabold tracking-tight text-foreground">
                 Давайте знакомиться
               </h2>
@@ -133,7 +187,7 @@ const UploadPage = () => {
               </p>
             </div>
 
-            <form onSubmit={handleStep1Submit} className="space-y-5 sm:space-y-6">
+            <form onSubmit={handleStep1Submit} className="space-y-5 sm:space-y-6 flex-1 flex flex-col">
 
               <div className="space-y-1.5 sm:space-y-2">
                 <Label htmlFor="restaurant" className="text-foreground font-medium ml-1 text-[11px] sm:text-xs sm:text-sm">
@@ -221,7 +275,8 @@ const UploadPage = () => {
                 </div>
               </div>
 
-              <div className="pt-3 sm:pt-4">
+              {/* mt-auto прижимает кнопку к низу карточки */}
+              <div className="pt-3 sm:pt-4 mt-auto">
                 <Button
                   type="submit"
                   className="w-full h-10 sm:h-12 text-xs sm:text-base font-semibold rounded-lg bg-brand-purple hover:bg-brand-purple/90 text-white shadow-md hover:shadow-lg hover:shadow-brand-purple/20 transition-all duration-300"
@@ -238,21 +293,17 @@ const UploadPage = () => {
 
         {/* --- ШАГ 2: ЗАГРУЗКА МЕНЮ --- */}
         {step === 2 && (
-          <div className="animate-in fade-in slide-in-from-right-4 duration-500">
-            <div className="space-y-2 sm:space-y-3 mb-6 sm:mb-8">
-              <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-brand-purple flex items-center justify-center text-white mb-4 sm:mb-6 shadow-md shadow-brand-purple/20">
-                <FileText size={20} className="sm:w-6 sm:h-6" />
-              </div>
-              <p className="text-[10px] sm:text-xs font-bold tracking-wider text-brand-purple uppercase">Шаг 2 из 2</p>
+          <div className="flex flex-col flex-1 animate-in fade-in slide-in-from-right-4 duration-500">
+            <div className="space-y-1.5 sm:space-y-2 mb-6 sm:mb-8 text-center sm:text-left">
               <h2 className="text-xl sm:text-3xl font-extrabold tracking-tight text-foreground">
                 Загрузите меню
               </h2>
               <p className="text-muted-foreground text-xs sm:text-base leading-relaxed">
-                Загрузите PDF файл, сделайте несколько фотографий или вставьте ссылку на облако. Наш ИИ всё распознает.
+                Загрузите PDF файл, сделайте фотографии или вставьте ссылку. Наш ИИ всё распознает.
               </p>
             </div>
 
-            <form onSubmit={handleFinalSubmit} className="space-y-5 sm:space-y-6">
+            <form onSubmit={handleFinalSubmit} className="space-y-5 sm:space-y-6 flex-1 flex flex-col">
 
               <div className="space-y-2 sm:space-y-3 pt-1 sm:pt-2">
                 <Label className="text-foreground font-medium ml-1 text-[11px] sm:text-xs sm:text-sm">
@@ -333,7 +384,8 @@ const UploadPage = () => {
                 </div>
               </div>
 
-              <div className="pt-3 sm:pt-4">
+              {/* mt-auto прижимает кнопку к низу карточки */}
+              <div className="pt-3 sm:pt-4 mt-auto">
                 <Button
                   type="submit"
                   className="w-full h-10 sm:h-12 text-xs sm:text-base font-semibold rounded-lg bg-brand-purple hover:bg-brand-purple/90 text-white shadow-md hover:shadow-lg hover:shadow-brand-purple/20 transition-all duration-300"
@@ -350,7 +402,7 @@ const UploadPage = () => {
 
         {/* --- ШАГ 3: ЗАГЛУШКА ПРЕЛОАДЕРА ИИ --- */}
         {step === 3 && (
-          <div className="py-12 sm:py-20 flex flex-col items-center justify-center animate-in zoom-in-95 duration-500">
+          <div className="flex-1 flex flex-col items-center justify-center animate-in zoom-in-95 duration-500">
             <div className="relative mb-8">
               <div className="w-20 h-20 sm:w-24 sm:h-24 border-4 border-secondary rounded-full absolute inset-0"></div>
               <div className="w-20 h-20 sm:w-24 sm:h-24 border-4 border-brand-purple border-t-transparent rounded-full animate-spin"></div>
