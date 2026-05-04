@@ -24,9 +24,10 @@ const SettingsPage = () => <div className="p-6 font-bold text-2xl">Настро�
 // --- КОМПОНЕНТЫ ЛЕЙАУТОВ ---
 
 const OnboardingLayout = ({ children }) => (
-  <div className="min-h-screen bg-secondary/30 flex flex-col items-center justify-center p-6">
+  // УБРАЛ justify-center, ДОБАВИЛ pt-12 sm:pt-20 (отступ сверху всегда фиксированный)
+  <div className="min-h-screen bg-secondary/30 flex flex-col items-center pt-12 sm:pt-20 px-6 pb-6">
     <div className="w-full max-w-4xl">
-      <div className="flex justify-center sm:mb-3 mb-5">
+      <div className="flex justify-center sm:mb-8 mb-6">
         <Link to="/" className="flex items-center gap-2 text-2xl font-bold tracking-tight text-foreground transition-transform hover:scale-105">
           <div className="flex h-8 w-8 items-center justify-center rounded-[0.6rem] bg-[var(--brand-purple)] text-white shadow-md">
             <Zap className="h-4 w-4" fill="currentColor" />

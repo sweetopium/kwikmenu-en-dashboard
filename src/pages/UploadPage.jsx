@@ -34,7 +34,7 @@ const COUNTRIES = [
 ];
 
 const UploadPage = () => {
-  const [step, setStep] = useState(1); // 1: Базовая инфа, 2: Загрузка меню, 3: Прелоадер обработки
+  const [step, setStep] = useState(1);
   const [isSubmitted, setIsSubmitted] = useState(false);
 
   // Состояния полей Шаг 1
@@ -42,26 +42,22 @@ const UploadPage = () => {
   const [phone, setPhone] = useState('');
   const [city, setCity] = useState('');
 
-  // Состояния для синхронизации страны и кода телефона
   const [selectedCountry, setSelectedCountry] = useState('ru');
   const [selectedDial, setSelectedDial] = useState('+7');
 
   // Состояния полей Шаг 2
-  const [menuSource, setMenuSource] = useState('file'); // 'file' | 'link'
-  const [files, setFiles] = useState([]); // Массив файлов
+  const [menuSource, setMenuSource] = useState('file');
+  const [files, setFiles] = useState([]);
   const [menuLink, setMenuLink] = useState('');
 
-  // Обработчик 1 шага
   const handleStep1Submit = (e) => {
     e.preventDefault();
     setStep(2);
   };
 
-  // Обработчик финальной отправки (Шаг 2 -> 3)
   const handleFinalSubmit = (e) => {
     e.preventDefault();
 
-    // Валидация
     if (menuSource === 'file' && files.length === 0) {
       alert("Пожалуйста, выберите хотя бы один файл.");
       return;
@@ -71,7 +67,6 @@ const UploadPage = () => {
       return;
     }
 
-    // Переводим на 3й шаг (заглушка обработки)
     setIsSubmitted(true);
     setStep(3);
   };
@@ -95,13 +90,13 @@ const UploadPage = () => {
   const inputBaseClasses = "flex h-11 w-full items-center rounded-lg border border-input bg-secondary/30 px-3 sm:px-4 text-sm sm:text-base transition-colors focus:bg-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground placeholder:text-xs sm:placeholder:text-sm disabled:cursor-not-allowed disabled:opacity-50 appearance-none";
 
   return (
-    <div className="max-w-2xl mx-auto space-y-10 py-3 sm:py-4 animate-in fade-in slide-in-from-bottom-4 duration-700 ease-out">
+    <div className="max-w-2xl mx-auto space-y-6 sm:space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700 ease-out w-full">
 
       {!isSubmitted && (
         step === 1 ? (
           <Link
             to="/"
-            className="inline-flex items-center gap-2 text-xs sm:text-sm font-medium text-muted-foreground hover:text-foreground transition-colors mb-3 sm:mb-5 group"
+            className="inline-flex items-center gap-2 text-xs sm:text-sm font-medium text-muted-foreground hover:text-foreground transition-colors group w-fit"
           >
             <ArrowLeft size={16} className="group-hover:-translate-x-1 transition-transform" />
             Назад к выбору
@@ -110,7 +105,7 @@ const UploadPage = () => {
           <button
             type="button"
             onClick={() => setStep(1)}
-            className="inline-flex items-center gap-2 text-xs sm:text-sm font-medium text-muted-foreground hover:text-foreground transition-colors mb-3 sm:mb-5 group bg-transparent border-0 p-0 cursor-pointer"
+            className="inline-flex items-center gap-2 text-xs sm:text-sm font-medium text-muted-foreground hover:text-foreground transition-colors group bg-transparent border-0 p-0 cursor-pointer w-fit"
           >
             <ArrowLeft size={16} className="group-hover:-translate-x-1 transition-transform" />
             Назад
