@@ -16,13 +16,18 @@ const MenuEditor = () => {
   const [activeCategoryId, setActiveCategoryId] = useState(menu.categories[0]?.id);
   const [searchQuery, setSearchQuery] = useState('');
 
-  // Состояния модалок
-  const [editingItem, setEditingItem] = useState(null);
+  // Состояния модалки редактирования категорий
   const [editingCategory, setEditingCategory] = useState(null);
+
+  // Состояния модалки редактирования блюд
+  const [editingItem, setEditingItem] = useState(null);
+  const [modalMode, setModalMode] = useState('edit'); // 'add' | 'edit'
+  const [originalCategoryId, setOriginalCategoryId] = useState(null);
+  const [targetCategoryId, setTargetCategoryId] = useState(null);
 
   // Текущая категория и отфильтрованные товары
   const activeCategory = menu.categories.find(c => c.id === activeCategoryId);
-  const filteredItems = activeCategory?.items.filter(item =>
+  const filteredItems = activeCategory?.items?.filter(item =>
     item.name.toLowerCase().includes(searchQuery.toLowerCase())
   ) || [];
 
@@ -83,22 +88,79 @@ const MenuEditor = () => {
   // ЛОГИКА БЛЮД (ITEMS)
   // ==========================================
 
+  // Открытие модалки для ДОБАВЛЕНИЯ
+  const handleAddItemClick = () => {
+    setModalMode('add');
+    setOriginalCategoryId(null);
+    setTargetCategoryId(activeCategoryId);
+    setEditingItem({
+      id: `item-${Date.now()}`,
+      name: '',
+      description: '',
+      price: '',
+      volume: '',
+      variants: []
+    });
+  };
+
+  // Открытие модалки для РЕДАКТИРОВАНИЯ
   const handleEditClick = (item) => {
+    setModalMode('edit');
+    setOriginalCategoryId(activeCategoryId);
+    setTargetCategoryId(activeCategoryId);
     setEditingItem(JSON.parse(JSON.stringify(item)));
   };
 
+  // Сохранение блюда (Добавление нового ИЛИ обновление/перенос старого)
   const handleSaveItem = () => {
-    const updatedCategories = menu.categories.map(cat => {
-      if (cat.id === activeCategoryId) {
-        return {
-          ...cat,
-          items: cat.items.map(i => i.id === editingItem.id ? editingItem : i)
-        };
+    if (!editingItem.name.trim()) {
+      alert('Пожалуйста, введите название блюда');
+      return;
+    }
+
+    let newCategories = [...menu.categories];
+
+    if (modalMode === 'add') {
+      // Добавляем новое блюдо в выбранную targetCategoryId
+      newCategories = newCategories.map(cat => {
+        if (cat.id === targetCategoryId) {
+          return { ...cat, items: [...(cat.items || []), editingItem] };
+        }
+        return cat;
+      });
+    } else if (modalMode === 'edit') {
+      if (originalCategoryId === targetCategoryId) {
+        // Категория не изменилась — просто обновляем блюдо
+        newCategories = newCategories.map(cat => {
+          if (cat.id === originalCategoryId) {
+            return {
+              ...cat,
+              items: cat.items.map(i => i.id === editingItem.id ? editingItem : i)
+            };
+          }
+          return cat;
+        });
+      } else {
+        // Категория ИЗМЕНИЛАСЬ — удаляем из старой, добавляем в новую
+        newCategories = newCategories.map(cat => {
+          if (cat.id === originalCategoryId) {
+            return { ...cat, items: cat.items.filter(i => i.id !== editingItem.id) };
+          }
+          if (cat.id === targetCategoryId) {
+            return { ...cat, items: [...(cat.items || []), editingItem] };
+          }
+          return cat;
+        });
       }
-      return cat;
-    });
-    setMenu({ ...menu, categories: updatedCategories });
+    }
+
+    setMenu({ ...menu, categories: newCategories });
     setEditingItem(null);
+
+    // Автоматически переключаем активную категорию на ту, куда добавили/перенесли блюдо
+    if (targetCategoryId !== activeCategoryId) {
+      setActiveCategoryId(targetCategoryId);
+    }
   };
 
   const handleVariantChange = (index, field, value) => {
@@ -112,7 +174,7 @@ const MenuEditor = () => {
     setEditingItem({
       ...editingItem,
       variants: editingItem.variants ? [...editingItem.variants, newVariant] : [newVariant],
-      price: ''
+      price: '' // Очищаем простую цену, переходим на варианты
     });
   };
 
@@ -225,8 +287,10 @@ const MenuEditor = () => {
                   className="pl-9 bg-secondary/30 border-transparent focus:bg-background h-10 w-full rounded-xl"
                 />
               </div>
-              {/* Заглушка, в будущем сюда можно повесить функцию создания нового блюда */}
-              <Button className="bg-brand-purple hover:bg-brand-purple/90 text-white rounded-xl h-10 px-4 shadow-sm">
+              <Button
+                onClick={handleAddItemClick}
+                className="bg-brand-purple hover:bg-brand-purple/90 text-white rounded-xl h-10 px-4 shadow-sm"
+              >
                 <Plus size={18} className="mr-2" />
                 Блюдо
               </Button>
@@ -305,9 +369,8 @@ const MenuEditor = () => {
         </div>
       </div>
 
-
       {/* ========================================== */}
-      {/* МОДАЛКА РЕДАКТИРОВАНИЯ КАТЕГОРИИ          */}
+      {/* МОДАЛКА РЕДАКТИРОВАНИЯ КАТЕГОРИИ           */}
       {/* ========================================== */}
       {editingCategory && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-black/40 backdrop-blur-sm animate-in fade-in duration-200">
@@ -370,9 +433,8 @@ const MenuEditor = () => {
         </div>
       )}
 
-
       {/* ========================================== */}
-      {/* МОДАЛКА РЕДАКТИРОВАНИЯ БЛЮДА               */}
+      {/* МОДАЛКА БЛЮДА (ДОБАВЛЕНИЕ / РЕДАКТИРОВАНИЕ)*/}
       {/* ========================================== */}
       {editingItem && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-black/40 backdrop-blur-sm animate-in fade-in duration-200">
@@ -382,8 +444,12 @@ const MenuEditor = () => {
           >
             <div className="p-6 border-b border-border/60 flex items-center justify-between bg-secondary/20">
               <div>
-                <h2 className="text-xl font-bold text-foreground">Редактирование блюда</h2>
-                <p className="text-xs text-muted-foreground mt-1">Изменения применятся после сохранения.</p>
+                <h2 className="text-xl font-bold text-foreground">
+                  {modalMode === 'add' ? 'Новое блюдо' : 'Редактирование блюда'}
+                </h2>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Изменения применятся после сохранения.
+                </p>
               </div>
               <button
                 onClick={() => setEditingItem(null)}
@@ -394,6 +460,26 @@ const MenuEditor = () => {
             </div>
 
             <div className="p-6 overflow-y-auto space-y-6 bg-background custom-scrollbar">
+
+              {/* СЕЛЕКТ КАТЕГОРИИ */}
+              <div className="space-y-2">
+                <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Категория</Label>
+                <div className="relative">
+                  <select
+                    value={targetCategoryId}
+                    onChange={(e) => setTargetCategoryId(e.target.value)}
+                    className="flex h-11 w-full items-center rounded-xl border border-transparent bg-secondary/30 px-3 text-sm sm:text-base transition-colors focus:bg-background focus:outline-none focus:ring-2 focus:ring-brand-purple/50 appearance-none cursor-pointer font-medium"
+                  >
+                    {menu.categories.map(cat => (
+                      <option key={cat.id} value={cat.id}>{cat.name}</option>
+                    ))}
+                  </select>
+                  <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-muted-foreground">
+                    <ChevronDown size={16} />
+                  </div>
+                </div>
+              </div>
+
               <div className="space-y-2">
                 <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Название</Label>
                 <Input
@@ -413,6 +499,7 @@ const MenuEditor = () => {
                 />
               </div>
 
+              {/* БЛОК: ЦЕНА И ВАРИАНТЫ */}
               <div className="bg-secondary/20 p-5 rounded-2xl border border-border/50 space-y-4">
                 <div className="flex items-center justify-between">
                   <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
@@ -500,9 +587,10 @@ const MenuEditor = () => {
               </Button>
               <Button
                 onClick={handleSaveItem}
+                disabled={!editingItem.name.trim()}
                 className="rounded-xl bg-brand-purple hover:bg-brand-purple/90 text-white font-semibold shadow-md shadow-brand-purple/20 px-6"
               >
-                Сохранить изменения
+                {modalMode === 'add' ? 'Добавить блюдо' : 'Сохранить изменения'}
               </Button>
             </div>
           </div>
