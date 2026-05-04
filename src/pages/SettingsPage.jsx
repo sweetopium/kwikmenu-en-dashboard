@@ -11,6 +11,11 @@ import { Label } from "../components/ui/label";
 import { Switch } from "../components/ui/switch";
 import { Textarea } from "../components/ui/textarea";
 
+// Единые классы для инпутов из Onboarding для 100% консистентности дизайна
+const inputBaseClasses = "flex h-11 w-full items-center rounded-lg border border-input bg-secondary/30 px-3 sm:px-4 text-sm sm:text-base transition-colors focus:bg-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground placeholder:text-xs sm:placeholder:text-sm disabled:cursor-not-allowed disabled:opacity-50 appearance-none";
+
+const textareaBaseClasses = "flex min-h-[100px] w-full rounded-lg border border-input bg-secondary/30 px-3 py-2 sm:px-4 text-sm sm:text-base transition-colors focus:bg-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-background placeholder:text-muted-foreground placeholder:text-xs sm:placeholder:text-sm disabled:cursor-not-allowed disabled:opacity-50 resize-none";
+
 const SettingsPage = () => {
   const [activeTab, setActiveTab] = useState('profile');
 
@@ -40,7 +45,7 @@ const SettingsPage = () => {
   ];
 
   return (
-    <div className=" mx-auto space-y-6">
+    <div className="mx-auto space-y-6">
 
       {/* Хедер страницы */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-card border border-border/60 p-6 rounded-3xl shadow-sm">
@@ -89,7 +94,7 @@ const SettingsPage = () => {
                     <Input
                       value={venueData.name}
                       onChange={(e) => setVenueData({...venueData, name: e.target.value})}
-                      className="h-11 bg-secondary/30 rounded-xl"
+                      className={inputBaseClasses}
                     />
                   </div>
                   <div className="space-y-2">
@@ -97,7 +102,7 @@ const SettingsPage = () => {
                     <Input
                       value={venueData.phone}
                       onChange={(e) => setVenueData({...venueData, phone: e.target.value})}
-                      className="h-11 bg-secondary/30 rounded-xl"
+                      className={inputBaseClasses}
                     />
                   </div>
                 </div>
@@ -107,7 +112,7 @@ const SettingsPage = () => {
                   <Textarea
                     value={venueData.description}
                     onChange={(e) => setVenueData({...venueData, description: e.target.value})}
-                    className="min-h-[100px] bg-secondary/30 rounded-xl resize-none"
+                    className={textareaBaseClasses}
                     placeholder="Расскажите гостям о вашем заведении..."
                   />
                 </div>
@@ -117,17 +122,32 @@ const SettingsPage = () => {
                     <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Город</Label>
                     <div className="relative">
                       <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={16} />
-                      <Input value={venueData.city} className="pl-10 h-11 bg-secondary/30 rounded-xl" />
+                      <Input
+                        value={venueData.city}
+                        onChange={(e) => setVenueData({...venueData, city: e.target.value})}
+                        className={`${inputBaseClasses} pl-10`}
+                      />
                     </div>
                   </div>
                   <div className="space-y-2">
                     <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Валюта меню</Label>
-                    <select className="flex h-11 w-full items-center rounded-xl bg-secondary/30 px-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand-purple/50 appearance-none cursor-pointer">
-                      <option>RUB (₽)</option>
-                      <option>USD ($)</option>
-                      <option>AED (DH)</option>
-                      <option>EUR (€)</option>
-                    </select>
+                    <div className="relative">
+                      <select
+                        value={venueData.currency}
+                        onChange={(e) => setVenueData({...venueData, currency: e.target.value})}
+                        className={`${inputBaseClasses} pr-10 cursor-pointer`}
+                      >
+                        <option value="RUB (₽)">RUB (₽)</option>
+                        <option value="USD ($)">USD ($)</option>
+                        <option value="AED (DH)">AED (DH)</option>
+                        <option value="EUR (€)">EUR (€)</option>
+                      </select>
+                      <div className="absolute right-3.5 sm:right-4 top-1/2 -translate-y-1/2 pointer-events-none text-muted-foreground">
+                        <svg width="12" height="12" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M4.18179 6.18181C4.35753 6.00608 4.64245 6.00608 4.81819 6.18181L7.49999 8.86362L10.1818 6.18181C10.3575 6.00608 10.6424 6.00608 10.8182 6.18181C10.9939 6.35755 10.9939 6.64247 10.8182 6.81821L7.81819 9.81821C7.73379 9.9026 7.61934 9.95001 7.49999 9.95001C7.38064 9.95001 7.26618 9.9026 7.18179 9.81821L4.18179 6.81821C4.00605 6.64247 4.00605 6.35755 4.18179 6.18181Z" fill="currentColor" fillRule="evenodd" clipRule="evenodd"></path>
+                        </svg>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -156,7 +176,7 @@ const SettingsPage = () => {
                     value={wifiData.ssid}
                     onChange={(e) => setWifiData({...wifiData, ssid: e.target.value})}
                     placeholder="Например: Guest_WiFi"
-                    className="h-11 bg-secondary/30 rounded-xl"
+                    className={inputBaseClasses}
                   />
                 </div>
                 <div className="space-y-2">
@@ -166,7 +186,7 @@ const SettingsPage = () => {
                     value={wifiData.password}
                     onChange={(e) => setWifiData({...wifiData, password: e.target.value})}
                     placeholder="Введите пароль"
-                    className="h-11 bg-secondary/30 rounded-xl"
+                    className={inputBaseClasses}
                   />
                 </div>
               </div>
@@ -194,7 +214,7 @@ const SettingsPage = () => {
                     {['Светлая', 'Темная', 'Авто', 'Брендовая'].map((theme) => (
                       <button
                         key={theme}
-                        className={`p-4 rounded-2xl border-2 text-sm font-bold transition-all text-center ${
+                        className={`p-4 rounded-xl border-2 text-sm font-bold transition-all text-center ${
                           theme === 'Светлая' ? 'border-brand-purple bg-brand-purple/5 text-brand-purple' : 'border-border/40 hover:border-border text-muted-foreground'
                         }`}
                       >
@@ -207,7 +227,7 @@ const SettingsPage = () => {
                 <div className="pt-6 border-t border-border/50 space-y-4">
                   <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Логотип заведения в меню</Label>
                   <div className="flex items-center gap-6">
-                    <div className="w-24 h-24 rounded-2xl bg-secondary/30 border-2 border-dashed border-border flex items-center justify-center cursor-pointer hover:bg-secondary/50 transition-colors">
+                    <div className="w-24 h-24 rounded-2xl bg-secondary/30 border-2 border-dashed border-input flex items-center justify-center cursor-pointer hover:bg-secondary/50 transition-colors">
                       <ImageIcon className="text-muted-foreground" size={32} />
                     </div>
                     <div className="space-y-1">
