@@ -2,6 +2,7 @@ import { X } from 'lucide-react';
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
+import { formFieldClasses, formTextareaClasses, primaryActionButtonClasses, secondaryActionButtonClasses } from "../../lib/uiStyles";
 import { getLocalizedField, setLocalizedField } from "./menuEditorUtils";
 
 const MenuMetaModal = ({ menuMeta, language, defaultLanguage, onChange, onCancel, onSave }) => {
@@ -38,7 +39,7 @@ const MenuMetaModal = ({ menuMeta, language, defaultLanguage, onChange, onCancel
             <Input
               value={localizedName}
               onChange={(event) => onChange(setLocalizedField(menuMeta, 'name', event.target.value, language, defaultLanguage))}
-              className="h-11 bg-secondary/30 border-transparent focus:bg-background rounded-xl text-base"
+              className={formFieldClasses}
               placeholder="Например: Основное меню"
             />
           </div>
@@ -51,7 +52,7 @@ const MenuMetaModal = ({ menuMeta, language, defaultLanguage, onChange, onCancel
             <textarea
               value={localizedDescription || ''}
               onChange={(event) => onChange(setLocalizedField(menuMeta, 'description', event.target.value, language, defaultLanguage))}
-              className="w-full min-h-[100px] bg-secondary/30 border-transparent focus:border-ring focus:bg-background rounded-xl p-3 text-sm outline-none resize-y transition-colors"
+              className={formTextareaClasses}
               placeholder="Краткое описание меню..."
             />
           </div>
@@ -61,7 +62,7 @@ const MenuMetaModal = ({ menuMeta, language, defaultLanguage, onChange, onCancel
           <Button
             variant="outline"
             onClick={onCancel}
-            className="rounded-xl border-border/60 hover:bg-secondary font-semibold"
+            className={secondaryActionButtonClasses}
           >
             Отмена
           </Button>
@@ -69,7 +70,7 @@ const MenuMetaModal = ({ menuMeta, language, defaultLanguage, onChange, onCancel
           <Button
             onClick={onSave}
             disabled={!getLocalizedField(menuMeta, 'name', defaultLanguage, defaultLanguage).trim()}
-            className="rounded-xl bg-brand-purple hover:bg-brand-purple/90 text-white font-semibold shadow-md shadow-brand-purple/20 px-6"
+            className={`${primaryActionButtonClasses} px-6`}
           >
             Сохранить
           </Button>

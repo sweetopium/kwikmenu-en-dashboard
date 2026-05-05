@@ -1,5 +1,6 @@
 import { Edit2, GripVertical, Image as ImageIcon, Trash2 } from 'lucide-react';
 import { Switch } from "../ui/switch";
+import { subtleIconButtonClasses } from "../../lib/uiStyles";
 import {
   DIETARY_TAG_OPTIONS,
   formatMeasure,
@@ -97,14 +98,14 @@ const MenuItemCard = ({ item, language, defaultLanguage, onEdit, onDelete }) => 
 
         <button
           onClick={() => onEdit(item)}
-          className="text-muted-foreground hover:text-brand-purple hover:bg-brand-purple/10 p-2 rounded-lg transition-colors"
+          className={`${subtleIconButtonClasses} hover:text-brand-purple hover:bg-brand-purple/10`}
         >
           <Edit2 size={18} />
         </button>
 
         <button
           onClick={() => onDelete(item)}
-          className="text-muted-foreground hover:text-destructive hover:bg-destructive/10 p-2 rounded-lg transition-colors"
+          className={`${subtleIconButtonClasses} hover:text-destructive hover:bg-destructive/10`}
         >
           <Trash2 size={18} />
         </button>

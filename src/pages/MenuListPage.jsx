@@ -7,6 +7,7 @@ import {
 
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
+import { formFieldClasses, primaryActionButtonClasses, subtleIconButtonClasses } from "../lib/uiStyles";
 
 // Мок-данные списка меню
 const mockMenus = [
@@ -73,10 +74,10 @@ const MenuListPage = () => {
               placeholder="Поиск меню..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-9 h-11 bg-secondary/30 rounded-xl w-full"
+              className={`${formFieldClasses} pl-9`}
             />
           </div>
-          <Button className="bg-brand-purple hover:bg-brand-purple/90 text-white rounded-xl shadow-md px-6 h-11 transition-all cursor-pointer">
+          <Button className={`${primaryActionButtonClasses} px-6 cursor-pointer`}>
             <Plus size={18} className="mr-2" />
             Создать меню
           </Button>
@@ -90,7 +91,7 @@ const MenuListPage = () => {
           placeholder="Поиск меню..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="pl-9 h-11 bg-card rounded-xl w-full border-border/60 shadow-sm"
+          className={`${formFieldClasses} pl-9 bg-card shadow-sm`}
         />
       </div>
 
@@ -151,12 +152,12 @@ const MenuListPage = () => {
               </div>
 
               <div className="flex items-center gap-2">
-                <button className="w-10 h-10 rounded-xl bg-secondary hover:bg-secondary/80 flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors cursor-pointer">
+                <button className={`${subtleIconButtonClasses} hover:bg-secondary cursor-pointer`}>
                   <MoreHorizontal size={18} />
                 </button>
                 <Link
                   to={`/dashboard/menu/${menu.id}`}
-                  className="h-10 px-4 rounded-xl bg-foreground hover:bg-foreground/90 text-background font-bold text-sm flex items-center gap-2 transition-all shadow-sm cursor-pointer"
+                  className="h-10 sm:h-12 px-4 rounded-lg bg-foreground hover:bg-foreground/90 text-background font-bold text-sm flex items-center gap-2 transition-all shadow-sm cursor-pointer"
                 >
                   Открыть
                   <ArrowRight size={16} />

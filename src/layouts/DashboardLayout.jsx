@@ -11,6 +11,7 @@ import {
   X,
   LifeBuoy
 } from 'lucide-react';
+import { subtleIconButtonClasses } from "../lib/uiStyles";
 
 const NAV_ITEMS = [
   { icon: LayoutDashboard, label: 'Обзор', path: '/dashboard' },
@@ -77,12 +78,12 @@ const SidebarContent = ({ pathname, onNavigate }) => (
           Напишите нашему менеджеру, мы всегда на связи.
         </p>
 
-        <button className="w-full text-xs font-bold bg-background border border-border hover:bg-secondary transition-colors py-2 rounded-lg text-foreground">
+        <button className="w-full h-11 text-xs font-bold bg-background border border-border hover:bg-secondary transition-colors rounded-lg text-foreground">
           Написать в поддержку
         </button>
       </div>
 
-      <button className="flex items-center gap-3 px-3 py-2.5 w-full text-sm font-semibold text-muted-foreground hover:bg-destructive/10 hover:text-destructive rounded-xl transition-colors group min-w-0">
+      <button className="flex items-center gap-3 px-3 h-11 w-full text-sm font-semibold text-muted-foreground hover:bg-destructive/10 hover:text-destructive rounded-lg transition-colors group min-w-0">
         <LogOut size={18} className="group-hover:text-destructive transition-colors shrink-0" />
         <span className="truncate">Выйти</span>
       </button>
@@ -116,10 +117,7 @@ const DashboardLayout = ({ children }) => {
         }`}
       >
         <div className="absolute top-6 right-4">
-          <button
-            onClick={() => setIsMobileMenuOpen(false)}
-            className="p-2 text-muted-foreground hover:bg-secondary rounded-lg transition-colors"
-          >
+          <button onClick={() => setIsMobileMenuOpen(false)} className={`${subtleIconButtonClasses} hover:bg-secondary`}>
             <X size={20} />
           </button>
         </div>
@@ -132,10 +130,7 @@ const DashboardLayout = ({ children }) => {
         {/* Хедер */}
         <header className="h-16 border-b border-border/60 flex items-center justify-between px-4 sm:px-8 bg-card/80 backdrop-blur-xl sticky top-0 z-10 w-full max-w-full min-w-0 overflow-hidden shrink-0">
           <div className="md:hidden flex items-center gap-3 min-w-0">
-            <button
-              onClick={() => setIsMobileMenuOpen(true)}
-              className="p-2 -ml-2 text-muted-foreground hover:bg-secondary rounded-lg transition-colors shrink-0"
-            >
+            <button onClick={() => setIsMobileMenuOpen(true)} className={`${subtleIconButtonClasses} -ml-2 hover:bg-secondary shrink-0`}>
               <MenuIcon size={22} />
             </button>
 

@@ -1,5 +1,7 @@
 import { Copy } from 'lucide-react';
 
+import { subtleIconButtonClasses } from "../../lib/uiStyles";
+
 const DirectMenuLink = ({ displayValue, onCopy }) => (
   <div className="bg-card border border-border/60 rounded-2xl p-4 shadow-sm flex items-center justify-between min-w-0">
     <div className="truncate pr-4 min-w-0">
@@ -13,7 +15,7 @@ const DirectMenuLink = ({ displayValue, onCopy }) => (
 
     <button
       onClick={onCopy}
-      className="w-10 h-10 shrink-0 bg-secondary hover:bg-secondary/80 rounded-xl flex items-center justify-center text-foreground transition-colors border border-border/50 shadow-sm"
+      className={`${subtleIconButtonClasses} shrink-0 hover:bg-secondary/80 text-foreground shadow-sm`}
     >
       <Copy size={16} />
     </button>

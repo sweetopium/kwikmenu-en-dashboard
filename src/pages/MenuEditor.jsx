@@ -10,6 +10,7 @@ import MenuItemList from "../components/menu-editor/MenuItemList";
 import { simpleMenuPayload } from "../data/menu_mock.js";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
+import { formFieldClasses, primaryActionButtonClasses, secondaryActionButtonClasses, subtleIconButtonClasses } from "../lib/uiStyles";
 import {
   getAvailableHoursLabel,
   getLocalizedField,
@@ -294,14 +295,14 @@ const MenuEditor = () => {
                 <div className="flex items-center gap-1 shrink-0">
                   <button
                     onClick={handleEditCategory}
-                    className="w-8 h-8 rounded-lg flex items-center justify-center text-muted-foreground hover:text-brand-purple hover:bg-brand-purple/10 border border-border/60 hover:border-brand-purple/30 transition-all bg-secondary/30 shadow-sm"
+                    className={`${subtleIconButtonClasses} hover:text-brand-purple hover:bg-brand-purple/10 hover:border-brand-purple/30 shadow-sm`}
                   >
                     <Edit2 size={15} />
                   </button>
 
                   <button
                     onClick={handleDeleteCategoryClick}
-                    className="w-8 h-8 rounded-lg flex items-center justify-center text-muted-foreground hover:text-destructive hover:bg-destructive/10 border border-border/60 hover:border-destructive/30 transition-all bg-secondary/30 shadow-sm"
+                    className={`${subtleIconButtonClasses} hover:text-destructive hover:bg-destructive/10 hover:border-destructive/30 shadow-sm`}
                   >
                     <Trash2 size={15} />
                   </button>
@@ -342,7 +343,7 @@ const MenuEditor = () => {
               <Button
                 variant="outline"
                 onClick={handleEditMenuMeta}
-                className="rounded-xl border-border/60 bg-card font-semibold shrink-0"
+                className={`${secondaryActionButtonClasses} px-5 shrink-0`}
               >
                 Меню
               </Button>
@@ -357,13 +358,13 @@ const MenuEditor = () => {
                   placeholder="Поиск блюда..."
                   value={searchQuery}
                   onChange={(event) => setSearchQuery(event.target.value)}
-                  className="pl-9 bg-secondary/30 border-transparent focus:bg-background h-10 w-full rounded-xl min-w-0"
+                  className={`${formFieldClasses} pl-9`}
                 />
               </div>
 
               <Button
                 onClick={handleAddItemClick}
-                className="bg-brand-purple hover:bg-brand-purple/90 text-white rounded-xl h-10 px-4 shadow-sm shrink-0"
+                className={`${primaryActionButtonClasses} px-4 shrink-0`}
               >
                 <Plus size={18} className="mr-2" />
                 Блюдо

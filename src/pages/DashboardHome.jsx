@@ -5,6 +5,7 @@ import {
 } from 'lucide-react';
 
 import { Button } from "../components/ui/button";
+import { primaryActionButtonClasses, secondaryActionButtonClasses } from "../lib/uiStyles";
 
 // Мок-данные для графика (оставляем 7 дней, они красиво растянутся)
 const chartData = [
@@ -32,13 +33,13 @@ const DashboardHome = () => {
         </div>
 
         <div className="flex items-center gap-3">
-          <Button variant="outline" className="bg-card border-border/60 hover:bg-secondary/50 rounded-xl font-semibold shadow-sm">
+          <Button variant="outline" className={`${secondaryActionButtonClasses} bg-card shadow-sm px-5`}>
             <span className="flex items-center gap-2">
               За последние 7 дней
               <ChevronDown size={16} className="text-muted-foreground" />
             </span>
           </Button>
-          <Button className="bg-brand-purple hover:bg-brand-purple/90 text-white rounded-xl shadow-md px-5 hidden sm:flex">
+          <Button className={`${primaryActionButtonClasses} px-5 hidden sm:flex`}>
             <Plus size={18} className="mr-2" />
             Добавить блюдо
           </Button>

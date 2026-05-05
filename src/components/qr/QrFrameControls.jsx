@@ -2,6 +2,7 @@ import { Type } from 'lucide-react';
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
 import { Switch } from "../ui/switch";
+import { formFieldClasses } from "../../lib/uiStyles";
 
 const QrFrameControls = ({
   hasFrame,
@@ -40,7 +41,7 @@ const QrFrameControls = ({
         <Input
           value={frameText}
           onChange={(e) => onFrameTextChange(e.target.value)}
-          className="h-11 bg-secondary/30 border-input/60 rounded-xl text-base font-medium"
+          className={formFieldClasses}
           placeholder="Например: СКАНИРУЙ МЕНЮ"
           maxLength={24}
         />

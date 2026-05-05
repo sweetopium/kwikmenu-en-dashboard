@@ -2,6 +2,7 @@ import { X } from 'lucide-react';
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
+import { formFieldClasses, formTextareaClasses, primaryActionButtonClasses, secondaryActionButtonClasses } from "../../lib/uiStyles";
 import { getLocalizedField, setLocalizedField } from "./menuEditorUtils";
 
 const CategoryModal = ({ category, language, defaultLanguage, onChange, onCancel, onSave }) => {
@@ -40,7 +41,7 @@ const CategoryModal = ({ category, language, defaultLanguage, onChange, onCancel
             <Input
               value={localizedName}
               onChange={(event) => onChange(setLocalizedField(category, 'name', event.target.value, language, defaultLanguage))}
-              className="h-11 bg-secondary/30 border-transparent focus:bg-background rounded-xl text-base"
+              className={formFieldClasses}
               placeholder="Например: Десерты"
             />
           </div>
@@ -53,7 +54,7 @@ const CategoryModal = ({ category, language, defaultLanguage, onChange, onCancel
             <textarea
               value={localizedDescription || ''}
               onChange={(event) => onChange(setLocalizedField(category, 'description', event.target.value, language, defaultLanguage))}
-              className="w-full min-h-[80px] bg-secondary/30 border-transparent focus:border-ring focus:bg-background rounded-xl p-3 text-sm outline-none resize-y transition-colors"
+              className={`${formTextareaClasses} min-h-[80px]`}
               placeholder="Показывать под заголовком категории..."
             />
           </div>
@@ -66,7 +67,7 @@ const CategoryModal = ({ category, language, defaultLanguage, onChange, onCancel
             <Input
               value={category.imageUrl || ''}
               onChange={(event) => onChange({ ...category, imageUrl: event.target.value || null })}
-              className="h-11 bg-secondary/30 border-transparent focus:bg-background rounded-xl text-base"
+              className={formFieldClasses}
               placeholder="https://..."
             />
           </div>
@@ -87,7 +88,7 @@ const CategoryModal = ({ category, language, defaultLanguage, onChange, onCancel
                     end: category.availableHours?.end || '',
                   },
                 })}
-                className="h-11 bg-secondary/30 border-transparent focus:bg-background rounded-xl text-base"
+                className={formFieldClasses}
               />
             </div>
 
@@ -106,7 +107,7 @@ const CategoryModal = ({ category, language, defaultLanguage, onChange, onCancel
                     end: event.target.value,
                   },
                 })}
-                className="h-11 bg-secondary/30 border-transparent focus:bg-background rounded-xl text-base"
+                className={formFieldClasses}
               />
             </div>
           </div>
@@ -116,7 +117,7 @@ const CategoryModal = ({ category, language, defaultLanguage, onChange, onCancel
           <Button
             variant="outline"
             onClick={onCancel}
-            className="rounded-xl border-border/60 hover:bg-secondary font-semibold"
+            className={secondaryActionButtonClasses}
           >
             Отмена
           </Button>
@@ -124,7 +125,7 @@ const CategoryModal = ({ category, language, defaultLanguage, onChange, onCancel
           <Button
             onClick={onSave}
             disabled={!getLocalizedField(category, 'name', defaultLanguage, defaultLanguage).trim()}
-            className="rounded-xl bg-brand-purple hover:bg-brand-purple/90 text-white font-semibold shadow-md shadow-brand-purple/20 px-6"
+            className={`${primaryActionButtonClasses} px-6`}
           >
             Сохранить
           </Button>

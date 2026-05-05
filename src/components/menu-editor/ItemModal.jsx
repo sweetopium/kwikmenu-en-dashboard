@@ -4,6 +4,13 @@ import { Input } from "../ui/input";
 import { Label } from "../ui/label";
 import { Switch } from "../ui/switch";
 import {
+  formFieldClasses,
+  formSelectClasses,
+  formTextareaClasses,
+  primaryActionButtonClasses,
+  secondaryActionButtonClasses,
+} from "../../lib/uiStyles";
+import {
   BADGE_OPTIONS,
   DIETARY_TAG_OPTIONS,
   MEASURE_UNITS,
@@ -66,7 +73,7 @@ const ItemModal = ({
               <select
                 value={targetCategoryId}
                 onChange={(event) => onTargetCategoryChange(event.target.value)}
-                className="flex h-11 w-full items-center rounded-xl border border-input bg-secondary/30 px-3 text-sm sm:text-base transition-colors focus:bg-background focus:outline-none focus:ring-2 focus:ring-brand-purple/50 appearance-none cursor-pointer font-medium"
+                className={formSelectClasses}
               >
                 {categories.map((category) => (
                   <option key={category.id} value={category.id}>
@@ -89,7 +96,7 @@ const ItemModal = ({
             <Input
               value={localizedName}
               onChange={(event) => onChange(setLocalizedField(item, 'name', event.target.value, language, defaultLanguage))}
-              className="h-11 bg-secondary/30 border-transparent focus:bg-background rounded-xl text-base"
+              className={formFieldClasses}
             />
           </div>
 
@@ -101,7 +108,7 @@ const ItemModal = ({
             <textarea
               value={localizedDescription || ''}
               onChange={(event) => onChange(setLocalizedField(item, 'description', event.target.value, language, defaultLanguage))}
-              className="w-full min-h-[100px] bg-secondary/30 border-transparent focus:border-ring focus:bg-background rounded-xl p-3 text-sm outline-none resize-y transition-colors"
+              className={formTextareaClasses}
               placeholder="Вкусное описание для гостей..."
             />
           </div>
@@ -114,7 +121,7 @@ const ItemModal = ({
             <Input
               value={item.imageUrl || ''}
               onChange={(event) => onChange({ ...item, imageUrl: event.target.value || null })}
-              className="h-11 bg-secondary/30 border-transparent focus:bg-background rounded-xl text-base"
+              className={formFieldClasses}
               placeholder="https://..."
             />
           </div>
@@ -144,7 +151,7 @@ const ItemModal = ({
                   <Input
                     value={item.price || ''}
                     onChange={(event) => onChange({ ...item, price: event.target.value })}
-                    className="bg-background rounded-lg border border-input h-10"
+                    className={formFieldClasses}
                     placeholder="Например: 350"
                   />
                 </div>
@@ -158,7 +165,7 @@ const ItemModal = ({
                     type="number"
                     value={item.measureValue || ''}
                     onChange={(event) => onChange({ ...item, measureValue: event.target.value })}
-                    className="bg-background rounded-lg border border-input h-10"
+                    className={formFieldClasses}
                     placeholder="Например: 250"
                   />
                 </div>
@@ -171,7 +178,7 @@ const ItemModal = ({
                   <MeasureUnitSelect
                     value={item.measureUnit || 'ml'}
                     onChange={(value) => onChange({ ...item, measureUnit: value })}
-                    className="flex h-10 w-full items-center rounded-lg border border-input bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand-purple/50 appearance-none cursor-pointer"
+                    className={formSelectClasses}
                     chevronSize={14}
                   />
                 </div>
@@ -198,7 +205,7 @@ const ItemModal = ({
                       <Input
                         value={getLocalizedField(variant, 'label', language, defaultLanguage)}
                         onChange={(event) => onVariantChange(index, 'label', event.target.value, language)}
-                        className="h-9 text-xs bg-secondary/30"
+                        className={`${formFieldClasses} h-11 text-xs px-3`}
                         placeholder="Например: Гранд"
                       />
                     </div>
@@ -212,7 +219,7 @@ const ItemModal = ({
                         type="number"
                         value={variant.measureValue || ''}
                         onChange={(event) => onVariantChange(index, 'measureValue', event.target.value)}
-                        className="h-9 text-xs bg-secondary/30"
+                        className={`${formFieldClasses} h-11 text-xs px-3`}
                         placeholder="400"
                       />
                     </div>
@@ -225,7 +232,7 @@ const ItemModal = ({
                       <MeasureUnitSelect
                         value={variant.measureUnit || 'ml'}
                         onChange={(value) => onVariantChange(index, 'measureUnit', value)}
-                        className="flex h-9 w-full items-center rounded-lg border border-transparent bg-secondary/30 px-2 text-xs focus:outline-none focus:ring-2 focus:ring-brand-purple/50 appearance-none cursor-pointer"
+                        className={`${formSelectClasses} h-11 text-xs px-3`}
                         chevronSize={12}
                       />
                     </div>
@@ -238,7 +245,7 @@ const ItemModal = ({
                       <Input
                         value={variant.price || ''}
                         onChange={(event) => onVariantChange(index, 'price', event.target.value)}
-                        className="h-9 text-xs bg-secondary/30"
+                        className={`${formFieldClasses} h-11 text-xs px-3`}
                         placeholder="300"
                       />
                     </div>
@@ -258,7 +265,7 @@ const ItemModal = ({
                 <select
                   value={item.badge || ''}
                   onChange={(event) => onChange({ ...item, badge: event.target.value || null })}
-                  className="flex h-11 w-full items-center rounded-xl border border-input bg-secondary/30 px-3 text-sm transition-colors focus:bg-background focus:outline-none focus:ring-2 focus:ring-brand-purple/50 appearance-none cursor-pointer font-medium"
+                  className={formSelectClasses}
                 >
                   <option value="">Без бейджа</option>
                   {BADGE_OPTIONS.map((badge) => (
@@ -290,7 +297,7 @@ const ItemModal = ({
                       end: item.availableHours?.end || '',
                     },
                   })}
-                  className="h-11 bg-secondary/30 border-transparent focus:bg-background rounded-xl text-base"
+                  className={formFieldClasses}
                 />
               </div>
 
@@ -309,7 +316,7 @@ const ItemModal = ({
                       end: event.target.value,
                     },
                   })}
-                  className="h-11 bg-secondary/30 border-transparent focus:bg-background rounded-xl text-base"
+                  className={formFieldClasses}
                 />
               </div>
             </div>
@@ -333,7 +340,7 @@ const ItemModal = ({
                         ? item.tags.filter((value) => value !== tag.value)
                         : [...(item.tags || []), tag.value],
                     })}
-                    className={`px-3 py-2 rounded-xl border text-xs font-semibold transition-colors ${
+                    className={`px-3 py-2 rounded-lg border text-xs font-semibold transition-colors ${
                       isActive
                         ? 'bg-foreground text-background border-foreground'
                         : 'bg-secondary/30 text-muted-foreground border-border/60 hover:text-foreground'
@@ -369,7 +376,7 @@ const ItemModal = ({
           <Button
             variant="outline"
             onClick={onCancel}
-            className="rounded-xl border-border/60 hover:bg-secondary font-semibold"
+            className={secondaryActionButtonClasses}
           >
             Отмена
           </Button>
@@ -377,7 +384,7 @@ const ItemModal = ({
           <Button
             onClick={onSave}
             disabled={!getLocalizedField(item, 'name', defaultLanguage, defaultLanguage).trim()}
-            className="rounded-xl bg-brand-purple hover:bg-brand-purple/90 text-white font-semibold shadow-md shadow-brand-purple/20 px-6"
+            className={`${primaryActionButtonClasses} px-6`}
           >
             {mode === 'add' ? 'Добавить блюдо' : 'Сохранить изменения'}
           </Button>

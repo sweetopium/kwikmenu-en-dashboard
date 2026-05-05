@@ -2,6 +2,7 @@ import { FileDown } from 'lucide-react';
 import { QRCode } from 'react-qrcode-logo';
 import { Button } from "../ui/button";
 import { Label } from "../ui/label";
+import { primaryActionButtonClasses } from "../../lib/uiStyles";
 
 const QrPreview = ({
   mobile = false,
@@ -70,7 +71,7 @@ const QrPreview = ({
     <div className={`space-y-3 w-full ${mobile ? 'mt-5' : 'mt-8'}`}>
       <Button
         onClick={onDownload}
-        className="w-full h-12 bg-foreground hover:bg-foreground/90 text-background rounded-xl font-bold text-sm shadow-md"
+        className={`w-full ${primaryActionButtonClasses} bg-foreground hover:bg-foreground/90 text-background`}
       >
         <FileDown size={18} className="mr-2" />
         Скачать PNG

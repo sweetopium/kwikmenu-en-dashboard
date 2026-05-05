@@ -10,11 +10,13 @@ import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
 import { Switch } from "../components/ui/switch";
 import { Textarea } from "../components/ui/textarea";
-
-// Единые классы для инпутов из Onboarding для 100% консистентности дизайна
-const inputBaseClasses = "flex h-11 w-full items-center rounded-lg border border-input bg-secondary/30 px-3 sm:px-4 text-sm sm:text-base transition-colors focus:bg-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground placeholder:text-xs sm:placeholder:text-sm disabled:cursor-not-allowed disabled:opacity-50 appearance-none";
-
-const textareaBaseClasses = "flex min-h-[100px] w-full rounded-lg border border-input bg-secondary/30 px-3 py-2 sm:px-4 text-sm sm:text-base transition-colors focus:bg-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-background placeholder:text-muted-foreground placeholder:text-xs sm:placeholder:text-sm disabled:cursor-not-allowed disabled:opacity-50 resize-none";
+import {
+  formFieldClasses,
+  formSelectClasses,
+  formTextareaClasses,
+  primaryActionButtonClasses,
+  secondaryActionButtonClasses,
+} from "../lib/uiStyles";
 
 const SettingsPage = () => {
   const [activeTab, setActiveTab] = useState('profile');
@@ -53,7 +55,7 @@ const SettingsPage = () => {
           <h1 className="text-2xl sm:text-3xl font-extrabold text-foreground tracking-tight">Настройки</h1>
           <p className="text-sm text-muted-foreground mt-1">Управляйте информацией о заведении и параметрами меню</p>
         </div>
-        <Button className="bg-brand-purple hover:bg-brand-purple/90 text-white rounded-xl px-6 shadow-md shadow-brand-purple/20 transition-all">
+        <Button className={`${primaryActionButtonClasses} px-6`}>
           <Save size={18} className="mr-2" />
           Сохранить изменения
         </Button>
@@ -94,7 +96,7 @@ const SettingsPage = () => {
                     <Input
                       value={venueData.name}
                       onChange={(e) => setVenueData({...venueData, name: e.target.value})}
-                      className={inputBaseClasses}
+                      className={formFieldClasses}
                     />
                   </div>
                   <div className="space-y-2">
@@ -102,7 +104,7 @@ const SettingsPage = () => {
                     <Input
                       value={venueData.phone}
                       onChange={(e) => setVenueData({...venueData, phone: e.target.value})}
-                      className={inputBaseClasses}
+                      className={formFieldClasses}
                     />
                   </div>
                 </div>
@@ -112,7 +114,7 @@ const SettingsPage = () => {
                   <Textarea
                     value={venueData.description}
                     onChange={(e) => setVenueData({...venueData, description: e.target.value})}
-                    className={textareaBaseClasses}
+                    className={formTextareaClasses}
                     placeholder="Расскажите гостям о вашем заведении..."
                   />
                 </div>
@@ -125,7 +127,7 @@ const SettingsPage = () => {
                       <Input
                         value={venueData.city}
                         onChange={(e) => setVenueData({...venueData, city: e.target.value})}
-                        className={`${inputBaseClasses} pl-10`}
+                        className={`${formFieldClasses} pl-10`}
                       />
                     </div>
                   </div>
@@ -135,7 +137,7 @@ const SettingsPage = () => {
                       <select
                         value={venueData.currency}
                         onChange={(e) => setVenueData({...venueData, currency: e.target.value})}
-                        className={`${inputBaseClasses} pr-10 cursor-pointer`}
+                        className={formSelectClasses}
                       >
                         <option value="RUB (₽)">RUB (₽)</option>
                         <option value="USD ($)">USD ($)</option>
@@ -176,7 +178,7 @@ const SettingsPage = () => {
                     value={wifiData.ssid}
                     onChange={(e) => setWifiData({...wifiData, ssid: e.target.value})}
                     placeholder="Например: Guest_WiFi"
-                    className={inputBaseClasses}
+                    className={formFieldClasses}
                   />
                 </div>
                 <div className="space-y-2">
@@ -186,7 +188,7 @@ const SettingsPage = () => {
                     value={wifiData.password}
                     onChange={(e) => setWifiData({...wifiData, password: e.target.value})}
                     placeholder="Введите пароль"
-                    className={inputBaseClasses}
+                    className={formFieldClasses}
                   />
                 </div>
               </div>
@@ -233,7 +235,7 @@ const SettingsPage = () => {
                     <div className="space-y-1">
                       <p className="text-sm font-bold">Загрузите квадратное лого</p>
                       <p className="text-xs text-muted-foreground">Рекомендуемый размер 512x512px, формат PNG или SVG</p>
-                      <Button variant="outline" size="sm" className="mt-2 rounded-lg text-[10px] uppercase tracking-wider font-black">Выбрать файл</Button>
+                      <Button variant="outline" size="sm" className="mt-2 rounded-lg border-border/60 text-[10px] uppercase tracking-wider font-black">Выбрать файл</Button>
                     </div>
                   </div>
                 </div>
@@ -244,7 +246,7 @@ const SettingsPage = () => {
                   <p className="text-xs font-bold text-brand-purple uppercase tracking-widest">Предпросмотр</p>
                   <h4 className="text-lg font-extrabold">Посмотрите, как меню видят гости</h4>
                 </div>
-                <Button className="bg-white text-gray-900 hover:bg-gray-100 rounded-xl font-bold gap-2">
+                <Button className="h-11 rounded-lg bg-white text-gray-900 hover:bg-gray-100 font-bold gap-2 px-5">
                   Открыть меню
                   <ExternalLink size={16} />
                 </Button>
@@ -287,8 +289,8 @@ const SettingsPage = () => {
                   </ul>
                 </div>
                 <div className="pt-6 border-t border-border/50 flex flex-col sm:flex-row gap-3">
-                  <Button variant="outline" className="flex-1 rounded-xl font-bold border-border/60">Квитанции и чеки</Button>
-                  <Button variant="destructive" className="flex-1 rounded-xl font-bold bg-red-500/10 text-red-500 border-none hover:bg-red-500/20">Отменить подписку</Button>
+                  <Button variant="outline" className={`flex-1 ${secondaryActionButtonClasses}`}>Квитанции и чеки</Button>
+                  <Button variant="destructive" className="flex-1 h-10 sm:h-12 rounded-lg font-bold bg-red-500/10 text-red-500 border-none hover:bg-red-500/20">Отменить подписку</Button>
                 </div>
               </div>
             </div>

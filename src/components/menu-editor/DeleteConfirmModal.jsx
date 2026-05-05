@@ -1,5 +1,6 @@
 import { Trash2 } from 'lucide-react';
 import { Button } from "../ui/button";
+import { secondaryActionButtonClasses } from "../../lib/uiStyles";
 
 const DeleteConfirmModal = ({ deleteConfirm, onCancel, onConfirm }) => {
   if (!deleteConfirm) return null;
@@ -31,14 +32,14 @@ const DeleteConfirmModal = ({ deleteConfirm, onCancel, onConfirm }) => {
           <Button
             variant="outline"
             onClick={onCancel}
-            className="w-full sm:w-auto rounded-xl border-border/60 hover:bg-secondary font-semibold"
+            className={`w-full sm:w-auto ${secondaryActionButtonClasses}`}
           >
             Отмена
           </Button>
 
           <Button
             onClick={onConfirm}
-            className="w-full sm:w-auto rounded-xl bg-destructive hover:bg-destructive/90 text-white font-semibold shadow-md px-6"
+            className="w-full sm:w-auto h-10 sm:h-12 rounded-lg bg-destructive hover:bg-destructive/90 text-white font-semibold shadow-md px-6"
           >
             Удалить
           </Button>
