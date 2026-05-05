@@ -1,13 +1,11 @@
-import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
-  Plus, Search, Utensils, Wine, Coffee,
+  Plus, Utensils, Wine, Coffee,
   MoreHorizontal, Calendar, LayoutGrid, ArrowRight, FolderOpen
 } from 'lucide-react';
 
 import { Button } from "../components/ui/button";
-import { Input } from "../components/ui/input";
-import { formFieldClasses, primaryActionButtonClasses, subtleIconButtonClasses } from "../lib/uiStyles";
+import { primaryActionButtonClasses, subtleIconButtonClasses } from "../lib/uiStyles";
 
 // Мок-данные списка меню
 const mockMenus = [
@@ -50,61 +48,41 @@ const mockMenus = [
 ];
 
 const MenuListPage = () => {
-  const [searchQuery, setSearchQuery] = useState('');
-
-  const filteredMenus = mockMenus.filter(menu =>
-    menu.name.toLowerCase().includes(searchQuery.toLowerCase())
-  );
-
   return (
     <div className="mx-auto space-y-6 sm:space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700 ease-out">
+      <div className="bg-card border border-border/60 rounded-3xl shadow-sm overflow-hidden">
+        <div className="p-6 sm:p-8">
+          <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-5">
+            <div className="min-w-0">
+              <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-muted-foreground mb-2">
+                Меню заведения
+              </p>
+              <h1 className="text-2xl sm:text-3xl font-extrabold text-foreground tracking-tight">
+                Ваши меню
+              </h1>
+              <p className="text-sm text-muted-foreground mt-2 max-w-2xl leading-relaxed">
+                Создавайте отдельные меню для основного зала, сезона, завтраков или специальных предложений
+              </p>
+            </div>
 
-      {/* Хедер страницы */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-card border border-border/60 p-6 sm:p-8 rounded-3xl shadow-sm">
-        <div>
-          <h1 className="text-2xl sm:text-3xl font-extrabold text-foreground tracking-tight">Ваши меню</h1>
-          <p className="text-sm text-muted-foreground mt-1 max-w-xl">
-            Создавайте разные меню для разных залов, сезонов или времени суток. Гость увидит то меню, QR-код которого отсканирует.
-          </p>
-        </div>
-        <div className="flex items-center gap-3 shrink-0">
-          <div className="relative hidden sm:block w-64">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={16} />
-            <Input
-              placeholder="Поиск меню..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className={`${formFieldClasses} pl-9`}
-            />
+            <div className="w-full sm:w-auto shrink-0">
+              <Button className={`${primaryActionButtonClasses} px-5 shrink-0 cursor-pointer`}>
+                <Plus size={18} className="mr-2" />
+                Создать меню
+              </Button>
+            </div>
           </div>
-          <Button className={`${primaryActionButtonClasses} px-6 cursor-pointer`}>
-            <Plus size={18} className="mr-2" />
-            Создать меню
-          </Button>
         </div>
       </div>
 
-      {/* Мобильный поиск */}
-      <div className="relative sm:hidden">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={16} />
-        <Input
-          placeholder="Поиск меню..."
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          className={`${formFieldClasses} pl-9 bg-card shadow-sm`}
-        />
-      </div>
-
-      {/* Сетка карточек меню */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6">
-        {filteredMenus.map((menu) => (
+        {mockMenus.map((menu) => (
           <div
             key={menu.id}
             className="bg-card border border-border/60 rounded-3xl p-6 sm:p-7 shadow-sm flex flex-col group hover:border-brand-purple/30 hover:shadow-md transition-all"
           >
-            {/* Иконка и Статус */}
             <div className="flex justify-between items-start mb-6">
-              <div className={`w-14 h-14 rounded-2xl flex items-center justify-center ${menu.bgColor} ${menu.color}`}>
+              <div className={`w-14 h-14 rounded-2xl flex items-center justify-center ${menu.bgColor} ${menu.color} shrink-0`}>
                 <menu.icon size={26} />
               </div>
 
@@ -119,9 +97,11 @@ const MenuListPage = () => {
               )}
             </div>
 
-            {/* Инфо */}
-            <div className="mb-6 flex-1">
-              <h3 className="text-xl font-bold text-foreground group-hover:text-brand-purple transition-colors">
+            <div className="mb-6 flex-1 min-w-0">
+              <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-muted-foreground mb-2">
+                {menu.status === 'active' ? 'Опубликовано' : 'В работе'}
+              </p>
+              <h3 className="text-xl font-bold text-foreground group-hover:text-brand-purple transition-colors truncate">
                 {menu.name}
               </h3>
               <p className="text-sm text-muted-foreground mt-2 line-clamp-2 leading-relaxed">
@@ -129,22 +109,20 @@ const MenuListPage = () => {
               </p>
             </div>
 
-            {/* Статистика - в виде аккуратных капсул */}
-            <div className="flex items-center gap-3 mb-6">
+            <div className="flex flex-wrap items-center gap-3 mb-6">
               <div className="flex items-center gap-2 bg-secondary/50 px-3 py-1.5 rounded-xl border border-border/50">
                 <LayoutGrid size={14} className="text-muted-foreground" />
-                <span className="text-xs font-semibold text-muted-foreground">Категории:</span>
+                <span className="text-xs font-semibold text-muted-foreground">Категории</span>
                 <span className="text-xs font-black text-foreground">{menu.categoriesCount}</span>
               </div>
 
               <div className="flex items-center gap-2 bg-secondary/50 px-3 py-1.5 rounded-xl border border-border/50">
                 <FolderOpen size={14} className="text-muted-foreground" />
-                <span className="text-xs font-semibold text-muted-foreground">Блюда:</span>
+                <span className="text-xs font-semibold text-muted-foreground">Блюда</span>
                 <span className="text-xs font-black text-foreground">{menu.itemsCount}</span>
               </div>
             </div>
 
-            {/* Дата и Действия */}
             <div className="flex items-center justify-between mt-auto pt-5 border-t border-border/50 gap-4">
               <div className="flex items-center gap-2 text-muted-foreground">
                 <Calendar size={14} />
@@ -166,15 +144,6 @@ const MenuListPage = () => {
             </div>
           </div>
         ))}
-
-        {/* Карточка создания нового меню */}
-        <div className="border-2 border-dashed border-border/60 rounded-3xl p-6 sm:p-7 flex flex-col items-center justify-center text-center cursor-pointer hover:bg-secondary/20 hover:border-brand-purple/30 transition-all group min-h-[350px]">
-          <div className="w-16 h-16 rounded-2xl bg-secondary/50 flex items-center justify-center text-muted-foreground group-hover:text-brand-purple group-hover:bg-brand-purple/10 group-hover:scale-110 transition-all duration-300 mb-4">
-            <Plus size={32} />
-          </div>
-          <h3 className="text-xl font-bold text-foreground mb-2">Новое меню</h3>
-          <p className="text-sm text-muted-foreground max-w-[200px]">Создайте меню с нуля или импортируйте из файла</p>
-        </div>
       </div>
     </div>
   );
