@@ -1,14 +1,14 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowLeft, ArrowRight, Check, Sparkles } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Check } from 'lucide-react';
 
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
 import { CountryField, DialPhoneField } from "../components/onboarding/CountryDialFields";
 import { COUNTRIES, inputBaseClasses } from "../components/onboarding/countries";
-import MenuSourcePicker from "../components/onboarding/MenuSourcePicker";
 import OnboardingCard from "../components/onboarding/OnboardingCard";
+import MenuImportFlow from "../components/menu-import/MenuImportFlow";
 
 const STEPS = [
   { id: 1, label: 'Данные' },
@@ -55,36 +55,17 @@ const UploadStepper = ({ step }) => (
 );
 
 const UploadPage = () => {
-  const [step, setStep] = useState(1);
-  const [isSubmitted, setIsSubmitted] = useState(false);
+  const [isProfileStepCompleted, setIsProfileStepCompleted] = useState(false);
+  const [importStage, setImportStage] = useState('idle');
   const [restaurant, setRestaurant] = useState('');
   const [phone, setPhone] = useState('');
   const [city, setCity] = useState('');
   const [selectedCountry, setSelectedCountry] = useState('ru');
   const [selectedDial, setSelectedDial] = useState('+7');
-  const [menuSource, setMenuSource] = useState('file');
-  const [files, setFiles] = useState([]);
-  const [menuLink, setMenuLink] = useState('');
 
   const handleStep1Submit = (e) => {
     e.preventDefault();
-    setStep(2);
-  };
-
-  const handleFinalSubmit = (e) => {
-    e.preventDefault();
-
-    if (menuSource === 'file' && files.length === 0) {
-      alert("Пожалуйста, выберите хотя бы один файл.");
-      return;
-    }
-    if (menuSource === 'link' && !menuLink.trim()) {
-      alert("Пожалуйста, укажите ссылку.");
-      return;
-    }
-
-    setIsSubmitted(true);
-    setStep(3);
+    setIsProfileStepCompleted(true);
   };
 
   const handleCountryChange = (countryId) => {
@@ -96,11 +77,27 @@ const UploadPage = () => {
     }
   };
 
+  const step = useMemo(() => {
+    if (!isProfileStepCompleted) {
+      return 1;
+    }
+
+    return ['uploading', 'processing', 'success'].includes(importStage) ? 3 : 2;
+  }, [importStage, isProfileStepCompleted]);
+
+  const importContext = {
+    restaurant_name: restaurant,
+    contact_phone: `${selectedDial} ${phone}`.trim(),
+    city,
+    country: selectedCountry,
+    flow: 'onboarding',
+  };
+
   return (
     <div className="max-w-2xl mx-auto flex flex-col space-y-6 py-3 sm:py-4 animate-in fade-in slide-in-from-bottom-4 duration-700 ease-out w-full">
-      {!isSubmitted && (
+      {importStage !== 'uploading' && importStage !== 'processing' && importStage !== 'success' && (
         <div className="flex items-center">
-          {step === 1 ? (
+          {!isProfileStepCompleted ? (
             <Link
               to="/"
               className="inline-flex items-center gap-2 text-xs sm:text-sm font-semibold text-muted-foreground hover:text-foreground bg-card border border-border/60 shadow-sm hover:shadow-md px-4 py-2.5 rounded-full transition-all group"
@@ -111,7 +108,7 @@ const UploadPage = () => {
           ) : (
             <button
               type="button"
-              onClick={() => setStep(1)}
+              onClick={() => setIsProfileStepCompleted(false)}
               className="inline-flex items-center gap-2 text-xs sm:text-sm font-semibold text-muted-foreground hover:text-foreground bg-card border border-border/60 shadow-sm hover:shadow-md px-4 py-2.5 rounded-full transition-all group cursor-pointer"
             >
               <ArrowLeft size={16} className="group-hover:-translate-x-1 transition-transform" />
@@ -125,7 +122,7 @@ const UploadPage = () => {
         <UploadStepper step={step} />
         <div className="pt-2 sm:pt-4" />
 
-        {step === 1 && (
+        {!isProfileStepCompleted && (
           <div className="flex flex-col flex-1 animate-in fade-in slide-in-from-right-4 duration-500">
             <div className="space-y-1.5 sm:space-y-2 mb-6 sm:mb-8 text-center sm:text-left">
               <h2 className="text-xl sm:text-3xl font-extrabold tracking-tight text-foreground">
@@ -192,69 +189,21 @@ const UploadPage = () => {
           </div>
         )}
 
-        {step === 2 && (
+        {isProfileStepCompleted && (
           <div className="flex flex-col flex-1 animate-in fade-in slide-in-from-right-4 duration-500">
-            <div className="space-y-1.5 sm:space-y-2 mb-6 sm:mb-8 text-center sm:text-left">
-              <h2 className="text-xl sm:text-3xl font-extrabold tracking-tight text-foreground">
-                Загрузите меню
-              </h2>
-              <p className="text-muted-foreground text-xs sm:text-base leading-relaxed">
-                Загрузите PDF файл, сделайте фотографии или вставьте ссылку. Наш ИИ всё распознает.
-              </p>
-            </div>
-
-            <form onSubmit={handleFinalSubmit} className="space-y-5 sm:space-y-6 flex-1 flex flex-col">
-              <div className="space-y-2 sm:space-y-3 pt-1 sm:pt-2">
-                <Label className="text-foreground font-medium ml-1 text-[11px] sm:text-xs sm:text-sm">
-                  Исходник меню <span className="text-red-500">*</span>
-                </Label>
-
-                <MenuSourcePicker
-                  menuSource={menuSource}
-                  onMenuSourceChange={setMenuSource}
-                  files={files}
-                  onFileChange={(e) => setFiles(Array.from(e.target.files || []))}
-                  menuLink={menuLink}
-                  onMenuLinkChange={setMenuLink}
-                  inputClassName={inputBaseClasses}
-                  multiple
-                  fileTabLabel="Загрузить файлы"
-                  fileTabMobileLabel="Файлы"
-                  linkPlaceholder="Ссылка на Google Drive, Яндекс.Диск..."
-                  dropzoneHeight="h-32 sm:h-36"
-                />
-              </div>
-
-              <div className="pt-3 sm:pt-4 mt-auto">
-                <Button
-                  type="submit"
-                  className="w-full h-10 sm:h-12 text-xs sm:text-base font-semibold rounded-lg bg-brand-purple hover:bg-brand-purple/90 text-white shadow-md hover:shadow-lg hover:shadow-brand-purple/20 transition-all duration-300"
-                >
-                  <span className="flex items-center gap-2">
-                    <Sparkles size={16} className="sm:w-[18px] sm:h-[18px]" />
-                    Распознать меню
-                  </span>
-                </Button>
-              </div>
-            </form>
-          </div>
-        )}
-
-        {step === 3 && (
-          <div className="flex-1 flex flex-col items-center justify-center animate-in zoom-in-95 duration-500">
-            <div className="relative mb-8">
-              <div className="w-20 h-20 sm:w-24 sm:h-24 border-4 border-secondary rounded-full absolute inset-0" />
-              <div className="w-20 h-20 sm:w-24 sm:h-24 border-4 border-brand-purple border-t-transparent rounded-full animate-spin" />
-              <div className="absolute inset-0 flex items-center justify-center text-brand-purple">
-                <Sparkles size={28} className="sm:w-8 sm:h-8 animate-pulse" />
-              </div>
-            </div>
-            <h3 className="text-lg sm:text-2xl font-bold text-foreground mb-3 sm:mb-4 text-center">
-              ИИ изучает ваше меню...
-            </h3>
-            <p className="text-muted-foreground text-xs sm:text-base max-w-[260px] sm:max-w-[320px] text-center leading-relaxed">
-              Мы извлекаем категории, блюда, описания и цены. Обычно это занимает около 10-15 секунд.
-            </p>
+            <MenuImportFlow
+              context={importContext}
+              introTitle="Загрузите меню"
+              introDescription="Загрузите PDF, фотографии или ссылку. Отправим исходники в сценарий распознавания и покажем результат."
+              submitLabel="Отправить на распознавание"
+              successTitle="Черновик меню подготовлен"
+              successDescription="Исходники ушли в webhook, базовая структура собрана. Дальше можно открыть демо-редактор и продолжить работу вручную."
+              successPrimaryLabel="Открыть редактор меню"
+              successPrimaryTo="/dashboard/menu/main"
+              successSecondaryLabel="Перейти в кабинет"
+              successSecondaryTo="/dashboard"
+              onStageChange={setImportStage}
+            />
           </div>
         )}
       </OnboardingCard>

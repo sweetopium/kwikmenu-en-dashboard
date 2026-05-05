@@ -7,6 +7,7 @@ import MenuEditor from "./pages/MenuEditor.jsx";
 import DashboardHome from "./pages/DashboardHome.jsx";
 import OnboardingLayout from "./layouts/OnboardingLayout.jsx";
 import MenuListPage from "./pages/MenuListPage.jsx";
+import MenuImportPage from "./pages/MenuImportPage.jsx";
 import VenuePage from "./pages/VenuePage.jsx";
 import AccountPage from "./pages/AccountPage.jsx";
 import BillingPage from "./pages/BillingPage.jsx";
@@ -25,6 +26,8 @@ function App() {
                 {/* Dashboard Flow */}
                 <Route path="/dashboard" element={<DashboardLayout><DashboardHome/></DashboardLayout>}/>
                 <Route path="/dashboard/menu" element={<DashboardLayout><MenuListPage/></DashboardLayout>}/>
+                <Route path="/dashboard/menu/new" element={<DashboardLayout><MenuImportPage/></DashboardLayout>}/>
+                <Route path="/dashboard/menu/import" element={<Navigate to="/dashboard/menu/new" replace/>}/>
                 <Route path="/dashboard/menu/:id" element={<DashboardLayout><MenuEditor/></DashboardLayout>}/>
                 <Route path="/dashboard/venues" element={<DashboardLayout><VenueListPage/></DashboardLayout>}/>
                 <Route path="/dashboard/venues/:id" element={<DashboardLayout><VenuePage/></DashboardLayout>}/>

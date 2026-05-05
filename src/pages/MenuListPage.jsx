@@ -73,9 +73,11 @@ const MenuListPage = () => {
             </div>
 
             <div className="w-full sm:w-auto shrink-0">
-              <Button className={`${primaryActionButtonClasses} px-5 shrink-0 cursor-pointer`}>
+              <Button asChild className={`${primaryActionButtonClasses} px-5 shrink-0 cursor-pointer`}>
+                <Link to="/dashboard/menu/new">
                 <Plus size={18} className="mr-2" />
                 Создать меню
+                </Link>
               </Button>
             </div>
           </div>
