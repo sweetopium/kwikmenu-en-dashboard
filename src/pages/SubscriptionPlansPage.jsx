@@ -36,7 +36,7 @@ const PLAN_OPTIONS = [
   {
     id: 'basic',
     name: 'Базовый',
-    description: 'Для активных ресторанов: стоп-листы, сезонные меню и регулярные обновления.',
+    description: 'Для активных ресторанов: стоп-листы, сезонные меню и обновления.',
     monthlyPrice: 3190,
     yearlyPrice: 38280,
     badge: 'ХИТ ПРОДАЖ',
@@ -74,6 +74,99 @@ const SubscriptionPlansPage = () => {
     [selectedPlanId]
   );
 
+  // Вынесли рендер карточки в отдельную функцию, чтобы не дублировать код
+  // для мобильной (1 карточка) и десктопной (3 карточки) версий.
+  const renderPlanCard = (plan) => {
+    const isSelected = selectedPlanId === plan.id;
+    const isFeatured = plan.id === 'basic';
+
+    return (
+      <article
+        key={plan.id}
+        className={`relative flex flex-col h-full rounded-3xl border p-4 sm:p-5 transition-all animate-in fade-in zoom-in-95 duration-300 ${
+          isFeatured
+            ? 'border-[#2a1e44] bg-[#171126] text-white shadow-[0_24px_70px_-36px_rgba(117,90,255,0.65)] z-10'
+            : isSelected
+              ? 'border-brand-purple/40 bg-card shadow-[0_20px_50px_-38px_rgba(109,103,235,0.42)]'
+              : 'border-border/60 bg-card shadow-[0_18px_60px_-42px_rgba(109,103,235,0.1)]'
+        }`}
+      >
+        <div className="flex flex-col flex-grow space-y-4">
+          <div className="space-y-1.5">
+            <div className="flex items-start justify-between gap-2">
+              <h2 className={`text-xl sm:text-2xl font-black tracking-tight ${isFeatured ? 'text-white' : 'text-foreground'}`}>
+                {plan.name}
+              </h2>
+              {plan.badge && (
+                <div className="shrink-0 rounded-full bg-brand-purple px-2 py-1 text-[9px] sm:text-[10px] font-extrabold uppercase tracking-wide text-white shadow-lg shadow-brand-purple/30">
+                  <span className="flex items-center gap-1.5">
+                    <Sparkles size={10} />
+                    {plan.badge}
+                  </span>
+                </div>
+              )}
+            </div>
+            <p className={`text-xs sm:text-sm leading-relaxed ${isFeatured ? 'text-white/70' : 'text-muted-foreground'}`}>
+              {plan.description}
+            </p>
+          </div>
+
+          <div className="space-y-1">
+            <div className="flex items-baseline gap-1.5 flex-wrap">
+              <span className={`text-3xl sm:text-4xl font-black tracking-tight ${isFeatured ? 'text-white' : 'text-foreground'}`}>
+                {plan.monthlyPrice}
+              </span>
+              <span className={`text-lg font-bold ${isFeatured ? 'text-white/50' : 'text-muted-foreground'}`}>₽</span>
+              <span className={`text-sm font-semibold ${isFeatured ? 'text-white/50' : 'text-muted-foreground'}`}>
+                / мес
+              </span>
+            </div>
+            <p className="text-sm font-bold text-brand-purple">
+              Итого {formatRub(plan.yearlyPrice)} за год
+            </p>
+          </div>
+
+          <Button
+            type="button"
+            onClick={() => setSelectedPlanId(plan.id)}
+            className={`h-10 sm:h-11 w-full rounded-xl text-sm font-bold transition-all mt-2 ${
+              isFeatured
+                ? 'bg-white text-foreground hover:bg-white/95'
+                : isSelected
+                  ? 'bg-brand-purple text-white hover:bg-brand-purple/90'
+                  : 'bg-background text-foreground border border-border/60 hover:bg-secondary/30 shadow-sm'
+            }`}
+          >
+            {isSelected ? 'Тариф выбран' : 'Выбрать тариф'}
+            {!isSelected && <ArrowRight size={16} className="ml-2" />}
+          </Button>
+
+          <div className="space-y-2.5 pt-3 mt-auto">
+            <h3 className={`text-xs font-extrabold uppercase tracking-wide ${isFeatured ? 'text-white/85' : 'text-foreground'}`}>
+              Что включено:
+            </h3>
+            <ul className="space-y-2">
+              {plan.features.slice(0, 5).map((feature) => (
+                <li
+                  key={feature}
+                  className={`flex items-start gap-2 text-xs sm:text-sm leading-relaxed ${
+                    isFeatured ? 'text-white/80' : 'text-muted-foreground'
+                  }`}
+                >
+                  <CheckCircle2
+                    size={14}
+                    className={`mt-0.5 shrink-0 ${isFeatured ? 'text-brand-purple' : 'text-brand-purple'}`}
+                  />
+                  <span>{feature}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      </article>
+    );
+  };
+
   return (
     <div className="mx-auto space-y-6 sm:space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700 ease-out">
       <SettingsPageHeader
@@ -83,211 +176,145 @@ const SubscriptionPlansPage = () => {
       />
 
       <section className="rounded-3xl border border-border/60 bg-card p-4 sm:p-6 shadow-sm">
-        <div className="mb-5 flex items-center justify-between gap-4">
+        <div className="mb-5 sm:mb-6 flex items-start sm:items-center justify-between gap-4">
           <div>
             <h2 className="text-lg sm:text-xl font-extrabold text-foreground">Выберите тариф</h2>
-            <p className="text-sm text-muted-foreground mt-1">Компактный state для выбора плана перед привязкой карты.</p>
+            <p className="text-xs sm:text-sm text-muted-foreground mt-1">Выберите план перед привязкой карты.</p>
           </div>
-          <span className="hidden sm:inline-flex rounded-full bg-brand-purple/10 px-3 py-1.5 text-xs font-bold uppercase tracking-wide text-brand-purple">
+          <span className="hidden sm:inline-flex shrink-0 whitespace-nowrap rounded-full bg-brand-purple/10 px-3 py-1.5 text-xs font-bold uppercase tracking-wide text-brand-purple">
             14 дней бесплатно
           </span>
         </div>
 
-        <div className="grid gap-4 xl:grid-cols-3">
-          {PLAN_OPTIONS.map((plan) => {
-            const isSelected = selectedPlanId === plan.id;
-            const isFeatured = plan.id === 'basic';
+        {/* МОБИЛЬНАЯ ВЕРСИЯ: Табы для переключения (видна только до lg) */}
+        <div className="flex lg:hidden w-full bg-secondary/30 p-1.5 rounded-2xl mb-5">
+          {PLAN_OPTIONS.map((plan) => (
+            <button
+              key={plan.id}
+              onClick={() => setSelectedPlanId(plan.id)}
+              className={`flex-1 flex flex-col items-center justify-center py-2.5 rounded-xl transition-all ${
+                selectedPlanId === plan.id
+                  ? 'bg-brand-purple text-white shadow-md'
+                  : 'text-muted-foreground hover:text-foreground hover:bg-secondary/50'
+              }`}
+            >
+              <span className="text-base sm:text-lg font-black">{plan.monthlyPrice} ₽</span>
+              <span className="text-[10px] font-bold uppercase tracking-wider mt-0.5">{plan.name}</span>
+            </button>
+          ))}
+        </div>
 
-            return (
-              <article
-                key={plan.id}
-                className={`relative rounded-3xl border p-5 sm:p-6 transition-all ${
-                  isFeatured
-                    ? 'border-[#2a1e44] bg-[#171126] text-white shadow-[0_24px_70px_-36px_rgba(117,90,255,0.65)]'
-                    : isSelected
-                      ? 'border-brand-purple/40 bg-card shadow-[0_20px_50px_-38px_rgba(109,103,235,0.42)]'
-                      : 'border-border/60 bg-card shadow-[0_18px_60px_-42px_rgba(109,103,235,0.28)]'
-                }`}
-              >
-                {plan.badge ? (
-                  <div className="absolute right-5 top-5 rounded-full bg-brand-purple px-3 py-1.5 text-[10px] font-extrabold uppercase tracking-wide text-white shadow-lg shadow-brand-purple/30">
-                    <span className="flex items-center gap-2">
-                      <Sparkles size={12} />
-                      {plan.badge}
-                    </span>
-                  </div>
-                ) : null}
+        {/* МОБИЛЬНАЯ ВЕРСИЯ: Карточка (рендерится только одна, видна только до lg) */}
+        <div className="block lg:hidden" key={`mobile-view-${selectedPlan.id}`}>
+          {renderPlanCard(selectedPlan)}
+        </div>
 
-                <div className="space-y-5">
-                  <div className="space-y-2 pr-20 sm:pr-24">
-                    <h2 className={`text-2xl sm:text-3xl font-black tracking-tight ${isFeatured ? 'text-white' : 'text-foreground'}`}>
-                      {plan.name}
-                    </h2>
-                    <p className={`text-sm sm:text-base leading-relaxed ${isFeatured ? 'text-white/70' : 'text-muted-foreground'}`}>
-                      {plan.description}
-                    </p>
-                  </div>
-
-                  <div className="space-y-2">
-                    <div className="flex items-end gap-2 flex-wrap">
-                      <span className={`text-4xl sm:text-5xl font-black tracking-tight ${isFeatured ? 'text-white' : 'text-foreground'}`}>
-                        {plan.monthlyPrice}
-                      </span>
-                      <span className={`pb-1.5 text-xl font-bold ${isFeatured ? 'text-white/50' : 'text-muted-foreground'}`}>₽</span>
-                      <span className={`pb-1.5 text-base font-semibold ${isFeatured ? 'text-white/50' : 'text-muted-foreground'}`}>
-                        / мес
-                      </span>
-                    </div>
-
-                    <p className="text-base sm:text-lg font-bold text-brand-purple">
-                      Итого {formatRub(plan.yearlyPrice)} за год
-                    </p>
-                  </div>
-
-                  <Button
-                    type="button"
-                    onClick={() => setSelectedPlanId(plan.id)}
-                    className={`h-11 sm:h-12 w-full rounded-xl text-sm sm:text-base font-bold transition-all ${
-                      isFeatured
-                        ? 'bg-white text-foreground hover:bg-white/95'
-                        : isSelected
-                          ? 'bg-brand-purple text-white hover:bg-brand-purple/90'
-                          : 'bg-background text-foreground border border-border/60 hover:bg-secondary/30 shadow-sm'
-                    }`}
-                  >
-                    {isSelected ? 'Тариф выбран' : 'Попробовать бесплатно'}
-                    <ArrowRight size={20} className="ml-3" />
-                  </Button>
-
-                  <div className="space-y-3 pt-1">
-                    <h3 className={`text-sm font-extrabold uppercase tracking-wide ${isFeatured ? 'text-white/85' : 'text-foreground'}`}>
-                      Что включено:
-                    </h3>
-
-                    <ul className="space-y-2.5">
-                      {plan.features.slice(0, 4).map((feature) => (
-                        <li
-                          key={feature}
-                          className={`flex items-start gap-3 text-sm leading-relaxed ${
-                            isFeatured ? 'text-white/78' : 'text-muted-foreground'
-                          }`}
-                        >
-                          <CheckCircle2
-                            size={16}
-                            className={`mt-0.5 shrink-0 ${isFeatured ? 'text-brand-purple' : 'text-brand-purple'}`}
-                          />
-                          <span>{feature}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                </div>
-              </article>
-            );
-          })}
+        {/* ДЕСКТОПНАЯ ВЕРСИЯ: Сетка из 3 карточек (видна только от lg и выше) */}
+        <div className="hidden lg:grid gap-4 lg:grid-cols-3">
+          {PLAN_OPTIONS.map((plan) => renderPlanCard(plan))}
         </div>
       </section>
 
-      <section className="grid gap-6 xl:grid-cols-[minmax(0,1.1fr)_minmax(320px,0.9fr)]">
-        <div className="rounded-3xl border border-border/60 bg-card p-6 sm:p-8 shadow-sm space-y-6">
-          <div className="flex items-center gap-3">
-            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-brand-purple/10 text-brand-purple">
+      <section className="grid gap-6 lg:grid-cols-[minmax(0,1.2fr)_minmax(300px,0.8fr)]">
+        <div className="rounded-3xl border border-border/60 bg-card p-5 sm:p-8 shadow-sm space-y-6">
+          <div className="flex items-start gap-3">
+            <div className="flex h-10 w-10 sm:h-11 sm:w-11 shrink-0 items-center justify-center rounded-2xl bg-brand-purple/10 text-brand-purple">
               <CreditCard size={20} />
             </div>
-            <div>
-              <h2 className="text-xl font-extrabold text-foreground">Привязка карты</h2>
-              <p className="text-sm text-muted-foreground">Мок экрана оплаты. Никакой реальной логики здесь пока нет.</p>
+            <div className="pt-0.5">
+              <h2 className="text-lg sm:text-xl font-extrabold text-foreground">Привязка карты</h2>
+              <p className="text-xs sm:text-sm text-muted-foreground mt-0.5">Мок экрана оплаты. Никакой логики здесь пока нет.</p>
             </div>
           </div>
 
-          <div className="grid gap-5 sm:grid-cols-2">
-            <div className="space-y-2 sm:col-span-2">
-              <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Номер карты</Label>
+          <div className="grid gap-4 sm:gap-5 sm:grid-cols-2">
+            <div className="space-y-1.5 sm:col-span-2">
+              <Label className="text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-muted-foreground">Номер карты</Label>
               <Input value="4242 4242 4242 4242" readOnly className={formFieldClasses} />
             </div>
 
-            <div className="space-y-2">
-              <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Имя держателя</Label>
+            <div className="space-y-1.5">
+              <Label className="text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-muted-foreground">Имя держателя</Label>
               <Input value="Tatyana Vasilieva" readOnly className={formFieldClasses} />
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Срок</Label>
+            <div className="grid grid-cols-2 gap-3 sm:gap-4">
+              <div className="space-y-1.5">
+                <Label className="text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-muted-foreground">Срок</Label>
                 <Input value="08/28" readOnly className={formFieldClasses} />
               </div>
 
-              <div className="space-y-2">
-                <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">CVC</Label>
+              <div className="space-y-1.5">
+                <Label className="text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-muted-foreground">CVC</Label>
                 <Input value="321" readOnly className={formFieldClasses} />
               </div>
             </div>
           </div>
 
-          <div className="rounded-2xl border border-brand-purple/15 bg-brand-purple/5 p-4 text-sm text-brand-purple/80 flex items-start gap-3">
-            <Lock size={18} className="mt-0.5 shrink-0 text-brand-purple" />
-            <span>Данные карты здесь только как заглушка для визуала. Позже сюда можно будет подключить CloudPayments, YooKassa или Stripe.</span>
+          <div className="rounded-2xl border border-brand-purple/15 bg-brand-purple/5 p-3 sm:p-4 text-xs sm:text-sm text-brand-purple/80 flex items-start gap-2.5">
+            <Lock size={16} className="mt-0.5 shrink-0 text-brand-purple" />
+            <span className="leading-relaxed">Данные карты здесь только как заглушка для визуала. Позже сюда можно будет подключить CloudPayments, YooKassa или Stripe.</span>
           </div>
 
-          <div className="flex flex-col sm:flex-row gap-3">
-            <Button className={`${primaryActionButtonClasses} flex-1 px-5`}>
+          <div className="flex flex-col sm:flex-row gap-2.5 pt-2">
+            <Button className={`${primaryActionButtonClasses} flex-1 p-3 h-11 sm:h-12 w-full`}>
               Запустить бесплатный период
             </Button>
-            <Button variant="outline" className={`flex-1 ${secondaryActionButtonClasses}`}>
+            <Button variant="outline" className={`flex-1 p-3  h-11 sm:h-12 w-full ${secondaryActionButtonClasses}`}>
               Привязать карту позже
             </Button>
           </div>
         </div>
 
-        <aside className="rounded-3xl border border-border/60 bg-card p-6 sm:p-8 shadow-sm space-y-6 xl:sticky xl:top-24 self-start">
-          <div className="flex items-center gap-3">
-            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-brand-purple text-white shadow-md shadow-brand-purple/20">
+        <aside className="rounded-3xl border border-border/60 bg-card p-5 sm:p-8 shadow-sm space-y-5 lg:sticky lg:top-24 self-start">
+          <div className="flex items-start gap-3">
+            <div className="flex h-10 w-10 sm:h-11 sm:w-11 shrink-0 items-center justify-center rounded-2xl bg-brand-purple text-white shadow-md shadow-brand-purple/20">
               <ShieldCheck size={20} />
             </div>
-            <div>
-              <h2 className="text-xl font-extrabold text-foreground">Итог подписки</h2>
-              <p className="text-sm text-muted-foreground">Выбранный тариф и условия запуска.</p>
+            <div className="pt-0.5">
+              <h2 className="text-lg sm:text-xl font-extrabold text-foreground">Итог подписки</h2>
+              <p className="text-xs sm:text-sm text-muted-foreground mt-0.5">Выбранный тариф и условия запуска.</p>
             </div>
           </div>
 
-          <div className="rounded-2xl border border-border/60 bg-secondary/15 p-5 space-y-3">
-            <div className="flex items-start justify-between gap-4">
-              <div>
-                <p className="text-sm font-semibold text-muted-foreground">Тариф</p>
-                <p className="text-2xl font-black text-foreground mt-1">{selectedPlan.name}</p>
+          <div className="rounded-2xl border border-border/60 bg-secondary/15 p-4 sm:p-5 space-y-4">
+            <div className="flex items-start justify-between gap-3">
+              <div className="min-w-0 flex-1">
+                <p className="text-xs sm:text-sm font-semibold text-muted-foreground">Тариф</p>
+                <p className="text-xl sm:text-2xl font-black text-foreground mt-0.5 truncate">{selectedPlan.name}</p>
               </div>
-              <span className="rounded-full bg-brand-purple/10 px-3 py-1 text-xs font-bold uppercase tracking-wide text-brand-purple">
+              <span className="shrink-0 whitespace-nowrap rounded-full bg-brand-purple/10 px-2.5 py-1 text-[10px] sm:text-xs font-bold uppercase tracking-wide text-brand-purple">
                 14 дней бесплатно
               </span>
             </div>
 
-            <div className="border-t border-border/50 pt-3 space-y-2">
-              <div className="flex items-center justify-between gap-3 text-sm">
+            <div className="border-t border-border/50 pt-4 space-y-2.5">
+              <div className="flex items-center justify-between gap-3 text-xs sm:text-sm">
                 <span className="text-muted-foreground">Ежемесячно</span>
                 <span className="font-bold text-foreground">{formatRub(selectedPlan.monthlyPrice)}</span>
               </div>
-              <div className="flex items-center justify-between gap-3 text-sm">
+              <div className="flex items-center justify-between gap-3 text-xs sm:text-sm">
                 <span className="text-muted-foreground">За год</span>
                 <span className="font-bold text-brand-purple">{formatRub(selectedPlan.yearlyPrice)}</span>
               </div>
-              <div className="flex items-center justify-between gap-3 text-sm">
+              <div className="flex items-center justify-between gap-3 text-xs sm:text-sm">
                 <span className="text-muted-foreground">Первое списание</span>
                 <span className="font-bold text-foreground">через 14 дней</span>
               </div>
             </div>
           </div>
 
-          <div className="space-y-3">
+          <div className="space-y-3 pt-1">
             <p className="text-sm font-bold text-foreground">Что произойдёт дальше:</p>
-            <ul className="space-y-3">
+            <ul className="space-y-2.5">
               {[
                 'Подтвердите выбранный тариф',
                 'Привяжите карту для автопродления',
-                'Сразу после активации откроются функции тарифа',
+                'Сразу после активации откроются функции',
               ].map((step) => (
-                <li key={step} className="flex items-start gap-3 text-sm text-muted-foreground">
-                  <CheckCircle2 size={18} className="mt-0.5 shrink-0 text-brand-purple" />
-                  <span>{step}</span>
+                <li key={step} className="flex items-start gap-2.5 text-xs sm:text-sm text-muted-foreground">
+                  <CheckCircle2 size={16} className="mt-0.5 shrink-0 text-brand-purple" />
+                  <span className="leading-snug">{step}</span>
                 </li>
               ))}
             </ul>
