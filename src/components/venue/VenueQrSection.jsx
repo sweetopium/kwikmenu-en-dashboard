@@ -1,9 +1,12 @@
 import { useState } from 'react';
+import { Save } from 'lucide-react';
 
 import DirectMenuLink from "../qr/DirectMenuLink";
 import QrDesignControls from "../qr/QrDesignControls";
 import QrFrameControls from "../qr/QrFrameControls";
 import QrPreview from "../qr/QrPreview";
+import { Button } from "../ui/button";
+import { primaryActionButtonClasses } from "../../lib/uiStyles";
 
 const PRESET_COLORS = ['#08060d', '#863bff', '#ef4444', '#f97316', '#22c55e', '#3b82f6'];
 const QR_VALUE = "https://kwikmenu.com/cafe-tatiana";
@@ -98,6 +101,13 @@ const VenueQrSection = () => {
               onFrameTextChange={setFrameText}
               onFrameColorChange={setFrameColor}
             />
+          </div>
+
+          <div className="bg-card border border-border/60 rounded-3xl shadow-sm p-6 flex justify-end">
+            <Button className={`${primaryActionButtonClasses} px-5`}>
+              <Save size={18} className="mr-2" />
+              Сохранить QR и ссылку
+            </Button>
           </div>
         </div>
 

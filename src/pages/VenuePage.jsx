@@ -9,6 +9,8 @@ import {
   MapPin,
   ExternalLink,
   Image as ImageIcon,
+  LayoutTemplate,
+  Palette,
 } from 'lucide-react';
 
 import { Button } from "../components/ui/button";
@@ -22,7 +24,9 @@ import {
   formFieldClasses,
   formSelectClasses,
   formTextareaClasses,
+  primaryActionButtonClasses,
 } from "../lib/uiStyles";
+import { TOP_CURRENCIES } from "../lib/currencyMeta";
 
 const VENUE_TABS = [
   { id: 'profile', label: 'Профиль', icon: Store },
@@ -41,13 +45,25 @@ const VenuePage = () => {
     phone: '+7 925 323 29 46',
     city: 'Москва',
     country: 'Россия',
-    currency: 'RUB (₽)',
+    currency: 'RUB',
   });
   const [wifiData, setWifiData] = useState({
     ssid: 'Skuratov_Guest',
     password: 'coffee2026',
     enabled: true,
   });
+  const [designData, setDesignData] = useState({
+    template: 'classic',
+    accentColor: '#6d67eb',
+  });
+
+  const templateOptions = [
+    { id: 'classic', label: 'Классический' },
+    { id: 'minimal', label: 'Минималистичный' },
+    { id: 'accent', label: 'Акцентный' },
+  ];
+
+  const accentColors = ['#6d67eb', '#111827', '#ef4444', '#f97316', '#22c55e', '#0ea5e9', '#ec4899', '#a855f7'];
 
   const handleTabChange = (tabId) => {
     const nextParams = new URLSearchParams(searchParams);
@@ -66,8 +82,7 @@ const VenuePage = () => {
       <SettingsPageHeader
         title="Заведение"
         description="Управляйте профилем заведения, гостевым Wi-Fi и внешним видом меню."
-        actionLabel="Сохранить заведение"
-        actionIcon={Save}
+        actionLabel={null}
       />
 
       <div className="flex flex-col lg:flex-row gap-8">
@@ -143,10 +158,11 @@ const VenuePage = () => {
                         onChange={(e) => setVenueData({ ...venueData, currency: e.target.value })}
                         className={formSelectClasses}
                       >
-                        <option value="RUB (₽)">RUB (₽)</option>
-                        <option value="USD ($)">USD ($)</option>
-                        <option value="AED (DH)">AED (DH)</option>
-                        <option value="EUR (€)">EUR (€)</option>
+                        {TOP_CURRENCIES.map((currency) => (
+                          <option key={currency.code} value={currency.code}>
+                            {currency.flag} {currency.code} ({currency.symbol})
+                          </option>
+                        ))}
                       </select>
                       <div className="absolute right-3.5 sm:right-4 top-1/2 -translate-y-1/2 pointer-events-none text-muted-foreground">
                         <svg width="12" height="12" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -155,6 +171,13 @@ const VenuePage = () => {
                       </div>
                     </div>
                   </div>
+                </div>
+
+                <div className="pt-4 border-t border-border/50 flex justify-end">
+                  <Button className={`${primaryActionButtonClasses} px-5`}>
+                    <Save size={18} className="mr-2" />
+                    Сохранить профиль
+                  </Button>
                 </div>
               </div>
             </div>
@@ -186,7 +209,6 @@ const VenuePage = () => {
                 <div className="space-y-2">
                   <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Пароль</Label>
                   <Input
-                    type="password"
                     value={wifiData.password}
                     onChange={(e) => setWifiData({ ...wifiData, password: e.target.value })}
                     className={formFieldClasses}
@@ -202,6 +224,13 @@ const VenuePage = () => {
                   При активации этой функции в меню появится кнопка «Подключиться к Wi‑Fi». Гостям не придётся вводить пароль вручную.
                 </p>
               </div>
+
+              <div className="pt-4 border-t border-border/50 flex justify-end">
+                <Button className={`${primaryActionButtonClasses} px-5`}>
+                  <Save size={18} className="mr-2" />
+                  Сохранить Wi‑Fi
+                </Button>
+              </div>
             </div>
           )}
 
@@ -211,20 +240,65 @@ const VenuePage = () => {
                 <h3 className="text-lg font-bold text-foreground">Внешний вид меню</h3>
 
                 <div className="space-y-4">
-                  <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Цветовая тема</Label>
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                    {['Светлая', 'Темная', 'Авто', 'Брендовая'].map((theme) => (
+                  <div className="flex items-center gap-3">
+                    <div className="w-9 h-9 rounded-xl bg-brand-purple/10 text-brand-purple flex items-center justify-center shrink-0">
+                      <LayoutTemplate size={18} />
+                    </div>
+                    <div>
+                      <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Шаблон меню</Label>
+                      <p className="text-sm text-muted-foreground mt-1">Выберите базовую визуальную подачу меню.</p>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    {templateOptions.map((template) => (
                       <button
-                        key={theme}
+                        key={template.id}
+                        onClick={() => setDesignData({ ...designData, template: template.id })}
                         className={`p-4 rounded-xl border-2 text-sm font-bold transition-all text-center ${
-                          theme === 'Светлая'
+                          designData.template === template.id
                             ? 'border-brand-purple bg-brand-purple/5 text-brand-purple'
                             : 'border-border/40 hover:border-border text-muted-foreground'
                         }`}
                       >
-                        {theme}
+                        {template.label}
                       </button>
                     ))}
+                  </div>
+                </div>
+
+                <div className="pt-6 border-t border-border/50 space-y-4">
+                  <div className="flex items-center gap-3">
+                    <div className="w-9 h-9 rounded-xl bg-brand-purple/10 text-brand-purple flex items-center justify-center shrink-0">
+                      <Palette size={18} />
+                    </div>
+                    <div>
+                      <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Акцентный цвет</Label>
+                      <p className="text-sm text-muted-foreground mt-1">Используется для кнопок, активных состояний и ссылок.</p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-3 flex-wrap">
+                    {accentColors.map((color) => (
+                      <button
+                        key={color}
+                        onClick={() => setDesignData({ ...designData, accentColor: color })}
+                        className={`w-9 h-9 rounded-full border-2 transition-transform hover:scale-110 ${
+                          designData.accentColor === color ? 'border-foreground shadow-md' : 'border-transparent'
+                        }`}
+                        style={{ backgroundColor: color }}
+                      />
+                    ))}
+
+                    <label className="w-9 h-9 rounded-full border-2 border-border/60 overflow-hidden cursor-pointer shadow-sm relative">
+                      <input
+                        type="color"
+                        value={designData.accentColor}
+                        onChange={(e) => setDesignData({ ...designData, accentColor: e.target.value })}
+                        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                      />
+                      <div className="w-full h-full" style={{ backgroundColor: designData.accentColor }} />
+                    </label>
                   </div>
                 </div>
 
@@ -240,6 +314,13 @@ const VenuePage = () => {
                       <Button variant="outline" size="sm" className="mt-2 rounded-lg border-border/60 text-[10px] uppercase tracking-wider font-black">Выбрать файл</Button>
                     </div>
                   </div>
+                </div>
+
+                <div className="pt-4 border-t border-border/50 flex justify-end">
+                  <Button className={`${primaryActionButtonClasses} px-5`}>
+                    <Save size={18} className="mr-2" />
+                    Сохранить внешний вид
+                  </Button>
                 </div>
               </div>
 
