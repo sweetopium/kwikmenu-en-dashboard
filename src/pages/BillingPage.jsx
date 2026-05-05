@@ -6,7 +6,7 @@ import { secondaryActionButtonClasses } from "../lib/uiStyles";
 
 const BillingPage = () => {
   return (
-    <div className="mx-auto space-y-6">
+    <div className="mx-auto space-y-6 sm:space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700 ease-out">
       <SettingsPageHeader
         title="Биллинг"
         description="Тариф, платежи и документы по подписке вашего кабинета."

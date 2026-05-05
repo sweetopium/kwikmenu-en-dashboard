@@ -25,7 +25,7 @@ const AccountPage = () => {
   });
 
   return (
-    <div className="mx-auto space-y-6">
+    <div className="mx-auto space-y-6 sm:space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700 ease-out">
       <SettingsPageHeader
         title="Аккаунт"
         description="Управляйте личными данными и уведомлениями"
