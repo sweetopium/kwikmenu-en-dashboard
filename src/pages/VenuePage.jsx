@@ -29,10 +29,10 @@ import {
 import { TOP_CURRENCIES } from "../lib/currencyMeta";
 
 const VENUE_TABS = [
-  { id: 'profile', label: 'Профиль', icon: Store },
-  { id: 'wifi', label: 'Wi-Fi', icon: Wifi },
-  { id: 'design', label: 'Внешний вид', icon: Paintbrush },
-  { id: 'qr', label: 'QR и ссылка', icon: QrCode },
+  { id: 'profile', label: 'Профиль', mobileLabel: 'Профиль', icon: Store },
+  { id: 'wifi', label: 'Wi-Fi', mobileLabel: 'Wi‑Fi', icon: Wifi },
+  { id: 'design', label: 'Внешний вид', mobileLabel: 'Вид', icon: Paintbrush },
+  { id: 'qr', label: 'QR и ссылка', mobileLabel: 'QR', icon: QrCode },
 ];
 
 const VenuePage = () => {
@@ -85,27 +85,28 @@ const VenuePage = () => {
         actionLabel={null}
       />
 
-      <div className="flex flex-col lg:flex-row gap-8">
-        <aside className="w-full lg:w-64 shrink-0">
-          <nav className="flex lg:flex-col gap-1 overflow-x-auto no-scrollbar pb-2 lg:pb-0">
+      <div className="space-y-6">
+        <nav className="bg-card border border-border/60 rounded-3xl shadow-sm p-2 sm:p-3">
+          <div className="grid grid-cols-4 gap-2">
             {VENUE_TABS.map((tab) => (
               <button
                 key={tab.id}
                 onClick={() => handleTabChange(tab.id)}
-                className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold transition-all whitespace-nowrap ${
+                className={`flex items-center justify-center gap-2 px-2 sm:px-4 h-11 sm:h-12 rounded-xl text-[11px] sm:text-sm font-bold transition-all min-w-0 ${
                   activeTab === tab.id
                     ? 'bg-brand-purple text-white shadow-md shadow-brand-purple/20'
-                    : 'text-muted-foreground hover:bg-card hover:text-foreground border border-transparent'
+                    : 'text-muted-foreground hover:bg-secondary/40 hover:text-foreground'
                 }`}
               >
-                <tab.icon size={18} />
-                {tab.label}
+                <tab.icon size={16} className="hidden sm:block shrink-0" />
+                <span className="truncate sm:hidden">{tab.mobileLabel}</span>
+                <span className="truncate hidden sm:block">{tab.label}</span>
               </button>
             ))}
-          </nav>
-        </aside>
+          </div>
+        </nav>
 
-        <main className="flex-1 space-y-6 animate-in fade-in slide-in-from-right-4 duration-500">
+        <main className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-500">
           {activeTab === 'profile' && (
             <div className="bg-card border border-border/60 rounded-3xl shadow-sm divide-y divide-border/50">
               <div className="p-6 sm:p-8 space-y-6">
