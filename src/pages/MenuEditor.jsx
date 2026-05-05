@@ -372,7 +372,7 @@ const MenuEditor = () => {
                   placeholder="Поиск блюда..."
                   value={searchQuery}
                   onChange={(event) => setSearchQuery(event.target.value)}
-                  className={`${formFieldClasses} pl-13`}
+                  className={`${formFieldClasses}  !pl-[30px]`}
                 />
               </div>
 
