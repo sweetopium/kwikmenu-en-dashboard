@@ -7,7 +7,7 @@ import {
   FolderOpen,
   MapPin,
   MoreHorizontal,
-  QrCode,
+  Link as LinkIcon,
 } from 'lucide-react';
 
 import { Button } from "../components/ui/button";
@@ -21,8 +21,8 @@ const mockVenues = [
     description: 'Основное заведение с цифровым меню, QR-кодами и гостевым Wi‑Fi.',
     status: 'active',
     menusCount: 3,
-    qrCount: 4,
     plan: 'PRO',
+    publicLinkReady: true,
     lastUpdated: 'Сегодня, 14:30',
   },
 ];
@@ -89,9 +89,10 @@ const VenueListPage = () => {
               </div>
 
               <div className="flex items-center gap-2 bg-secondary/50 px-3 py-1.5 rounded-xl border border-border/50">
-                <QrCode size={14} className="text-muted-foreground" />
-                <span className="text-xs font-semibold text-muted-foreground">QR</span>
-                <span className="text-xs font-black text-foreground">{venue.qrCount}</span>
+                <LinkIcon size={14} className="text-muted-foreground" />
+                <span className="text-xs font-semibold text-muted-foreground">
+                  {venue.publicLinkReady ? 'Ссылка готова' : 'Нет ссылки'}
+                </span>
               </div>
 
               <div className="flex items-center gap-2 bg-secondary/50 px-3 py-1.5 rounded-xl border border-border/50">

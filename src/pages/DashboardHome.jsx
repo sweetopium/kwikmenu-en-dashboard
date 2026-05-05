@@ -180,7 +180,7 @@ const DashboardHome = () => {
         </Link>
 
         <Link
-          to="/dashboard/qr"
+          to="/dashboard/venues/cafe-tatiana?tab=qr"
           className="bg-card border border-border/60 rounded-3xl p-6 sm:p-8 shadow-sm flex flex-col justify-between group hover:border-foreground/20 transition-all hover:-translate-y-1 min-h-[220px] sm:min-h-[250px]"
         >
           <div className="w-14 h-14 rounded-2xl bg-secondary flex items-center justify-center mb-8 group-hover:bg-foreground group-hover:text-background transition-colors">

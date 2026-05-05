@@ -1,8 +1,10 @@
 import { useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import {
   Store,
   Wifi,
   Paintbrush,
+  QrCode,
   Save,
   MapPin,
   ExternalLink,
@@ -15,6 +17,7 @@ import { Label } from "../components/ui/label";
 import { Switch } from "../components/ui/switch";
 import { Textarea } from "../components/ui/textarea";
 import SettingsPageHeader from "../components/settings/SettingsPageHeader";
+import VenueQrSection from "../components/venue/VenueQrSection";
 import {
   formFieldClasses,
   formSelectClasses,
@@ -25,10 +28,13 @@ const VENUE_TABS = [
   { id: 'profile', label: 'Профиль', icon: Store },
   { id: 'wifi', label: 'Wi-Fi', icon: Wifi },
   { id: 'design', label: 'Внешний вид', icon: Paintbrush },
+  { id: 'qr', label: 'QR и ссылка', icon: QrCode },
 ];
 
 const VenuePage = () => {
-  const [activeTab, setActiveTab] = useState('profile');
+  const [searchParams, setSearchParams] = useSearchParams();
+  const requestedTab = searchParams.get('tab');
+  const activeTab = VENUE_TABS.some((tab) => tab.id === requestedTab) ? requestedTab : 'profile';
   const [venueData, setVenueData] = useState({
     name: 'Skuratov Coffee',
     description: 'Собственная обжарка и формат брю-бара: классика, спешлы, сезонные напитки, выпечка, десерты, завтраки и лёгкая еда.',
@@ -42,6 +48,18 @@ const VenuePage = () => {
     password: 'coffee2026',
     enabled: true,
   });
+
+  const handleTabChange = (tabId) => {
+    const nextParams = new URLSearchParams(searchParams);
+
+    if (tabId === 'profile') {
+      nextParams.delete('tab');
+    } else {
+      nextParams.set('tab', tabId);
+    }
+
+    setSearchParams(nextParams, { replace: true });
+  };
 
   return (
     <div className="mx-auto space-y-6">
@@ -58,7 +76,7 @@ const VenuePage = () => {
             {VENUE_TABS.map((tab) => (
               <button
                 key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
+                onClick={() => handleTabChange(tab.id)}
                 className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold transition-all whitespace-nowrap ${
                   activeTab === tab.id
                     ? 'bg-brand-purple text-white shadow-md shadow-brand-purple/20'
@@ -237,6 +255,8 @@ const VenuePage = () => {
               </div>
             </div>
           )}
+
+          {activeTab === 'qr' && <VenueQrSection />}
         </main>
       </div>
     </div>

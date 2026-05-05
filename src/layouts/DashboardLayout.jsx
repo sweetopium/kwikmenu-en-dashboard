@@ -3,7 +3,6 @@ import { Link, useLocation } from 'react-router-dom';
 import {
   LayoutDashboard,
   UtensilsCrossed,
-  QrCode,
   Building2,
   UserRound,
   CreditCard,
@@ -18,7 +17,6 @@ import { subtleIconButtonClasses } from "../lib/uiStyles";
 const NAV_ITEMS = [
   { icon: LayoutDashboard, label: 'Обзор', path: '/dashboard' },
   { icon: UtensilsCrossed, label: 'Меню', path: '/dashboard/menu' },
-  { icon: QrCode, label: 'QR-коды', path: '/dashboard/qr' },
   { icon: Building2, label: 'Заведения', path: '/dashboard/venues' },
   { icon: UserRound, label: 'Аккаунт', path: '/dashboard/account' },
   { icon: CreditCard, label: 'Биллинг', path: '/dashboard/billing' },

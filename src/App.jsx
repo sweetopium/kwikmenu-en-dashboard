@@ -4,7 +4,6 @@ import WelcomePage from "./pages/WelcomePage.jsx";
 import HelpPage from "./pages/HelpPage.jsx";
 import UploadPage from "./pages/UploadPage.jsx";
 import MenuEditor from "./pages/MenuEditor.jsx";
-import QrManager from "./pages/QrManager.jsx";
 import DashboardHome from "./pages/DashboardHome.jsx";
 import OnboardingLayout from "./layouts/OnboardingLayout.jsx";
 import MenuListPage from "./pages/MenuListPage.jsx";
@@ -26,9 +25,9 @@ function App() {
                 <Route path="/dashboard" element={<DashboardLayout><DashboardHome/></DashboardLayout>}/>
                 <Route path="/dashboard/menu" element={<DashboardLayout><MenuListPage/></DashboardLayout>}/>
                 <Route path="/dashboard/menu/:id" element={<DashboardLayout><MenuEditor/></DashboardLayout>}/>
-                <Route path="/dashboard/qr" element={<DashboardLayout><QrManager/></DashboardLayout>}/>
                 <Route path="/dashboard/venues" element={<DashboardLayout><VenueListPage/></DashboardLayout>}/>
                 <Route path="/dashboard/venues/:id" element={<DashboardLayout><VenuePage/></DashboardLayout>}/>
+                <Route path="/dashboard/qr" element={<Navigate to="/dashboard/venues/cafe-tatiana?tab=qr" replace/>}/>
                 <Route path="/dashboard/venue" element={<Navigate to="/dashboard/venues" replace/>}/>
                 <Route path="/dashboard/account" element={<DashboardLayout><AccountPage/></DashboardLayout>}/>
                 <Route path="/dashboard/billing" element={<DashboardLayout><BillingPage/></DashboardLayout>}/>
