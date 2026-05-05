@@ -19,7 +19,7 @@ const NAV_ITEMS = [
   { icon: LayoutDashboard, label: 'Обзор', path: '/dashboard' },
   { icon: UtensilsCrossed, label: 'Меню', path: '/dashboard/menu' },
   { icon: QrCode, label: 'QR-коды', path: '/dashboard/qr' },
-  { icon: Building2, label: 'Заведение', path: '/dashboard/venue' },
+  { icon: Building2, label: 'Заведения', path: '/dashboard/venues' },
   { icon: UserRound, label: 'Аккаунт', path: '/dashboard/account' },
   { icon: CreditCard, label: 'Биллинг', path: '/dashboard/billing' },
 ];
@@ -39,7 +39,9 @@ const SidebarContent = ({ pathname, onNavigate }) => (
 
     <nav className="flex-1 px-3 space-y-1.5 overflow-y-auto overflow-x-hidden">
       {NAV_ITEMS.map((item) => {
-        const isActive = pathname === item.path;
+        const isActive = item.path === '/dashboard'
+          ? pathname === item.path
+          : pathname === item.path || pathname.startsWith(`${item.path}/`);
 
         return (
           <Link

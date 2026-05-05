@@ -11,6 +11,7 @@ import MenuListPage from "./pages/MenuListPage.jsx";
 import VenuePage from "./pages/VenuePage.jsx";
 import AccountPage from "./pages/AccountPage.jsx";
 import BillingPage from "./pages/BillingPage.jsx";
+import VenueListPage from "./pages/VenueListPage.jsx";
 
 function App() {
     return (
@@ -26,7 +27,9 @@ function App() {
                 <Route path="/dashboard/menu" element={<DashboardLayout><MenuListPage/></DashboardLayout>}/>
                 <Route path="/dashboard/menu/:id" element={<DashboardLayout><MenuEditor/></DashboardLayout>}/>
                 <Route path="/dashboard/qr" element={<DashboardLayout><QrManager/></DashboardLayout>}/>
-                <Route path="/dashboard/venue" element={<DashboardLayout><VenuePage/></DashboardLayout>}/>
+                <Route path="/dashboard/venues" element={<DashboardLayout><VenueListPage/></DashboardLayout>}/>
+                <Route path="/dashboard/venues/:id" element={<DashboardLayout><VenuePage/></DashboardLayout>}/>
+                <Route path="/dashboard/venue" element={<Navigate to="/dashboard/venues" replace/>}/>
                 <Route path="/dashboard/account" element={<DashboardLayout><AccountPage/></DashboardLayout>}/>
                 <Route path="/dashboard/billing" element={<DashboardLayout><BillingPage/></DashboardLayout>}/>
                 <Route path="/dashboard/settings" element={<Navigate to="/dashboard/account" replace/>}/>
