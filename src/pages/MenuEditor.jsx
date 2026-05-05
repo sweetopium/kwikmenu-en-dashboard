@@ -289,7 +289,67 @@ const MenuEditor = () => {
 
       <div className="flex-1 flex flex-col bg-background relative min-w-0 w-full max-w-full overflow-hidden">
         {activeCategory ? (
-          <div className="p-4 sm:p-6 lg:p-8 border-b border-border/60 flex flex-col sm:flex-row gap-4 sm:items-start justify-between bg-card z-10 sticky top-0 min-w-0 max-w-full overflow-hidden">
+          <div className="p-4 sm:p-6 lg:p-8 border-b border-border/60 flex flex-col gap-4 bg-card z-10 sticky top-0 min-w-0 max-w-full overflow-hidden">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full min-w-0 sm:justify-end">
+              <div className="grid grid-cols-2 gap-3 w-full sm:w-auto sm:flex sm:flex-row shrink-0">
+                <div className="relative min-w-0 sm:min-w-[156px]">
+                  <select
+                    value={editorLanguage}
+                    onChange={(event) => setEditorLanguage(event.target.value)}
+                    className={formSelectClasses}
+                  >
+                    {menu.languages.map((language) => {
+                      const meta = getLanguageMeta(language.code);
+                      const flag = language.flag || meta?.flag || '🌐';
+                      const label = language.nativeName || meta?.label || language.shortLabel || language.code.toUpperCase();
+
+                      return (
+                        <option key={language.code} value={language.code}>
+                          {flag} {label}
+                        </option>
+                      );
+                    })}
+                  </select>
+
+                  <div className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none">
+                    <ChevronDown size={16} />
+                  </div>
+                </div>
+
+                <Button
+                  variant="outline"
+                  onClick={handleEditMenuMeta}
+                  className={`${secondaryActionButtonClasses} sm:h-[44px] h-[44px] px-5 w-full sm:w-auto shrink-0`}
+                >
+                  Редактировать
+                </Button>
+              </div>
+
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full sm:w-auto min-w-0 sm:flex-none">
+                <div className="relative flex-1 sm:w-64 min-w-0">
+                  <Search
+                    className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
+                    size={16}
+                  />
+
+                  <Input
+                    placeholder="Поиск блюда..."
+                    value={searchQuery}
+                    onChange={(event) => setSearchQuery(event.target.value)}
+                    className={`${formFieldClasses} !pl-[30px]`}
+                  />
+                </div>
+
+                <Button
+                  onClick={handleAddItemClick}
+                  className={`${primaryActionButtonClasses} sm:h-[44px] h-[44px] px-4 shrink-0`}
+                >
+                  <Plus size={18} className="mr-2" />
+                  Блюдо
+                </Button>
+              </div>
+            </div>
+
             <div className="flex flex-col min-w-0 max-w-full">
               <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-muted-foreground mb-2">
                 {localizedMenuName}
@@ -327,66 +387,6 @@ const MenuEditor = () => {
                   Доступно: {getAvailableHoursLabel(activeCategory.availableHours)}
                 </p>
               )}
-            </div>
-
-            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full sm:w-auto shrink-0 mt-2 sm:mt-0 min-w-0">
-              <div className="grid grid-cols-2 gap-3 w-full sm:w-auto sm:flex sm:flex-row">
-                <div className="relative min-w-0 sm:min-w-[156px]">
-                  <select
-                    value={editorLanguage}
-                    onChange={(event) => setEditorLanguage(event.target.value)}
-                    className={formSelectClasses}
-                  >
-                    {menu.languages.map((language) => {
-                      const meta = getLanguageMeta(language.code);
-                      const flag = language.flag || meta?.flag || '🌐';
-                      const label = language.nativeName || meta?.label || language.shortLabel || language.code.toUpperCase();
-
-                      return (
-                        <option key={language.code} value={language.code}>
-                          {flag} {label}
-                        </option>
-                      );
-                    })}
-                  </select>
-
-                  <div className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none">
-                    <ChevronDown size={16} />
-                  </div>
-                </div>
-
-                <Button
-                  variant="outline"
-                  onClick={handleEditMenuMeta}
-                  className={`${secondaryActionButtonClasses} sm:h-[44px] h-[44px] px-5 w-full sm:w-auto shrink-0`}
-                >
-                  Редактировать
-                </Button>
-              </div>
-
-              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full sm:w-auto min-w-0">
-                <div className="relative flex-1 sm:w-64 min-w-0">
-                  <Search
-                    className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
-                    size={16}
-                  />
-
-                  <Input
-                    placeholder="Поиск блюда..."
-                    value={searchQuery}
-                    onChange={(event) => setSearchQuery(event.target.value)}
-                    className={`${formFieldClasses} !pl-[30px]`}
-                  />
-                </div>
-
-                <Button
-                  onClick={handleAddItemClick}
-                  className={`${primaryActionButtonClasses} sm:h-[44px] h-[44px] px-4 shrink-0`}
-                >
-                  <Plus size={18} className="mr-2" />
-                  Блюдо
-                </Button>
-              </div>
             </div>
           </div>
         ) : (
