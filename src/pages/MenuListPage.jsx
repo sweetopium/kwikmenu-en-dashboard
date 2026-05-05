@@ -127,7 +127,7 @@ const MenuListPage = () => {
               </div>
             </div>
 
-            <div className="flex items-center justify-between mt-auto pt-3 md:pt-4 border-t border-border/50 gap-4 -mb-2">
+            <div className="flex items-center justify-between mt-auto pt-3 md:pt-4 border-t border-border/50 gap-4 -mb-2 md:-mb-0">
               <div className="flex items-center gap-2 text-muted-foreground">
                 <Calendar size={14} />
                 <span className="text-[11px] font-medium">{menu.lastUpdated}</span>
