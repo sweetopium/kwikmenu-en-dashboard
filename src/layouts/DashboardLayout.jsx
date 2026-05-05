@@ -1,28 +1,36 @@
 import { useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard,
   UtensilsCrossed,
   Building2,
   UserRound,
   CreditCard,
+  Check,
+  ChevronDown,
   LogOut,
   Menu as MenuIcon,
   Zap,
   X,
-  LifeBuoy
+  LifeBuoy,
+  Plus
 } from 'lucide-react';
 import { subtleIconButtonClasses } from "../lib/uiStyles";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "../components/ui/dropdown-menu";
 
-const NAV_ITEMS = [
-  { icon: LayoutDashboard, label: 'Обзор', path: '/dashboard' },
-  { icon: UtensilsCrossed, label: 'Меню', path: '/dashboard/menu' },
-  { icon: Building2, label: 'Заведения', path: '/dashboard/venues' },
-  { icon: UserRound, label: 'Аккаунт', path: '/dashboard/account' },
-  { icon: CreditCard, label: 'Биллинг', path: '/dashboard/billing' },
+const MOCK_VENUES = [
+  { id: 'cafe-tatiana', name: 'Кафе «Татьяна»', plan: 'PRO-тариф' },
+  { id: 'coffee-arbat', name: 'Кофейня на Арбате', plan: 'PRO-тариф' },
 ];
 
-const SidebarContent = ({ pathname, onNavigate }) => (
+const SidebarContent = ({ pathname, navItems, onNavigate }) => (
   <>
     <div className="p-6 flex items-center gap-3 text-xl font-extrabold tracking-tight text-foreground">
       <div className="flex h-8 w-8 items-center justify-center rounded-[0.6rem] bg-brand-purple text-white shadow-md shadow-brand-purple/20 shrink-0">
@@ -36,10 +44,12 @@ const SidebarContent = ({ pathname, onNavigate }) => (
     </div>
 
     <nav className="flex-1 px-3 space-y-1.5 overflow-y-auto overflow-x-hidden">
-      {NAV_ITEMS.map((item) => {
+      {navItems.map((item) => {
         const isActive = item.path === '/dashboard'
           ? pathname === item.path
-          : pathname === item.path || pathname.startsWith(`${item.path}/`);
+          : item.path.startsWith('/dashboard/venues/')
+            ? pathname === '/dashboard/venues' || pathname.startsWith('/dashboard/venues/')
+            : pathname === item.path || pathname.startsWith(`${item.path}/`);
 
         return (
           <Link
@@ -98,12 +108,42 @@ const SidebarContent = ({ pathname, onNavigate }) => (
 const DashboardLayout = ({ children }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
+  const [activeVenueId, setActiveVenueId] = useState(() => {
+    if (typeof window === 'undefined') {
+      return MOCK_VENUES[0].id;
+    }
+
+    return window.localStorage.getItem('kwikmenu-active-venue') || MOCK_VENUES[0].id;
+  });
+
+  const activeVenue = MOCK_VENUES.find((venue) => venue.id === activeVenueId) || MOCK_VENUES[0];
+
+  const navItems = [
+    { icon: LayoutDashboard, label: 'Обзор', path: '/dashboard' },
+    { icon: UtensilsCrossed, label: 'Меню', path: '/dashboard/menu' },
+    { icon: Building2, label: 'Заведение', path: `/dashboard/venues/${activeVenue.id}` },
+    { icon: UserRound, label: 'Аккаунт', path: '/dashboard/account' },
+    { icon: CreditCard, label: 'Биллинг', path: '/dashboard/billing' },
+  ];
+
+  const handleVenueSwitch = (venueId) => {
+    setActiveVenueId(venueId);
+
+    if (typeof window !== 'undefined') {
+      window.localStorage.setItem('kwikmenu-active-venue', venueId);
+    }
+
+    if (location.pathname.startsWith('/dashboard/venues/')) {
+      navigate(`/dashboard/venues/${venueId}`);
+    }
+  };
 
   return (
     <div className="flex min-h-screen w-full max-w-full overflow-x-hidden bg-secondary/20">
       {/* ДЕСКТОП Сайдбар */}
       <aside className="hidden md:flex flex-col w-64 bg-card border-r border-border/60 fixed inset-y-0 z-20 shadow-[4px_0_24px_-12px_rgba(0,0,0,0.05)] overflow-x-hidden">
-        <SidebarContent pathname={location.pathname} />
+        <SidebarContent pathname={location.pathname} navItems={navItems} />
       </aside>
 
       {/* МОБИЛЬНЫЙ Сайдбар: оверлей */}
@@ -126,7 +166,7 @@ const DashboardLayout = ({ children }) => {
           </button>
         </div>
 
-        <SidebarContent pathname={location.pathname} onNavigate={() => setIsMobileMenuOpen(false)} />
+        <SidebarContent pathname={location.pathname} navItems={navItems} onNavigate={() => setIsMobileMenuOpen(false)} />
       </aside>
 
       {/* Основной контент */}
@@ -143,25 +183,47 @@ const DashboardLayout = ({ children }) => {
             </div>
           </div>
 
-          <div className="ml-auto flex items-center gap-4 min-w-0 shrink-0">
-            <div className="text-right hidden sm:block min-w-0">
-              <p className="text-sm font-bold text-foreground truncate">
-                Кафе «Татьяна»
-              </p>
+          <div className="ml-auto flex items-center gap-3 min-w-0 shrink-0">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button className="flex items-center gap-2 rounded-xl border border-border/60 bg-background px-3 py-2 hover:bg-secondary/50 transition-colors min-w-0 max-w-[220px] sm:max-w-[280px]">
+                  <div className="text-left sm:text-right min-w-0">
+                    <p className="text-xs sm:text-sm font-bold text-foreground truncate">
+                      {activeVenue.name}
+                    </p>
 
-              <div className="flex items-center justify-end gap-1.5 mt-0.5">
-                <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse shrink-0" />
-                <p className="text-[10px] font-bold tracking-wider uppercase text-brand-purple truncate">
-                  PRO-тариф
-                </p>
-              </div>
-            </div>
+                    <div className="flex items-center justify-start sm:justify-end gap-1.5 mt-0.5">
+                      <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse shrink-0" />
+                      <p className="text-[10px] font-bold tracking-wider uppercase text-brand-purple truncate">
+                        {activeVenue.plan}
+                      </p>
+                    </div>
+                  </div>
+                  <ChevronDown size={16} className="text-muted-foreground shrink-0" />
+                </button>
+              </DropdownMenuTrigger>
 
-            <button className="w-10 h-10 rounded-full bg-gradient-to-tr from-brand-purple to-blue-500 p-[2px] transition-transform hover:scale-105 shrink-0">
-              <div className="w-full h-full rounded-full bg-card border-2 border-transparent flex items-center justify-center font-bold text-sm text-foreground overflow-hidden">
-                ТВ
-              </div>
-            </button>
+              <DropdownMenuContent className="min-w-[260px]">
+                <DropdownMenuLabel>Текущее заведение</DropdownMenuLabel>
+                {MOCK_VENUES.map((venue) => (
+                  <DropdownMenuItem
+                    key={venue.id}
+                    onSelect={() => handleVenueSwitch(venue.id)}
+                    className="justify-between"
+                  >
+                    <span>{venue.name}</span>
+                    {activeVenue.id === venue.id ? <Check size={16} className="text-brand-purple" /> : null}
+                  </DropdownMenuItem>
+                ))}
+
+                <DropdownMenuSeparator />
+
+                <DropdownMenuItem onSelect={() => navigate('/dashboard/venues')}>
+                  <Plus size={16} />
+                  Добавить заведение
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </header>
 
