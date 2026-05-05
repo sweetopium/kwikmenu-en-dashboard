@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Edit2, Plus, Search, Trash2 } from 'lucide-react';
+import { ChevronDown, Edit2, Plus, Search, Trash2 } from 'lucide-react';
 
 import CategoryModal from "../components/menu-editor/CategoryModal";
 import CategorySidebar from "../components/menu-editor/CategorySidebar";
@@ -10,7 +10,14 @@ import MenuItemList from "../components/menu-editor/MenuItemList";
 import { simpleMenuPayload } from "../data/menu_mock.js";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
-import { formFieldClasses, primaryActionButtonClasses, secondaryActionButtonClasses, subtleIconButtonClasses } from "../lib/uiStyles";
+import { getLanguageMeta } from "../lib/languageMeta";
+import {
+  formFieldClasses,
+  formSelectClasses,
+  primaryActionButtonClasses,
+  secondaryActionButtonClasses,
+  subtleIconButtonClasses,
+} from "../lib/uiStyles";
 import {
   getAvailableHoursLabel,
   getLocalizedField,
@@ -323,21 +330,28 @@ const MenuEditor = () => {
             </div>
 
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full sm:w-auto shrink-0 mt-2 sm:mt-0 min-w-0">
-              <div className="flex p-1 bg-secondary/40 rounded-xl border border-border/60 shrink-0">
-                {menu.languages.map((language) => (
-                  <button
-                    key={language.code}
-                    type="button"
-                    onClick={() => setEditorLanguage(language.code)}
-                    className={`px-3 py-2 text-xs font-bold rounded-lg transition-colors ${
-                      editorLanguage === language.code
-                        ? 'bg-background text-foreground shadow-sm'
-                        : 'text-muted-foreground hover:text-foreground'
-                    }`}
-                  >
-                    {language.shortLabel}
-                  </button>
-                ))}
+              <div className="relative shrink-0 min-w-[156px]">
+                <select
+                  value={editorLanguage}
+                  onChange={(event) => setEditorLanguage(event.target.value)}
+                  className={formSelectClasses}
+                >
+                  {menu.languages.map((language) => {
+                    const meta = getLanguageMeta(language.code);
+                    const flag = language.flag || meta?.flag || '🌐';
+                    const label = language.nativeName || meta?.label || language.shortLabel || language.code.toUpperCase();
+
+                    return (
+                      <option key={language.code} value={language.code}>
+                        {flag} {label}
+                      </option>
+                    );
+                  })}
+                </select>
+
+                <div className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none">
+                  <ChevronDown size={16} />
+                </div>
               </div>
 
               <Button
@@ -358,7 +372,7 @@ const MenuEditor = () => {
                   placeholder="Поиск блюда..."
                   value={searchQuery}
                   onChange={(event) => setSearchQuery(event.target.value)}
-                  className={`${formFieldClasses} pl-9`}
+                  className={`${formFieldClasses} pl-13`}
                 />
               </div>
 
