@@ -1,11 +1,23 @@
+import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import {
-  Users, Eye, UserCheck,
-  ArrowUpRight, ArrowDownRight, QrCode, Plus,
-  ChevronDown, MoreHorizontal
+  Users, Eye,
+  ArrowUpRight, QrCode,
+  Check, ChevronDown, ExternalLink, Pencil
 } from 'lucide-react';
 
 import { Button } from "../components/ui/button";
-import { primaryActionButtonClasses, secondaryActionButtonClasses } from "../lib/uiStyles";
+import { secondaryActionButtonClasses } from "../lib/uiStyles";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "../components/ui/dropdown-menu";
+
+const PRIMARY_MENU_ID = 'main';
+const PUBLIC_MENU_URL = 'https://kwikmenu.com/cafe-tatiana';
+const PERIOD_OPTIONS = ['Сегодня', 'Вчера', 'Последние 7 дней', 'Последние 30 дней'];
 
 // Мок-данные для графика (оставляем 7 дней, они красиво растянутся)
 const chartData = [
@@ -19,6 +31,8 @@ const chartData = [
 ];
 
 const DashboardHome = () => {
+  const [selectedPeriod, setSelectedPeriod] = useState('Последние 7 дней');
+
   // Максимальное значение для расчета высоты столбцов графика
   const maxViews = Math.max(...chartData.map(d => d.views));
 
@@ -33,66 +47,71 @@ const DashboardHome = () => {
         </div>
 
         <div className="flex items-center gap-3">
-          <Button variant="outline" className={`${secondaryActionButtonClasses} bg-card shadow-sm px-5`}>
-            <span className="flex items-center gap-2">
-              За последние 7 дней
-              <ChevronDown size={16} className="text-muted-foreground" />
-            </span>
-          </Button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" className={`${secondaryActionButtonClasses} bg-card shadow-sm px-5`}>
+                <span className="flex items-center gap-2">
+                  {selectedPeriod}
+                  <ChevronDown size={16} className="text-muted-foreground" />
+                </span>
+              </Button>
+            </DropdownMenuTrigger>
 
+            <DropdownMenuContent className="min-w-[220px]">
+              {PERIOD_OPTIONS.map((period) => (
+                <DropdownMenuItem
+                  key={period}
+                  onSelect={() => setSelectedPeriod(period)}
+                  className="justify-between"
+                >
+                  <span>{period}</span>
+                  {selectedPeriod === period ? <Check size={16} className="text-brand-purple" /> : null}
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
 
-      {/* КАРТОЧКИ СТАТИСТИКИ (KPI) - Теперь их 3, они крупнее и чище */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
+      {/* КАРТОЧКИ СТАТИСТИКИ (KPI) */}
+      <div className="grid grid-cols-2 gap-3 sm:gap-6">
 
         {/* Карточка 1: Просмотры */}
-        <div className="bg-card border border-border/60 p-6 sm:p-8 rounded-3xl shadow-sm group hover:border-brand-purple/30 transition-colors">
+        <div className="bg-card border border-border/60 p-4 sm:p-8 rounded-2xl sm:rounded-3xl shadow-sm group hover:border-brand-purple/30 transition-colors min-h-[148px] sm:min-h-0">
           <div className="flex justify-between items-start">
-            <div className="w-12 h-12 rounded-2xl bg-brand-purple/10 text-brand-purple flex items-center justify-center">
-              <Eye size={24} />
+            <div className="w-9 h-9 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-brand-purple/10 text-brand-purple flex items-center justify-center">
+              <Eye size={18} className="sm:hidden" />
+              <Eye size={24} className="hidden sm:block" />
             </div>
-            <div className="flex items-center gap-1 text-sm font-bold text-green-500 bg-green-500/10 px-2.5 py-1 rounded-lg">
-              <ArrowUpRight size={16} /> 14%
+            <div className="flex items-center gap-1 text-xs sm:text-sm font-bold text-green-500 bg-green-500/10 px-2 py-1 rounded-lg">
+              <ArrowUpRight size={14} className="sm:hidden" />
+              <ArrowUpRight size={16} className="hidden sm:block" /> 14%
             </div>
           </div>
-          <div className="mt-6">
-            <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Открытия меню</p>
-            <h3 className="text-4xl font-black text-foreground mt-1">1,665</h3>
+          <div className="mt-4 sm:mt-6">
+            <p className="text-[10px] sm:text-xs font-bold text-muted-foreground uppercase tracking-[0.12em] sm:tracking-wider">Открытия меню</p>
+            <h3 className="text-3xl sm:text-4xl font-black text-foreground mt-1 leading-none">1,665</h3>
           </div>
         </div>
 
         {/* Карточка 2: Уникальные */}
-        <div className="bg-card border border-border/60 p-6 sm:p-8 rounded-3xl shadow-sm group hover:border-blue-500/30 transition-colors">
+        <div className="bg-card border border-border/60 p-4 sm:p-8 rounded-2xl sm:rounded-3xl shadow-sm group hover:border-blue-500/30 transition-colors min-h-[148px] sm:min-h-0">
           <div className="flex justify-between items-start">
-            <div className="w-12 h-12 rounded-2xl bg-blue-500/10 text-blue-500 flex items-center justify-center">
-              <Users size={24} />
+            <div className="w-9 h-9 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-blue-500/10 text-blue-500 flex items-center justify-center">
+              <Users size={18} className="sm:hidden" />
+              <Users size={24} className="hidden sm:block" />
             </div>
-            <div className="flex items-center gap-1 text-sm font-bold text-green-500 bg-green-500/10 px-2.5 py-1 rounded-lg">
-              <ArrowUpRight size={16} /> 8%
+            <div className="flex items-center gap-1 text-xs sm:text-sm font-bold text-green-500 bg-green-500/10 px-2 py-1 rounded-lg">
+              <ArrowUpRight size={14} className="sm:hidden" />
+              <ArrowUpRight size={16} className="hidden sm:block" /> 8%
             </div>
           </div>
-          <div className="mt-6">
-            <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Уникальные гости</p>
-            <h3 className="text-4xl font-black text-foreground mt-1">1,260</h3>
+          <div className="mt-4 sm:mt-6">
+            <p className="text-[10px] sm:text-xs font-bold text-muted-foreground uppercase tracking-[0.12em] sm:tracking-wider">Уникальные гости</p>
+            <h3 className="text-3xl sm:text-4xl font-black text-foreground mt-1 leading-none">1,260</h3>
           </div>
         </div>
 
-        {/* Карточка 3: Возвращаемость */}
-        <div className="bg-card border border-border/60 p-6 sm:p-8 rounded-3xl shadow-sm group hover:border-orange-500/30 transition-colors">
-          <div className="flex justify-between items-start">
-            <div className="w-12 h-12 rounded-2xl bg-orange-500/10 text-orange-500 flex items-center justify-center">
-              <UserCheck size={24} />
-            </div>
-            <div className="flex items-center gap-1 text-sm font-bold text-red-500 bg-red-500/10 px-2.5 py-1 rounded-lg">
-              <ArrowDownRight size={16} /> 2%
-            </div>
-          </div>
-          <div className="mt-6">
-            <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Постоянные гости</p>
-            <h3 className="text-4xl font-black text-foreground mt-1">405</h3>
-          </div>
-        </div>
       </div>
 
       {/* ОСНОВНОЙ БЛОК: ГРАФИК (Теперь на 100% ширины) */}
@@ -145,38 +164,48 @@ const DashboardHome = () => {
         </div>
       </div>
 
-      {/* БЫСТРЫЕ ДЕЙСТВИЯ (3 колонки отлично балансируют 3 KPI карточки) */}
+      {/* БЫСТРЫЕ ДЕЙСТВИЯ */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
-        <div className="bg-gradient-to-br from-brand-purple to-indigo-600 rounded-3xl p-6 sm:p-8 text-white shadow-md shadow-brand-purple/20 relative overflow-hidden flex flex-col justify-between group cursor-pointer hover:shadow-lg transition-all hover:-translate-y-1">
-          <div className="absolute top-0 right-0 w-40 h-40 bg-white/10 rounded-full blur-2xl -z-10 translate-x-1/3 -translate-y-1/3"></div>
-          <div className="w-14 h-14 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center mb-8">
+        <Link
+          to={`/dashboard/menu/${PRIMARY_MENU_ID}`}
+          className="bg-card border border-border/60 rounded-3xl p-6 sm:p-8 shadow-sm flex flex-col justify-between group hover:border-foreground/20 transition-all hover:-translate-y-1 min-h-[220px] sm:min-h-[250px]"
+        >
+          <div className="w-14 h-14 rounded-2xl bg-secondary flex items-center justify-center mb-8 group-hover:bg-foreground group-hover:text-background transition-colors">
+            <Pencil size={28} />
+          </div>
+          <div>
+            <h3 className="font-bold text-xl text-foreground">Открыть редактор меню</h3>
+            <p className="text-sm text-muted-foreground mt-1">Изменить категории, позиции и переводы</p>
+          </div>
+        </Link>
+
+        <Link
+          to="/dashboard/qr"
+          className="bg-card border border-border/60 rounded-3xl p-6 sm:p-8 shadow-sm flex flex-col justify-between group hover:border-foreground/20 transition-all hover:-translate-y-1 min-h-[220px] sm:min-h-[250px]"
+        >
+          <div className="w-14 h-14 rounded-2xl bg-secondary flex items-center justify-center mb-8 group-hover:bg-foreground group-hover:text-background transition-colors">
             <QrCode size={28} />
           </div>
           <div>
-            <h3 className="font-bold text-xl">Скачать QR-коды</h3>
-            <p className="text-sm text-white/80 mt-1">Для печати и соцсетей</p>
+            <h3 className="font-bold text-xl text-foreground">Скачать QR-коды</h3>
+            <p className="text-sm text-muted-foreground mt-1">Для печати и соцсетей</p>
           </div>
-        </div>
+        </Link>
 
-        <div className="bg-card border border-border/60 rounded-3xl p-6 sm:p-8 shadow-sm flex flex-col justify-between group cursor-pointer hover:border-foreground/20 transition-all hover:-translate-y-1">
+        <a
+          href={PUBLIC_MENU_URL}
+          target="_blank"
+          rel="noreferrer"
+          className="bg-card border border-border/60 rounded-3xl p-6 sm:p-8 shadow-sm flex flex-col justify-between group hover:border-foreground/20 transition-all hover:-translate-y-1 min-h-[220px] sm:min-h-[250px]"
+        >
           <div className="w-14 h-14 rounded-2xl bg-secondary flex items-center justify-center mb-8 group-hover:bg-foreground group-hover:text-background transition-colors">
-            <Plus size={28} />
+            <ExternalLink size={28} />
           </div>
           <div>
-            <h3 className="font-bold text-xl text-foreground">Добавить позицию</h3>
-            <p className="text-sm text-muted-foreground mt-1">Обновить меню новинками</p>
+            <h3 className="font-bold text-xl text-foreground">Открыть публичное меню</h3>
+            <p className="text-sm text-muted-foreground mt-1">Проверить, как меню видят гости</p>
           </div>
-        </div>
-
-        <div className="bg-card border border-border/60 rounded-3xl p-6 sm:p-8 shadow-sm flex flex-col justify-between group cursor-pointer hover:border-foreground/20 transition-all hover:-translate-y-1">
-          <div className="w-14 h-14 rounded-2xl bg-secondary flex items-center justify-center mb-8 group-hover:bg-foreground group-hover:text-background transition-colors">
-            <MoreHorizontal size={28} />
-          </div>
-          <div>
-            <h3 className="font-bold text-xl text-foreground">Настройки дизайна</h3>
-            <p className="text-sm text-muted-foreground mt-1">Изменить цвета и логотип</p>
-          </div>
-        </div>
+        </a>
       </div>
 
     </div>
