@@ -172,7 +172,7 @@ const DashboardLayout = ({ children }) => {
       {/* Основной контент */}
       <main className="flex-1 md:pl-64 flex flex-col min-h-screen w-full max-w-full min-w-0 overflow-x-hidden">
         {/* Хедер */}
-        <header className="h-16 border-b border-border/60 flex items-center justify-between px-4 sm:px-8 bg-card/80 backdrop-blur-xl sticky top-0 z-10 w-full max-w-full min-w-0 overflow-hidden shrink-0">
+        <header className="h-18 border-b border-border/60 flex items-center justify-between px-4 sm:px-8 bg-card/80 backdrop-blur-xl sticky top-0 z-10 w-full max-w-full min-w-0 overflow-hidden shrink-0">
           <div className="md:hidden flex items-center gap-3 min-w-0">
             <button onClick={() => setIsMobileMenuOpen(true)} className={`${subtleIconButtonClasses} -ml-2 hover:bg-secondary shrink-0`}>
               <MenuIcon size={22} />
