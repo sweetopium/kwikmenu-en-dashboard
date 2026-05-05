@@ -290,7 +290,7 @@ const MenuEditor = () => {
       <div className="flex-1 flex flex-col bg-background relative min-w-0 w-full max-w-full overflow-hidden">
         {activeCategory ? (
           <div className="p-4 sm:p-6 lg:p-8 border-b border-border/60 flex flex-col gap-4 bg-card z-10 sticky top-0 min-w-0 max-w-full overflow-hidden">
-            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full min-w-0 sm:justify-end">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full min-w-0 sm:justify-end md:ml-auto md:w-auto md:max-w-full md:rounded-xl md:border md:border-border/70 md:bg-secondary/35 md:px-3 md:py-3 mb-0 md:mb-4">
               <div className="grid grid-cols-2 gap-3 w-full sm:w-auto sm:flex sm:flex-row shrink-0">
                 <div className="relative min-w-0 sm:min-w-[156px]">
                   <select
