@@ -39,10 +39,7 @@ const DashboardHome = () => {
               <ChevronDown size={16} className="text-muted-foreground" />
             </span>
           </Button>
-          <Button className={`${primaryActionButtonClasses} px-5 hidden sm:flex`}>
-            <Plus size={18} className="mr-2" />
-            Добавить блюдо
-          </Button>
+
         </div>
       </div>
 

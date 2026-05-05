@@ -96,10 +96,10 @@ const HelpPage = () => {
           <>
             <div className="space-y-2 sm:space-y-3 mb-6 sm:mb-8">
               <h2 className="text-xl sm:text-3xl font-extrabold tracking-tight text-foreground">
-                Давайте мы всё сделаем
+                Заявка на перенос меню
               </h2>
               <p className="text-muted-foreground text-xs sm:text-base leading-relaxed">
-                Оставьте свои контакты и меню. Мы сами всё распознаем, настроим и отдадим вам готовый QR-код и доступ в личный кабинет
+                Оставьте контакты, менеджер свяжется и подготовит меню
               </p>
             </div>
 
@@ -160,7 +160,7 @@ const HelpPage = () => {
                     id="city"
                     value={city}
                     onChange={(e) => setCity(e.target.value)}
-                    placeholder="Например: Дубай"
+                    placeholder="Например: Москва"
                     className={inputBaseClasses}
                   />
                 </div>

@@ -7,11 +7,9 @@ const WelcomePage = () => (
         {/* Заголовок */}
         <div className="space-y-4">
             <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight text-foreground">
-                Добро пожаловать
+                Как вы хотите начать?
             </h1>
-            <p className="text-muted-foreground text-lg md:text-xl max-w-xl mx-auto">
-                Создадим ваше цифровое меню за пару минут. Как вам удобнее начать?
-            </p>
+
         </div>
 
         {/* Карточки */}
@@ -34,9 +32,9 @@ const WelcomePage = () => (
                     </div>
                 </div>
                 <div className="mt-8">
-                    <h3 className="font-bold text-2xl text-foreground">Справлюсь сам</h3>
+                    <h3 className="font-bold text-2xl text-foreground">Самостоятельно</h3>
                     <p className="text-base text-muted-foreground mt-3 leading-relaxed">
-                        Загружу PDF или фото, ИИ распознает, я проверю и опубликую
+                        Загрузите действующие меню, AI распознает и подготовит его к публикации
                     </p>
                 </div>
             </Link>
@@ -60,7 +58,7 @@ const WelcomePage = () => (
                 <div className="mt-8">
                     <h3 className="font-bold text-2xl text-foreground">Нужна помощь</h3>
                     <p className="text-base text-muted-foreground mt-3 leading-relaxed">
-                        Оставьте контакт, и наша команда настроит всё за вас
+                        Оставьте заявку, менеджер подготовит меню и пришлет готовый QR-код
                     </p>
                 </div>
             </Link>
