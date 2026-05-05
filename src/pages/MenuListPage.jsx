@@ -1,11 +1,20 @@
 import { Link } from 'react-router-dom';
 import {
   Plus, Utensils, Wine, Coffee,
-  MoreHorizontal, Calendar, LayoutGrid, ArrowRight, FolderOpen
+  MoreHorizontal, Calendar, LayoutGrid, ArrowRight, FolderOpen,
+  Pencil, Copy, Upload, Download, Trash2
 } from 'lucide-react';
 
 import { Button } from "../components/ui/button";
 import { primaryActionButtonClasses, subtleIconButtonClasses } from "../lib/uiStyles";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "../components/ui/dropdown-menu";
 
 // Мок-данные списка меню
 const mockMenus = [
@@ -54,9 +63,7 @@ const MenuListPage = () => {
         <div className="p-6 sm:p-8">
           <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-5">
             <div className="min-w-0">
-              <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-muted-foreground mb-2">
-                Меню заведения
-              </p>
+
               <h1 className="text-2xl sm:text-3xl font-extrabold text-foreground tracking-tight">
                 Ваши меню
               </h1>
@@ -79,11 +86,11 @@ const MenuListPage = () => {
         {mockMenus.map((menu) => (
           <div
             key={menu.id}
-            className="bg-card border border-border/60 rounded-3xl p-6 sm:p-7 shadow-sm flex flex-col group hover:border-brand-purple/30 hover:shadow-md transition-all"
+            className="bg-card border border-border/60 rounded-3xl p-5 sm:p-6 shadow-sm flex flex-col group hover:border-brand-purple/30 hover:shadow-md transition-all"
           >
-            <div className="flex justify-between items-start mb-6">
-              <div className={`w-14 h-14 rounded-2xl flex items-center justify-center ${menu.bgColor} ${menu.color} shrink-0`}>
-                <menu.icon size={26} />
+            <div className="flex justify-between items-start mb-5">
+              <div className={`w-11 h-11 rounded-xl flex items-center justify-center ${menu.bgColor} ${menu.color} shrink-0`}>
+                <menu.icon size={18} />
               </div>
 
               {menu.status === 'active' ? (
@@ -98,9 +105,6 @@ const MenuListPage = () => {
             </div>
 
             <div className="mb-6 flex-1 min-w-0">
-              <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-muted-foreground mb-2">
-                {menu.status === 'active' ? 'Опубликовано' : 'В работе'}
-              </p>
               <h3 className="text-xl font-bold text-foreground group-hover:text-brand-purple transition-colors truncate">
                 {menu.name}
               </h3>
@@ -123,16 +127,56 @@ const MenuListPage = () => {
               </div>
             </div>
 
-            <div className="flex items-center justify-between mt-auto pt-5 border-t border-border/50 gap-4">
+            <div className="flex items-center justify-between mt-auto pt-3 md:pt-4 border-t border-border/50 gap-4 -mb-2">
               <div className="flex items-center gap-2 text-muted-foreground">
                 <Calendar size={14} />
                 <span className="text-[11px] font-medium">{menu.lastUpdated}</span>
               </div>
 
               <div className="flex items-center gap-2">
-                <button className={`${subtleIconButtonClasses} hover:bg-secondary cursor-pointer`}>
-                  <MoreHorizontal size={18} />
-                </button>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <button className={`${subtleIconButtonClasses} hover:bg-secondary cursor-pointer`}>
+                      <MoreHorizontal size={18} />
+                    </button>
+                  </DropdownMenuTrigger>
+
+                  <DropdownMenuContent>
+                    <DropdownMenuLabel>Действия с меню</DropdownMenuLabel>
+                    <DropdownMenuItem asChild>
+                      <Link to={`/dashboard/menu/${menu.id}`}>
+                        <Pencil size={16} />
+                        Редактировать
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem>
+                      <Copy size={16} />
+                      Дублировать
+                    </DropdownMenuItem>
+
+                    <DropdownMenuSeparator />
+
+                    {menu.status === 'active' ? (
+                      <DropdownMenuItem>
+                        <Download size={16} />
+                        Снять с публикации
+                      </DropdownMenuItem>
+                    ) : (
+                      <DropdownMenuItem>
+                        <Upload size={16} />
+                        Опубликовать
+                      </DropdownMenuItem>
+                    )}
+
+                    <DropdownMenuSeparator />
+
+                    <DropdownMenuItem variant="destructive">
+                      <Trash2 size={16} />
+                      Удалить
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+
                 <Link
                   to={`/dashboard/menu/${menu.id}`}
                   className="h-10 sm:h-12 px-4 rounded-lg bg-foreground hover:bg-foreground/90 text-background font-bold text-sm flex items-center gap-2 transition-all shadow-sm cursor-pointer"
