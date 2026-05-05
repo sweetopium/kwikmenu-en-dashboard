@@ -11,6 +11,7 @@ import VenuePage from "./pages/VenuePage.jsx";
 import AccountPage from "./pages/AccountPage.jsx";
 import BillingPage from "./pages/BillingPage.jsx";
 import VenueListPage from "./pages/VenueListPage.jsx";
+import SubscriptionPlansPage from "./pages/SubscriptionPlansPage.jsx";
 
 function App() {
     return (
@@ -31,6 +32,7 @@ function App() {
                 <Route path="/dashboard/venue" element={<Navigate to="/dashboard/venues" replace/>}/>
                 <Route path="/dashboard/account" element={<DashboardLayout><AccountPage/></DashboardLayout>}/>
                 <Route path="/dashboard/billing" element={<DashboardLayout><BillingPage/></DashboardLayout>}/>
+                <Route path="/dashboard/subscription" element={<DashboardLayout><SubscriptionPlansPage/></DashboardLayout>}/>
                 <Route path="/dashboard/settings" element={<Navigate to="/dashboard/account" replace/>}/>
 
                 {/* Fallback */}

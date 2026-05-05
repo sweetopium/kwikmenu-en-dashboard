@@ -6,6 +6,7 @@ import {
   Building2,
   UserRound,
   CreditCard,
+  Sparkles,
   Check,
   ChevronDown,
   LogOut,
@@ -125,6 +126,7 @@ const DashboardLayout = ({ children }) => {
     { icon: Building2, label: 'Заведение', path: `/dashboard/venues/${activeVenue.id}` },
     { icon: UserRound, label: 'Аккаунт', path: '/dashboard/account' },
     { icon: CreditCard, label: 'Биллинг', path: '/dashboard/billing' },
+    { icon: Sparkles, label: 'Подписка', path: '/dashboard/subscription' },
   ];
 
   const handleVenueSwitch = (venueId) => {

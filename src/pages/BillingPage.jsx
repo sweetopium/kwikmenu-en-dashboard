@@ -1,4 +1,4 @@
-import { CreditCard, Download, Receipt, Save, ShieldCheck } from 'lucide-react';
+import { CreditCard, Download, Receipt, ShieldCheck } from 'lucide-react';
 
 import { Button } from "../components/ui/button";
 import SettingsPageHeader from "../components/settings/SettingsPageHeader";
@@ -10,8 +10,7 @@ const BillingPage = () => {
       <SettingsPageHeader
         title="Биллинг"
         description="Тариф, платежи и документы по подписке вашего кабинета."
-        actionLabel="Обновить способ оплаты"
-        actionIcon={Save}
+        actionLabel={null}
       />
 
       <div className="grid grid-cols-1 xl:grid-cols-[minmax(0,1.2fr)_minmax(320px,0.8fr)] gap-6">
