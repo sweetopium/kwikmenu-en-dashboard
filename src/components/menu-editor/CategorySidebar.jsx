@@ -1,8 +1,11 @@
 import { ChevronDown, ChevronUp, Plus } from 'lucide-react';
+import { getAvailableHoursLabel, getLocalizedField } from "./menuEditorUtils";
 
 const CategorySidebar = ({
   categories,
   activeCategoryId,
+  language,
+  defaultLanguage,
   onAddCategory,
   onSelectCategory,
   onMoveCategory,
@@ -30,9 +33,16 @@ const CategorySidebar = ({
                 : 'text-muted-foreground hover:bg-secondary/50 font-semibold border border-transparent'
             }`}
           >
-            <span className="truncate max-w-[180px] md:max-w-none text-sm sm:text-base">
-              {category.name}
-            </span>
+            <div className="min-w-0">
+              <span className="truncate max-w-[180px] md:max-w-none text-sm sm:text-base block">
+                {getLocalizedField(category, 'name', language, defaultLanguage)}
+              </span>
+              {category.availableHours?.start && category.availableHours?.end && (
+                <span className="text-[10px] font-medium text-muted-foreground/80 block mt-0.5">
+                  {getAvailableHoursLabel(category.availableHours)}
+                </span>
+              )}
+            </div>
 
             <span className={`text-[10px] sm:text-xs px-2 py-0.5 rounded-full font-bold shrink-0 ${
               activeCategoryId === category.id

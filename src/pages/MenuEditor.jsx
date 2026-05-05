@@ -5,17 +5,25 @@ import CategoryModal from "../components/menu-editor/CategoryModal";
 import CategorySidebar from "../components/menu-editor/CategorySidebar";
 import DeleteConfirmModal from "../components/menu-editor/DeleteConfirmModal";
 import ItemModal from "../components/menu-editor/ItemModal";
+import MenuMetaModal from "../components/menu-editor/MenuMetaModal";
 import MenuItemList from "../components/menu-editor/MenuItemList";
 import { simpleMenuPayload } from "../data/menu_mock.js";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
+import {
+  getAvailableHoursLabel,
+  getLocalizedField,
+  setLocalizedField,
+} from "../components/menu-editor/menuEditorUtils";
 
 const MenuEditor = () => {
   const [menu, setMenu] = useState(simpleMenuPayload);
   const [activeCategoryId, setActiveCategoryId] = useState(menu.categories[0]?.id);
+  const [editorLanguage, setEditorLanguage] = useState(menu.defaultLanguage || 'ru');
   const [searchQuery, setSearchQuery] = useState('');
   const [editingCategory, setEditingCategory] = useState(null);
   const [editingItem, setEditingItem] = useState(null);
+  const [editingMenuMeta, setEditingMenuMeta] = useState(null);
   const [modalMode, setModalMode] = useState('edit');
   const [originalCategoryId, setOriginalCategoryId] = useState(null);
   const [targetCategoryId, setTargetCategoryId] = useState(null);
@@ -23,17 +31,22 @@ const MenuEditor = () => {
 
   const activeCategory = menu.categories.find((category) => category.id === activeCategoryId);
   const filteredItems = activeCategory?.items?.filter((item) =>
-    item.name.toLowerCase().includes(searchQuery.toLowerCase())
+    getLocalizedField(item, 'name', editorLanguage, menu.defaultLanguage).toLowerCase().includes(searchQuery.toLowerCase())
   ) || [];
+  const localizedMenuName = getLocalizedField(menu.menuMeta, 'name', editorLanguage, menu.defaultLanguage);
+  const localizedCategoryName = getLocalizedField(activeCategory, 'name', editorLanguage, menu.defaultLanguage);
+  const localizedCategoryDescription = getLocalizedField(activeCategory, 'description', editorLanguage, menu.defaultLanguage);
 
   const handleAddCategory = () => {
     setEditingCategory({
       id: `cat-${Date.now()}`,
       name: '',
       description: '',
+      translations: {},
       sortOrder: menu.categories.length + 1,
       isHidden: false,
       imageUrl: null,
+      availableHours: null,
       items: [],
     });
   };
@@ -41,6 +54,15 @@ const MenuEditor = () => {
   const handleEditCategory = () => {
     if (!activeCategory) return;
     setEditingCategory(JSON.parse(JSON.stringify(activeCategory)));
+  };
+
+  const handleEditMenuMeta = () => {
+    setEditingMenuMeta(JSON.parse(JSON.stringify(menu.menuMeta)));
+  };
+
+  const handleSaveMenuMeta = () => {
+    setMenu({ ...menu, menuMeta: editingMenuMeta });
+    setEditingMenuMeta(null);
   };
 
   const handleSaveCategory = () => {
@@ -82,9 +104,13 @@ const MenuEditor = () => {
       id: `item-${Date.now()}`,
       name: '',
       description: '',
+      translations: {},
       price: '',
       measureValue: '',
       measureUnit: 'ml',
+      tags: [],
+      badge: null,
+      availableHours: null,
       sortOrder: (activeCategory?.items?.length || 0) + 1,
       isAvailable: true,
       imageUrl: null,
@@ -104,7 +130,7 @@ const MenuEditor = () => {
     setDeleteConfirm({
       type: 'category',
       id: activeCategory.id,
-      name: activeCategory.name,
+      name: localizedCategoryName,
     });
   };
 
@@ -112,7 +138,7 @@ const MenuEditor = () => {
     setDeleteConfirm({
       type: 'item',
       id: item.id,
-      name: item.name,
+      name: getLocalizedField(item, 'name', editorLanguage, menu.defaultLanguage),
       categoryId: activeCategoryId,
     });
   };
@@ -170,9 +196,11 @@ const MenuEditor = () => {
     }
   };
 
-  const handleVariantChange = (index, field, value) => {
+  const handleVariantChange = (index, field, value, language = menu.defaultLanguage) => {
     const updatedVariants = [...editingItem.variants];
-    updatedVariants[index][field] = value;
+    updatedVariants[index] = field === 'label'
+      ? setLocalizedField(updatedVariants[index], field, value, language, menu.defaultLanguage)
+      : { ...updatedVariants[index], [field]: value };
     setEditingItem({ ...editingItem, variants: updatedVariants });
   };
 
@@ -180,6 +208,7 @@ const MenuEditor = () => {
     const newVariant = {
       id: `var-${Date.now()}`,
       label: '',
+      translations: {},
       price: '',
       measureValue: '',
       measureUnit: 'ml',
@@ -243,6 +272,8 @@ const MenuEditor = () => {
       <CategorySidebar
         categories={menu.categories}
         activeCategoryId={activeCategoryId}
+        language={editorLanguage}
+        defaultLanguage={menu.defaultLanguage}
         onAddCategory={handleAddCategory}
         onSelectCategory={setActiveCategoryId}
         onMoveCategory={moveCategory}
@@ -252,9 +283,12 @@ const MenuEditor = () => {
         {activeCategory ? (
           <div className="p-4 sm:p-6 lg:p-8 border-b border-border/60 flex flex-col sm:flex-row gap-4 sm:items-start justify-between bg-card z-10 sticky top-0 min-w-0 max-w-full overflow-hidden">
             <div className="flex flex-col min-w-0 max-w-full">
+              <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-muted-foreground mb-2">
+                {localizedMenuName}
+              </p>
               <div className="flex items-center gap-3 min-w-0 max-w-full">
                 <h1 className="text-2xl sm:text-3xl font-extrabold text-foreground tracking-tight truncate min-w-0">
-                  {activeCategory.name}
+                  {localizedCategoryName}
                 </h1>
 
                 <div className="flex items-center gap-1 shrink-0">
@@ -274,14 +308,45 @@ const MenuEditor = () => {
                 </div>
               </div>
 
-              {activeCategory.description && (
+              {localizedCategoryDescription && (
                 <p className="text-sm text-muted-foreground mt-1.5 max-w-2xl leading-relaxed truncate whitespace-normal line-clamp-2">
-                  {activeCategory.description}
+                  {localizedCategoryDescription}
+                </p>
+              )}
+
+              {activeCategory.availableHours?.start && activeCategory.availableHours?.end && (
+                <p className="text-xs font-semibold text-foreground/80 mt-2">
+                  Доступно: {getAvailableHoursLabel(activeCategory.availableHours)}
                 </p>
               )}
             </div>
 
-            <div className="flex items-center gap-3 w-full sm:w-auto shrink-0 mt-2 sm:mt-0 min-w-0">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full sm:w-auto shrink-0 mt-2 sm:mt-0 min-w-0">
+              <div className="flex p-1 bg-secondary/40 rounded-xl border border-border/60 shrink-0">
+                {menu.languages.map((language) => (
+                  <button
+                    key={language.code}
+                    type="button"
+                    onClick={() => setEditorLanguage(language.code)}
+                    className={`px-3 py-2 text-xs font-bold rounded-lg transition-colors ${
+                      editorLanguage === language.code
+                        ? 'bg-background text-foreground shadow-sm'
+                        : 'text-muted-foreground hover:text-foreground'
+                    }`}
+                  >
+                    {language.shortLabel}
+                  </button>
+                ))}
+              </div>
+
+              <Button
+                variant="outline"
+                onClick={handleEditMenuMeta}
+                className="rounded-xl border-border/60 bg-card font-semibold shrink-0"
+              >
+                Меню
+              </Button>
+
               <div className="relative flex-1 sm:w-64 min-w-0">
                 <Search
                   className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
@@ -313,6 +378,8 @@ const MenuEditor = () => {
 
         <MenuItemList
           items={filteredItems}
+          language={editorLanguage}
+          defaultLanguage={menu.defaultLanguage}
           onEditItem={handleEditItemClick}
           onDeleteItem={handleDeleteItemClick}
         />
@@ -326,15 +393,28 @@ const MenuEditor = () => {
 
       <CategoryModal
         category={editingCategory}
+        language={editorLanguage}
+        defaultLanguage={menu.defaultLanguage}
         onChange={setEditingCategory}
         onCancel={() => setEditingCategory(null)}
         onSave={handleSaveCategory}
+      />
+
+      <MenuMetaModal
+        menuMeta={editingMenuMeta}
+        language={editorLanguage}
+        defaultLanguage={menu.defaultLanguage}
+        onChange={setEditingMenuMeta}
+        onCancel={() => setEditingMenuMeta(null)}
+        onSave={handleSaveMenuMeta}
       />
 
       <ItemModal
         item={editingItem}
         mode={modalMode}
         categories={menu.categories}
+        language={editorLanguage}
+        defaultLanguage={menu.defaultLanguage}
         targetCategoryId={targetCategoryId}
         onTargetCategoryChange={setTargetCategoryId}
         onChange={setEditingItem}

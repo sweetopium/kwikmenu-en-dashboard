@@ -3,12 +3,20 @@ import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
 import { Switch } from "../ui/switch";
-import { MEASURE_UNITS } from "./menuEditorUtils";
+import {
+  BADGE_OPTIONS,
+  DIETARY_TAG_OPTIONS,
+  MEASURE_UNITS,
+  getLocalizedField,
+  setLocalizedField,
+} from "./menuEditorUtils";
 
 const ItemModal = ({
   item,
   mode,
   categories,
+  language,
+  defaultLanguage,
   targetCategoryId,
   onTargetCategoryChange,
   onChange,
@@ -19,6 +27,9 @@ const ItemModal = ({
   onSave,
 }) => {
   if (!item) return null;
+
+  const localizedName = getLocalizedField(item, 'name', language, defaultLanguage);
+  const localizedDescription = getLocalizedField(item, 'description', language, defaultLanguage);
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-black/40 backdrop-blur-sm animate-in fade-in duration-200">
@@ -59,7 +70,7 @@ const ItemModal = ({
               >
                 {categories.map((category) => (
                   <option key={category.id} value={category.id}>
-                    {category.name}
+                    {getLocalizedField(category, 'name', language, defaultLanguage)}
                   </option>
                 ))}
               </select>
@@ -72,26 +83,39 @@ const ItemModal = ({
 
           <div className="space-y-2">
             <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-              Название
+              Название ({language.toUpperCase()})
             </Label>
 
             <Input
-              value={item.name}
-              onChange={(event) => onChange({ ...item, name: event.target.value })}
+              value={localizedName}
+              onChange={(event) => onChange(setLocalizedField(item, 'name', event.target.value, language, defaultLanguage))}
               className="h-11 bg-secondary/30 border-transparent focus:bg-background rounded-xl text-base"
             />
           </div>
 
           <div className="space-y-2">
             <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-              Описание
+              Описание ({language.toUpperCase()})
             </Label>
 
             <textarea
-              value={item.description || ''}
-              onChange={(event) => onChange({ ...item, description: event.target.value })}
+              value={localizedDescription || ''}
+              onChange={(event) => onChange(setLocalizedField(item, 'description', event.target.value, language, defaultLanguage))}
               className="w-full min-h-[100px] bg-secondary/30 border-transparent focus:border-ring focus:bg-background rounded-xl p-3 text-sm outline-none resize-y transition-colors"
               placeholder="Вкусное описание для гостей..."
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+              Изображение блюда
+            </Label>
+
+            <Input
+              value={item.imageUrl || ''}
+              onChange={(event) => onChange({ ...item, imageUrl: event.target.value || null })}
+              className="h-11 bg-secondary/30 border-transparent focus:bg-background rounded-xl text-base"
+              placeholder="https://..."
             />
           </div>
 
@@ -168,12 +192,12 @@ const ItemModal = ({
 
                     <div className="flex-1 min-w-[120px] space-y-1.5">
                       <Label className="text-[10px] text-muted-foreground">
-                        Название опции
+                        Название опции ({language.toUpperCase()})
                       </Label>
 
                       <Input
-                        value={variant.label || ''}
-                        onChange={(event) => onVariantChange(index, 'label', event.target.value)}
+                        value={getLocalizedField(variant, 'label', language, defaultLanguage)}
+                        onChange={(event) => onVariantChange(index, 'label', event.target.value, language)}
                         className="h-9 text-xs bg-secondary/30"
                         placeholder="Например: Гранд"
                       />
@@ -224,6 +248,104 @@ const ItemModal = ({
             )}
           </div>
 
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                Маркетинговый бейдж
+              </Label>
+
+              <div className="relative">
+                <select
+                  value={item.badge || ''}
+                  onChange={(event) => onChange({ ...item, badge: event.target.value || null })}
+                  className="flex h-11 w-full items-center rounded-xl border border-input bg-secondary/30 px-3 text-sm transition-colors focus:bg-background focus:outline-none focus:ring-2 focus:ring-brand-purple/50 appearance-none cursor-pointer font-medium"
+                >
+                  <option value="">Без бейджа</option>
+                  {BADGE_OPTIONS.map((badge) => (
+                    <option key={badge.value} value={badge.value}>
+                      {badge.label}
+                    </option>
+                  ))}
+                </select>
+
+                <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-muted-foreground">
+                  <ChevronDown size={16} />
+                </div>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                  Доступно с
+                </Label>
+
+                <Input
+                  type="time"
+                  value={item.availableHours?.start || ''}
+                  onChange={(event) => onChange({
+                    ...item,
+                    availableHours: {
+                      start: event.target.value,
+                      end: item.availableHours?.end || '',
+                    },
+                  })}
+                  className="h-11 bg-secondary/30 border-transparent focus:bg-background rounded-xl text-base"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                  Доступно до
+                </Label>
+
+                <Input
+                  type="time"
+                  value={item.availableHours?.end || ''}
+                  onChange={(event) => onChange({
+                    ...item,
+                    availableHours: {
+                      start: item.availableHours?.start || '',
+                      end: event.target.value,
+                    },
+                  })}
+                  className="h-11 bg-secondary/30 border-transparent focus:bg-background rounded-xl text-base"
+                />
+              </div>
+            </div>
+          </div>
+
+          <div className="space-y-3">
+            <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+              Теги и аллергены
+            </Label>
+
+            <div className="flex flex-wrap gap-2">
+              {DIETARY_TAG_OPTIONS.map((tag) => {
+                const isActive = item.tags?.includes(tag.value);
+                return (
+                  <button
+                    key={tag.value}
+                    type="button"
+                    onClick={() => onChange({
+                      ...item,
+                      tags: isActive
+                        ? item.tags.filter((value) => value !== tag.value)
+                        : [...(item.tags || []), tag.value],
+                    })}
+                    className={`px-3 py-2 rounded-xl border text-xs font-semibold transition-colors ${
+                      isActive
+                        ? 'bg-foreground text-background border-foreground'
+                        : 'bg-secondary/30 text-muted-foreground border-border/60 hover:text-foreground'
+                    }`}
+                  >
+                    {tag.label}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
           <div className="flex items-center justify-between gap-4 p-4 bg-secondary/20 rounded-xl border border-border/50">
             <div>
               <Label className="text-sm font-bold text-foreground cursor-pointer">
@@ -254,7 +376,7 @@ const ItemModal = ({
 
           <Button
             onClick={onSave}
-            disabled={!item.name.trim()}
+            disabled={!getLocalizedField(item, 'name', defaultLanguage, defaultLanguage).trim()}
             className="rounded-xl bg-brand-purple hover:bg-brand-purple/90 text-white font-semibold shadow-md shadow-brand-purple/20 px-6"
           >
             {mode === 'add' ? 'Добавить блюдо' : 'Сохранить изменения'}

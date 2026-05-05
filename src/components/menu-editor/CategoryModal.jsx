@@ -2,9 +2,13 @@ import { X } from 'lucide-react';
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
+import { getLocalizedField, setLocalizedField } from "./menuEditorUtils";
 
-const CategoryModal = ({ category, onChange, onCancel, onSave }) => {
+const CategoryModal = ({ category, language, defaultLanguage, onChange, onCancel, onSave }) => {
   if (!category) return null;
+
+  const localizedName = getLocalizedField(category, 'name', language, defaultLanguage);
+  const localizedDescription = getLocalizedField(category, 'description', language, defaultLanguage);
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-black/40 backdrop-blur-sm animate-in fade-in duration-200">
@@ -15,7 +19,7 @@ const CategoryModal = ({ category, onChange, onCancel, onSave }) => {
         <div className="p-6 border-b border-border/60 flex items-center justify-between bg-secondary/20">
           <div>
             <h2 className="text-xl font-bold text-foreground">
-              {category.name ? 'Настройки категории' : 'Новая категория'}
+              {localizedName ? 'Настройки категории' : 'Новая категория'}
             </h2>
           </div>
 
@@ -30,12 +34,12 @@ const CategoryModal = ({ category, onChange, onCancel, onSave }) => {
         <div className="p-6 space-y-5 bg-background">
           <div className="space-y-2">
             <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-              Название
+              Название ({language.toUpperCase()})
             </Label>
 
             <Input
-              value={category.name}
-              onChange={(event) => onChange({ ...category, name: event.target.value })}
+              value={localizedName}
+              onChange={(event) => onChange(setLocalizedField(category, 'name', event.target.value, language, defaultLanguage))}
               className="h-11 bg-secondary/30 border-transparent focus:bg-background rounded-xl text-base"
               placeholder="Например: Десерты"
             />
@@ -43,15 +47,68 @@ const CategoryModal = ({ category, onChange, onCancel, onSave }) => {
 
           <div className="space-y-2">
             <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-              Описание (опционально)
+              Описание ({language.toUpperCase()})
             </Label>
 
             <textarea
-              value={category.description || ''}
-              onChange={(event) => onChange({ ...category, description: event.target.value })}
+              value={localizedDescription || ''}
+              onChange={(event) => onChange(setLocalizedField(category, 'description', event.target.value, language, defaultLanguage))}
               className="w-full min-h-[80px] bg-secondary/30 border-transparent focus:border-ring focus:bg-background rounded-xl p-3 text-sm outline-none resize-y transition-colors"
               placeholder="Показывать под заголовком категории..."
             />
+          </div>
+
+          <div className="space-y-2">
+            <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+              Изображение категории
+            </Label>
+
+            <Input
+              value={category.imageUrl || ''}
+              onChange={(event) => onChange({ ...category, imageUrl: event.target.value || null })}
+              className="h-11 bg-secondary/30 border-transparent focus:bg-background rounded-xl text-base"
+              placeholder="https://..."
+            />
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                Доступно с
+              </Label>
+
+              <Input
+                type="time"
+                value={category.availableHours?.start || ''}
+                onChange={(event) => onChange({
+                  ...category,
+                  availableHours: {
+                    start: event.target.value,
+                    end: category.availableHours?.end || '',
+                  },
+                })}
+                className="h-11 bg-secondary/30 border-transparent focus:bg-background rounded-xl text-base"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                Доступно до
+              </Label>
+
+              <Input
+                type="time"
+                value={category.availableHours?.end || ''}
+                onChange={(event) => onChange({
+                  ...category,
+                  availableHours: {
+                    start: category.availableHours?.start || '',
+                    end: event.target.value,
+                  },
+                })}
+                className="h-11 bg-secondary/30 border-transparent focus:bg-background rounded-xl text-base"
+              />
+            </div>
           </div>
         </div>
 
@@ -66,7 +123,7 @@ const CategoryModal = ({ category, onChange, onCancel, onSave }) => {
 
           <Button
             onClick={onSave}
-            disabled={!category.name.trim()}
+            disabled={!getLocalizedField(category, 'name', defaultLanguage, defaultLanguage).trim()}
             className="rounded-xl bg-brand-purple hover:bg-brand-purple/90 text-white font-semibold shadow-md shadow-brand-purple/20 px-6"
           >
             Сохранить

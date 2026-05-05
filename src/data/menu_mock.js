@@ -1,5 +1,5 @@
 export const simpleMenuPayload = {
-    "schemaVersion": 1,
+    "schemaVersion": 2,
     "defaultLanguage": "ru",
     "currency": "RUB",
     "settings": {
@@ -17,8 +17,26 @@ export const simpleMenuPayload = {
             "shortLabel": "RU",
             "nativeName": "Русский",
             "flag": "🇷🇺"
+        },
+        {
+            "code": "en",
+            "shortLabel": "EN",
+            "nativeName": "English",
+            "flag": "🇬🇧"
         }
     ],
+    "menuMeta": {
+        "id": "main-menu",
+        "slug": "main-menu",
+        "name": "Основное меню",
+        "description": "Основное меню кофейни с классическими напитками, сезонными позициями и едой.",
+        "translations": {
+            "en": {
+                "name": "Main Menu",
+                "description": "Core coffee shop menu with classic drinks, seasonal specials, and food."
+            }
+        }
+    },
     "venue": {
         "name": "Skuratov Coffee",
         "description": "Собственная обжарка и формат брю-бара: классика, спешлы, сезонные напитки, выпечка, десерты, завтраки и лёгкая еда.",
@@ -40,7 +58,15 @@ export const simpleMenuPayload = {
                     "price": "280 ₽",
                     "sortOrder": 1,
                     "isAvailable": true,
-                    "imageUrl": null
+                    "imageUrl": null,
+                    "tags": [],
+                    "badge": null,
+                    "availableHours": null,
+                    "translations": {
+                        "en": {
+                            "name": "Skuratov Espresso"
+                        }
+                    }
                 },
                 {
                     "id": "seasonal-espresso",
@@ -48,7 +74,15 @@ export const simpleMenuPayload = {
                     "price": "310 ₽",
                     "sortOrder": 2,
                     "isAvailable": true,
-                    "imageUrl": null
+                    "imageUrl": null,
+                    "tags": [],
+                    "badge": null,
+                    "availableHours": null,
+                    "translations": {
+                        "en": {
+                            "name": "Seasonal Espresso"
+                        }
+                    }
                 },
                 {
                     "id": "espresso-set",
@@ -56,7 +90,15 @@ export const simpleMenuPayload = {
                     "price": "570 ₽",
                     "sortOrder": 3,
                     "isAvailable": true,
-                    "imageUrl": null
+                    "imageUrl": null,
+                    "tags": [],
+                    "badge": null,
+                    "availableHours": null,
+                    "translations": {
+                        "en": {
+                            "name": "Espresso Set"
+                        }
+                    }
                 },
                 {
                     "id": "americano",
@@ -72,7 +114,12 @@ export const simpleMenuPayload = {
                             "measureValue": 250,
                             "measureUnit": "ml",
                             "sortOrder": 1,
-                            "isAvailable": true
+                            "isAvailable": true,
+                            "translations": {
+                                "en": {
+                                    "label": "250 ml"
+                                }
+                            }
                         },
                         {
                             "id": "americano-350ml",
@@ -81,7 +128,12 @@ export const simpleMenuPayload = {
                             "measureValue": 350,
                             "measureUnit": "ml",
                             "sortOrder": 2,
-                            "isAvailable": true
+                            "isAvailable": true,
+                            "translations": {
+                                "en": {
+                                    "label": "350 ml"
+                                }
+                            }
                         },
                         {
                             "id": "americano-450ml",
@@ -90,9 +142,22 @@ export const simpleMenuPayload = {
                             "measureValue": 450,
                             "measureUnit": "ml",
                             "sortOrder": 3,
-                            "isAvailable": true
+                            "isAvailable": true,
+                            "translations": {
+                                "en": {
+                                    "label": "450 ml"
+                                }
+                            }
                         }
-                    ]
+                    ],
+                    "tags": [],
+                    "badge": null,
+                    "availableHours": null,
+                    "translations": {
+                        "en": {
+                            "name": "Americano"
+                        }
+                    }
                 },
                 {
                     "id": "filter-coffee",
@@ -108,7 +173,12 @@ export const simpleMenuPayload = {
                             "measureValue": 250,
                             "measureUnit": "ml",
                             "sortOrder": 1,
-                            "isAvailable": true
+                            "isAvailable": true,
+                            "translations": {
+                                "en": {
+                                    "label": "250 ml"
+                                }
+                            }
                         },
                         {
                             "id": "filter-coffee-350ml",
@@ -117,7 +187,12 @@ export const simpleMenuPayload = {
                             "measureValue": 350,
                             "measureUnit": "ml",
                             "sortOrder": 2,
-                            "isAvailable": true
+                            "isAvailable": true,
+                            "translations": {
+                                "en": {
+                                    "label": "350 ml"
+                                }
+                            }
                         },
                         {
                             "id": "filter-coffee-450ml",
@@ -126,9 +201,22 @@ export const simpleMenuPayload = {
                             "measureValue": 450,
                             "measureUnit": "ml",
                             "sortOrder": 3,
-                            "isAvailable": true
+                            "isAvailable": true,
+                            "translations": {
+                                "en": {
+                                    "label": "450 ml"
+                                }
+                            }
                         }
-                    ]
+                    ],
+                    "tags": [],
+                    "badge": null,
+                    "availableHours": null,
+                    "translations": {
+                        "en": {
+                            "name": "Filter Coffee"
+                        }
+                    }
                 },
                 {
                     "id": "filter-coffee-cherry",
@@ -138,7 +226,15 @@ export const simpleMenuPayload = {
                     "measureUnit": "ml",
                     "sortOrder": 6,
                     "isAvailable": true,
-                    "imageUrl": null
+                    "imageUrl": null,
+                    "tags": [],
+                    "badge": null,
+                    "availableHours": null,
+                    "translations": {
+                        "en": {
+                            "name": "Cherry Filter Coffee"
+                        }
+                    }
                 },
                 {
                     "id": "v60",
@@ -146,7 +242,15 @@ export const simpleMenuPayload = {
                     "price": "410 ₽",
                     "sortOrder": 7,
                     "isAvailable": true,
-                    "imageUrl": null
+                    "imageUrl": null,
+                    "tags": [],
+                    "badge": null,
+                    "availableHours": null,
+                    "translations": {
+                        "en": {
+                            "name": "V60 Pour Over"
+                        }
+                    }
                 },
                 {
                     "id": "cappuccino",
@@ -162,7 +266,12 @@ export const simpleMenuPayload = {
                             "measureValue": 250,
                             "measureUnit": "ml",
                             "sortOrder": 1,
-                            "isAvailable": true
+                            "isAvailable": true,
+                            "translations": {
+                                "en": {
+                                    "label": "250 ml"
+                                }
+                            }
                         },
                         {
                             "id": "cappuccino-350ml",
@@ -171,7 +280,12 @@ export const simpleMenuPayload = {
                             "measureValue": 350,
                             "measureUnit": "ml",
                             "sortOrder": 2,
-                            "isAvailable": true
+                            "isAvailable": true,
+                            "translations": {
+                                "en": {
+                                    "label": "350 ml"
+                                }
+                            }
                         },
                         {
                             "id": "cappuccino-450ml",
@@ -180,9 +294,22 @@ export const simpleMenuPayload = {
                             "measureValue": 450,
                             "measureUnit": "ml",
                             "sortOrder": 3,
-                            "isAvailable": true
+                            "isAvailable": true,
+                            "translations": {
+                                "en": {
+                                    "label": "450 ml"
+                                }
+                            }
                         }
-                    ]
+                    ],
+                    "tags": [],
+                    "badge": null,
+                    "availableHours": null,
+                    "translations": {
+                        "en": {
+                            "name": "Cappuccino"
+                        }
+                    }
                 },
                 {
                     "id": "latte",
@@ -198,7 +325,12 @@ export const simpleMenuPayload = {
                             "measureValue": 350,
                             "measureUnit": "ml",
                             "sortOrder": 1,
-                            "isAvailable": true
+                            "isAvailable": true,
+                            "translations": {
+                                "en": {
+                                    "label": "350 ml"
+                                }
+                            }
                         },
                         {
                             "id": "latte-450ml",
@@ -207,9 +339,22 @@ export const simpleMenuPayload = {
                             "measureValue": 450,
                             "measureUnit": "ml",
                             "sortOrder": 2,
-                            "isAvailable": true
+                            "isAvailable": true,
+                            "translations": {
+                                "en": {
+                                    "label": "450 ml"
+                                }
+                            }
                         }
-                    ]
+                    ],
+                    "tags": [],
+                    "badge": null,
+                    "availableHours": null,
+                    "translations": {
+                        "en": {
+                            "name": "Latte"
+                        }
+                    }
                 },
                 {
                     "id": "flat-white",
@@ -217,7 +362,15 @@ export const simpleMenuPayload = {
                     "price": "290 ₽",
                     "sortOrder": 10,
                     "isAvailable": true,
-                    "imageUrl": null
+                    "imageUrl": null,
+                    "tags": [],
+                    "badge": null,
+                    "availableHours": null,
+                    "translations": {
+                        "en": {
+                            "name": "Flat White"
+                        }
+                    }
                 },
                 {
                     "id": "matcha-latte",
@@ -233,7 +386,12 @@ export const simpleMenuPayload = {
                             "measureValue": 250,
                             "measureUnit": "ml",
                             "sortOrder": 1,
-                            "isAvailable": true
+                            "isAvailable": true,
+                            "translations": {
+                                "en": {
+                                    "label": "250 ml"
+                                }
+                            }
                         },
                         {
                             "id": "matcha-latte-350ml",
@@ -242,7 +400,12 @@ export const simpleMenuPayload = {
                             "measureValue": 350,
                             "measureUnit": "ml",
                             "sortOrder": 2,
-                            "isAvailable": true
+                            "isAvailable": true,
+                            "translations": {
+                                "en": {
+                                    "label": "350 ml"
+                                }
+                            }
                         },
                         {
                             "id": "matcha-latte-450ml",
@@ -251,9 +414,25 @@ export const simpleMenuPayload = {
                             "measureValue": 450,
                             "measureUnit": "ml",
                             "sortOrder": 3,
-                            "isAvailable": true
+                            "isAvailable": true,
+                            "translations": {
+                                "en": {
+                                    "label": "450 ml"
+                                }
+                            }
                         }
-                    ]
+                    ],
+                    "tags": [
+                        "vegetarian",
+                        "contains-dairy"
+                    ],
+                    "badge": "hit",
+                    "availableHours": null,
+                    "translations": {
+                        "en": {
+                            "name": "Matcha Latte"
+                        }
+                    }
                 },
                 {
                     "id": "cocoa",
@@ -269,7 +448,12 @@ export const simpleMenuPayload = {
                             "measureValue": 250,
                             "measureUnit": "ml",
                             "sortOrder": 1,
-                            "isAvailable": true
+                            "isAvailable": true,
+                            "translations": {
+                                "en": {
+                                    "label": "250 ml"
+                                }
+                            }
                         },
                         {
                             "id": "cocoa-350ml",
@@ -278,9 +462,25 @@ export const simpleMenuPayload = {
                             "measureValue": 350,
                             "measureUnit": "ml",
                             "sortOrder": 2,
-                            "isAvailable": true
+                            "isAvailable": true,
+                            "translations": {
+                                "en": {
+                                    "label": "350 ml"
+                                }
+                            }
                         }
-                    ]
+                    ],
+                    "tags": [
+                        "vegetarian",
+                        "contains-dairy"
+                    ],
+                    "badge": null,
+                    "availableHours": null,
+                    "translations": {
+                        "en": {
+                            "name": "Cocoa"
+                        }
+                    }
                 },
                 {
                     "id": "bean-to-bar-cocoa",
@@ -296,9 +496,25 @@ export const simpleMenuPayload = {
                             "measureValue": 350,
                             "measureUnit": "ml",
                             "sortOrder": 1,
-                            "isAvailable": true
+                            "isAvailable": true,
+                            "translations": {
+                                "en": {
+                                    "label": "350 ml"
+                                }
+                            }
                         }
-                    ]
+                    ],
+                    "tags": [
+                        "vegetarian",
+                        "contains-dairy"
+                    ],
+                    "badge": null,
+                    "availableHours": null,
+                    "translations": {
+                        "en": {
+                            "name": "Bean-to-Bar Cocoa"
+                        }
+                    }
                 },
                 {
                     "id": "americano-seasonal-espresso",
@@ -306,9 +522,24 @@ export const simpleMenuPayload = {
                     "price": "350 ₽",
                     "sortOrder": 14,
                     "isAvailable": true,
-                    "imageUrl": null
+                    "imageUrl": null,
+                    "tags": [],
+                    "badge": null,
+                    "availableHours": null,
+                    "translations": {
+                        "en": {
+                            "name": "Americano with Seasonal Espresso"
+                        }
+                    }
                 }
-            ]
+            ],
+            "availableHours": null,
+            "translations": {
+                "en": {
+                    "name": "Classics",
+                    "description": "Classic coffee drinks. Decaf is available; extra espresso shot +110 RUB."
+                }
+            }
         },
         {
             "id": "special-drinks",
@@ -323,7 +554,11 @@ export const simpleMenuPayload = {
                     "price": "470 ₽",
                     "sortOrder": 1,
                     "isAvailable": true,
-                    "imageUrl": null
+                    "imageUrl": null,
+                    "tags": [],
+                    "badge": null,
+                    "availableHours": null,
+                    "translations": {}
                 },
                 {
                     "id": "citrus-raf",
@@ -331,7 +566,11 @@ export const simpleMenuPayload = {
                     "price": "490 ₽",
                     "sortOrder": 2,
                     "isAvailable": true,
-                    "imageUrl": null
+                    "imageUrl": null,
+                    "tags": [],
+                    "badge": null,
+                    "availableHours": null,
+                    "translations": {}
                 },
                 {
                     "id": "halva-latte",
@@ -339,7 +578,14 @@ export const simpleMenuPayload = {
                     "price": "450 ₽",
                     "sortOrder": 3,
                     "isAvailable": true,
-                    "imageUrl": null
+                    "imageUrl": null,
+                    "tags": [
+                        "contains-nuts",
+                        "contains-dairy"
+                    ],
+                    "badge": null,
+                    "availableHours": null,
+                    "translations": {}
                 },
                 {
                     "id": "peanut-latte",
@@ -347,7 +593,14 @@ export const simpleMenuPayload = {
                     "price": "470 ₽",
                     "sortOrder": 4,
                     "isAvailable": true,
-                    "imageUrl": null
+                    "imageUrl": null,
+                    "tags": [
+                        "contains-nuts",
+                        "contains-dairy"
+                    ],
+                    "badge": null,
+                    "availableHours": null,
+                    "translations": {}
                 },
                 {
                     "id": "salted-caramel-latte",
@@ -355,9 +608,22 @@ export const simpleMenuPayload = {
                     "price": "450 ₽",
                     "sortOrder": 5,
                     "isAvailable": true,
-                    "imageUrl": null
+                    "imageUrl": null,
+                    "tags": [
+                        "vegetarian",
+                        "contains-dairy"
+                    ],
+                    "badge": null,
+                    "availableHours": null,
+                    "translations": {}
                 }
-            ]
+            ],
+            "availableHours": null,
+            "translations": {
+                "en": {
+                    "name": "Specials"
+                }
+            }
         },
         {
             "id": "cold-drinks",
@@ -374,7 +640,11 @@ export const simpleMenuPayload = {
                     "measureUnit": "ml",
                     "sortOrder": 1,
                     "isAvailable": true,
-                    "imageUrl": null
+                    "imageUrl": null,
+                    "tags": [],
+                    "badge": null,
+                    "availableHours": null,
+                    "translations": {}
                 },
                 {
                     "id": "espresso-tonic",
@@ -390,7 +660,12 @@ export const simpleMenuPayload = {
                             "measureValue": 400,
                             "measureUnit": "ml",
                             "sortOrder": 1,
-                            "isAvailable": true
+                            "isAvailable": true,
+                            "translations": {
+                                "en": {
+                                    "label": "400 ml"
+                                }
+                            }
                         },
                         {
                             "id": "espresso-tonic-500ml",
@@ -399,9 +674,18 @@ export const simpleMenuPayload = {
                             "measureValue": 500,
                             "measureUnit": "ml",
                             "sortOrder": 2,
-                            "isAvailable": true
+                            "isAvailable": true,
+                            "translations": {
+                                "en": {
+                                    "label": "500 ml"
+                                }
+                            }
                         }
-                    ]
+                    ],
+                    "tags": [],
+                    "badge": null,
+                    "availableHours": null,
+                    "translations": {}
                 },
                 {
                     "id": "homemade-lemonade",
@@ -417,7 +701,12 @@ export const simpleMenuPayload = {
                             "measureValue": 400,
                             "measureUnit": "ml",
                             "sortOrder": 1,
-                            "isAvailable": true
+                            "isAvailable": true,
+                            "translations": {
+                                "en": {
+                                    "label": "400 ml"
+                                }
+                            }
                         },
                         {
                             "id": "homemade-lemonade-500ml",
@@ -426,9 +715,18 @@ export const simpleMenuPayload = {
                             "measureValue": 500,
                             "measureUnit": "ml",
                             "sortOrder": 2,
-                            "isAvailable": true
+                            "isAvailable": true,
+                            "translations": {
+                                "en": {
+                                    "label": "500 ml"
+                                }
+                            }
                         }
-                    ]
+                    ],
+                    "tags": [],
+                    "badge": null,
+                    "availableHours": null,
+                    "translations": {}
                 },
                 {
                     "id": "cold-brew",
@@ -436,7 +734,11 @@ export const simpleMenuPayload = {
                     "price": "350 ₽",
                     "sortOrder": 4,
                     "isAvailable": true,
-                    "imageUrl": null
+                    "imageUrl": null,
+                    "tags": [],
+                    "badge": "new",
+                    "availableHours": null,
+                    "translations": {}
                 },
                 {
                     "id": "cold-brew-cherry",
@@ -444,7 +746,11 @@ export const simpleMenuPayload = {
                     "price": "410 ₽",
                     "sortOrder": 5,
                     "isAvailable": true,
-                    "imageUrl": null
+                    "imageUrl": null,
+                    "tags": [],
+                    "badge": null,
+                    "availableHours": null,
+                    "translations": {}
                 },
                 {
                     "id": "nitro",
@@ -453,7 +759,11 @@ export const simpleMenuPayload = {
                     "price": "430 ₽",
                     "sortOrder": 6,
                     "isAvailable": true,
-                    "imageUrl": null
+                    "imageUrl": null,
+                    "tags": [],
+                    "badge": null,
+                    "availableHours": null,
+                    "translations": {}
                 },
                 {
                     "id": "air-latte",
@@ -462,9 +772,19 @@ export const simpleMenuPayload = {
                     "price": "470 ₽",
                     "sortOrder": 7,
                     "isAvailable": true,
-                    "imageUrl": null
+                    "imageUrl": null,
+                    "tags": [],
+                    "badge": null,
+                    "availableHours": null,
+                    "translations": {}
                 }
-            ]
+            ],
+            "availableHours": null,
+            "translations": {
+                "en": {
+                    "name": "Cold Drinks"
+                }
+            }
         },
         {
             "id": "seasonal-drinks",
@@ -488,7 +808,12 @@ export const simpleMenuPayload = {
                             "measureValue": 250,
                             "measureUnit": "ml",
                             "sortOrder": 1,
-                            "isAvailable": true
+                            "isAvailable": true,
+                            "translations": {
+                                "en": {
+                                    "label": "250 ml"
+                                }
+                            }
                         },
                         {
                             "id": "filter-strawberry-tarragon-350ml",
@@ -497,7 +822,12 @@ export const simpleMenuPayload = {
                             "measureValue": 350,
                             "measureUnit": "ml",
                             "sortOrder": 2,
-                            "isAvailable": true
+                            "isAvailable": true,
+                            "translations": {
+                                "en": {
+                                    "label": "350 ml"
+                                }
+                            }
                         },
                         {
                             "id": "filter-strawberry-tarragon-450ml",
@@ -506,9 +836,18 @@ export const simpleMenuPayload = {
                             "measureValue": 450,
                             "measureUnit": "ml",
                             "sortOrder": 3,
-                            "isAvailable": true
+                            "isAvailable": true,
+                            "translations": {
+                                "en": {
+                                    "label": "450 ml"
+                                }
+                            }
                         }
-                    ]
+                    ],
+                    "tags": [],
+                    "badge": "season",
+                    "availableHours": null,
+                    "translations": {}
                 },
                 {
                     "id": "matcha-raspberry-foam",
@@ -524,7 +863,12 @@ export const simpleMenuPayload = {
                             "measureValue": 350,
                             "measureUnit": "ml",
                             "sortOrder": 1,
-                            "isAvailable": true
+                            "isAvailable": true,
+                            "translations": {
+                                "en": {
+                                    "label": "350 ml"
+                                }
+                            }
                         },
                         {
                             "id": "matcha-raspberry-foam-450ml",
@@ -533,9 +877,21 @@ export const simpleMenuPayload = {
                             "measureValue": 450,
                             "measureUnit": "ml",
                             "sortOrder": 2,
-                            "isAvailable": true
+                            "isAvailable": true,
+                            "translations": {
+                                "en": {
+                                    "label": "450 ml"
+                                }
+                            }
                         }
-                    ]
+                    ],
+                    "tags": [
+                        "vegetarian",
+                        "contains-dairy"
+                    ],
+                    "badge": null,
+                    "availableHours": null,
+                    "translations": {}
                 },
                 {
                     "id": "mint-melissa-latte",
@@ -551,7 +907,12 @@ export const simpleMenuPayload = {
                             "measureValue": 350,
                             "measureUnit": "ml",
                             "sortOrder": 1,
-                            "isAvailable": true
+                            "isAvailable": true,
+                            "translations": {
+                                "en": {
+                                    "label": "350 ml"
+                                }
+                            }
                         },
                         {
                             "id": "mint-melissa-latte-450ml",
@@ -560,9 +921,21 @@ export const simpleMenuPayload = {
                             "measureValue": 450,
                             "measureUnit": "ml",
                             "sortOrder": 2,
-                            "isAvailable": true
+                            "isAvailable": true,
+                            "translations": {
+                                "en": {
+                                    "label": "450 ml"
+                                }
+                            }
                         }
-                    ]
+                    ],
+                    "tags": [
+                        "vegetarian",
+                        "contains-dairy"
+                    ],
+                    "badge": null,
+                    "availableHours": null,
+                    "translations": {}
                 },
                 {
                     "id": "sea-buckthorn-honey",
@@ -570,7 +943,18 @@ export const simpleMenuPayload = {
                     "price": "450 ₽",
                     "sortOrder": 4,
                     "isAvailable": true,
-                    "imageUrl": null
+                    "imageUrl": null,
+                    "tags": [
+                        "vegetarian",
+                        "caffeine-free"
+                    ],
+                    "badge": null,
+                    "availableHours": null,
+                    "translations": {
+                        "en": {
+                            "name": "Sea Buckthorn & Honey"
+                        }
+                    }
                 },
                 {
                     "id": "rosehip",
@@ -578,7 +962,15 @@ export const simpleMenuPayload = {
                     "price": "390 ₽",
                     "sortOrder": 5,
                     "isAvailable": true,
-                    "imageUrl": null
+                    "imageUrl": null,
+                    "tags": [],
+                    "badge": null,
+                    "availableHours": null,
+                    "translations": {
+                        "en": {
+                            "name": "Rosehip"
+                        }
+                    }
                 },
                 {
                     "id": "tea-without-tea",
@@ -586,9 +978,28 @@ export const simpleMenuPayload = {
                     "description": "Сезонный некофейный напиток.",
                     "sortOrder": 6,
                     "isAvailable": true,
-                    "imageUrl": null
+                    "imageUrl": null,
+                    "tags": [
+                        "vegan",
+                        "caffeine-free"
+                    ],
+                    "badge": null,
+                    "availableHours": null,
+                    "translations": {
+                        "en": {
+                            "name": "Tea Without Tea",
+                            "description": "Seasonal caffeine-free signature drink."
+                        }
+                    }
                 }
-            ]
+            ],
+            "availableHours": null,
+            "translations": {
+                "en": {
+                    "name": "Seasonal Menu",
+                    "description": "Seasonal menu “Green Spring”."
+                }
+            }
         },
         {
             "id": "add-ons",
@@ -604,7 +1015,11 @@ export const simpleMenuPayload = {
                     "price": "110 ₽",
                     "sortOrder": 1,
                     "isAvailable": true,
-                    "imageUrl": null
+                    "imageUrl": null,
+                    "tags": [],
+                    "badge": null,
+                    "availableHours": null,
+                    "translations": {}
                 },
                 {
                     "id": "decaf",
@@ -612,7 +1027,11 @@ export const simpleMenuPayload = {
                     "price": "100 ₽",
                     "sortOrder": 2,
                     "isAvailable": true,
-                    "imageUrl": null
+                    "imageUrl": null,
+                    "tags": [],
+                    "badge": null,
+                    "availableHours": null,
+                    "translations": {}
                 },
                 {
                     "id": "almond-coconut-milk",
@@ -620,7 +1039,11 @@ export const simpleMenuPayload = {
                     "price": "90 ₽",
                     "sortOrder": 3,
                     "isAvailable": true,
-                    "imageUrl": null
+                    "imageUrl": null,
+                    "tags": [],
+                    "badge": null,
+                    "availableHours": null,
+                    "translations": {}
                 },
                 {
                     "id": "oat-skimmed-milk",
@@ -628,7 +1051,11 @@ export const simpleMenuPayload = {
                     "description": "Доступно как замена молока.",
                     "sortOrder": 4,
                     "isAvailable": true,
-                    "imageUrl": null
+                    "imageUrl": null,
+                    "tags": [],
+                    "badge": null,
+                    "availableHours": null,
+                    "translations": {}
                 },
                 {
                     "id": "syrup",
@@ -636,9 +1063,20 @@ export const simpleMenuPayload = {
                     "description": "Уточните доступные вкусы у бариста.",
                     "sortOrder": 5,
                     "isAvailable": true,
-                    "imageUrl": null
+                    "imageUrl": null,
+                    "tags": [],
+                    "badge": null,
+                    "availableHours": null,
+                    "translations": {}
                 }
-            ]
+            ],
+            "availableHours": null,
+            "translations": {
+                "en": {
+                    "name": "Add-ons & Syrups",
+                    "description": "Oat and skim milk plus decaf are available; almond or coconut milk +90 RUB; extra espresso shot +110 RUB."
+                }
+            }
         },
         {
             "id": "cookies-and-buns",
@@ -653,7 +1091,11 @@ export const simpleMenuPayload = {
                     "price": "230 ₽",
                     "sortOrder": 1,
                     "isAvailable": true,
-                    "imageUrl": null
+                    "imageUrl": null,
+                    "tags": [],
+                    "badge": null,
+                    "availableHours": null,
+                    "translations": {}
                 },
                 {
                     "id": "chocolate-cookie",
@@ -661,7 +1103,11 @@ export const simpleMenuPayload = {
                     "price": "270 ₽",
                     "sortOrder": 2,
                     "isAvailable": true,
-                    "imageUrl": null
+                    "imageUrl": null,
+                    "tags": [],
+                    "badge": null,
+                    "availableHours": null,
+                    "translations": {}
                 },
                 {
                     "id": "peanut-cookie",
@@ -669,7 +1115,13 @@ export const simpleMenuPayload = {
                     "price": "230 ₽",
                     "sortOrder": 3,
                     "isAvailable": true,
-                    "imageUrl": null
+                    "imageUrl": null,
+                    "tags": [
+                        "contains-nuts"
+                    ],
+                    "badge": null,
+                    "availableHours": null,
+                    "translations": {}
                 },
                 {
                     "id": "canele",
@@ -677,7 +1129,11 @@ export const simpleMenuPayload = {
                     "price": "250 ₽",
                     "sortOrder": 4,
                     "isAvailable": true,
-                    "imageUrl": null
+                    "imageUrl": null,
+                    "tags": [],
+                    "badge": null,
+                    "availableHours": null,
+                    "translations": {}
                 },
                 {
                     "id": "banana-bread",
@@ -685,7 +1141,11 @@ export const simpleMenuPayload = {
                     "price": "280 ₽",
                     "sortOrder": 5,
                     "isAvailable": true,
-                    "imageUrl": null
+                    "imageUrl": null,
+                    "tags": [],
+                    "badge": null,
+                    "availableHours": null,
+                    "translations": {}
                 },
                 {
                     "id": "condensed-milk-tube",
@@ -693,7 +1153,11 @@ export const simpleMenuPayload = {
                     "price": "280 ₽",
                     "sortOrder": 6,
                     "isAvailable": true,
-                    "imageUrl": null
+                    "imageUrl": null,
+                    "tags": [],
+                    "badge": null,
+                    "availableHours": null,
+                    "translations": {}
                 },
                 {
                     "id": "raisin-roll",
@@ -701,7 +1165,11 @@ export const simpleMenuPayload = {
                     "price": "360 ₽",
                     "sortOrder": 7,
                     "isAvailable": true,
-                    "imageUrl": null
+                    "imageUrl": null,
+                    "tags": [],
+                    "badge": null,
+                    "availableHours": null,
+                    "translations": {}
                 },
                 {
                     "id": "blueberry-danish",
@@ -709,7 +1177,11 @@ export const simpleMenuPayload = {
                     "price": "530 ₽",
                     "sortOrder": 8,
                     "isAvailable": true,
-                    "imageUrl": null
+                    "imageUrl": null,
+                    "tags": [],
+                    "badge": null,
+                    "availableHours": null,
+                    "translations": {}
                 },
                 {
                     "id": "currant-galette",
@@ -717,7 +1189,11 @@ export const simpleMenuPayload = {
                     "price": "310 ₽",
                     "sortOrder": 9,
                     "isAvailable": true,
-                    "imageUrl": null
+                    "imageUrl": null,
+                    "tags": [],
+                    "badge": null,
+                    "availableHours": null,
+                    "translations": {}
                 },
                 {
                     "id": "almond-croissant",
@@ -725,7 +1201,14 @@ export const simpleMenuPayload = {
                     "price": "460 ₽",
                     "sortOrder": 10,
                     "isAvailable": true,
-                    "imageUrl": null
+                    "imageUrl": null,
+                    "tags": [
+                        "contains-nuts",
+                        "contains-dairy"
+                    ],
+                    "badge": null,
+                    "availableHours": null,
+                    "translations": {}
                 },
                 {
                     "id": "christmas-cake",
@@ -733,7 +1216,11 @@ export const simpleMenuPayload = {
                     "price": "380 ₽",
                     "sortOrder": 11,
                     "isAvailable": true,
-                    "imageUrl": null
+                    "imageUrl": null,
+                    "tags": [],
+                    "badge": null,
+                    "availableHours": null,
+                    "translations": {}
                 },
                 {
                     "id": "poppy-bun",
@@ -741,7 +1228,11 @@ export const simpleMenuPayload = {
                     "price": "290 ₽",
                     "sortOrder": 12,
                     "isAvailable": true,
-                    "imageUrl": null
+                    "imageUrl": null,
+                    "tags": [],
+                    "badge": null,
+                    "availableHours": null,
+                    "translations": {}
                 },
                 {
                     "id": "cardamom-bun",
@@ -749,9 +1240,19 @@ export const simpleMenuPayload = {
                     "price": "320 ₽",
                     "sortOrder": 13,
                     "isAvailable": true,
-                    "imageUrl": null
+                    "imageUrl": null,
+                    "tags": [],
+                    "badge": null,
+                    "availableHours": null,
+                    "translations": {}
                 }
-            ]
+            ],
+            "availableHours": null,
+            "translations": {
+                "en": {
+                    "name": "Cookies & Buns"
+                }
+            }
         },
         {
             "id": "food",
@@ -766,7 +1267,11 @@ export const simpleMenuPayload = {
                     "price": "610 ₽",
                     "sortOrder": 1,
                     "isAvailable": true,
-                    "imageUrl": null
+                    "imageUrl": null,
+                    "tags": [],
+                    "badge": null,
+                    "availableHours": null,
+                    "translations": {}
                 },
                 {
                     "id": "ham-mozzarella-croissant",
@@ -774,7 +1279,11 @@ export const simpleMenuPayload = {
                     "price": "610 ₽",
                     "sortOrder": 2,
                     "isAvailable": true,
-                    "imageUrl": null
+                    "imageUrl": null,
+                    "tags": [],
+                    "badge": null,
+                    "availableHours": null,
+                    "translations": {}
                 },
                 {
                     "id": "salmon-croissant",
@@ -782,7 +1291,11 @@ export const simpleMenuPayload = {
                     "price": "695 ₽",
                     "sortOrder": 3,
                     "isAvailable": true,
-                    "imageUrl": null
+                    "imageUrl": null,
+                    "tags": [],
+                    "badge": null,
+                    "availableHours": null,
+                    "translations": {}
                 },
                 {
                     "id": "blueberry-pie",
@@ -790,7 +1303,11 @@ export const simpleMenuPayload = {
                     "price": "470 ₽",
                     "sortOrder": 4,
                     "isAvailable": true,
-                    "imageUrl": null
+                    "imageUrl": null,
+                    "tags": [],
+                    "badge": null,
+                    "availableHours": null,
+                    "translations": {}
                 },
                 {
                     "id": "san-sebastian-cheesecake",
@@ -798,7 +1315,15 @@ export const simpleMenuPayload = {
                     "price": "490 ₽",
                     "sortOrder": 5,
                     "isAvailable": true,
-                    "imageUrl": null
+                    "imageUrl": null,
+                    "tags": [],
+                    "badge": "chefs-choice",
+                    "availableHours": null,
+                    "translations": {
+                        "en": {
+                            "name": "San Sebastian Cheesecake"
+                        }
+                    }
                 },
                 {
                     "id": "mortadella-curd-cheese-sandwich",
@@ -806,7 +1331,11 @@ export const simpleMenuPayload = {
                     "price": "550 ₽",
                     "sortOrder": 6,
                     "isAvailable": true,
-                    "imageUrl": null
+                    "imageUrl": null,
+                    "tags": [],
+                    "badge": null,
+                    "availableHours": null,
+                    "translations": {}
                 },
                 {
                     "id": "turkey-pastrami-cherry-sandwich",
@@ -814,7 +1343,11 @@ export const simpleMenuPayload = {
                     "price": "560 ₽",
                     "sortOrder": 7,
                     "isAvailable": true,
-                    "imageUrl": null
+                    "imageUrl": null,
+                    "tags": [],
+                    "badge": null,
+                    "availableHours": null,
+                    "translations": {}
                 },
                 {
                     "id": "chicken-sandwich",
@@ -822,7 +1355,11 @@ export const simpleMenuPayload = {
                     "price": "590 ₽",
                     "sortOrder": 8,
                     "isAvailable": true,
-                    "imageUrl": null
+                    "imageUrl": null,
+                    "tags": [],
+                    "badge": null,
+                    "availableHours": null,
+                    "translations": {}
                 },
                 {
                     "id": "duck-sandwich",
@@ -830,9 +1367,19 @@ export const simpleMenuPayload = {
                     "price": "650 ₽",
                     "sortOrder": 9,
                     "isAvailable": true,
-                    "imageUrl": null
+                    "imageUrl": null,
+                    "tags": [],
+                    "badge": null,
+                    "availableHours": null,
+                    "translations": {}
                 }
-            ]
+            ],
+            "availableHours": null,
+            "translations": {
+                "en": {
+                    "name": "Food"
+                }
+            }
         },
         {
             "id": "breakfasts-in-jar",
@@ -847,7 +1394,18 @@ export const simpleMenuPayload = {
                     "price": "330 ₽",
                     "sortOrder": 1,
                     "isAvailable": true,
-                    "imageUrl": null
+                    "imageUrl": null,
+                    "tags": [],
+                    "badge": null,
+                    "availableHours": {
+                        "start": "08:00",
+                        "end": "12:00"
+                    },
+                    "translations": {
+                        "en": {
+                            "name": "Grain Porridge"
+                        }
+                    }
                 },
                 {
                     "id": "granola-strawberry-yogurt",
@@ -855,9 +1413,31 @@ export const simpleMenuPayload = {
                     "price": "360 ₽",
                     "sortOrder": 2,
                     "isAvailable": true,
-                    "imageUrl": null
+                    "imageUrl": null,
+                    "tags": [
+                        "vegetarian"
+                    ],
+                    "badge": null,
+                    "availableHours": {
+                        "start": "08:00",
+                        "end": "12:00"
+                    },
+                    "translations": {
+                        "en": {
+                            "name": "Granola with Strawberry and Yogurt"
+                        }
+                    }
                 }
-            ]
+            ],
+            "availableHours": {
+                "start": "08:00",
+                "end": "12:00"
+            },
+            "translations": {
+                "en": {
+                    "name": "Breakfast in a Jar"
+                }
+            }
         }
     ],
     "wifi": {
