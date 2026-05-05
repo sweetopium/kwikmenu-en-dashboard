@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import {
   Users, Eye, UserCheck,
   ArrowUpRight, ArrowDownRight, QrCode, Plus,
@@ -19,8 +18,6 @@ const chartData = [
 ];
 
 const DashboardHome = () => {
-  const [timeRange, setTimeRange] = useState('7d'); // '7d', '30d', 'all'
-
   // Максимальное значение для расчета высоты столбцов графика
   const maxViews = Math.max(...chartData.map(d => d.views));
 

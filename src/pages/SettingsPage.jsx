@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import {
   Store, Wifi, Paintbrush, ShieldCheck,
-  Save, Globe, MapPin, Phone, CreditCard,
-  ChevronRight, ExternalLink, Image as ImageIcon, X
+  Save, MapPin, CreditCard,
+  ExternalLink, Image as ImageIcon
 } from 'lucide-react';
 
 import { Button } from "../components/ui/button";
