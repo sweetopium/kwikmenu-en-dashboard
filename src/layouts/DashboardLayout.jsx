@@ -4,7 +4,9 @@ import {
   LayoutDashboard,
   UtensilsCrossed,
   QrCode,
-  Settings,
+  Building2,
+  UserRound,
+  CreditCard,
   LogOut,
   Menu as MenuIcon,
   Zap,
@@ -17,7 +19,9 @@ const NAV_ITEMS = [
   { icon: LayoutDashboard, label: 'Обзор', path: '/dashboard' },
   { icon: UtensilsCrossed, label: 'Меню', path: '/dashboard/menu' },
   { icon: QrCode, label: 'QR-коды', path: '/dashboard/qr' },
-  { icon: Settings, label: 'Настройки', path: '/dashboard/settings' },
+  { icon: Building2, label: 'Заведение', path: '/dashboard/venue' },
+  { icon: UserRound, label: 'Аккаунт', path: '/dashboard/account' },
+  { icon: CreditCard, label: 'Биллинг', path: '/dashboard/billing' },
 ];
 
 const SidebarContent = ({ pathname, onNavigate }) => (
