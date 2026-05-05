@@ -5,6 +5,7 @@ import { Switch } from "../ui/switch";
 import { formFieldClasses } from "../../lib/uiStyles";
 
 const QrFrameControls = ({
+  embedded = false,
   hasFrame,
   frameText,
   frameColor,
@@ -13,16 +14,21 @@ const QrFrameControls = ({
   onFrameTextChange,
   onFrameColorChange,
 }) => (
-  <div className="bg-card border border-border/60 p-6 rounded-3xl shadow-sm space-y-6">
-    <div className="flex items-center justify-between gap-3 border-b border-border/50 pb-4">
+  <div className={`${embedded ? 'space-y-6' : 'bg-card border border-border/60 p-6 sm:p-8 rounded-3xl shadow-sm space-y-6'}`}>
+    <div className={`flex items-center justify-between gap-3 ${embedded ? '' : 'border-b border-border/50 pb-4'}`}>
       <div className="flex items-center gap-3 min-w-0">
         <div className="w-8 h-8 rounded-lg bg-orange-500/10 text-orange-500 flex items-center justify-center shrink-0">
           <Type size={18} />
         </div>
 
-        <h2 className="font-bold text-lg text-foreground truncate">
-          Рамка и текст
-        </h2>
+        <div className="min-w-0">
+          <h2 className="font-bold text-lg text-foreground">
+            Рамка и текст
+          </h2>
+          <p className="text-sm text-muted-foreground mt-1">
+            Добавьте короткий призыв к действию и цвет для печатной версии QR.
+          </p>
+        </div>
       </div>
 
       <Switch

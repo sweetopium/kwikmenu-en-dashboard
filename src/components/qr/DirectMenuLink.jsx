@@ -2,8 +2,8 @@ import { Copy } from 'lucide-react';
 
 import { subtleIconButtonClasses } from "../../lib/uiStyles";
 
-const DirectMenuLink = ({ displayValue, onCopy }) => (
-  <div className="bg-card border border-border/60 rounded-2xl p-4 shadow-sm flex items-center justify-between min-w-0">
+const DirectMenuLink = ({ displayValue, onCopy, embedded = false }) => (
+  <div className={`${embedded ? 'bg-secondary/20 border border-border/60' : 'bg-card border border-border/60 shadow-sm'} rounded-2xl p-4 flex items-center justify-between min-w-0`}>
     <div className="truncate pr-4 min-w-0">
       <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-1">
         Прямая ссылка на меню

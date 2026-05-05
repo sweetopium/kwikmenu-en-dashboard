@@ -2,6 +2,7 @@ import { Image as ImageIcon, Palette, X } from 'lucide-react';
 import { Label } from "../ui/label";
 
 const QrDesignControls = ({
+  embedded = false,
   qrColor,
   qrStyle,
   logoFile,
@@ -11,15 +12,20 @@ const QrDesignControls = ({
   onLogoUpload,
   onRemoveLogo,
 }) => (
-  <div className="bg-card border border-border/60 p-6 rounded-3xl shadow-sm space-y-6">
-    <div className="flex items-center gap-3 border-b border-border/50 pb-4">
+  <div className={`${embedded ? 'space-y-6' : 'bg-card border border-border/60 p-6 sm:p-8 rounded-3xl shadow-sm space-y-6'}`}>
+    <div className={`flex items-center gap-3 ${embedded ? '' : 'border-b border-border/50 pb-4'}`}>
       <div className="w-8 h-8 rounded-lg bg-brand-purple/10 text-brand-purple flex items-center justify-center shrink-0">
         <Palette size={18} />
       </div>
 
-      <h2 className="font-bold text-lg text-foreground">
-        Дизайн кода
-      </h2>
+      <div>
+        <h2 className="font-bold text-lg text-foreground">
+          Дизайн кода
+        </h2>
+        <p className="text-sm text-muted-foreground mt-1">
+          Настройте форму элементов, цвет и логотип в центре.
+        </p>
+      </div>
     </div>
 
     <div className="space-y-3">
