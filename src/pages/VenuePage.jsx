@@ -86,16 +86,16 @@ const VenuePage = () => {
       />
 
       <div className="space-y-6">
-        <nav className="bg-card border border-border/60 rounded-3xl shadow-sm p-2 sm:p-3">
-          <div className="grid grid-cols-4 gap-2">
+
+          <div className="grid grid-cols-4 gap-2 bg-secondary/30 p-1 rounded-xl border border-input/50">
             {VENUE_TABS.map((tab) => (
               <button
                 key={tab.id}
                 onClick={() => handleTabChange(tab.id)}
-                className={`flex items-center justify-center gap-2 px-2 sm:px-4 h-11 sm:h-12 rounded-xl text-[11px] sm:text-sm font-bold transition-all min-w-0 ${
+                className={`flex items-center justify-center gap-2 px-2 sm:px-4 h-10 sm:h-11 rounded-lg text-[11px] sm:text-sm font-medium transition-all min-w-0 ${
                   activeTab === tab.id
-                    ? 'bg-brand-purple text-white shadow-md shadow-brand-purple/20'
-                    : 'text-muted-foreground hover:bg-secondary/40 hover:text-foreground'
+                    ? 'bg-background shadow-sm text-foreground'
+                    : 'text-muted-foreground hover:text-foreground'
                 }`}
               >
                 <tab.icon size={16} className="hidden sm:block shrink-0" />
@@ -104,7 +104,7 @@ const VenuePage = () => {
               </button>
             ))}
           </div>
-        </nav>
+
 
         <main className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-500">
           {activeTab === 'profile' && (
