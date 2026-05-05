@@ -50,10 +50,10 @@ const BillingPage = () => {
             </div>
 
             <div className="pt-6 border-t border-border/50 flex flex-col sm:flex-row gap-3">
-              <Button variant="outline" className={`flex-1 ${secondaryActionButtonClasses}`}>
+              <Button variant="outline" className={`flex-1 ${secondaryActionButtonClasses} p-4`}>
                 Квитанции и чеки
               </Button>
-              <Button variant="destructive" className="flex-1 h-10 sm:h-12 rounded-lg font-bold bg-red-500/10 text-red-500 border-none hover:bg-red-500/20">
+              <Button variant="destructive" className="flex-1  p-3 sm:h-12 rounded-lg font-bold bg-red-500/10 text-red-500 border-none hover:bg-red-500/20">
                 Отменить подписку
               </Button>
             </div>
