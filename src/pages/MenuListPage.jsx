@@ -65,10 +65,10 @@ const MenuListPage = () => {
             <div className="min-w-0">
 
               <h1 className="text-2xl sm:text-3xl font-extrabold text-foreground tracking-tight">
-                Ваши меню
+                Ваше меню
               </h1>
               <p className="text-sm text-muted-foreground mt-2 max-w-2xl leading-relaxed">
-                Создавайте отдельные меню для основного зала, сезона, завтраков или специальных предложений
+                Добавляйте категории и позиции, обновляйте цены и стоп-лист
               </p>
             </div>
 
