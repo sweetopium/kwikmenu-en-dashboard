@@ -140,10 +140,11 @@ class MenuImportPipeline:
         for section in extracted.sections:
             normalized_items: list[ExtractedItem] = []
             for item in section.items:
-                measure_value, measure_unit = self._normalize_measure_fields(item.measureValue, item.measureUnit)
+                expanded_item = self._expand_compound_variants(item)
+                measure_value, measure_unit = self._normalize_measure_fields(expanded_item.measureValue, expanded_item.measureUnit)
                 normalized_variants: list[ExtractedVariant] = []
 
-                for variant in item.variants:
+                for variant in expanded_item.variants:
                     variant_measure_value, variant_measure_unit = self._normalize_measure_fields(
                         variant.measureValue,
                         variant.measureUnit,
@@ -158,7 +159,7 @@ class MenuImportPipeline:
                     )
 
                 normalized_items.append(
-                    item.model_copy(
+                    expanded_item.model_copy(
                         update={
                             "measureValue": measure_value,
                             "measureUnit": measure_unit,
@@ -171,27 +172,197 @@ class MenuImportPipeline:
 
         return extracted.model_copy(update={"sections": normalized_sections})
 
+    def _expand_compound_variants(self, item: ExtractedItem) -> ExtractedItem:
+        if item.variants:
+            return item
+
+        price_parts = self._split_compound_price_parts(item.price)
+        measure_parts, measure_unit, description = self._resolve_compound_measure_parts(item)
+
+        if len(price_parts) < 2 or len(price_parts) != len(measure_parts):
+            return item
+
+        variants = [
+            ExtractedVariant(
+                label=self._build_variant_label(measure_value, measure_unit),
+                price=price_part,
+                measureValue=measure_value,
+                measureUnit=measure_unit,
+                isAvailable=item.isAvailable,
+            )
+            for measure_value, price_part in zip(measure_parts, price_parts)
+        ]
+
+        return item.model_copy(
+            update={
+                "price": None,
+                "measureValue": None,
+                "measureUnit": None,
+                "description": description,
+                "variants": variants,
+            }
+        )
+
+    def _split_compound_price_parts(self, raw_price: str | None) -> list[str]:
+        if not raw_price:
+            return []
+
+        raw_text = str(raw_price).strip()
+        if "/" not in raw_text:
+            return []
+
+        numeric_parts = re.findall(r"\d+(?:[.,]\d+)?", raw_text)
+        if len(numeric_parts) < 2:
+            return []
+
+        suffix = " ₽" if "₽" in raw_text else ""
+        return [f"{value.replace(',', '.')}{suffix}" for value in numeric_parts]
+
+    def _split_compound_measure_parts(self, raw_measure: int | float | str | None, measure_unit: Any) -> tuple[list[int | float], Any]:
+        normalized_unit = self._normalize_measure_unit(measure_unit)
+
+        if raw_measure is None:
+            return [], normalized_unit
+
+        if isinstance(raw_measure, (int, float)):
+            return [raw_measure], normalized_unit
+
+        raw_text = str(raw_measure).strip().replace(",", ".").lower()
+        if "/" not in raw_text:
+            return [], normalized_unit
+
+        inferred_unit = normalized_unit or self._detect_measure_unit_from_text(raw_text)
+        numeric_parts = re.findall(r"\d+(?:\.\d+)?", raw_text)
+        parsed_parts: list[int | float] = []
+        for value in numeric_parts:
+            numeric_value = float(value)
+            parsed_parts.append(int(numeric_value) if numeric_value.is_integer() else numeric_value)
+
+        return parsed_parts if len(parsed_parts) > 1 else [], inferred_unit
+
+    def _resolve_compound_measure_parts(self, item: ExtractedItem) -> tuple[list[int | float], Any, str | None]:
+        measure_parts, measure_unit = self._split_compound_measure_parts(item.measureValue, item.measureUnit)
+        if len(measure_parts) > 1:
+            return measure_parts, measure_unit, item.description
+
+        for source_name, source_text in (("description", item.description), ("name", item.name)):
+            extracted_parts, extracted_unit = self._extract_measure_parts_from_text(source_text, item.measureUnit)
+            if len(extracted_parts) > 1:
+                cleaned_description = item.description
+                if source_name == "description":
+                    cleaned_description = self._clean_measure_description(source_text)
+                return extracted_parts, extracted_unit, cleaned_description
+
+        return [], self._normalize_measure_unit(item.measureUnit), item.description
+
+    def _extract_measure_parts_from_text(self, raw_text: str | None, measure_unit: Any) -> tuple[list[int | float], Any]:
+        if not raw_text:
+            return [], self._normalize_measure_unit(measure_unit)
+
+        match = re.search(
+            r"(\d+(?:[.,]\d+)?(?:\s*[\\/]\s*\d+(?:[.,]\d+)?)+)\s*(ml|мл|l|л|g|гр\.?|г|kg|кг|pcs|шт\.?|portion|порц(?:ия|ии)?)",
+            raw_text,
+            flags=re.IGNORECASE,
+        )
+        if not match:
+            return [], self._normalize_measure_unit(measure_unit)
+
+        return self._split_compound_measure_parts(match.group(0), match.group(2))
+
+    def _clean_measure_description(self, raw_text: str | None) -> str | None:
+        if not raw_text:
+            return raw_text
+
+        cleaned = re.sub(
+            r"\b\d+(?:[.,]\d+)?(?:\s*[\\/]\s*\d+(?:[.,]\d+)?)+\s*(?:ml|мл|l|л|g|гр\.?|г|kg|кг|pcs|шт\.?|portion|порц(?:ия|ии)?)\b",
+            "",
+            raw_text,
+            flags=re.IGNORECASE,
+        )
+        cleaned = re.sub(r"\s{2,}", " ", cleaned).strip(" ,;:-")
+        return cleaned or None
+
+    def _build_variant_label(self, measure_value: int | float, measure_unit: Any) -> str:
+        formatted_value = str(int(measure_value)) if isinstance(measure_value, float) and measure_value.is_integer() else str(measure_value)
+        display_unit = self._display_measure_unit(measure_unit)
+        return f"{formatted_value} {display_unit}".strip() if display_unit else formatted_value
+
     def _normalize_measure_fields(self, measure_value: int | float | str | None, measure_unit: Any) -> tuple[int | float | None, Any]:
+        normalized_unit = self._normalize_measure_unit(measure_unit)
         if measure_value is None:
-            return None, measure_unit
+            return None, normalized_unit
 
         if isinstance(measure_value, (int, float)):
-            return measure_value, measure_unit
+            return measure_value, normalized_unit
 
         raw_value = str(measure_value).strip().replace(",", ".")
         if not raw_value:
-            return None, measure_unit
+            return None, normalized_unit
+
+        normalized_unit = normalized_unit or self._detect_measure_unit_from_text(raw_value.lower())
 
         if "/" in raw_value or "\\" in raw_value:
             return None, None
 
-        if re.fullmatch(r"\d+(?:\.\d+)?", raw_value):
-            numeric_value = float(raw_value)
+        match = re.search(r"\d+(?:\.\d+)?", raw_value)
+        if match:
+            numeric_value = float(match.group(0))
             if numeric_value.is_integer():
-                return int(numeric_value), measure_unit
-            return numeric_value, measure_unit
+                return int(numeric_value), normalized_unit
+            return numeric_value, normalized_unit
 
         return None, None
+
+    def _normalize_measure_unit(self, measure_unit: Any) -> Any:
+        if measure_unit is None:
+            return None
+
+        raw_unit = str(measure_unit).strip().lower()
+        mapping = {
+            "ml": "ml",
+            "мл": "ml",
+            "l": "l",
+            "л": "l",
+            "g": "g",
+            "гр": "g",
+            "гр.": "g",
+            "г": "g",
+            "kg": "kg",
+            "кг": "kg",
+            "pcs": "pcs",
+            "шт": "pcs",
+            "шт.": "pcs",
+            "portion": "portion",
+            "порция": "portion",
+        }
+        return mapping.get(raw_unit, raw_unit)
+
+    def _detect_measure_unit_from_text(self, raw_text: str) -> Any:
+        if "мл" in raw_text or " ml" in raw_text:
+            return "ml"
+        if re.search(r"(^|[\s])л($|[\s])", raw_text) or " l" in raw_text:
+            return "l"
+        if "кг" in raw_text or " kg" in raw_text:
+            return "kg"
+        if "гр" in raw_text or " г" in raw_text or " g" in raw_text:
+            return "g"
+        if "шт" in raw_text or " pcs" in raw_text:
+            return "pcs"
+        if "порц" in raw_text or "portion" in raw_text:
+            return "portion"
+        return None
+
+    def _display_measure_unit(self, measure_unit: Any) -> str | None:
+        normalized_unit = self._normalize_measure_unit(measure_unit)
+        display_map = {
+            "ml": "мл",
+            "l": "л",
+            "g": "г",
+            "kg": "кг",
+            "pcs": "шт",
+            "portion": "порция",
+        }
+        return display_map.get(normalized_unit, normalized_unit)
 
     def _validate_extracted_page(self, extracted: ExtractedPage, page: NormalizedPage) -> None:
         if not extracted.sections:
@@ -227,6 +398,11 @@ class MenuImportPipeline:
                     raise ValueError(
                         f"Item '{item.name}' on page {page.page_number} ({page.source_name}) "
                         "has both direct price and variants."
+                    )
+                if not item.variants and self._has_compound_price(item.price):
+                    raise ValueError(
+                        f"Item '{item.name}' on page {page.page_number} ({page.source_name}) "
+                        "contains multiple prices but no variants."
                     )
 
         if len(extracted.sections) == 1 and total_items > self.settings.menu_import_max_items_per_single_category:
@@ -335,6 +511,10 @@ class MenuImportPipeline:
 
             if not category.items:
                 raise ValueError(f"Final menu contains empty category '{category.name}'.")
+
+            for item in category.items:
+                if not item.variants and self._has_compound_price(item.price):
+                    raise ValueError(f"Final menu item '{item.name}' contains multiple prices but no variants.")
 
         if len(menu.categories) == 1 and total_items > self.settings.menu_import_max_items_per_single_category:
             raise ValueError(
@@ -445,3 +625,6 @@ class MenuImportPipeline:
                 upper = code.upper()
                 languages.append(MenuLanguage(code=code, shortLabel=upper, nativeName=upper, flag=upper))
         return languages
+
+    def _has_compound_price(self, raw_price: str | None) -> bool:
+        return len(self._split_compound_price_parts(raw_price)) > 1

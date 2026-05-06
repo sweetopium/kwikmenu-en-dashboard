@@ -131,7 +131,17 @@ class OpenRouterClient:
             "measureValue must contain only one numeric scalar like 250 or 0.5.",
             "If the source shows composite notation like 1/200, 120/30, 100/50/20, 1 pcs / 250 g or similar, do not put that into measureValue.",
             "For composite serving notations set measureValue to null and measureUnit to null.",
-            "For variants use the variants array only when one menu item has size or option rows under the same item.",
+            "For variants use the variants array only when one menu item has multiple sizes or option rows under the same item.",
+            "If one item has multiple sizes and multiple prices on the same line or in the same row block, return them as variants and pair them by order.",
+            "Parent item price must be null when variants are present.",
+            "Use this target shape for such rows: "
+            "{\"name\":\"Фильтр-кофе\",\"price\":null,\"measureValue\":null,\"measureUnit\":null,"
+            "\"variants\":["
+            "{\"label\":\"250 мл\",\"price\":\"160\",\"measureValue\":250,\"measureUnit\":\"ml\"},"
+            "{\"label\":\"350 мл\",\"price\":\"190\",\"measureValue\":350,\"measureUnit\":\"ml\"},"
+            "{\"label\":\"450 мл\",\"price\":\"220\",\"measureValue\":450,\"measureUnit\":\"ml\"}"
+            "]}",
+            "Do not return price='160/190/220' or measureValue='250/350/450' on the parent item in that case.",
             "If there are no variants, return an empty variants array.",
             f"Page number: {page_number}",
             f"Source kind: {source_kind}",
