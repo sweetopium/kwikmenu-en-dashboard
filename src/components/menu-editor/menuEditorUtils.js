@@ -1,4 +1,5 @@
 export const MEASURE_UNITS = [
+  { value: '', label: 'Не указано' },
   { value: 'ml', label: 'мл' },
   { value: 'l', label: 'л' },
   { value: 'g', label: 'г' },
@@ -9,8 +10,9 @@ export const MEASURE_UNITS = [
 
 export const formatMeasure = (value, unitCode) => {
   if (!value) return '';
+  if (!unitCode || unitCode === 'null') return `${value}`.trim();
   const unit = MEASURE_UNITS.find((item) => item.value === unitCode);
-  return `${value} ${unit ? unit.label : ''}`.trim();
+  return `${value} ${unit && unit.value ? unit.label : ''}`.trim();
 };
 
 export const DIETARY_TAG_OPTIONS = [

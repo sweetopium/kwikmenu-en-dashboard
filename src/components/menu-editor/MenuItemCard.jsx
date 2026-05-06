@@ -1,11 +1,6 @@
 import { GripVertical, Image as ImageIcon, Edit2, Trash2 } from 'lucide-react';
 import { Switch } from "../ui/switch";
-
-const formatMeasure = (value, unitCode) => {
-  if (!value) return '';
-  const units = { ml: 'мл', l: 'л', g: 'г', kg: 'кг', pcs: 'шт', portion: 'порция' };
-  return `${value} ${units[unitCode] || unitCode}`.trim();
-};
+import { formatMeasure } from "./menuEditorUtils";
 
 const MenuItemCard = ({ item, language, defaultLanguage, onEdit, onDelete }) => {
   const name = language !== defaultLanguage && item.translations?.[language]?.name ? item.translations[language].name : item.name;

@@ -176,8 +176,8 @@ const ItemModal = ({
                   </Label>
 
                   <MeasureUnitSelect
-                    value={item.measureUnit || 'ml'}
-                    onChange={(value) => onChange({ ...item, measureUnit: value })}
+                    value={item.measureUnit || ''}
+                    onChange={(value) => onChange({ ...item, measureUnit: value || null })}
                     className={formSelectClasses}
                     chevronSize={14}
                   />
@@ -230,8 +230,8 @@ const ItemModal = ({
                       </Label>
 
                       <MeasureUnitSelect
-                        value={variant.measureUnit || 'ml'}
-                        onChange={(value) => onVariantChange(index, 'measureUnit', value)}
+                        value={variant.measureUnit || ''}
+                        onChange={(value) => onVariantChange(index, 'measureUnit', value || null)}
                         className={`${formSelectClasses} h-11 text-xs px-3`}
                         chevronSize={12}
                       />

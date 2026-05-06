@@ -84,6 +84,7 @@ class MenuImportPipeline:
             raise ValueError("Parser did not find any menu sections in the provided files.")
 
         menu_payload = self._merge_pages(extracted_pages=extracted_pages, context=context)
+        menu_payload = self._repair_missing_measure_units(menu_payload)
         validated_menu = MenuPayload.model_validate(menu_payload.model_dump())
         self._validate_final_menu(validated_menu)
 
@@ -545,6 +546,95 @@ class MenuImportPipeline:
                 f"Final menu has one category with {total_items} items. "
                 "This likely means the parser failed to split the menu into sections."
             )
+
+    def _repair_missing_measure_units(self, menu: MenuPayload) -> MenuPayload:
+        repaired_categories: list[MenuCategory] = []
+        for category in menu.categories:
+            category_unit = self._infer_category_dominant_unit(category)
+            repaired_items: list[MenuItem] = []
+
+            for item in category.items:
+                item_measure_unit = item.measureUnit
+                if item.measureValue is not None and item_measure_unit is None:
+                    item_measure_unit = category_unit or self._infer_measure_unit_from_context(
+                        category_name=category.name,
+                        item_name=item.name,
+                        item_description=item.description,
+                    )
+
+                repaired_variants: list[MenuVariant] = []
+                for variant in item.variants:
+                    variant_measure_unit = variant.measureUnit
+                    if variant.measureValue is not None and variant_measure_unit is None:
+                        variant_measure_unit = category_unit or self._infer_measure_unit_from_context(
+                            category_name=category.name,
+                            item_name=f"{item.name} {variant.label}",
+                            item_description=item.description,
+                        )
+
+                    repaired_variants.append(
+                        variant.model_copy(update={"measureUnit": variant_measure_unit})
+                    )
+
+                repaired_items.append(
+                    item.model_copy(
+                        update={
+                            "measureUnit": item_measure_unit,
+                            "variants": repaired_variants,
+                        }
+                    )
+                )
+
+            repaired_categories.append(category.model_copy(update={"items": repaired_items}))
+
+        return menu.model_copy(update={"categories": repaired_categories})
+
+    def _infer_category_dominant_unit(self, category: MenuCategory) -> Any:
+        units: list[str] = []
+        for item in category.items:
+            if item.measureValue is not None and item.measureUnit:
+                units.append(str(item.measureUnit))
+            for variant in item.variants:
+                if variant.measureValue is not None and variant.measureUnit:
+                    units.append(str(variant.measureUnit))
+
+        if not units:
+            return None
+
+        unit_counts: dict[str, int] = {}
+        for unit in units:
+            unit_counts[unit] = unit_counts.get(unit, 0) + 1
+
+        return max(unit_counts, key=unit_counts.get)
+
+    def _infer_measure_unit_from_context(
+        self,
+        *,
+        category_name: str | None,
+        item_name: str | None,
+        item_description: str | None,
+    ) -> Any:
+        context_text = " ".join(filter(None, [category_name, item_name, item_description])).lower()
+
+        drink_keywords = [
+            "кофе", "coffee", "эспрессо", "espresso", "американо", "americano", "капучино", "cappuccino",
+            "латте", "latte", "раф", "flat white", "флэт уайт", "чай", "tea", "лимонад", "lemonade",
+            "сок", "juice", "морс", "компот", "вода", "water", "сироп", "syrup", "коктейл", "cocktail",
+            "виски", "whisky", "whiskey", "джин", "gin", "ром", "rum", "водка", "vodka", "коньяк",
+            "brandy", "ликер", "liqueur", "пиво", "beer", "вино", "wine", "просекко", "prosecco",
+            "шампан", "champagne", "текила", "tequila", "мартини", "martini", "настойка",
+        ]
+        food_keywords = [
+            "салат", "salad", "суп", "soup", "закуск", "appetizer", "десерт", "dessert", "паста", "pasta",
+            "бургер", "burger", "пицца", "pizza", "шашлык", "хачапури", "хинкали", "стейк", "steak",
+            "гарнир", "соус", "sauce", "мясо", "рыба", "fish", "курица", "chicken", "торт", "cake",
+        ]
+
+        if any(keyword in context_text for keyword in drink_keywords):
+            return "ml"
+        if any(keyword in context_text for keyword in food_keywords):
+            return "g"
+        return None
 
     def _merge_items(self, *, category: MenuCategory, new_items: list[ExtractedItem]) -> None:
         item_map = {slugify(item.name, fallback=f"item-{index}"): item for index, item in enumerate(category.items, start=1)}

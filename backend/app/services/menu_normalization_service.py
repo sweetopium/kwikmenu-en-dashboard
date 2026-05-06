@@ -54,10 +54,18 @@ class MenuNormalizationService:
                     raise ValueError("Normalizer changed item ids or order.")
                 if len(original_item.variants) != len(normalized_item.variants):
                     raise ValueError(f"Normalizer changed variant count for item '{original_item.id}'.")
+                if original_item.measureValue is not None and normalized_item.measureValue is None:
+                    raise ValueError(f"Normalizer removed measureValue for item '{original_item.id}'.")
+                if original_item.measureUnit is not None and normalized_item.measureUnit is None:
+                    raise ValueError(f"Normalizer removed measureUnit for item '{original_item.id}'.")
 
                 for original_variant, normalized_variant in zip(original_item.variants, normalized_item.variants):
                     if original_variant.id != normalized_variant.id:
                         raise ValueError("Normalizer changed variant ids or order.")
+                    if original_variant.measureValue is not None and normalized_variant.measureValue is None:
+                        raise ValueError(f"Normalizer removed measureValue for variant '{original_variant.id}'.")
+                    if original_variant.measureUnit is not None and normalized_variant.measureUnit is None:
+                        raise ValueError(f"Normalizer removed measureUnit for variant '{original_variant.id}'.")
 
     def _apply_deterministic_cleanup(self, menu: MenuPayload) -> MenuPayload:
         cleaned_categories: list[MenuCategory] = []
@@ -65,11 +73,14 @@ class MenuNormalizationService:
             cleaned_items: list[MenuItem] = []
             for item in category.items:
                 cleaned_variants = [self._normalize_variant(variant) for variant in item.variants]
+                item_measure_value, item_measure_unit = self._normalize_measure_pair(item.measureValue, item.measureUnit)
                 cleaned_items.append(
                     item.model_copy(
                         update={
                             "name": self._normalize_sentence_case(item.name),
                             "description": self._normalize_description(item.description),
+                            "measureValue": item_measure_value,
+                            "measureUnit": item_measure_unit,
                             "tags": [self._normalize_sentence_case(tag) for tag in item.tags if tag and tag.strip()],
                             "variants": cleaned_variants,
                         }
@@ -99,9 +110,12 @@ class MenuNormalizationService:
         )
 
     def _normalize_variant(self, variant: MenuVariant) -> MenuVariant:
+        measure_value, measure_unit = self._normalize_measure_pair(variant.measureValue, variant.measureUnit)
         return variant.model_copy(
             update={
-                "label": self._normalize_variant_label(variant.label, variant.measureValue, variant.measureUnit),
+                "measureValue": measure_value,
+                "measureUnit": measure_unit,
+                "label": self._normalize_variant_label(variant.label, measure_value, measure_unit),
             }
         )
 
@@ -156,6 +170,30 @@ class MenuNormalizationService:
 
         return self._normalize_sentence_case(cleaned) or ""
 
+    def _normalize_measure_pair(self, measure_value: Any, measure_unit: Any) -> tuple[Any, Any]:
+        if measure_value is None or measure_unit is None:
+            return measure_value, measure_unit
+
+        try:
+            numeric_value = float(str(measure_value).replace(",", ".").strip())
+        except ValueError:
+            return measure_value, measure_unit
+
+        unit = self._unit_code(measure_unit)
+
+        if unit == "l" and 0 < numeric_value < 1:
+            converted_value = numeric_value * 1000
+            return self._finalize_measure_value(converted_value), "ml"
+
+        if unit == "kg" and 0 < numeric_value < 1:
+            converted_value = numeric_value * 1000
+            return self._finalize_measure_value(converted_value), "g"
+
+        return self._finalize_measure_value(numeric_value), measure_unit
+
+    def _finalize_measure_value(self, numeric_value: float) -> int | float:
+        return int(numeric_value) if numeric_value.is_integer() else numeric_value
+
     def _extract_numeric_prefix(self, value: str) -> str | None:
         match = re.fullmatch(r"(\d+(?:[.,]\d+)?)\s*[a-zA-Zа-яА-Я.]*", value)
         if not match:
@@ -174,6 +212,7 @@ class MenuNormalizationService:
         if measure_unit is None:
             return None
 
+        unit_code = self._unit_code(measure_unit)
         mapping = {
             "ml": "мл",
             "l": "л",
@@ -182,7 +221,12 @@ class MenuNormalizationService:
             "pcs": "шт",
             "portion": "порция",
         }
-        return mapping.get(str(measure_unit), str(measure_unit))
+        return mapping.get(unit_code, unit_code)
+
+    def _unit_code(self, measure_unit: Any) -> str:
+        if hasattr(measure_unit, "value"):
+            return str(measure_unit.value)
+        return str(measure_unit)
 
     def _strip_english_duplicate_suffix(self, value: str) -> str:
         parts = [part.strip() for part in re.split(r"\s*/\s*", value) if part.strip()]
