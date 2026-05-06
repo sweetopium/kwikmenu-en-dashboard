@@ -1,6 +1,6 @@
-from pydantic import Field
+from pydantic import Field, field_validator
 
-from app.schemas.menu import LocalizedContent, MenuAvailableHours, MenuBadge, MenuUnit, StrictModel
+from app.schemas.menu import LocalizedContent, MenuAvailableHours, MenuBadge, MenuUnit, StrictModel, normalize_menu_unit_value
 
 
 RawMeasureValue = int | float | str | None
@@ -13,6 +13,11 @@ class ExtractedVariant(StrictModel):
     measureUnit: MenuUnit | None = None
     isAvailable: bool = True
     translations: dict[str, LocalizedContent] = Field(default_factory=dict)
+
+    @field_validator("measureUnit", mode="before")
+    @classmethod
+    def validate_measure_unit(cls, value: object) -> object:
+        return normalize_menu_unit_value(value)
 
 
 class ExtractedItem(StrictModel):
@@ -27,6 +32,11 @@ class ExtractedItem(StrictModel):
     availableHours: MenuAvailableHours | None = None
     translations: dict[str, LocalizedContent] = Field(default_factory=dict)
     variants: list[ExtractedVariant] = Field(default_factory=list)
+
+    @field_validator("measureUnit", mode="before")
+    @classmethod
+    def validate_measure_unit(cls, value: object) -> object:
+        return normalize_menu_unit_value(value)
 
 
 class ExtractedSection(StrictModel):

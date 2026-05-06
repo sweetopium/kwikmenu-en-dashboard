@@ -134,6 +134,8 @@ class OpenRouterClient:
             "For composite serving notations set measureValue to null and measureUnit to null.",
             "For variants use the variants array only when one menu item has multiple sizes or option rows under the same item.",
             "If one item has multiple sizes and multiple prices on the same line or in the same row block, return them as variants and pair them by order.",
+            "If a local block or subsection has one shared size header for multiple following items, apply that size header to every item in that block.",
+            "If needed, store that shared size header in section.description so downstream normalization can reuse it.",
             "Parent item price must be null when variants are present.",
             "Use this target shape for such rows: "
             "{\"name\":\"Фильтр-кофе\",\"price\":null,\"measureValue\":null,\"measureUnit\":null,"
@@ -143,6 +145,8 @@ class OpenRouterClient:
             "{\"label\":\"450 мл\",\"price\":\"220\",\"measureValue\":450,\"measureUnit\":\"ml\"}"
             "]}",
             "Do not return price='160/190/220' or measureValue='250/350/450' on the parent item in that case.",
+            "Another example: subsection 'Домашние лимонады' with shared size header '0,25/1л' and item '«Классический» 180/650' "
+            "must become one item with variants [{label:'0.25 л', price:'180'}, {label:'1 л', price:'650'}], not price='180/650'.",
             "If there are no variants, return an empty variants array.",
             f"Page number: {page_number}",
             f"Source kind: {source_kind}",

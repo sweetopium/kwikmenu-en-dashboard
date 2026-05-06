@@ -1,6 +1,6 @@
 from enum import Enum
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 
 class StrictModel(BaseModel):
@@ -14,6 +14,39 @@ class MenuUnit(str, Enum):
     kg = "kg"
     pcs = "pcs"
     portion = "portion"
+
+
+def normalize_menu_unit_value(value: object) -> str | None:
+    if value is None:
+        return None
+
+    raw_value = str(value).strip().lower()
+    if not raw_value:
+        return None
+
+    if "." in raw_value:
+        raw_value = raw_value.split(".")[-1]
+
+    mapping = {
+        "ml": "ml",
+        "мл": "ml",
+        "l": "l",
+        "л": "l",
+        "g": "g",
+        "гр": "g",
+        "гр.": "g",
+        "г": "g",
+        "kg": "kg",
+        "кг": "kg",
+        "pcs": "pcs",
+        "pc": "pcs",
+        "шт": "pcs",
+        "шт.": "pcs",
+        "portion": "portion",
+        "порция": "portion",
+        "порц": "portion",
+    }
+    return mapping.get(raw_value)
 
 
 class MenuBadge(str, Enum):
@@ -77,6 +110,11 @@ class MenuVariant(StrictModel):
     isAvailable: bool = True
     translations: dict[str, LocalizedContent] = Field(default_factory=dict)
 
+    @field_validator("measureUnit", mode="before")
+    @classmethod
+    def validate_measure_unit(cls, value: object) -> object:
+        return normalize_menu_unit_value(value)
+
 
 class MenuItem(StrictModel):
     id: str
@@ -93,6 +131,11 @@ class MenuItem(StrictModel):
     availableHours: MenuAvailableHours | None = None
     translations: dict[str, LocalizedContent] = Field(default_factory=dict)
     variants: list[MenuVariant] = Field(default_factory=list)
+
+    @field_validator("measureUnit", mode="before")
+    @classmethod
+    def validate_measure_unit(cls, value: object) -> object:
+        return normalize_menu_unit_value(value)
 
 
 class MenuCategory(StrictModel):

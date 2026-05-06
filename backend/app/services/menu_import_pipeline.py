@@ -23,8 +23,8 @@ from app.services.page_normalizer import NormalizedPage, PageNormalizer
 
 
 def slugify(value: str, *, fallback: str) -> str:
-    normalized = unicodedata.normalize("NFKD", value).encode("ascii", "ignore").decode("ascii").lower()
-    slug = re.sub(r"[^a-z0-9]+", "-", normalized).strip("-")
+    normalized = unicodedata.normalize("NFKC", value).lower().strip()
+    slug = re.sub(r"[^\w]+", "-", normalized, flags=re.UNICODE).strip("-_")
     return slug or fallback
 
 
@@ -58,21 +58,30 @@ class MenuImportPipeline:
         previous_section_headings: list[str] = []
 
         for page in pages:
-            extracted, page_warnings, fallback_used = self._parse_page(
-                page=page,
-                context=context,
-                previous_section_headings=previous_section_headings,
-            )
-            warnings.extend(page_warnings)
-            used_fallback = used_fallback or fallback_used
-            normalized_page = self._normalize_extracted_page(extracted)
-            self._validate_extracted_page(normalized_page, page)
-            extracted_pages.append(normalized_page)
-            previous_section_headings = [
-                section.heading.strip()
-                for section in normalized_page.sections
-                if section.heading and section.heading.strip()
-            ]
+            try:
+                extracted, page_warnings, fallback_used = self._parse_page(
+                    page=page,
+                    context=context,
+                    previous_section_headings=previous_section_headings,
+                )
+                warnings.extend(page_warnings)
+                used_fallback = used_fallback or fallback_used
+                normalized_page = self._normalize_extracted_page(extracted)
+                self._validate_extracted_page(normalized_page, page)
+                extracted_pages.append(normalized_page)
+                previous_section_headings = [
+                    section.heading.strip()
+                    for section in normalized_page.sections
+                    if section.heading and section.heading.strip()
+                ]
+            except ValueError as exc:
+                if self._is_skippable_page_error(exc):
+                    warnings.append(str(exc))
+                    continue
+                raise
+
+        if not extracted_pages:
+            raise ValueError("Parser did not find any menu sections in the provided files.")
 
         menu_payload = self._merge_pages(extracted_pages=extracted_pages, context=context)
         validated_menu = MenuPayload.model_validate(menu_payload.model_dump())
@@ -140,7 +149,7 @@ class MenuImportPipeline:
         for section in extracted.sections:
             normalized_items: list[ExtractedItem] = []
             for item in section.items:
-                expanded_item = self._expand_compound_variants(item)
+                expanded_item = self._expand_compound_variants(item, section)
                 measure_value, measure_unit = self._normalize_measure_fields(expanded_item.measureValue, expanded_item.measureUnit)
                 normalized_variants: list[ExtractedVariant] = []
 
@@ -161,6 +170,7 @@ class MenuImportPipeline:
                 normalized_items.append(
                     expanded_item.model_copy(
                         update={
+                            "price": None if normalized_variants else expanded_item.price,
                             "measureValue": measure_value,
                             "measureUnit": measure_unit,
                             "variants": normalized_variants,
@@ -168,16 +178,26 @@ class MenuImportPipeline:
                     )
                 )
 
-            normalized_sections.append(section.model_copy(update={"items": normalized_items}))
+            if not normalized_items:
+                continue
+
+            normalized_sections.append(
+                section.model_copy(
+                    update={
+                        "items": normalized_items,
+                        "continuedFromPreviousPage": section.continuedFromPreviousPage or not bool(section.heading and section.heading.strip()),
+                    }
+                )
+            )
 
         return extracted.model_copy(update={"sections": normalized_sections})
 
-    def _expand_compound_variants(self, item: ExtractedItem) -> ExtractedItem:
+    def _expand_compound_variants(self, item: ExtractedItem, section: ExtractedSection) -> ExtractedItem:
         if item.variants:
             return item
 
         price_parts = self._split_compound_price_parts(item.price)
-        measure_parts, measure_unit, description = self._resolve_compound_measure_parts(item)
+        measure_parts, measure_unit, description = self._resolve_compound_measure_parts(item, section)
 
         if len(price_parts) < 2 or len(price_parts) != len(measure_parts):
             return item
@@ -240,7 +260,7 @@ class MenuImportPipeline:
 
         return parsed_parts if len(parsed_parts) > 1 else [], inferred_unit
 
-    def _resolve_compound_measure_parts(self, item: ExtractedItem) -> tuple[list[int | float], Any, str | None]:
+    def _resolve_compound_measure_parts(self, item: ExtractedItem, section: ExtractedSection) -> tuple[list[int | float], Any, str | None]:
         measure_parts, measure_unit = self._split_compound_measure_parts(item.measureValue, item.measureUnit)
         if len(measure_parts) > 1:
             return measure_parts, measure_unit, item.description
@@ -252,6 +272,10 @@ class MenuImportPipeline:
                 if source_name == "description":
                     cleaned_description = self._clean_measure_description(source_text)
                 return extracted_parts, extracted_unit, cleaned_description
+
+        extracted_parts, extracted_unit = self._extract_measure_parts_from_text(section.description, item.measureUnit)
+        if len(extracted_parts) > 1:
+            return extracted_parts, extracted_unit, item.description
 
         return [], self._normalize_measure_unit(item.measureUnit), item.description
 
@@ -628,3 +652,11 @@ class MenuImportPipeline:
 
     def _has_compound_price(self, raw_price: str | None) -> bool:
         return len(self._split_compound_price_parts(raw_price)) > 1
+
+    def _is_skippable_page_error(self, error: ValueError) -> bool:
+        message = str(error)
+        return (
+            message.startswith("Parser returned no sections for page ")
+            or message.startswith("Section 'continuation' has no items on page ")
+            or message.startswith("Section without heading on page ")
+        )
