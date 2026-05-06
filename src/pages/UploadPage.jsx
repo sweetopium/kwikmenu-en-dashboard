@@ -194,12 +194,12 @@ const UploadPage = () => {
             <MenuImportFlow
               context={importContext}
               introTitle="Загрузите меню"
-              introDescription="Загрузите PDF, фотографии или ссылку. Отправим исходники в сценарий распознавания и покажем результат."
+              introDescription="Загрузите PDF, фотографии или ссылку. Создадим backend job, дождемся обработки и покажем результат."
               submitLabel="Отправить на распознавание"
               successTitle="Черновик меню подготовлен"
-              successDescription="Исходники ушли в webhook, базовая структура собрана. Дальше можно открыть демо-редактор и продолжить работу вручную."
+              successDescription="Исходники обработаны backend-сервисом, итоговый JSON собран и проверен. Дальше можно открыть демо-редактор и продолжить работу вручную."
               successPrimaryLabel="Открыть редактор меню"
-              successPrimaryTo="/dashboard/menu/main"
+              successPrimaryTo="/dashboard/menu/imported"
               successSecondaryLabel="Перейти в кабинет"
               successSecondaryTo="/dashboard"
               onStageChange={setImportStage}

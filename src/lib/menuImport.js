@@ -1,28 +1,6 @@
-export const MENU_IMPORT_WEBHOOK_URL = 'https://n8n.rtctrf.com/webhook-test/5fbe7bd4-d627-4315-9a1b-ad1ac1fb6617';
-
-const FALLBACK_PROCESSING_MS = 1200;
+export const MENU_IMPORT_API_URL = import.meta.env.VITE_MENU_IMPORT_API_URL || 'http://localhost:8000/api/menu-imports';
 
 const trimString = (value) => `${value ?? ''}`.trim();
-
-export const buildMenuImportPreview = ({ menuSource, files, menuLink }) => {
-  const fileCount = files.length;
-  const detectedCategories = menuSource === 'file'
-    ? Math.max(3, Math.min(9, fileCount * 2 + 1))
-    : 4;
-  const detectedItems = menuSource === 'file'
-    ? Math.max(12, fileCount * 14)
-    : 28;
-
-  return {
-    detectedCategories,
-    detectedItems,
-    sourceLabel: menuSource === 'file'
-      ? fileCount === 1
-        ? files[0].name
-        : `${fileCount} файлов`
-      : trimString(menuLink),
-  };
-};
 
 export const submitMenuImport = async ({
   menuSource,
@@ -50,46 +28,26 @@ export const submitMenuImport = async ({
     }
   });
 
-  const requestStartedAt = Date.now();
+  const response = await fetch(MENU_IMPORT_API_URL, {
+    method: 'POST',
+    body: formData,
+  });
 
-  try {
-    const response = await fetch(MENU_IMPORT_WEBHOOK_URL, {
-      method: 'POST',
-      body: formData,
-    });
-
-    if (!response.ok) {
-      throw new Error(`Webhook returned ${response.status}`);
-    }
-
-    let payload = null;
-    const contentType = response.headers.get('content-type') || '';
-    if (contentType.includes('application/json')) {
-      payload = await response.json().catch(() => null);
-    } else {
-      await response.text().catch(() => null);
-    }
-
-    return {
-      payload,
-      processingDelayMs: Math.max(800, FALLBACK_PROCESSING_MS - (Date.now() - requestStartedAt)),
-      transport: 'cors',
-    };
-  } catch (error) {
-    if (!(error instanceof TypeError)) {
-      throw error;
-    }
-
-    await fetch(MENU_IMPORT_WEBHOOK_URL, {
-      method: 'POST',
-      body: formData,
-      mode: 'no-cors',
-    });
-
-    return {
-      payload: null,
-      processingDelayMs: Math.max(800, FALLBACK_PROCESSING_MS - (Date.now() - requestStartedAt)),
-      transport: 'opaque',
-    };
+  if (!response.ok) {
+    const errorText = await response.text().catch(() => '');
+    throw new Error(errorText || `Menu import request failed with status ${response.status}`);
   }
+
+  return response.json();
+};
+
+export const pollMenuImportStatus = async (jobId) => {
+  const response = await fetch(`${MENU_IMPORT_API_URL}/${jobId}`);
+
+  if (!response.ok) {
+    const errorText = await response.text().catch(() => '');
+    throw new Error(errorText || `Menu import status request failed with status ${response.status}`);
+  }
+
+  return response.json();
 };

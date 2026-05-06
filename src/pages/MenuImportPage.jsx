@@ -8,7 +8,7 @@ const MenuImportPage = () => {
     <div className="mx-auto space-y-6 sm:space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700 ease-out">
       <SettingsPageHeader
         title="Новое меню"
-        description="Отдельный экран импорта для рабочего кабинета. Пока без БД: отправляем исходники в webhook и показываем полный visual flow."
+        description="Отдельный экран импорта для рабочего кабинета. Пока без БД: отправляем исходники в backend job и показываем полный visual flow."
         actionLabel={null}
       />
 
@@ -20,9 +20,9 @@ const MenuImportPage = () => {
             introDescription="Поддерживаем PDF, фотографии и ссылку на облако или сайт. После отправки покажем состояние обработки и переводим в существующий редактор."
             submitLabel="Создать черновик меню"
             successTitle="Импорт завершен"
-            successDescription="Webhook принял исходники. Для текущего прототипа открываем существующий демо-редактор, пока без сохранения новой сущности меню."
+            successDescription="Backend job принял исходники, собрал итоговый JSON и провалидировал схему. Для текущего прототипа открываем существующий демо-редактор."
             successPrimaryLabel="Открыть демо-редактор"
-            successPrimaryTo="/dashboard/menu/main"
+            successPrimaryTo="/dashboard/menu/imported"
             successSecondaryLabel="Загрузить другой файл"
           />
         </section>
@@ -35,15 +35,15 @@ const MenuImportPage = () => {
               </div>
               <div>
                 <h2 className="text-lg font-bold text-foreground">Что делает импорт</h2>
-                <p className="text-sm text-muted-foreground">Пока только front-flow и webhook dispatch.</p>
+                <p className="text-sm text-muted-foreground">Работает через backend import job и polling.</p>
               </div>
             </div>
 
             <div className="space-y-3">
               {[
                 'Принимаем PDF, фотографии или ссылку на меню.',
-                'Отправляем данные в n8n webhook без локального сохранения.',
-                'Показываем статусы загрузки, обработки, успеха и ошибки.',
+                'Создаем backend job и сохраняем исходники локально без БД.',
+                'Показываем статусы загрузки, обработки, успеха и ошибки через polling.',
                 'После успеха переводим в существующий демо-редактор.',
               ].map((item) => (
                 <div key={item} className="rounded-2xl border border-border/60 bg-secondary/15 px-4 py-4 text-sm leading-relaxed text-muted-foreground">
@@ -60,7 +60,7 @@ const MenuImportPage = () => {
               </div>
               <div>
                 <h2 className="text-lg font-bold text-foreground">Следующий этап</h2>
-                <p className="text-sm text-muted-foreground">Когда появится backend-модель меню.</p>
+                <p className="text-sm text-muted-foreground">Когда появится постоянное хранение и сущности меню.</p>
               </div>
             </div>
 

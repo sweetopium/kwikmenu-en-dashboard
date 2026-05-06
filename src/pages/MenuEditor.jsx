@@ -1,5 +1,6 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { ChevronDown, Edit2, Plus, Search, Trash2 } from 'lucide-react';
+import { useParams } from 'react-router-dom';
 
 import CategoryModal from "../components/menu-editor/CategoryModal";
 import CategorySidebar from "../components/menu-editor/CategorySidebar";
@@ -10,6 +11,7 @@ import MenuItemList from "../components/menu-editor/MenuItemList";
 import { simpleMenuPayload } from "../data/menu_mock.js";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
+import { loadImportedMenuFromStorage, saveImportedMenuToStorage } from "../lib/importedMenuStorage";
 import { getLanguageMeta } from "../lib/languageMeta";
 import {
   formFieldClasses,
@@ -25,7 +27,18 @@ import {
 } from "../components/menu-editor/menuEditorUtils";
 
 const MenuEditor = () => {
-  const [menu, setMenu] = useState(simpleMenuPayload);
+  const { id } = useParams();
+  const isImportedMenu = id === 'imported';
+  const resolveMenuPayload = () => {
+    if (!isImportedMenu) {
+      return simpleMenuPayload;
+    }
+
+    return loadImportedMenuFromStorage() || simpleMenuPayload;
+  };
+  const [menu, setMenu] = useState(() => {
+    return resolveMenuPayload();
+  });
   const [activeCategoryId, setActiveCategoryId] = useState(menu.categories[0]?.id);
   const [editorLanguage, setEditorLanguage] = useState(menu.defaultLanguage || 'ru');
   const [searchQuery, setSearchQuery] = useState('');
@@ -44,6 +57,22 @@ const MenuEditor = () => {
   const localizedMenuName = getLocalizedField(menu.menuMeta, 'name', editorLanguage, menu.defaultLanguage);
   const localizedCategoryName = getLocalizedField(activeCategory, 'name', editorLanguage, menu.defaultLanguage);
   const localizedCategoryDescription = getLocalizedField(activeCategory, 'description', editorLanguage, menu.defaultLanguage);
+
+  useEffect(() => {
+    const nextMenu = resolveMenuPayload();
+    setMenu(nextMenu);
+    setActiveCategoryId(nextMenu.categories[0]?.id || null);
+    setEditorLanguage(nextMenu.defaultLanguage || 'ru');
+    setSearchQuery('');
+  }, [id]);
+
+  useEffect(() => {
+    if (!isImportedMenu) {
+      return;
+    }
+
+    saveImportedMenuToStorage(menu);
+  }, [isImportedMenu, menu]);
 
   const handleAddCategory = () => {
     setEditingCategory({

@@ -10,20 +10,22 @@ import {
   primaryActionButtonClasses,
   secondaryActionButtonClasses,
 } from "../../lib/uiStyles";
-import { buildMenuImportPreview, submitMenuImport } from "../../lib/menuImport";
+import { saveImportedMenuToStorage } from "../../lib/importedMenuStorage";
+import { pollMenuImportStatus, submitMenuImport } from "../../lib/menuImport";
 
 const STATUS_META = {
   uploading: {
     title: 'Загружаем исходники',
-    description: 'Отправляем файлы и метаданные в сценарий распознавания.',
+    description: 'Создаем import job и отправляем файлы в backend.',
   },
   processing: {
     title: 'Распознаем структуру меню',
-    description: 'Собираем категории, позиции, описания и цены в единую структуру.',
+    description: 'Бэк обрабатывает документы, вызывает parser и валидирует итоговую схему.',
   },
 };
 
 const delay = (ms) => new Promise((resolve) => window.setTimeout(resolve, ms));
+const POLL_INTERVAL_MS = 1500;
 
 const StageItem = ({ isActive, isDone, title, description }) => (
   <div className={`rounded-2xl border p-4 transition-colors ${
@@ -78,11 +80,11 @@ const MenuImportFlow = ({
 
   const resetFlow = () => {
     setStage('idle');
-    setErrorMessage('');
-    setResultPreview(null);
-    setFiles([]);
-    setMenuLink('');
-    setMenuSource('file');
+      setErrorMessage('');
+      setResultPreview(null);
+      setFiles([]);
+      setMenuLink('');
+      setMenuSource('file');
   };
 
   const handleSubmit = async (event) => {
@@ -104,8 +106,7 @@ const MenuImportFlow = ({
     setStage('uploading');
 
     try {
-      const preview = buildMenuImportPreview({ menuSource, files, menuLink });
-      const response = await submitMenuImport({
+      const submission = await submitMenuImport({
         menuSource,
         files,
         menuLink,
@@ -113,12 +114,27 @@ const MenuImportFlow = ({
       });
 
       setStage('processing');
-      await delay(response.processingDelayMs);
+      const finalJob = await waitForImportCompletion(submission.jobId);
 
-      setResultPreview(preview);
+      if (finalJob.status === 'failed') {
+        throw new Error(finalJob.error || 'Не удалось обработать меню.');
+      }
+
+      const result = finalJob.result;
+      saveImportedMenuToStorage(result.menu);
+      setResultPreview({
+        sourceLabel: result.sourceSummary.length > 0
+          ? result.sourceSummary.map((source) => source.name).join(', ')
+          : (menuSource === 'link' ? menuLink.trim() : 'Без названия'),
+        detectedCategories: result.categoryCount,
+        detectedItems: result.itemCount,
+        documentCount: result.documentCount,
+        usedFallback: result.usedFallback,
+        warnings: result.warnings || [],
+      });
       setStage('success');
     } catch (error) {
-      setErrorMessage('Не удалось отправить меню в обработку. Попробуйте еще раз.');
+      setErrorMessage(error instanceof Error ? error.message : 'Не удалось отправить меню в обработку. Попробуйте еще раз.');
       setStage('error');
     }
   };
@@ -194,9 +210,25 @@ const MenuImportFlow = ({
           <div className="flex items-start gap-3">
             <Sparkles size={18} className="mt-0.5 shrink-0 text-brand-purple" />
             <p className="text-sm leading-relaxed text-brand-purple/90">
-              Пока это visual flow без сохранения сущности меню. После обработки ведем пользователя в существующий демо-редактор.
+              Импорт завершен через backend job. Сущность меню пока не сохраняем в БД, поэтому после обработки ведем пользователя в существующий демо-редактор.
             </p>
           </div>
+        </div>
+
+        <div className="grid gap-3">
+          <div className="rounded-2xl border border-border/60 bg-secondary/15 p-4 text-sm text-muted-foreground">
+            Документов обработано: <span className="font-bold text-foreground">{resultPreview.documentCount}</span>
+          </div>
+          {resultPreview.usedFallback && (
+            <div className="rounded-2xl border border-amber-500/20 bg-amber-500/5 p-4 text-sm text-amber-700">
+              OpenRouter key не настроен, поэтому backend вернул schema-valid scaffold вместо LLM-парсинга.
+            </div>
+          )}
+          {resultPreview.warnings?.length > 0 && (
+            <div className="rounded-2xl border border-border/60 bg-secondary/15 p-4 text-sm text-muted-foreground">
+              {resultPreview.warnings.join(' ')}
+            </div>
+          )}
         </div>
 
         <div className="flex flex-col sm:flex-row gap-3">
@@ -287,6 +319,16 @@ const MenuImportFlow = ({
       </form>
     </div>
   );
+};
+
+const waitForImportCompletion = async (jobId) => {
+  while (true) {
+    const job = await pollMenuImportStatus(jobId);
+    if (job.status === 'completed' || job.status === 'failed') {
+      return job;
+    }
+    await delay(POLL_INTERVAL_MS);
+  }
 };
 
 export default MenuImportFlow;
