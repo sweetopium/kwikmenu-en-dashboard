@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { ChevronDown, Edit2, Plus, Search, Trash2 } from 'lucide-react';
+import { ChevronDown, Edit2, Plus, Search, Sparkles, Trash2 } from 'lucide-react';
 import { useParams } from 'react-router-dom';
 
 import CategoryModal from "../components/menu-editor/CategoryModal";
@@ -12,6 +12,7 @@ import { simpleMenuPayload } from "../data/menu_mock.js";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import { loadImportedMenuFromStorage, saveImportedMenuToStorage } from "../lib/importedMenuStorage";
+import { normalizeMenu } from "../lib/menuNormalization";
 import { getLanguageMeta } from "../lib/languageMeta";
 import {
   formFieldClasses,
@@ -49,6 +50,7 @@ const MenuEditor = () => {
   const [originalCategoryId, setOriginalCategoryId] = useState(null);
   const [targetCategoryId, setTargetCategoryId] = useState(null);
   const [deleteConfirm, setDeleteConfirm] = useState(null);
+  const [isNormalizing, setIsNormalizing] = useState(false);
 
   const activeCategory = menu.categories.find((category) => category.id === activeCategoryId);
   const filteredItems = activeCategory?.items?.filter((item) =>
@@ -304,6 +306,19 @@ const MenuEditor = () => {
     setDeleteConfirm(null);
   };
 
+  const handleNormalizeMenu = async () => {
+    setIsNormalizing(true);
+
+    try {
+      const response = await normalizeMenu(menu);
+      setMenu(response.menu);
+    } catch (error) {
+      alert(error?.message || 'Не удалось нормализовать меню');
+    } finally {
+      setIsNormalizing(false);
+    }
+  };
+
   return (
     <div className="bg-card border border-border/60 rounded-3xl shadow-sm flex flex-col md:flex-row overflow-hidden min-h-[calc(100vh-8rem)] relative w-full max-w-full min-w-0">
       <CategorySidebar
@@ -352,6 +367,18 @@ const MenuEditor = () => {
                 >
                   Редактировать
                 </Button>
+
+                {isImportedMenu && (
+                  <Button
+                    variant="outline"
+                    onClick={handleNormalizeMenu}
+                    disabled={isNormalizing}
+                    className={`${secondaryActionButtonClasses} sm:h-[44px] h-[44px] px-5 w-full sm:w-auto shrink-0`}
+                  >
+                    <Sparkles size={16} className="mr-2" />
+                    {isNormalizing ? 'Нормализация...' : 'Нормализовать'}
+                  </Button>
+                )}
               </div>
 
               <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full sm:w-auto min-w-0 sm:flex-none">

@@ -10,6 +10,7 @@ from urllib import error, request
 import certifi
 
 from app.core.config import get_settings
+from app.schemas.menu import MenuPayload
 from app.schemas.menu_extract import ExtractedPage
 
 
@@ -177,6 +178,56 @@ class OpenRouterClient:
                 "url": f"data:{media_type};base64,{encoded}",
             },
         }
+
+    def normalize_menu(self, menu: MenuPayload) -> MenuPayload:
+        if not self.enabled:
+            raise RuntimeError("OPENROUTER_API_KEY is not configured")
+
+        payload: dict[str, Any] = {
+            "model": self.settings.menu_import_model,
+            "temperature": 0,
+            "max_completion_tokens": self.settings.menu_import_max_completion_tokens,
+            "messages": [
+                {
+                    "role": "system",
+                    "content": "You normalize restaurant menu JSON. Return only structured data following the provided JSON schema.",
+                },
+                {
+                    "role": "user",
+                    "content": [
+                        {
+                            "type": "text",
+                            "text": (
+                                "Normalize this menu JSON without changing its structure.\n"
+                                "Rules:\n"
+                                "- Preserve category count, item count, variant count, ids, sortOrder, prices, measureValue, measureUnit, availability, images and translations.\n"
+                                "- Fix obvious OCR and spelling mistakes in menu names, category names, item names, descriptions, variant labels and tags.\n"
+                                "- Normalize casing to sentence case: first letter uppercase, remaining letters lowercase.\n"
+                                "- If measureValue and measureUnit already store the size, remove duplicated unit text from variant labels.\n"
+                                "- Example: label '250 мл' with measureValue=250 and measureUnit='ml' should become '250'.\n"
+                                "- Do not invent dishes, categories, descriptions, prices or variants.\n"
+                                "- Return the same schema only.\n"
+                                f"Menu JSON:\n{json.dumps(menu.model_dump(mode='json'), ensure_ascii=False)}"
+                            ),
+                        }
+                    ],
+                },
+            ],
+            "response_format": {
+                "type": "json_schema",
+                "json_schema": {
+                    "name": "kwikmenu_menu_normalization",
+                    "strict": True,
+                    "schema": MenuPayload.model_json_schema(),
+                },
+            },
+            "stream": False,
+        }
+
+        response_payload = self._post_json(payload)
+        raw_content = response_payload["choices"][0]["message"]["content"]
+        structured = json.loads(raw_content) if isinstance(raw_content, str) else raw_content
+        return MenuPayload.model_validate(structured)
 
     def _post_json(self, payload: dict[str, Any]) -> dict[str, Any]:
         data = json.dumps(payload).encode("utf-8")
