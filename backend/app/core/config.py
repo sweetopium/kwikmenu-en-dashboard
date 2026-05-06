@@ -14,6 +14,7 @@ class Settings(BaseSettings):
     app_env: str = "development"
     menu_import_model: str = "google/gemini-3.1-flash-lite-preview"
     menu_import_max_completion_tokens: int = 8000
+    menu_normalization_max_completion_tokens: int = 24000
     menu_import_request_timeout_seconds: int = 180
     menu_import_max_items_per_single_category: int = 25
     menu_import_api_url: str = "http://localhost:8000"

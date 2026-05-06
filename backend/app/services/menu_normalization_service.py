@@ -18,8 +18,13 @@ class MenuNormalizationService:
 
         normalized_menu = menu
         if self.openrouter.enabled:
-            normalized_menu = self.openrouter.normalize_menu(menu)
-            self._validate_shape_integrity(original=menu, normalized=normalized_menu)
+            try:
+                normalized_menu = self.openrouter.normalize_menu(menu)
+                self._validate_shape_integrity(original=menu, normalized=normalized_menu)
+            except Exception as exc:  # noqa: BLE001
+                used_fallback = True
+                warnings.append(f"LLM normalizer fallback: {exc}")
+                normalized_menu = menu
         else:
             used_fallback = True
             warnings.append("OPENROUTER_API_KEY is not configured, deterministic normalizer was used.")
@@ -74,7 +79,7 @@ class MenuNormalizationService:
             cleaned_categories.append(
                 category.model_copy(
                     update={
-                        "name": self._normalize_sentence_case(category.name),
+                        "name": self._normalize_category_name(category.name, menu.defaultLanguage),
                         "description": self._normalize_description(category.description),
                         "items": cleaned_items,
                     }
@@ -109,11 +114,26 @@ class MenuNormalizationService:
             return ""
 
         lowered = cleaned.lower()
-        return lowered[:1].upper() + lowered[1:]
+        match = re.search(r"[A-Za-zА-Яа-яЁё]", lowered)
+        if not match:
+            return lowered
+
+        index = match.start()
+        return lowered[:index] + lowered[index].upper() + lowered[index + 1:]
 
     def _normalize_description(self, value: str | None) -> str | None:
         normalized = self._normalize_sentence_case(value)
         return normalized or None
+
+    def _normalize_category_name(self, value: str | None, default_language: str) -> str | None:
+        cleaned = self._normalize_sentence_case(value)
+        if not cleaned:
+            return cleaned
+
+        if default_language != "ru":
+            return cleaned
+
+        return self._strip_english_duplicate_suffix(cleaned)
 
     def _normalize_variant_label(self, label: str, measure_value: Any, measure_unit: Any) -> str:
         cleaned = re.sub(r"\s+", " ", label or "").strip()
@@ -164,3 +184,14 @@ class MenuNormalizationService:
         }
         return mapping.get(str(measure_unit), str(measure_unit))
 
+    def _strip_english_duplicate_suffix(self, value: str) -> str:
+        parts = [part.strip() for part in re.split(r"\s*/\s*", value) if part.strip()]
+        if len(parts) < 2:
+            return value
+
+        primary = parts[0]
+        suffix = parts[-1]
+        if re.search(r"[А-Яа-яЁё]", primary) and re.fullmatch(r"[A-Za-z0-9 &'().-]+", suffix):
+            return primary
+
+        return value

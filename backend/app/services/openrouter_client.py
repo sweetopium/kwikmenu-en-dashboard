@@ -3,6 +3,7 @@ from __future__ import annotations
 import base64
 import json
 import ssl
+from json import JSONDecodeError
 from pathlib import Path
 from typing import Any
 from urllib import error, request
@@ -66,7 +67,7 @@ class OpenRouterClient:
         payload: dict[str, Any] = {
             "model": self.settings.menu_import_model,
             "temperature": 0,
-            "max_completion_tokens": self.settings.menu_import_max_completion_tokens,
+            "max_completion_tokens": self.settings.menu_normalization_max_completion_tokens,
             "messages": [
                 {
                     "role": "system",
@@ -190,7 +191,7 @@ class OpenRouterClient:
         payload: dict[str, Any] = {
             "model": self.settings.menu_import_model,
             "temperature": 0,
-            "max_completion_tokens": self.settings.menu_import_max_completion_tokens,
+            "max_completion_tokens": self.settings.menu_normalization_max_completion_tokens,
             "messages": [
                 {
                     "role": "system",
@@ -207,6 +208,8 @@ class OpenRouterClient:
                                 "- Preserve category count, item count, variant count, ids, sortOrder, prices, measureValue, measureUnit, availability, images and translations.\n"
                                 "- Fix obvious OCR and spelling mistakes in menu names, category names, item names, descriptions, variant labels and tags.\n"
                                 "- Normalize casing to sentence case: first letter uppercase, remaining letters lowercase.\n"
+                                "- For Russian menu fields, remove duplicated English subtitles from category names and item names when both languages are packed into one string.\n"
+                                "- Example: 'Салаты / salads' -> 'Салаты', 'Супы / soups' -> 'Супы', 'Безалкогольные напитки / soft drinks' -> 'Безалкогольные напитки'.\n"
                                 "- If measureValue and measureUnit already store the size, remove duplicated unit text from variant labels.\n"
                                 "- Example: label '250 мл' with measureValue=250 and measureUnit='ml' should become '250'.\n"
                                 "- Do not invent dishes, categories, descriptions, prices or variants.\n"
@@ -230,8 +233,22 @@ class OpenRouterClient:
 
         response_payload = self._post_json(payload)
         raw_content = response_payload["choices"][0]["message"]["content"]
-        structured = json.loads(raw_content) if isinstance(raw_content, str) else raw_content
+        structured = self._decode_structured_content(raw_content, operation="menu normalization")
         return MenuPayload.model_validate(structured)
+
+    def _decode_structured_content(self, raw_content: Any, *, operation: str) -> Any:
+        if not isinstance(raw_content, str):
+            return raw_content
+
+        try:
+            return json.loads(raw_content)
+        except JSONDecodeError as exc:
+            preview = raw_content[max(0, exc.pos - 120):exc.pos + 120]
+            raise RuntimeError(
+                f"OpenRouter returned invalid JSON for {operation}. "
+                f"The response was likely truncated or malformed near char {exc.pos}. "
+                f"Preview: {preview!r}"
+            ) from exc
 
     def _post_json(self, payload: dict[str, Any]) -> dict[str, Any]:
         data = json.dumps(payload).encode("utf-8")
