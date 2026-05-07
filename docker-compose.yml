@@ -10,7 +10,8 @@ services:
     restart: unless-stopped
     volumes:
       - backend_data:/app/.data
-    expose:
+    # Здесь мы мапим внешний порт 18082 на внутренний 8000
+    ports:
       - "18082:8000"
 
   frontend:
