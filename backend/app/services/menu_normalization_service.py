@@ -78,7 +78,11 @@ class MenuNormalizationService:
                     item.model_copy(
                         update={
                             "name": self._normalize_sentence_case(item.name),
-                            "description": self._normalize_description(item.description),
+                            "description": self._normalize_entity_description(
+                                name=item.name,
+                                description=item.description,
+                                default_language=menu.defaultLanguage,
+                            ),
                             "measureValue": item_measure_value,
                             "measureUnit": item_measure_unit,
                             "tags": [self._normalize_sentence_case(tag) for tag in item.tags if tag and tag.strip()],
@@ -91,7 +95,11 @@ class MenuNormalizationService:
                 category.model_copy(
                     update={
                         "name": self._normalize_category_name(category.name, menu.defaultLanguage),
-                        "description": self._normalize_description(category.description),
+                        "description": self._normalize_entity_description(
+                            name=category.name,
+                            description=category.description,
+                            default_language=menu.defaultLanguage,
+                        ),
                         "items": cleaned_items,
                     }
                 )
@@ -102,7 +110,11 @@ class MenuNormalizationService:
                 "menuMeta": menu.menuMeta.model_copy(
                     update={
                         "name": self._normalize_sentence_case(menu.menuMeta.name),
-                        "description": self._normalize_description(menu.menuMeta.description),
+                        "description": self._normalize_entity_description(
+                            name=menu.menuMeta.name,
+                            description=menu.menuMeta.description,
+                            default_language=menu.defaultLanguage,
+                        ),
                     }
                 ),
                 "categories": cleaned_categories,
@@ -138,6 +150,20 @@ class MenuNormalizationService:
     def _normalize_description(self, value: str | None) -> str | None:
         normalized = self._normalize_sentence_case(value)
         return normalized or None
+
+    def _normalize_entity_description(self, *, name: str | None, description: str | None, default_language: str) -> str | None:
+        normalized_description = self._normalize_description(description)
+        if not normalized_description:
+            return None
+
+        if self._should_drop_mismatched_description(
+            name=name,
+            description=normalized_description,
+            default_language=default_language,
+        ):
+            return None
+
+        return normalized_description
 
     def _normalize_category_name(self, value: str | None, default_language: str) -> str | None:
         cleaned = self._normalize_sentence_case(value)
@@ -239,3 +265,20 @@ class MenuNormalizationService:
             return primary
 
         return value
+
+    def _should_drop_mismatched_description(self, *, name: str | None, description: str, default_language: str) -> bool:
+        if not name or not description:
+            return False
+
+        name_has_cyrillic = bool(re.search(r"[А-Яа-яЁё]", name))
+        name_has_latin = bool(re.search(r"[A-Za-z]", name))
+        description_has_cyrillic = bool(re.search(r"[А-Яа-яЁё]", description))
+        description_has_latin = bool(re.search(r"[A-Za-z]", description))
+
+        if default_language == "ru":
+            return name_has_cyrillic and description_has_latin and not description_has_cyrillic
+
+        if default_language == "en":
+            return name_has_latin and description_has_cyrillic and not description_has_latin
+
+        return False

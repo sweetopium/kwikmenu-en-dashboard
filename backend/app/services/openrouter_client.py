@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import base64
 import json
+import re
 import ssl
 from json import JSONDecodeError
 from pathlib import Path
@@ -67,7 +68,7 @@ class OpenRouterClient:
         payload: dict[str, Any] = {
             "model": self.settings.menu_import_model,
             "temperature": 0,
-            "max_completion_tokens": self.settings.menu_normalization_max_completion_tokens,
+            "max_completion_tokens": self.settings.menu_import_max_completion_tokens,
             "messages": [
                 {
                     "role": "system",
@@ -99,10 +100,25 @@ class OpenRouterClient:
                 }
             ]
 
-        response_payload = self._post_json(payload)
-        raw_content = response_payload["choices"][0]["message"]["content"]
-        structured = json.loads(raw_content) if isinstance(raw_content, str) else raw_content
-        return ExtractedPage.model_validate(structured)
+        last_error: Exception | None = None
+        for attempt in range(2):
+            response_payload = self._post_json(payload)
+            raw_content = response_payload["choices"][0]["message"]["content"]
+            try:
+                structured = self._decode_structured_content(
+                    raw_content,
+                    operation=f"page {page_number} extraction",
+                )
+                return ExtractedPage.model_validate(structured)
+            except Exception as exc:  # noqa: BLE001
+                last_error = exc
+                if attempt == 0:
+                    continue
+                raise RuntimeError(
+                    f"OpenRouter returned malformed structured content for page {page_number} ({file_name})."
+                ) from exc
+
+        raise RuntimeError(f"OpenRouter page extraction failed for page {page_number} ({file_name}).") from last_error
 
     def _build_prompt(
         self,
@@ -244,18 +260,60 @@ class OpenRouterClient:
         return MenuPayload.model_validate(structured)
 
     def _decode_structured_content(self, raw_content: Any, *, operation: str) -> Any:
+        if isinstance(raw_content, list):
+            combined_text = "".join(
+                chunk.get("text", "") if isinstance(chunk, dict) else str(chunk)
+                for chunk in raw_content
+            )
+            return self._decode_structured_content(combined_text, operation=operation)
+
         if not isinstance(raw_content, str):
             return raw_content
 
-        try:
-            return json.loads(raw_content)
-        except JSONDecodeError as exc:
-            preview = raw_content[max(0, exc.pos - 120):exc.pos + 120]
-            raise RuntimeError(
-                f"OpenRouter returned invalid JSON for {operation}. "
-                f"The response was likely truncated or malformed near char {exc.pos}. "
-                f"Preview: {preview!r}"
-            ) from exc
+        candidates = self._json_candidates(raw_content)
+        last_error: JSONDecodeError | None = None
+
+        for candidate in candidates:
+            try:
+                return json.loads(candidate)
+            except JSONDecodeError as exc:
+                last_error = exc
+
+        if last_error is None:
+            raise RuntimeError(f"OpenRouter returned empty structured content for {operation}.")
+
+        preview_source = candidates[-1] if candidates else raw_content
+        preview = preview_source[max(0, last_error.pos - 120):last_error.pos + 120]
+        raise RuntimeError(
+            f"OpenRouter returned invalid JSON for {operation}. "
+            f"The response was likely truncated or malformed near char {last_error.pos}. "
+            f"Preview: {preview!r}"
+        ) from last_error
+
+    def _json_candidates(self, raw_content: str) -> list[str]:
+        candidates: list[str] = []
+
+        def add_candidate(value: str) -> None:
+            if value and value not in candidates:
+                candidates.append(value)
+
+        add_candidate(raw_content)
+
+        stripped = raw_content.strip()
+        add_candidate(stripped)
+
+        if stripped.startswith("```"):
+            without_fences = re.sub(r"^```(?:json)?\s*|\s*```$", "", stripped, flags=re.IGNORECASE | re.DOTALL).strip()
+            add_candidate(without_fences)
+            stripped = without_fences
+
+        starts = [index for index in (stripped.find("{"), stripped.find("[")) if index != -1]
+        object_start = min(starts) if starts else -1
+        object_end = max(stripped.rfind("}"), stripped.rfind("]"))
+        if object_start != -1 and object_end > object_start:
+            add_candidate(stripped[object_start:object_end + 1].strip())
+
+        return candidates
 
     def _post_json(self, payload: dict[str, Any]) -> dict[str, Any]:
         data = json.dumps(payload).encode("utf-8")

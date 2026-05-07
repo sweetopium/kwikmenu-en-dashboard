@@ -191,7 +191,39 @@ class MenuImportPipeline:
                 )
             )
 
-        return extracted.model_copy(update={"sections": normalized_sections})
+        return extracted.model_copy(update={"sections": self._merge_duplicate_page_sections(normalized_sections)})
+
+    def _merge_duplicate_page_sections(self, sections: list[ExtractedSection]) -> list[ExtractedSection]:
+        merged_sections: list[ExtractedSection] = []
+        section_index: dict[str, int] = {}
+
+        for section in sections:
+            heading = section.heading.strip() if section.heading else None
+            if not heading:
+                merged_sections.append(section)
+                continue
+
+            section_key = heading.lower()
+            existing_index = section_index.get(section_key)
+            if existing_index is None:
+                section_index[section_key] = len(merged_sections)
+                merged_sections.append(section.model_copy(update={"heading": heading}))
+                continue
+
+            existing = merged_sections[existing_index]
+            merged_sections[existing_index] = existing.model_copy(
+                update={
+                    "description": existing.description or section.description,
+                    "continuesToNextPage": existing.continuesToNextPage or section.continuesToNextPage,
+                    "continuedFromPreviousPage": existing.continuedFromPreviousPage or section.continuedFromPreviousPage,
+                    "isHidden": existing.isHidden and section.isHidden,
+                    "availableHours": existing.availableHours or section.availableHours,
+                    "translations": {**existing.translations, **section.translations},
+                    "items": [*existing.items, *section.items],
+                }
+            )
+
+        return merged_sections
 
     def _expand_compound_variants(self, item: ExtractedItem, section: ExtractedSection) -> ExtractedItem:
         if item.variants:
