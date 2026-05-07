@@ -1,3 +1,5 @@
+version: '3.8'
+
 services:
   backend:
     build:
@@ -19,7 +21,7 @@ services:
       - backend
     restart: unless-stopped
     ports:
-      - "80:80"
+      - "18080:80"
 
 volumes:
   backend_data:
