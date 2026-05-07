@@ -1,4 +1,4 @@
-export const MENU_NORMALIZATION_API_URL = import.meta.env.VITE_MENU_NORMALIZATION_API_URL || 'http://localhost:8000/api/menu-normalizations';
+export const MENU_NORMALIZATION_API_URL = import.meta.env.VITE_MENU_NORMALIZATION_API_URL || '/api/menu-normalizations';
 
 export const normalizeMenu = async (menu) => {
   const response = await fetch(MENU_NORMALIZATION_API_URL, {

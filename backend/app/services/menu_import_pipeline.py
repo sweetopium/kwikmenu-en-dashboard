@@ -493,12 +493,12 @@ class MenuImportPipeline:
                     category_name = section.heading.strip()
                     category_key = slugify(category_name, fallback=f"category-{len(category_order) + 1}")
                 else:
-                    if not active_category_key:
-                        raise ValueError(
-                            f"Cannot merge continuation section on page {extracted_page.pageNumber} without previous category context."
-                        )
-                    category_key = active_category_key
-                    category_name = category_map[category_key].name
+                    category_key, category_name = self._resolve_continuation_category(
+                        extracted_page=extracted_page,
+                        category_map=category_map,
+                        category_order=category_order,
+                        active_category_key=active_category_key,
+                    )
 
                 if category_key not in category_map:
                     category_map[category_key] = MenuCategory(
@@ -550,6 +550,28 @@ class MenuImportPipeline:
             languages=languages,
             settings=MenuSettings(),
         )
+
+    def _resolve_continuation_category(
+        self,
+        *,
+        extracted_page: ExtractedPage,
+        category_map: dict[str, MenuCategory],
+        category_order: list[str],
+        active_category_key: str | None,
+    ) -> tuple[str, str]:
+        if active_category_key and active_category_key in category_map:
+            return active_category_key, category_map[active_category_key].name
+
+        if len(category_order) == 1:
+            only_key = category_order[0]
+            return only_key, category_map[only_key].name
+
+        synthetic_name = f"Раздел со стр. {extracted_page.pageNumber}"
+        synthetic_key = slugify(
+            synthetic_name,
+            fallback=f"page-{extracted_page.pageNumber}-continuation",
+        )
+        return synthetic_key, synthetic_name
 
     def _validate_final_menu(self, menu: MenuPayload) -> None:
         if not menu.categories:

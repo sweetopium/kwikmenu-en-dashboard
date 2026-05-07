@@ -23,3 +23,19 @@ uvicorn app.main:app --reload
 - Jobs are stored in memory.
 - Uploaded files are stored in `backend/.data/uploads`.
 - If `OPENROUTER_API_KEY` is not configured, the parser finishes in fallback mode and still returns a schema-valid menu JSON scaffold.
+
+## Docker
+
+The repo-level `docker-compose.yml` starts this backend automatically.
+
+Prepare env:
+
+```bash
+cp backend/.env.example backend/.env
+```
+
+Required:
+
+```env
+OPENROUTER_API_KEY=...
+```

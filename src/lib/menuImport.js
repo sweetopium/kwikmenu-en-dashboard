@@ -1,4 +1,4 @@
-export const MENU_IMPORT_API_URL = import.meta.env.VITE_MENU_IMPORT_API_URL || 'http://localhost:8000/api/menu-imports';
+export const MENU_IMPORT_API_URL = import.meta.env.VITE_MENU_IMPORT_API_URL || '/api/menu-imports';
 
 const trimString = (value) => `${value ?? ''}`.trim();
 
