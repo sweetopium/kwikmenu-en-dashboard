@@ -8,6 +8,7 @@ import AuthShell from "../components/auth/AuthShell.jsx";
 import SocialProviderButton from "../components/auth/SocialProviderButton.jsx";
 import AuthField from "../components/auth/AuthField.jsx";
 import {getPostRegisterRedirect, getProviderAuthUrl, registerWithEmail} from "../lib/auth.js";
+import { primaryActionButtonClasses } from "../lib/uiStyles.js";
 
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -95,14 +96,14 @@ const RegisterPage = () => {
       title="Создать аккаунт"
       subtitle="Введите данные для регистрации в системе, это займет меньше минуты"
     >
-      <div className="space-y-8">
+      <div className="space-y-6 sm:space-y-8">
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
           <SocialProviderButton icon={FcGoogle} label="Google" onClick={() => handleProviderClick("google")}/>
           <SocialProviderButton icon={FaYandex} label="Яндекс" iconClassName="text-[#fc3f1d]" onClick={() => handleProviderClick("yandex")}/>
           <SocialProviderButton icon={SiMaildotru} label="Mail.ru" iconClassName="text-[#005ff9]" onClick={() => handleProviderClick("mailru")}/>
         </div>
 
-        <div className="flex items-center gap-4 text-xs font-semibold uppercase tracking-[0.22em] text-muted-foreground">
+        <div className="flex items-center gap-4 text-[11px] font-semibold uppercase tracking-[0.22em] text-muted-foreground sm:text-xs">
           <div className="h-px flex-1 bg-border"/>
           <span>или через почту</span>
           <div className="h-px flex-1 bg-border"/>
@@ -160,14 +161,14 @@ const RegisterPage = () => {
           <button
             type="submit"
             disabled={pending}
-            className="inline-flex h-15 w-full items-center justify-center gap-3 rounded-3xl bg-brand-purple px-6 text-lg font-semibold text-white shadow-[0_18px_40px_rgba(115,93,255,0.28)] transition-all hover:-translate-y-0.5 hover:shadow-[0_22px_50px_rgba(115,93,255,0.34)] disabled:translate-y-0 disabled:opacity-60"
+            className={`w-full ${primaryActionButtonClasses} disabled:translate-y-0 disabled:opacity-60`}
           >
             {pending ? <Loader2 className="h-5 w-5 animate-spin"/> : "Зарегистрироваться"}
-            <ArrowRight className="h-5 w-5"/>
+
           </button>
         </form>
 
-        <p className="text-center text-sm text-muted-foreground">
+        <p className="text-center text-[11px] text-muted-foreground sm:text-sm">
           После регистрации можно сразу перейти к загрузке первого меню и заполнению данных заведения.
         </p>
       </div>

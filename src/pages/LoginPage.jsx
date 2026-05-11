@@ -8,6 +8,7 @@ import AuthShell from "../components/auth/AuthShell.jsx";
 import SocialProviderButton from "../components/auth/SocialProviderButton.jsx";
 import AuthField from "../components/auth/AuthField.jsx";
 import {getForgotPasswordUrl, getPostLoginRedirect, getProviderAuthUrl, loginWithEmail} from "../lib/auth.js";
+import { primaryActionButtonClasses } from "../lib/uiStyles.js";
 
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -78,14 +79,14 @@ const LoginPage = () => {
       title="С возвращением"
       subtitle="Рады видеть вас снова. Введите данные для входа в личный кабинет"
     >
-      <div className="space-y-8">
+      <div className="space-y-6 sm:space-y-8">
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
           <SocialProviderButton icon={FcGoogle} label="Google" onClick={() => handleProviderClick("google")}/>
           <SocialProviderButton icon={FaYandex} label="Яндекс" iconClassName="text-[#fc3f1d]" onClick={() => handleProviderClick("yandex")}/>
           <SocialProviderButton icon={SiMaildotru} label="Mail.ru" iconClassName="text-[#005ff9]" onClick={() => handleProviderClick("mailru")}/>
         </div>
 
-        <div className="flex items-center gap-4 text-xs font-semibold uppercase tracking-[0.22em] text-muted-foreground">
+        <div className="flex items-center gap-4 text-[11px] font-semibold uppercase tracking-[0.22em] text-muted-foreground sm:text-xs">
           <div className="h-px flex-1 bg-border"/>
           <span>или через почту</span>
           <div className="h-px flex-1 bg-border"/>
@@ -113,7 +114,7 @@ const LoginPage = () => {
             rightAction={
               <a
                 href={forgotPasswordUrl}
-                className="text-sm font-semibold text-brand-purple transition-colors hover:text-brand-purple/80"
+                className="text-xs font-semibold text-brand-purple transition-colors hover:text-brand-purple/80 sm:text-sm"
               >
                 Забыли пароль?
               </a>
@@ -129,14 +130,14 @@ const LoginPage = () => {
           <button
             type="submit"
             disabled={pending}
-            className="inline-flex h-15 w-full items-center justify-center gap-3 rounded-3xl bg-primary px-6 text-lg font-semibold text-primary-foreground shadow-[0_18px_40px_rgba(15,23,42,0.16)] transition-all hover:-translate-y-0.5 hover:shadow-[0_22px_50px_rgba(15,23,42,0.2)] disabled:translate-y-0 disabled:opacity-60"
+            className={`w-full ${primaryActionButtonClasses} disabled:translate-y-0 disabled:opacity-60`}
           >
             {pending ? <Loader2 className="h-5 w-5 animate-spin"/> : "Войти в систему"}
-            <ArrowRight className="h-5 w-5"/>
+
           </button>
         </form>
 
-        <p className="text-center text-sm text-muted-foreground">
+        <p className="text-center text-[11px] text-muted-foreground sm:text-sm">
           Продолжая, вы подтверждаете согласие с условиями сервиса и политикой обработки данных.
         </p>
       </div>

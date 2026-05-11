@@ -1,3 +1,5 @@
+import { inputBaseClasses } from "../onboarding/countries";
+
 const AuthField = ({
   label,
   hint,
@@ -8,11 +10,11 @@ const AuthField = ({
 }) => (
   <label className={`block space-y-3 ${className}`.trim()}>
     <div className="flex items-center justify-between gap-3">
-      <span className="text-base font-semibold text-foreground">{label}</span>
+      <span className="ml-1 text-[11px] font-medium text-foreground sm:text-sm">{label}</span>
       {rightAction}
     </div>
     <input
-      className={`h-15 w-full rounded-3xl border bg-background px-5 text-lg text-foreground shadow-sm outline-none transition-all placeholder:text-muted-foreground/85 focus:border-brand-purple focus:ring-4 focus:ring-brand-purple/15 ${error ? 'border-destructive/60 ring-4 ring-destructive/10' : 'border-border'}`}
+      className={`${inputBaseClasses} ${error ? 'border-destructive/60 ring-2 ring-destructive/10' : ''}`}
       {...props}
     />
     {error ? (

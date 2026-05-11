@@ -1,36 +1,27 @@
-import {Link} from "react-router-dom";
-import {ArrowLeft, Sparkles, Zap} from "lucide-react";
+import OnboardingCard from "../onboarding/OnboardingCard.jsx";
 
 const AuthShell = ({
   title,
   subtitle,
   children,
 }) => (
-  <div className="mx-auto w-full max-w-3xl animate-in fade-in slide-in-from-bottom-4 duration-500">
-    <div className="mb-6 flex items-center justify-between gap-4">
-
-    </div>
-
-    <div className="rounded-[2rem] border border-border/70 bg-card px-6 py-8 shadow-[0_20px_80px_rgba(55,65,81,0.06)] sm:px-10 sm:py-10">
-      <div className="mb-10 flex flex-col gap-8 border-b border-border/70 pb-8 sm:flex-row sm:items-start sm:justify-between">
+  <div className="mx-auto flex w-full max-w-2xl flex-col space-y-6 py-3 sm:py-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
+    <OnboardingCard className="px-6 py-8 sm:px-8 md:px-10">
+      <div className="mb-8 border-b border-border/70 pb-8 sm:mb-10">
         <div className="max-w-xl space-y-4">
-
           <div className="space-y-3">
-            <h1 className="text-3xl font-extrabold tracking-tight text-foreground sm:text-3xl">
+            <h1 className="text-xl font-extrabold tracking-tight text-foreground sm:text-3xl">
               {title}
             </h1>
-            <p className="max-w-lg text-lg leading-relaxed text-muted-foreground">
+            <p className="max-w-lg text-xs leading-relaxed text-muted-foreground sm:text-base">
               {subtitle}
             </p>
           </div>
         </div>
-
       </div>
 
       {children}
-
-
-    </div>
+    </OnboardingCard>
   </div>
 );
 
