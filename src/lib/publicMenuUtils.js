@@ -7,6 +7,19 @@ const UNIT_LABELS = {
   portion: 'порция',
 };
 
+const CURRENCY_SYMBOLS = {
+  RUB: '₽',
+  USD: '$',
+  EUR: '€',
+  GBP: '£',
+  AED: 'DH',
+  TRY: '₺',
+  KZT: '₸',
+  UZS: "so'm",
+  CNY: '¥',
+  JPY: '¥',
+};
+
 export const normalizeTemplateType = (value) => {
   const normalized = String(value || 'simple').trim().toLowerCase();
 
@@ -90,6 +103,61 @@ export const getLanguagePillLabel = (language) => {
   return String(language?.code || '??').toUpperCase();
 };
 
+const translationHasVisibleValues = (translation) => {
+  if (!translation || typeof translation !== 'object') {
+    return false;
+  }
+
+  return Object.values(translation).some((value) => isFilled(value));
+};
+
+const objectHasLanguageContent = (value, languageCode, shortLanguageCode) => {
+  if (!value) {
+    return false;
+  }
+
+  if (Array.isArray(value)) {
+    return value.some((item) => objectHasLanguageContent(item, languageCode, shortLanguageCode));
+  }
+
+  if (typeof value !== 'object') {
+    return false;
+  }
+
+  if (value.translations) {
+    const directTranslation = value.translations[languageCode];
+    const shortTranslation = value.translations[shortLanguageCode];
+
+    if (translationHasVisibleValues(directTranslation) || translationHasVisibleValues(shortTranslation)) {
+      return true;
+    }
+  }
+
+  return Object.values(value).some((nestedValue) => objectHasLanguageContent(nestedValue, languageCode, shortLanguageCode));
+};
+
+export const getVisibleMenuLanguages = (payload, defaultLanguage = 'ru') => {
+  const configuredLanguages = payload?.languages || [];
+
+  if (!configuredLanguages.length) {
+    return [];
+  }
+
+  return configuredLanguages.filter((language) => {
+    const code = String(language?.code || '').trim().toLowerCase();
+    if (!code) {
+      return false;
+    }
+
+    if (code === String(defaultLanguage || 'ru').trim().toLowerCase()) {
+      return true;
+    }
+
+    const shortCode = code.split('-')[0];
+    return objectHasLanguageContent(payload, code, shortCode);
+  });
+};
+
 export const hexToRgba = (hex, alpha) => {
   const sanitized = String(hex || '').trim().replace('#', '');
   if (![3, 6].includes(sanitized.length)) {
@@ -125,10 +193,27 @@ export const getContrastColor = (hex) => {
   return luminance > 0.62 ? '#111827' : '#ffffff';
 };
 
-export const formatCurrency = (price) => {
+export const getCurrencySymbol = (currencyCode) => {
+  const normalizedCode = String(currencyCode || '').trim().toUpperCase();
+  return CURRENCY_SYMBOLS[normalizedCode] || normalizedCode || '';
+};
+
+export const formatCurrency = (price, currencyCode = 'RUB') => {
   if (!isFilled(price)) {
-    return '';
+    return { amount: '', symbol: '' };
   }
 
-  return String(price).trim();
+  const rawPrice = String(price).trim();
+  const configuredSymbol = getCurrencySymbol(currencyCode);
+  const symbolMatch = rawPrice.match(/[₽$€£¥₺]|so'm|DH/iu);
+  const amount = rawPrice
+    .replace(/[₽$€£¥₺]/g, '')
+    .replace(/so'm/giu, '')
+    .replace(/DH/giu, '')
+    .trim();
+
+  return {
+    amount: amount || rawPrice,
+    symbol: symbolMatch?.[0] || configuredSymbol,
+  };
 };

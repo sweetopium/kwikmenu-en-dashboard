@@ -4,7 +4,10 @@ import { AlertCircle, ArrowLeft, Menu as MenuIcon } from 'lucide-react';
 
 import { getPublicVenueMenus } from '../lib/publicMenuApi.js';
 import PublicMenuTemplateRenderer from '../components/public-menu/PublicMenuTemplateRenderer.jsx';
+import PublicMenuSkeletonRenderer from '../components/public-menu/PublicMenuSkeletonRenderer.jsx';
 import { Button } from '../components/ui/button.jsx';
+
+const MIN_PUBLIC_MENU_LOADING_MS = 3000;
 
 const PublicVenueMenuPage = () => {
   const { venueId } = useParams();
@@ -14,21 +17,51 @@ const PublicVenueMenuPage = () => {
   const [error, setError] = useState('');
 
   useEffect(() => {
+    let isCancelled = false;
+    const requestStartedAt = Date.now();
+
     if (!venueId) {
       setError('Некорректная публичная ссылка.');
       setIsLoading(false);
-      return;
+      return undefined;
     }
 
     setIsLoading(true);
     setError('');
     getPublicVenueMenus(venueId)
-      .then((payload) => setData(payload))
+      .then((payload) => {
+        if (isCancelled) {
+          return;
+        }
+
+        setData(payload);
+      })
       .catch((nextError) => {
+        if (isCancelled) {
+          return;
+        }
+
         setData(null);
         setError(nextError.message || 'Не удалось загрузить публичное меню.');
       })
-      .finally(() => setIsLoading(false));
+      .finally(() => {
+        if (isCancelled) {
+          return;
+        }
+
+        const elapsedMs = Date.now() - requestStartedAt;
+        const remainingMs = Math.max(MIN_PUBLIC_MENU_LOADING_MS - elapsedMs, 0);
+
+        window.setTimeout(() => {
+          if (!isCancelled) {
+            setIsLoading(false);
+          }
+        }, remainingMs);
+      });
+
+    return () => {
+      isCancelled = true;
+    };
   }, [venueId]);
 
   const menus = data?.menus || [];
@@ -66,19 +99,7 @@ const PublicVenueMenuPage = () => {
   };
 
   if (isLoading) {
-    return (
-      <div className="min-h-screen bg-background">
-        <div className="mx-auto flex min-h-screen w-full max-w-4xl items-center justify-center px-4 py-10 sm:px-6">
-          <div className="w-full rounded-[2rem] border border-border/60 bg-card p-8 text-center shadow-sm">
-            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-secondary/60 text-muted-foreground">
-              <MenuIcon size={24} />
-            </div>
-            <h1 className="mt-4 text-2xl font-black tracking-tight text-foreground">Загружаем меню</h1>
-            <p className="mt-2 text-sm text-muted-foreground">Подтягиваем опубликованные категории и блюда заведения.</p>
-          </div>
-        </div>
-      </div>
-    );
+    return <PublicMenuSkeletonRenderer templateType="simple" />;
   }
 
   if (error || !data?.venue) {

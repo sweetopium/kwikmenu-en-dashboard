@@ -7,6 +7,7 @@ import {
   getContrastColor,
   getLanguagePillLabel,
   getLocalizedField,
+  getVisibleMenuLanguages,
   hexToRgba,
   isFilled,
 } from '../../../lib/publicMenuUtils';
@@ -109,9 +110,25 @@ const SimplePublicMenuTemplate = ({
     () => (payload?.categories || []).filter((category) => !category.isHidden),
     [payload?.categories]
   );
+  const visibleLanguages = useMemo(
+    () => getVisibleMenuLanguages(payload, defaultLanguage),
+    [payload, defaultLanguage]
+  );
 
   const venueDescription = venue?.description || '';
   const showWifiCard = Boolean(venue?.wifi?.enabled && venue?.wifi?.ssid && venue?.wifi?.password);
+  const currencyCode = venue?.currency || payload?.currency || 'RUB';
+
+  useEffect(() => {
+    if (!visibleLanguages.length) {
+      return;
+    }
+
+    const hasCurrentLanguage = visibleLanguages.some((menuLanguage) => menuLanguage.code === language);
+    if (!hasCurrentLanguage) {
+      setLanguage(defaultLanguage);
+    }
+  }, [defaultLanguage, language, visibleLanguages]);
 
   const scrollToCategory = (categoryId) => {
     const element = sectionRefs.current.get(categoryId);
@@ -190,26 +207,28 @@ const SimplePublicMenuTemplate = ({
                 {venue?.name || 'Menu'}
               </h1>
 
-              <div className="mt-2 flex flex-wrap gap-1.5">
-                {(payload?.languages || []).map((menuLanguage) => {
-                  const isSelected = menuLanguage.code === language;
-                  return (
-                    <button
-                      key={menuLanguage.code}
-                      type="button"
-                      onClick={() => setLanguage(menuLanguage.code)}
-                      className="inline-flex h-8 min-w-[3.35rem] items-center justify-center rounded-[0.5rem] border px-2.5 text-[0.76rem] font-medium transition-all"
-                      style={{
-                        borderColor: isSelected ? hexToRgba(heroTextColor, 0.28) : hexToRgba(heroTextColor, 0.18),
-                        backgroundColor: isSelected ? heroControlSelectedFill : heroControlFill,
-                        color: heroTextColor,
-                      }}
-                    >
-                      {getLanguagePillLabel(menuLanguage)}
-                    </button>
-                  );
-                })}
-              </div>
+              {visibleLanguages.length > 1 ? (
+                <div className="mt-2 flex flex-wrap gap-1.5">
+                  {visibleLanguages.map((menuLanguage) => {
+                    const isSelected = menuLanguage.code === language;
+                    return (
+                      <button
+                        key={menuLanguage.code}
+                        type="button"
+                        onClick={() => setLanguage(menuLanguage.code)}
+                        className="inline-flex h-8 min-w-[3.35rem] items-center justify-center rounded-[0.5rem] border px-2.5 text-[0.76rem] font-medium transition-all"
+                        style={{
+                          borderColor: isSelected ? hexToRgba(heroTextColor, 0.28) : hexToRgba(heroTextColor, 0.18),
+                          backgroundColor: isSelected ? heroControlSelectedFill : heroControlFill,
+                          color: heroTextColor,
+                        }}
+                      >
+                        {getLanguagePillLabel(menuLanguage)}
+                      </button>
+                    );
+                  })}
+                </div>
+              ) : null}
             </div>
           </div>
 
@@ -328,7 +347,7 @@ const SimplePublicMenuTemplate = ({
                     const itemName = getLocalizedField(item, 'name', language, defaultLanguage) || item.name;
                     const itemDescription = getLocalizedField(item, 'description', language, defaultLanguage);
                     const itemMeasure = formatMeasure(item.measureValue, item.measureUnit);
-                    const itemPrice = formatCurrency(item.price);
+                    const itemPrice = formatCurrency(item.price, currencyCode);
                     const visibleVariants = (item.variants || []).filter((variant) => variant.isAvailable !== false);
 
                     return (
@@ -350,9 +369,9 @@ const SimplePublicMenuTemplate = ({
                             ) : null}
                           </div>
 
-                          {isFilled(itemPrice) ? (
-                            <div className="shrink-0 text-right text-[1.02rem] font-medium tracking-[-0.01em] text-foreground sm:text-[1.12rem]">
-                              {itemPrice}
+                          {isFilled(itemPrice.amount) ? (
+                            <div className="shrink-0 text-right text-[1.02rem] font-bold tracking-[-0.01em] text-foreground sm:text-[1.12rem]">
+                              {itemPrice.amount}{itemPrice.symbol ? ` ${itemPrice.symbol}` : ''}
                             </div>
                           ) : null}
                         </div>
@@ -375,7 +394,10 @@ const SimplePublicMenuTemplate = ({
                                     </div>
                                     {menu?.payload?.settings?.showVariantPrices !== false ? (
                                       <div className="shrink-0 text-right text-[1.02rem] font-medium text-foreground">
-                                        {formatCurrency(variant.price)}
+                                        {(() => {
+                                          const variantPrice = formatCurrency(variant.price, currencyCode);
+                                          return `${variantPrice.amount}${variantPrice.symbol ? ` ${variantPrice.symbol}` : ''}`;
+                                        })()}
                                       </div>
                                     ) : null}
                                   </div>
