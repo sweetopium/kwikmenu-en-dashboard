@@ -27,6 +27,7 @@ const SimplePublicMenuTemplate = ({
   const [activeCategoryId, setActiveCategoryId] = useState(payload?.categories?.[0]?.id || '');
   const [passwordCopied, setPasswordCopied] = useState(false);
   const sectionRefs = useRef(new Map());
+  const categoryChipRefs = useRef(new Map());
   const copyResetTimeoutRef = useRef(null);
   const categoryScrollTimeoutRef = useRef(null);
   const programmaticCategoryScrollRef = useRef(false);
@@ -80,6 +81,19 @@ const SimplePublicMenuTemplate = ({
       window.clearTimeout(categoryScrollTimeoutRef.current);
     }
   }, []);
+
+  useEffect(() => {
+    const activeChip = categoryChipRefs.current.get(activeCategoryId);
+    if (!activeChip) {
+      return;
+    }
+
+    activeChip.scrollIntoView({
+      behavior: 'smooth',
+      block: 'nearest',
+      inline: 'center',
+    });
+  }, [activeCategoryId]);
 
   const pageTint = useMemo(() => hexToRgba(accentColor, 0.13), [accentColor]);
   const panelBorder = useMemo(() => hexToRgba(accentColor, 0.16), [accentColor]);
@@ -238,6 +252,13 @@ const SimplePublicMenuTemplate = ({
                 return (
                   <button
                     key={category.id}
+                    ref={(node) => {
+                      if (node) {
+                        categoryChipRefs.current.set(category.id, node);
+                      } else {
+                        categoryChipRefs.current.delete(category.id);
+                      }
+                    }}
                     type="button"
                     onClick={() => scrollToCategory(category.id)}
                     className="shrink-0 rounded-full border px-4 py-2.5 text-[0.8rem] font-medium transition-all"
