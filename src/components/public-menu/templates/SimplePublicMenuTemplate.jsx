@@ -98,7 +98,7 @@ const SimplePublicMenuTemplate = ({
     });
   }, [activeCategoryId]);
 
-  const pageTint = useMemo(() => hexToRgba(accentColor, 0.13), [accentColor]);
+  const pageTint = useMemo(() => hexToRgba(accentColor, 0.06), [accentColor]);
   const panelBorder = useMemo(() => hexToRgba(accentColor, 0.16), [accentColor]);
   const heroTextColor = useMemo(() => getContrastColor(accentColor), [accentColor]);
   const heroBorder = useMemo(() => hexToRgba(heroTextColor, 0.18), [heroTextColor]);

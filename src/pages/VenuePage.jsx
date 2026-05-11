@@ -544,17 +544,28 @@ const VenuePage = () => {
 
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                     {templateOptions.map((template) => (
+                      (() => {
+                        const isDisabled = template.id === 'accent';
+                        const isSelected = designData.template === template.id;
+
+                        return (
                       <button
                         key={template.id}
-                        onClick={() => setDesignData({ ...designData, template: template.id })}
+                        type="button"
+                        onClick={isDisabled ? undefined : () => setDesignData({ ...designData, template: template.id })}
+                        disabled={isDisabled}
                         className={`p-4 rounded-xl border-2 text-sm font-bold transition-all text-center ${
-                          designData.template === template.id
+                          isDisabled
+                            ? 'border-border/40 bg-muted/40 text-muted-foreground/70 cursor-not-allowed'
+                            : isSelected
                             ? 'border-brand-purple bg-brand-purple/5 text-brand-purple'
                             : 'border-border/40 hover:border-border text-muted-foreground'
                         }`}
                       >
                         {template.label}
                       </button>
+                        );
+                      })()
                     ))}
                   </div>
                 </div>
