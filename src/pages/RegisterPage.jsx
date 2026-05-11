@@ -92,12 +92,8 @@ const RegisterPage = () => {
 
   return (
     <AuthShell
-      eyebrow="Новый аккаунт"
       title="Создать аккаунт"
-      subtitle="Создайте аккаунт, чтобы привязать заведение, загрузить меню и продолжить настройку в новом кабинете."
-      alternateLabel="Уже есть аккаунт?"
-      alternateHref="/login"
-      alternateAction="Войти"
+      subtitle="Введите данные для регистрации в системе, это займет меньше минуты"
     >
       <div className="space-y-8">
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">

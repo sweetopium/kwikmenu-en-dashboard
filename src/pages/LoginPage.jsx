@@ -75,12 +75,8 @@ const LoginPage = () => {
 
   return (
     <AuthShell
-      eyebrow="Вход в систему"
       title="С возвращением"
-      subtitle="Войдите в аккаунт, чтобы продолжить настройку заведения, загрузку меню и работу в редакторе."
-      alternateLabel="Еще нет аккаунта?"
-      alternateHref="/register"
-      alternateAction="Регистрация"
+      subtitle="Рады видеть вас снова. Введите данные для входа в личный кабинет"
     >
       <div className="space-y-8">
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
