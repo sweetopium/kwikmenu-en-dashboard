@@ -60,3 +60,29 @@ export const updateMenu = async (menuId, payload) => {
 
   return response.json();
 };
+
+export const publishMenu = async (menuId) => {
+  const response = await fetch(`${MENUS_API_URL}/${menuId}/publish`, {
+    method: 'POST',
+    credentials: 'include',
+  });
+
+  if (!response.ok) {
+    await parseApiError(response, `Menu publish request failed with status ${response.status}`);
+  }
+
+  return response.json();
+};
+
+export const unpublishMenu = async (menuId) => {
+  const response = await fetch(`${MENUS_API_URL}/${menuId}/unpublish`, {
+    method: 'POST',
+    credentials: 'include',
+  });
+
+  if (!response.ok) {
+    await parseApiError(response, `Menu unpublish request failed with status ${response.status}`);
+  }
+
+  return response.json();
+};

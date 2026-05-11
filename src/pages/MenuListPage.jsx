@@ -8,7 +8,7 @@ import {
 
 import { Button } from "../components/ui/button";
 import { primaryActionButtonClasses, subtleIconButtonClasses } from "../lib/uiStyles";
-import { listMenus } from "../lib/menusApi";
+import { listMenus, publishMenu, unpublishMenu } from "../lib/menusApi";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -26,6 +26,7 @@ const MENU_ICON_META = {
 
 const MenuListPage = () => {
   const [menus, setMenus] = useState([]);
+  const [busyMenuId, setBusyMenuId] = useState(null);
 
   useEffect(() => {
     const activeVenueId = window.localStorage.getItem('kwikmenu-active-venue');
@@ -33,6 +34,27 @@ const MenuListPage = () => {
       .then(setMenus)
       .catch(() => setMenus([]));
   }, []);
+
+  const handlePublishToggle = async (menu) => {
+    setBusyMenuId(menu.id);
+    try {
+      const updatedMenu = menu.status === 'active'
+        ? await unpublishMenu(menu.id)
+        : await publishMenu(menu.id);
+
+      setMenus((currentMenus) =>
+        currentMenus.map((currentMenu) =>
+          currentMenu.id === menu.id
+            ? { ...currentMenu, status: updatedMenu.status, updatedAt: updatedMenu.updatedAt }
+            : currentMenu
+        )
+      );
+    } catch (error) {
+      console.error('Не удалось обновить статус меню', error);
+    } finally {
+      setBusyMenuId(null);
+    }
+  };
 
   return (
     <div className="mx-auto space-y-6 sm:space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700 ease-out">
@@ -139,14 +161,26 @@ const MenuListPage = () => {
                     <DropdownMenuSeparator />
 
                     {menu.status === 'active' ? (
-                      <DropdownMenuItem>
+                      <DropdownMenuItem
+                        onSelect={(event) => {
+                          event.preventDefault();
+                          handlePublishToggle(menu);
+                        }}
+                        disabled={busyMenuId === menu.id}
+                      >
                         <Download size={16} />
-                        Снять с публикации
+                        {busyMenuId === menu.id ? 'Обновляем...' : 'Снять с публикации'}
                       </DropdownMenuItem>
                     ) : (
-                      <DropdownMenuItem>
+                      <DropdownMenuItem
+                        onSelect={(event) => {
+                          event.preventDefault();
+                          handlePublishToggle(menu);
+                        }}
+                        disabled={busyMenuId === menu.id}
+                      >
                         <Upload size={16} />
-                        Опубликовать
+                        {busyMenuId === menu.id ? 'Обновляем...' : 'Опубликовать'}
                       </DropdownMenuItem>
                     )}
 

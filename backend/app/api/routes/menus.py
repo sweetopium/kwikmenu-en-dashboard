@@ -102,3 +102,37 @@ def update_menu(
     db.commit()
     db.refresh(menu)
     return serialize_menu(menu)
+
+
+@router.post("/{menu_id}/publish", response_model=MenuResponse)
+def publish_menu(
+    menu_id: str,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+) -> MenuResponse:
+    menu = get_owned_menu(db, menu_id=menu_id, user_id=current_user.id)
+    if menu is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Menu not found.")
+
+    menu.status = "active"
+    db.add(menu)
+    db.commit()
+    db.refresh(menu)
+    return serialize_menu(menu)
+
+
+@router.post("/{menu_id}/unpublish", response_model=MenuResponse)
+def unpublish_menu(
+    menu_id: str,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+) -> MenuResponse:
+    menu = get_owned_menu(db, menu_id=menu_id, user_id=current_user.id)
+    if menu is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Menu not found.")
+
+    menu.status = "draft"
+    db.add(menu)
+    db.commit()
+    db.refresh(menu)
+    return serialize_menu(menu)
