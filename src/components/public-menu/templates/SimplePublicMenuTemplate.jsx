@@ -28,6 +28,9 @@ const SimplePublicMenuTemplate = ({
   const [passwordCopied, setPasswordCopied] = useState(false);
   const sectionRefs = useRef(new Map());
   const copyResetTimeoutRef = useRef(null);
+  const categoryScrollTimeoutRef = useRef(null);
+  const programmaticCategoryScrollRef = useRef(false);
+  const pendingCategoryIdRef = useRef(null);
 
   useEffect(() => {
     setLanguage(payload?.defaultLanguage || 'ru');
@@ -44,6 +47,10 @@ const SimplePublicMenuTemplate = ({
         const visibleEntry = entries
           .filter((entry) => entry.isIntersecting)
           .sort((left, right) => right.intersectionRatio - left.intersectionRatio)[0];
+
+        if (programmaticCategoryScrollRef.current) {
+          return;
+        }
 
         if (visibleEntry?.target?.id) {
           setActiveCategoryId(visibleEntry.target.id.replace('public-category-', ''));
@@ -64,6 +71,15 @@ const SimplePublicMenuTemplate = ({
 
     return () => observer.disconnect();
   }, [payload?.categories]);
+
+  useEffect(() => () => {
+    if (copyResetTimeoutRef.current) {
+      window.clearTimeout(copyResetTimeoutRef.current);
+    }
+    if (categoryScrollTimeoutRef.current) {
+      window.clearTimeout(categoryScrollTimeoutRef.current);
+    }
+  }, []);
 
   const pageTint = useMemo(() => hexToRgba(accentColor, 0.13), [accentColor]);
   const panelBorder = useMemo(() => hexToRgba(accentColor, 0.16), [accentColor]);
@@ -88,8 +104,20 @@ const SimplePublicMenuTemplate = ({
       return;
     }
 
+    programmaticCategoryScrollRef.current = true;
+    pendingCategoryIdRef.current = categoryId;
+    if (categoryScrollTimeoutRef.current) {
+      window.clearTimeout(categoryScrollTimeoutRef.current);
+    }
+
     element.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    setActiveCategoryId(categoryId);
+    categoryScrollTimeoutRef.current = window.setTimeout(() => {
+      if (pendingCategoryIdRef.current) {
+        setActiveCategoryId(pendingCategoryIdRef.current);
+      }
+      pendingCategoryIdRef.current = null;
+      programmaticCategoryScrollRef.current = false;
+    }, 520);
   };
 
   const handleCopyWifiPassword = async () => {
@@ -200,7 +228,10 @@ const SimplePublicMenuTemplate = ({
 
         {visibleCategories.length ? (
           <section className="sticky top-3 z-20">
-            <div className="flex gap-1.5 overflow-x-auto pb-1">
+            <div
+              className="flex gap-1.5 overflow-x-auto pb-1 [&::-webkit-scrollbar]:hidden"
+              style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+            >
               {visibleCategories.map((category) => {
                 const isSelected = category.id === activeCategoryId;
                 const categoryName = getLocalizedField(category, 'name', language, defaultLanguage) || category.name;
