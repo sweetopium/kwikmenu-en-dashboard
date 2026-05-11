@@ -80,10 +80,10 @@ const LoginPage = () => {
       subtitle="Рады видеть вас снова. Введите данные для входа в личный кабинет"
     >
       <div className="space-y-6 sm:space-y-8">
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+        <div className="grid grid-cols-3 gap-3 sm:grid-cols-3">
           <SocialProviderButton icon={FcGoogle} label="Google" onClick={() => handleProviderClick("google")}/>
           <SocialProviderButton icon={FaYandex} label="Яндекс" iconClassName="text-[#fc3f1d]" onClick={() => handleProviderClick("yandex")}/>
-          <SocialProviderButton icon={SiMaildotru} label="Mail.ru" iconClassName="text-[#005ff9]" onClick={() => handleProviderClick("mailru")}/>
+          <SocialProviderButton icon={SiMaildotru} label="Mail" iconClassName="text-[#005ff9]" onClick={() => handleProviderClick("mailru")}/>
         </div>
 
         <div className="flex items-center gap-4 text-[11px] font-semibold uppercase tracking-[0.22em] text-muted-foreground sm:text-xs">
