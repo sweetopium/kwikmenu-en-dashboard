@@ -87,7 +87,7 @@ const VenueListPage = () => {
               <div className="flex items-center gap-2 bg-secondary/50 px-3 py-1.5 rounded-xl border border-border/50">
                 <LinkIcon size={14} className="text-muted-foreground" />
                 <span className="text-xs font-semibold text-muted-foreground">
-                  Нет ссылки
+                  {venue.publicPath || 'Без ссылки'}
                 </span>
               </div>
 

@@ -16,6 +16,7 @@ import SubscriptionPlansPage from "./pages/SubscriptionPlansPage.jsx";
 import LoginPage from "./pages/LoginPage.jsx";
 import RegisterPage from "./pages/RegisterPage.jsx";
 import { ProtectedRoute, PublicOnlyRoute } from "./components/auth/AuthGuards.jsx";
+import ActiveVenueQrRedirect from "./components/venue/ActiveVenueQrRedirect.jsx";
 
 function App() {
     return (
@@ -36,7 +37,7 @@ function App() {
                 <Route path="/dashboard/menu/:id" element={<ProtectedRoute><DashboardLayout><MenuEditor/></DashboardLayout></ProtectedRoute>}/>
                 <Route path="/dashboard/venues" element={<ProtectedRoute><DashboardLayout><VenueListPage/></DashboardLayout></ProtectedRoute>}/>
                 <Route path="/dashboard/venues/:id" element={<ProtectedRoute><DashboardLayout><VenuePage/></DashboardLayout></ProtectedRoute>}/>
-                <Route path="/dashboard/qr" element={<Navigate to="/dashboard/venues/cafe-tatiana?tab=qr" replace/>}/>
+                <Route path="/dashboard/qr" element={<ProtectedRoute><ActiveVenueQrRedirect /></ProtectedRoute>}/>
                 <Route path="/dashboard/venue" element={<Navigate to="/dashboard/venues" replace/>}/>
                 <Route path="/dashboard/account" element={<ProtectedRoute><DashboardLayout><AccountPage/></DashboardLayout></ProtectedRoute>}/>
                 <Route path="/dashboard/billing" element={<ProtectedRoute><DashboardLayout><BillingPage/></DashboardLayout></ProtectedRoute>}/>

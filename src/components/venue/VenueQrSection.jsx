@@ -1,32 +1,39 @@
-import { useState } from 'react';
-
 import DirectMenuLink from "../qr/DirectMenuLink";
 import QrDesignControls from "../qr/QrDesignControls";
 import QrFrameControls from "../qr/QrFrameControls";
 import QrPreview from "../qr/QrPreview";
+import { Button } from "../ui/button";
+import { Save } from "lucide-react";
+import { primaryActionButtonClasses } from "../../lib/uiStyles";
 
 const PRESET_COLORS = ['#08060d', '#863bff', '#ef4444', '#f97316', '#22c55e', '#3b82f6'];
-const QR_VALUE = "https://kwikmenu.com/cafe-tatiana";
-const QR_DISPLAY_VALUE = "kwikmenu.com/cafe-tatiana";
 
-const VenueQrSection = () => {
-  const [qrColor, setQrColor] = useState('#863bff');
-  const [qrStyle, setQrStyle] = useState('rounded');
-  const [logoFile, setLogoFile] = useState(null);
-  const [hasFrame, setHasFrame] = useState(true);
-  const [frameText, setFrameText] = useState('СКАНИРУЙ МЕНЮ');
-  const [frameColor, setFrameColor] = useState('#08060d');
+const fileToDataUrl = (file) =>
+  new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(typeof reader.result === 'string' ? reader.result : null);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
 
-  const handleLogoUpload = (e) => {
-    const file = e.target.files[0];
+const VenueQrSection = ({ value, onChange, onSave, isSaving = false }) => {
+  const qrValue = value.publicUrl || '';
+  const qrDisplayValue = qrValue.replace(/^https?:\/\//, '');
 
-    if (file) {
-      setLogoFile(URL.createObjectURL(file));
+  const handleQrLogoUpload = async (event) => {
+    const file = event.target.files?.[0];
+    if (!file) {
+      return;
+    }
+
+    const dataUrl = await fileToDataUrl(file);
+    if (dataUrl) {
+      onChange({ ...value, logoUrl: dataUrl });
     }
   };
 
   const downloadQR = () => {
-    const canvas = document.getElementById('kwikmenu-qr-canvas');
+    const canvas = document.getElementById('kwikmenu-qr-canvas') || document.getElementById('kwikmenu-qr-canvas-mobile');
 
     if (canvas) {
       const pngUrl = canvas
@@ -35,7 +42,7 @@ const VenueQrSection = () => {
 
       const downloadLink = document.createElement('a');
       downloadLink.href = pngUrl;
-      downloadLink.download = 'kwikmenu-qr.png';
+      downloadLink.download = `kwikmenu-${value.venueId || 'venue'}-qr.png`;
       document.body.appendChild(downloadLink);
       downloadLink.click();
       document.body.removeChild(downloadLink);
@@ -43,21 +50,25 @@ const VenueQrSection = () => {
   };
 
   const copyMenuLink = async () => {
+    if (!qrValue) {
+      return;
+    }
+
     try {
-      await navigator.clipboard.writeText(QR_VALUE);
+      await navigator.clipboard.writeText(qrValue);
     } catch (error) {
       console.error('Не удалось скопировать ссылку', error);
     }
   };
 
   const previewProps = {
-    qrValue: QR_VALUE,
-    qrColor,
-    qrStyle,
-    logoFile,
-    hasFrame,
-    frameText,
-    frameColor,
+    qrValue,
+    qrColor: value.color,
+    qrStyle: value.style,
+    logoFile: value.logoUrl,
+    hasFrame: value.hasFrame,
+    frameText: value.frameText,
+    frameColor: value.frameColor,
     onDownload: downloadQR,
   };
 
@@ -74,43 +85,54 @@ const VenueQrSection = () => {
         <div className="p-6 sm:p-8">
           <div className="xl:hidden space-y-4 mb-6">
             <QrPreview {...previewProps} mobile />
-            <DirectMenuLink embedded displayValue={QR_DISPLAY_VALUE} onCopy={copyMenuLink} />
+            <DirectMenuLink embedded displayValue={qrDisplayValue} onCopy={copyMenuLink} />
           </div>
 
           <div className="grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_400px] gap-6 lg:gap-8 relative w-full max-w-full min-w-0">
             <div className="space-y-8 min-w-0 max-w-full">
               <QrDesignControls
                 embedded
-                qrColor={qrColor}
-                qrStyle={qrStyle}
-                logoFile={logoFile}
+                qrColor={value.color}
+                qrStyle={value.style}
+                logoFile={value.logoUrl}
                 presetColors={PRESET_COLORS}
-                onQrColorChange={setQrColor}
-                onQrStyleChange={setQrStyle}
-                onLogoUpload={handleLogoUpload}
-                onRemoveLogo={() => setLogoFile(null)}
+                onQrColorChange={(nextColor) => onChange({ ...value, color: nextColor })}
+                onQrStyleChange={(nextStyle) => onChange({ ...value, style: nextStyle })}
+                onLogoUpload={handleQrLogoUpload}
+                onRemoveLogo={() => onChange({ ...value, logoUrl: null })}
               />
 
               <div className="border-t border-border/50" />
 
               <QrFrameControls
                 embedded
-                hasFrame={hasFrame}
-                frameText={frameText}
-                frameColor={frameColor}
+                hasFrame={value.hasFrame}
+                frameText={value.frameText}
+                frameColor={value.frameColor}
                 presetColors={PRESET_COLORS}
-                onHasFrameChange={setHasFrame}
-                onFrameTextChange={setFrameText}
-                onFrameColorChange={setFrameColor}
+                onHasFrameChange={(nextHasFrame) => onChange({ ...value, hasFrame: nextHasFrame })}
+                onFrameTextChange={(nextFrameText) => onChange({ ...value, frameText: nextFrameText })}
+                onFrameColorChange={(nextFrameColor) => onChange({ ...value, frameColor: nextFrameColor })}
               />
 
               <div className="border-t border-border/50" />
+
+              <div className="flex justify-end">
+                <Button
+                  onClick={onSave}
+                  disabled={isSaving}
+                  className={`${primaryActionButtonClasses} px-5`}
+                >
+                  <Save size={18} className="mr-2" />
+                  {isSaving ? 'Сохраняем...' : 'Сохранить QR'}
+                </Button>
+              </div>
             </div>
 
             <div className="hidden xl:block w-full shrink-0 self-start">
               <div className="sticky top-24 space-y-4">
                 <QrPreview {...previewProps} />
-                <DirectMenuLink embedded displayValue={QR_DISPLAY_VALUE} onCopy={copyMenuLink} />
+                <DirectMenuLink embedded displayValue={qrDisplayValue} onCopy={copyMenuLink} />
               </div>
             </div>
           </div>

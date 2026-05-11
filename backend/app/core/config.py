@@ -26,6 +26,7 @@ class Settings(BaseSettings):
     menu_import_api_url: str = "http://localhost:8000"
     menu_import_frontend_origin: str = "http://localhost:5173"
     menu_import_frontend_origin_regex: str = r"https?://(localhost|127\.0\.0\.1)(:\d+)?"
+    public_menu_base_url: str | None = None
     openrouter_api_key: str | None = None
     openrouter_referer: str = "http://localhost:5173"
     openrouter_app_name: str = "KwikMenu Dashboard"

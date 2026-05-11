@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useEffect, useMemo, useState } from 'react';
+import { useParams, useSearchParams } from 'react-router-dom';
 import {
   Store,
   Wifi,
@@ -27,6 +27,14 @@ import {
   primaryActionButtonClasses,
 } from "../lib/uiStyles";
 import { TOP_CURRENCIES } from "../lib/currencyMeta";
+import {
+  getVenue,
+  getVenueSettings,
+  updateVenueDesign,
+  updateVenueProfile,
+  updateVenueQr,
+  updateVenueWifi,
+} from "../lib/venuesApi";
 
 const VENUE_TABS = [
   { id: 'profile', label: 'Профиль', mobileLabel: 'Профиль', icon: Store },
@@ -35,35 +43,81 @@ const VENUE_TABS = [
   { id: 'qr', label: 'QR и ссылка', mobileLabel: 'QR', icon: QrCode },
 ];
 
+const EMPTY_VENUE = {
+  name: '',
+  description: '',
+  phone: '',
+  city: '',
+  country: '',
+  currency: 'RUB',
+  publicUrl: '',
+};
+
+const EMPTY_WIFI = {
+  ssid: '',
+  password: '',
+  enabled: false,
+};
+
+const EMPTY_DESIGN = {
+  template: 'classic',
+  accentColor: '#6d67eb',
+  logoUrl: null,
+};
+
+const EMPTY_QR = {
+  venueId: '',
+  style: 'rounded',
+  color: '#863bff',
+  logoUrl: null,
+  hasFrame: true,
+  frameText: 'СКАНИРУЙ МЕНЮ',
+  frameColor: '#08060d',
+  publicMenuEnabled: true,
+  publicPath: '',
+  publicUrl: '',
+};
+
+const fileToDataUrl = (file) =>
+  new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(typeof reader.result === 'string' ? reader.result : null);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+
 const VenuePage = () => {
+  const { id: venueId } = useParams();
   const [searchParams, setSearchParams] = useSearchParams();
   const requestedTab = searchParams.get('tab');
   const activeTab = VENUE_TABS.some((tab) => tab.id === requestedTab) ? requestedTab : 'profile';
-  const [venueData, setVenueData] = useState({
-    name: 'Skuratov Coffee',
-    description: 'Собственная обжарка и формат брю-бара: классика, спешлы, сезонные напитки, выпечка, десерты, завтраки и лёгкая еда.',
-    phone: '+7 925 323 29 46',
-    city: 'Москва',
-    country: 'Россия',
-    currency: 'RUB',
-  });
-  const [wifiData, setWifiData] = useState({
-    ssid: 'Skuratov_Guest',
-    password: 'coffee2026',
-    enabled: true,
-  });
-  const [designData, setDesignData] = useState({
-    template: 'classic',
-    accentColor: '#6d67eb',
+
+  const [venueData, setVenueData] = useState(EMPTY_VENUE);
+  const [wifiData, setWifiData] = useState(EMPTY_WIFI);
+  const [designData, setDesignData] = useState(EMPTY_DESIGN);
+  const [qrData, setQrData] = useState(EMPTY_QR);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [savingState, setSavingState] = useState({
+    profile: false,
+    wifi: false,
+    design: false,
+    qr: false,
   });
 
-  const templateOptions = [
-    { id: 'classic', label: 'Классический' },
-    { id: 'minimal', label: 'Минималистичный' },
-    { id: 'accent', label: 'Акцентный' },
-  ];
+  const templateOptions = useMemo(
+    () => [
+      { id: 'classic', label: 'Классический' },
+      { id: 'minimal', label: 'Минималистичный' },
+      { id: 'accent', label: 'Акцентный' },
+    ],
+    [],
+  );
 
-  const accentColors = ['#6d67eb', '#111827', '#ef4444', '#f97316', '#22c55e', '#0ea5e9', '#ec4899', '#a855f7'];
+  const accentColors = useMemo(
+    () => ['#6d67eb', '#111827', '#ef4444', '#f97316', '#22c55e', '#0ea5e9', '#ec4899', '#a855f7'],
+    [],
+  );
 
   const handleTabChange = (tabId) => {
     const nextParams = new URLSearchParams(searchParams);
@@ -77,34 +131,271 @@ const VenuePage = () => {
     setSearchParams(nextParams, { replace: true });
   };
 
+  const applyVenuePayload = (venue, settings) => {
+    setVenueData({
+      name: venue.name || '',
+      description: venue.description || '',
+      phone: venue.phone || '',
+      city: venue.city || '',
+      country: venue.country || '',
+      currency: venue.currency || settings?.currency || 'RUB',
+      publicUrl: venue.publicUrl || settings?.qr?.publicUrl || '',
+    });
+
+    if (settings) {
+      setWifiData({
+        ssid: settings.wifi?.ssid || '',
+        password: settings.wifi?.password || '',
+        enabled: Boolean(settings.wifi?.enabled),
+      });
+      setDesignData({
+        template: settings.design?.template || 'classic',
+        accentColor: settings.design?.accentColor || '#6d67eb',
+        logoUrl: settings.design?.logoUrl || null,
+      });
+      setQrData({
+        venueId: settings.venueId || venue.id,
+        style: settings.qr?.style || 'rounded',
+        color: settings.qr?.color || '#863bff',
+        logoUrl: settings.qr?.logoUrl || null,
+        hasFrame: settings.qr?.hasFrame ?? true,
+        frameText: settings.qr?.frameText || 'СКАНИРУЙ МЕНЮ',
+        frameColor: settings.qr?.frameColor || '#08060d',
+        publicMenuEnabled: settings.qr?.publicMenuEnabled ?? true,
+        publicPath: settings.qr?.publicPath || '',
+        publicUrl: settings.qr?.publicUrl || venue.publicUrl || '',
+      });
+    }
+  };
+
+  const loadVenue = async () => {
+    if (!venueId) {
+      return;
+    }
+
+    setIsLoading(true);
+    setError('');
+    try {
+      const [venue, settings] = await Promise.all([
+        getVenue(venueId),
+        getVenueSettings(venueId),
+      ]);
+      applyVenuePayload(venue, settings);
+    } catch (nextError) {
+      setError(nextError.message || 'Не удалось загрузить заведение.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadVenue();
+  }, [venueId]);
+
+  const setSaving = (key, value) => {
+    setSavingState((current) => ({ ...current, [key]: value }));
+  };
+
+  const handleSaveProfile = async () => {
+    if (!venueId) {
+      return;
+    }
+
+    setSaving('profile', true);
+    setError('');
+    try {
+      const venue = await updateVenueProfile(venueId, {
+        name: venueData.name,
+        description: venueData.description || null,
+        phone: venueData.phone || null,
+        city: venueData.city || null,
+        country: venueData.country || null,
+        currency: venueData.currency || 'RUB',
+      });
+      setVenueData((current) => ({
+        ...current,
+        name: venue.name || '',
+        description: venue.description || '',
+        phone: venue.phone || '',
+        city: venue.city || '',
+        country: venue.country || '',
+        currency: venue.currency || 'RUB',
+        publicUrl: venue.publicUrl || current.publicUrl,
+      }));
+    } catch (nextError) {
+      setError(nextError.message || 'Не удалось сохранить профиль заведения.');
+    } finally {
+      setSaving('profile', false);
+    }
+  };
+
+  const handleSaveWifi = async () => {
+    if (!venueId) {
+      return;
+    }
+
+    setSaving('wifi', true);
+    setError('');
+    try {
+      const settings = await updateVenueWifi(venueId, {
+        enabled: wifiData.enabled,
+        ssid: wifiData.ssid || null,
+        password: wifiData.password || null,
+      });
+      setWifiData({
+        ssid: settings.wifi?.ssid || '',
+        password: settings.wifi?.password || '',
+        enabled: Boolean(settings.wifi?.enabled),
+      });
+    } catch (nextError) {
+      setError(nextError.message || 'Не удалось сохранить Wi‑Fi настройки.');
+    } finally {
+      setSaving('wifi', false);
+    }
+  };
+
+  const handleSaveDesign = async () => {
+    if (!venueId) {
+      return;
+    }
+
+    setSaving('design', true);
+    setError('');
+    try {
+      const settings = await updateVenueDesign(venueId, {
+        template: designData.template,
+        accentColor: designData.accentColor,
+        logoUrl: designData.logoUrl || null,
+      });
+      setDesignData({
+        template: settings.design?.template || 'classic',
+        accentColor: settings.design?.accentColor || '#6d67eb',
+        logoUrl: settings.design?.logoUrl || null,
+      });
+    } catch (nextError) {
+      setError(nextError.message || 'Не удалось сохранить внешний вид.');
+    } finally {
+      setSaving('design', false);
+    }
+  };
+
+  const handleSaveQr = async () => {
+    if (!venueId) {
+      return;
+    }
+
+    setSaving('qr', true);
+    setError('');
+    try {
+      const settings = await updateVenueQr(venueId, {
+        style: qrData.style,
+        color: qrData.color,
+        logoUrl: qrData.logoUrl || null,
+        hasFrame: qrData.hasFrame,
+        frameText: qrData.frameText,
+        frameColor: qrData.frameColor,
+        publicMenuEnabled: qrData.publicMenuEnabled,
+      });
+      setQrData({
+        venueId: settings.venueId,
+        style: settings.qr?.style || 'rounded',
+        color: settings.qr?.color || '#863bff',
+        logoUrl: settings.qr?.logoUrl || null,
+        hasFrame: settings.qr?.hasFrame ?? true,
+        frameText: settings.qr?.frameText || 'СКАНИРУЙ МЕНЮ',
+        frameColor: settings.qr?.frameColor || '#08060d',
+        publicMenuEnabled: settings.qr?.publicMenuEnabled ?? true,
+        publicPath: settings.qr?.publicPath || '',
+        publicUrl: settings.qr?.publicUrl || '',
+      });
+      setVenueData((current) => ({
+        ...current,
+        publicUrl: settings.qr?.publicUrl || current.publicUrl,
+      }));
+    } catch (nextError) {
+      setError(nextError.message || 'Не удалось сохранить QR-настройки.');
+    } finally {
+      setSaving('qr', false);
+    }
+  };
+
+  const handleDesignLogoUpload = async (event) => {
+    const file = event.target.files?.[0];
+    if (!file) {
+      return;
+    }
+
+    const dataUrl = await fileToDataUrl(file);
+    if (dataUrl) {
+      setDesignData((current) => ({ ...current, logoUrl: dataUrl }));
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <div className="mx-auto space-y-6">
+        <SettingsPageHeader
+          title="Заведение"
+          description="Загружаем профиль заведения, Wi‑Fi и публичную ссылку."
+          actionLabel={null}
+        />
+        <div className="bg-card border border-border/60 rounded-3xl shadow-sm p-8 text-sm text-muted-foreground">
+          Загружаем данные заведения...
+        </div>
+      </div>
+    );
+  }
+
+  if (error && !venueData.name && !qrData.publicUrl) {
+    return (
+      <div className="mx-auto space-y-6">
+        <SettingsPageHeader
+          title="Заведение"
+          description="Управляйте профилем заведения, гостевым Wi‑Fi и внешним видом меню."
+          actionLabel={null}
+        />
+        <div className="bg-card border border-destructive/20 rounded-3xl shadow-sm p-8 space-y-4">
+          <p className="text-sm text-destructive">{error}</p>
+          <Button variant="outline" onClick={loadVenue}>
+            Повторить загрузку
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="mx-auto space-y-6">
       <SettingsPageHeader
         title="Заведение"
-        description="Управляйте профилем заведения, гостевым Wi-Fi и внешним видом меню."
+        description="Управляйте профилем заведения, гостевым Wi‑Fi и внешним видом меню."
         actionLabel={null}
       />
 
       <div className="space-y-6">
-
-          <div className="grid grid-cols-4 gap-2 bg-secondary/30 p-1 rounded-xl border border-input/50">
-            {VENUE_TABS.map((tab) => (
-              <button
-                key={tab.id}
-                onClick={() => handleTabChange(tab.id)}
-                className={`flex items-center justify-center gap-2 px-2 sm:px-4 h-10 sm:h-11 rounded-lg text-[11px] sm:text-sm font-medium transition-all min-w-0 ${
-                  activeTab === tab.id
-                    ? 'bg-background shadow-sm text-foreground'
-                    : 'text-muted-foreground hover:text-foreground'
-                }`}
-              >
-                <tab.icon size={16} className="hidden sm:block shrink-0" />
-                <span className="truncate sm:hidden">{tab.mobileLabel}</span>
-                <span className="truncate hidden sm:block">{tab.label}</span>
-              </button>
-            ))}
+        {error ? (
+          <div className="rounded-2xl border border-destructive/20 bg-destructive/5 px-4 py-3 text-sm text-destructive">
+            {error}
           </div>
+        ) : null}
 
+        <div className="grid grid-cols-4 gap-2 bg-secondary/30 p-1 rounded-xl border border-input/50">
+          {VENUE_TABS.map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => handleTabChange(tab.id)}
+              className={`flex items-center justify-center gap-2 px-2 sm:px-4 h-10 sm:h-11 rounded-lg text-[11px] sm:text-sm font-medium transition-all min-w-0 ${
+                activeTab === tab.id
+                  ? 'bg-background shadow-sm text-foreground'
+                  : 'text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              <tab.icon size={16} className="hidden sm:block shrink-0" />
+              <span className="truncate sm:hidden">{tab.mobileLabel}</span>
+              <span className="truncate hidden sm:block">{tab.label}</span>
+            </button>
+          ))}
+        </div>
 
         <main className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-500">
           {activeTab === 'profile' && (
@@ -175,9 +466,9 @@ const VenuePage = () => {
                 </div>
 
                 <div className="pt-4 border-t border-border/50 flex justify-end">
-                  <Button className={`${primaryActionButtonClasses} px-5`}>
+                  <Button onClick={handleSaveProfile} disabled={savingState.profile} className={`${primaryActionButtonClasses} px-5`}>
                     <Save size={18} className="mr-2" />
-                    Сохранить профиль
+                    {savingState.profile ? 'Сохраняем...' : 'Сохранить профиль'}
                   </Button>
                 </div>
               </div>
@@ -227,9 +518,9 @@ const VenuePage = () => {
               </div>
 
               <div className="pt-4 border-t border-border/50 flex justify-end">
-                <Button className={`${primaryActionButtonClasses} px-5`}>
+                <Button onClick={handleSaveWifi} disabled={savingState.wifi} className={`${primaryActionButtonClasses} px-5`}>
                   <Save size={18} className="mr-2" />
-                  Сохранить Wi‑Fi
+                  {savingState.wifi ? 'Сохраняем...' : 'Сохранить Wi‑Fi'}
                 </Button>
               </div>
             </div>
@@ -306,21 +597,33 @@ const VenuePage = () => {
                 <div className="pt-6 border-t border-border/50 space-y-4">
                   <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Логотип заведения в меню</Label>
                   <div className="flex items-center gap-6">
-                    <div className="w-24 h-24 rounded-2xl bg-secondary/30 border-2 border-dashed border-input flex items-center justify-center cursor-pointer hover:bg-secondary/50 transition-colors">
-                      <ImageIcon className="text-muted-foreground" size={32} />
-                    </div>
+                    <label className="w-24 h-24 rounded-2xl bg-secondary/30 border-2 border-dashed border-input flex items-center justify-center cursor-pointer hover:bg-secondary/50 transition-colors overflow-hidden">
+                      <input
+                        type="file"
+                        accept="image/png,image/jpeg,image/jpg"
+                        onChange={handleDesignLogoUpload}
+                        className="hidden"
+                      />
+                      {designData.logoUrl ? (
+                        <img src={designData.logoUrl} alt="Логотип заведения" className="w-full h-full object-cover" />
+                      ) : (
+                        <ImageIcon className="text-muted-foreground" size={32} />
+                      )}
+                    </label>
                     <div className="space-y-1">
                       <p className="text-sm font-bold">Загрузите квадратное лого</p>
                       <p className="text-xs text-muted-foreground">Рекомендуемый размер 512x512px, формат PNG или SVG</p>
-                      <Button variant="outline" size="sm" className="mt-2 rounded-lg border-border/60 text-[10px] uppercase tracking-wider font-black">Выбрать файл</Button>
+                      <Button variant="outline" size="sm" className="mt-2 rounded-lg border-border/60 text-[10px] uppercase tracking-wider font-black">
+                        Выбрать файл
+                      </Button>
                     </div>
                   </div>
                 </div>
 
                 <div className="pt-4 border-t border-border/50 flex justify-end">
-                  <Button className={`${primaryActionButtonClasses} px-5`}>
+                  <Button onClick={handleSaveDesign} disabled={savingState.design} className={`${primaryActionButtonClasses} px-5`}>
                     <Save size={18} className="mr-2" />
-                    Сохранить внешний вид
+                    {savingState.design ? 'Сохраняем...' : 'Сохранить внешний вид'}
                   </Button>
                 </div>
               </div>
@@ -330,15 +633,27 @@ const VenuePage = () => {
                   <p className="text-xs font-bold text-brand-purple uppercase tracking-widest">Предпросмотр</p>
                   <h4 className="text-lg font-extrabold">Посмотрите, как меню видят гости</h4>
                 </div>
-                <Button className="h-11 rounded-lg bg-white text-gray-900 hover:bg-gray-100 font-bold gap-2 px-5">
+                <a
+                  href={qrData.publicUrl || venueData.publicUrl || '#'}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex items-center h-11 rounded-lg bg-white px-5 text-gray-900 hover:bg-gray-100 font-bold gap-2 transition-colors"
+                >
                   Открыть меню
                   <ExternalLink size={16} />
-                </Button>
+                </a>
               </div>
             </div>
           )}
 
-          {activeTab === 'qr' && <VenueQrSection />}
+          {activeTab === 'qr' && (
+            <VenueQrSection
+              value={qrData}
+              onChange={setQrData}
+              onSave={handleSaveQr}
+              isSaving={savingState.qr}
+            />
+          )}
         </main>
       </div>
     </div>

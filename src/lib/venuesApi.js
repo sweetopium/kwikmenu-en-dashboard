@@ -15,31 +15,41 @@ const parseApiError = async (response, fallbackMessage) => {
   throw new Error(message || fallbackMessage);
 };
 
-export const listVenues = async () => {
-  const response = await fetch(VENUES_API_URL, {
+const jsonRequest = async (url, { method = 'GET', body } = {}, fallbackMessage) => {
+  const response = await fetch(url, {
+    method,
     credentials: 'include',
+    headers: body ? { 'Content-Type': 'application/json' } : undefined,
+    body: body ? JSON.stringify(body) : undefined,
   });
 
   if (!response.ok) {
-    await parseApiError(response, `Venues request failed with status ${response.status}`);
+    await parseApiError(response, fallbackMessage || `Venue request failed with status ${response.status}`);
   }
 
   return response.json();
 };
 
-export const createVenue = async (payload) => {
-  const response = await fetch(VENUES_API_URL, {
-    method: 'POST',
-    credentials: 'include',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(payload),
-  });
+export const listVenues = () =>
+  jsonRequest(VENUES_API_URL, {}, 'Не удалось загрузить список заведений.');
 
-  if (!response.ok) {
-    await parseApiError(response, `Venue create request failed with status ${response.status}`);
-  }
+export const createVenue = (payload) =>
+  jsonRequest(VENUES_API_URL, { method: 'POST', body: payload }, 'Не удалось создать заведение.');
 
-  return response.json();
-};
+export const getVenue = (venueId) =>
+  jsonRequest(`${VENUES_API_URL}/${venueId}`, {}, 'Не удалось загрузить заведение.');
+
+export const updateVenueProfile = (venueId, payload) =>
+  jsonRequest(`${VENUES_API_URL}/${venueId}/profile`, { method: 'PATCH', body: payload }, 'Не удалось сохранить профиль заведения.');
+
+export const getVenueSettings = (venueId) =>
+  jsonRequest(`${VENUES_API_URL}/${venueId}/settings`, {}, 'Не удалось загрузить настройки заведения.');
+
+export const updateVenueWifi = (venueId, payload) =>
+  jsonRequest(`${VENUES_API_URL}/${venueId}/wifi`, { method: 'PATCH', body: payload }, 'Не удалось сохранить Wi-Fi настройки.');
+
+export const updateVenueDesign = (venueId, payload) =>
+  jsonRequest(`${VENUES_API_URL}/${venueId}/design`, { method: 'PATCH', body: payload }, 'Не удалось сохранить внешний вид.');
+
+export const updateVenueQr = (venueId, payload) =>
+  jsonRequest(`${VENUES_API_URL}/${venueId}/qr`, { method: 'PATCH', body: payload }, 'Не удалось сохранить QR-настройки.');

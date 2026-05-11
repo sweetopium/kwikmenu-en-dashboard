@@ -10,7 +10,7 @@ const MenuImportPage = () => {
     <div className="mx-auto space-y-6 sm:space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700 ease-out">
       <SettingsPageHeader
         title="Новое меню"
-        description="Отдельный экран импорта для рабочего кабинета. Пока без БД: отправляем исходники в backend job и показываем полный visual flow."
+        description="Экран импорта для рабочего кабинета. Отправляем исходники в backend job, сохраняем результат и открываем черновик меню."
         actionLabel={null}
       />
 

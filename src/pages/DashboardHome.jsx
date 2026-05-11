@@ -16,7 +16,6 @@ import {
 } from "../components/ui/dropdown-menu";
 
 const PRIMARY_MENU_ID = 'main';
-const PUBLIC_MENU_URL = 'https://kwikmenu.com/cafe-tatiana';
 const PERIOD_OPTIONS = ['Сегодня', 'Вчера', 'Последние 7 дней', 'Последние 30 дней'];
 
 // Мок-данные для графика (оставляем 7 дней, они красиво растянутся)
@@ -32,6 +31,16 @@ const chartData = [
 
 const DashboardHome = () => {
   const [selectedPeriod, setSelectedPeriod] = useState('Последние 7 дней');
+  const origin = typeof window !== 'undefined' ? window.location.origin : '';
+  const activeVenueId = typeof window !== 'undefined'
+    ? window.localStorage.getItem('kwikmenu-active-venue')
+    : null;
+  const publicMenuUrl = activeVenueId
+    ? `${origin}/m/${activeVenueId}`
+    : `${origin}/dashboard/venues`;
+  const activeVenueQrPath = activeVenueId
+    ? `/dashboard/venues/${activeVenueId}?tab=qr`
+    : '/dashboard/venues';
 
   // Максимальное значение для расчета высоты столбцов графика
   const maxViews = Math.max(...chartData.map(d => d.views));
@@ -180,7 +189,7 @@ const DashboardHome = () => {
         </Link>
 
         <Link
-          to="/dashboard/venues/cafe-tatiana?tab=qr"
+          to={activeVenueQrPath}
           className="bg-card border border-border/60 rounded-3xl p-6 sm:p-8 shadow-sm flex flex-col justify-between group hover:border-foreground/20 transition-all hover:-translate-y-1 min-h-[220px] sm:min-h-[250px]"
         >
           <div className="w-14 h-14 rounded-2xl bg-secondary flex items-center justify-center mb-8 group-hover:bg-foreground group-hover:text-background transition-colors">
@@ -193,7 +202,7 @@ const DashboardHome = () => {
         </Link>
 
         <a
-          href={PUBLIC_MENU_URL}
+          href={publicMenuUrl}
           target="_blank"
           rel="noreferrer"
           className="bg-card border border-border/60 rounded-3xl p-6 sm:p-8 shadow-sm flex flex-col justify-between group hover:border-foreground/20 transition-all hover:-translate-y-1 min-h-[220px] sm:min-h-[250px]"

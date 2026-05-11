@@ -6,6 +6,7 @@ from app.api.routes.health import router as health_router
 from app.api.routes.menus import router as menus_router
 from app.api.routes.menu_imports import router as menu_imports_router
 from app.api.routes.menu_normalizations import router as menu_normalizations_router
+from app.api.routes.public import router as public_router
 from app.api.routes.venues import router as venues_router
 from app.core.config import get_settings
 from app.core.paths import DATA_ROOT, UPLOADS_ROOT
@@ -36,6 +37,7 @@ def create_app() -> FastAPI:
     app.include_router(menus_router)
     app.include_router(menu_imports_router)
     app.include_router(menu_normalizations_router)
+    app.include_router(public_router)
     app.include_router(venues_router)
     return app
 
