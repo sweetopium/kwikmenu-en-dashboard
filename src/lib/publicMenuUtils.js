@@ -23,15 +23,15 @@ const CURRENCY_SYMBOLS = {
 export const normalizeTemplateType = (value) => {
   const normalized = String(value || 'simple').trim().toLowerCase();
 
-  if (normalized === 'simple-menu' || normalized === 'simple') {
+  if (normalized === 'simple-menu' || normalized === 'simple' || normalized === 'classic') {
     return 'simple';
   }
 
-  if (normalized === 'extended' || normalized === 'extended-menu') {
+  if (normalized === 'extended' || normalized === 'extended-menu' || normalized === 'minimal') {
     return 'extended';
   }
 
-  if (normalized === 'premium' || normalized === 'premium-menu') {
+  if (normalized === 'premium' || normalized === 'premium-menu' || normalized === 'accent') {
     return 'premium';
   }
 

@@ -1,14 +1,17 @@
 import SimplePublicMenuTemplate from './templates/SimplePublicMenuTemplate.jsx';
+import ExtendedPublicMenuTemplate from './templates/ExtendedPublicMenuTemplate.jsx';
 import { normalizeTemplateType } from '../../lib/publicMenuUtils';
 
 const TEMPLATE_COMPONENTS = {
   simple: SimplePublicMenuTemplate,
-  extended: SimplePublicMenuTemplate,
+  extended: ExtendedPublicMenuTemplate,
   premium: SimplePublicMenuTemplate,
 };
 
 const PublicMenuTemplateRenderer = (props) => {
-  const templateType = normalizeTemplateType(props.menu?.payload?.settings?.templateType);
+  const templateType = normalizeTemplateType(
+    props.venue?.design?.template || props.menu?.payload?.settings?.templateType
+  );
   const TemplateComponent = TEMPLATE_COMPONENTS[templateType] || TEMPLATE_COMPONENTS.simple;
 
   return <TemplateComponent {...props} templateType={templateType} />;

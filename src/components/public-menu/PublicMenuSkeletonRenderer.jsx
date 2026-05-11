@@ -1,9 +1,10 @@
 import SimplePublicMenuSkeleton from './templates/SimplePublicMenuSkeleton.jsx';
+import ExtendedPublicMenuSkeleton from './templates/ExtendedPublicMenuSkeleton.jsx';
 import { normalizeTemplateType } from '../../lib/publicMenuUtils';
 
 const SKELETON_COMPONENTS = {
   simple: SimplePublicMenuSkeleton,
-  extended: SimplePublicMenuSkeleton,
+  extended: ExtendedPublicMenuSkeleton,
   premium: SimplePublicMenuSkeleton,
 };
 

@@ -30,6 +30,7 @@ class PublicVenueResponse(StrictModel):
     id: str
     name: str
     description: str | None = None
+    phone: str | None = None
     city: str | None = None
     country: str | None = None
     currency: str = "RUB"

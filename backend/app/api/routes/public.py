@@ -57,6 +57,7 @@ def get_public_venue_menus(
             id=venue.id,
             name=venue.name,
             description=venue.description,
+            phone=venue.phone,
             city=venue.city,
             country=venue.country,
             currency=venue_settings.currency,

@@ -6,8 +6,16 @@ import { getPublicVenueMenus } from '../lib/publicMenuApi.js';
 import PublicMenuTemplateRenderer from '../components/public-menu/PublicMenuTemplateRenderer.jsx';
 import PublicMenuSkeletonRenderer from '../components/public-menu/PublicMenuSkeletonRenderer.jsx';
 import { Button } from '../components/ui/button.jsx';
+import { normalizeTemplateType } from '../lib/publicMenuUtils.js';
 
 const MIN_PUBLIC_MENU_LOADING_MS = 3000;
+const getStoredTemplateType = (venueId) => {
+  if (!venueId || typeof window === 'undefined') {
+    return 'simple';
+  }
+
+  return normalizeTemplateType(window.sessionStorage.getItem(`kwikmenu-public-template:${venueId}`) || 'simple');
+};
 
 const PublicVenueMenuPage = () => {
   const { venueId } = useParams();
@@ -15,6 +23,7 @@ const PublicVenueMenuPage = () => {
   const [data, setData] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
+  const [lastKnownTemplateType, setLastKnownTemplateType] = useState(() => getStoredTemplateType(venueId));
 
   useEffect(() => {
     let isCancelled = false;
@@ -75,6 +84,17 @@ const PublicVenueMenuPage = () => {
   }, [menus, requestedMenuId]);
 
   useEffect(() => {
+    const nextTemplateType = normalizeTemplateType(
+      data?.venue?.design?.template || activeMenu?.payload?.settings?.templateType || 'simple'
+    );
+    setLastKnownTemplateType(nextTemplateType);
+
+    if (venueId && typeof window !== 'undefined') {
+      window.sessionStorage.setItem(`kwikmenu-public-template:${venueId}`, nextTemplateType);
+    }
+  }, [activeMenu?.payload?.settings?.templateType, data?.venue?.design?.template, venueId]);
+
+  useEffect(() => {
     if (!activeMenu) {
       return;
     }
@@ -99,7 +119,7 @@ const PublicVenueMenuPage = () => {
   };
 
   if (isLoading) {
-    return <PublicMenuSkeletonRenderer templateType="simple" />;
+    return <PublicMenuSkeletonRenderer templateType={lastKnownTemplateType} />;
   }
 
   if (error || !data?.venue) {

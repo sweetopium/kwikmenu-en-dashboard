@@ -291,7 +291,7 @@ const SimplePublicMenuTemplate = ({
                     }}
                     type="button"
                     onClick={() => scrollToCategory(category.id)}
-                    className="shrink-0 rounded-full border px-4 py-2.5 text-[0.8rem] font-medium transition-all"
+                    className="shrink-0 rounded-full border px-3 py-1.5 text-[0.62rem] font-medium transition-all sm:px-3.5 sm:text-[0.68rem]"
                     style={isSelected ? {
                       backgroundColor: accentColor,
                       borderColor: accentColor,
@@ -335,8 +335,8 @@ const SimplePublicMenuTemplate = ({
                 }}
               >
                 <div className="mb-4 space-y-1.5 sm:mb-5">
-                  <h2 className="text-[1.15rem] font-bold tracking-[-0.025em] text-foreground sm:text-[1.35rem]">{categoryName}</h2>
-                  <div className="h-[3px] w-[76px] rounded-full" style={{ backgroundColor: accentColor }} />
+                  <h2 className="text-[0.82rem] font-bold tracking-[-0.02em] text-foreground sm:text-[0.92rem]">{categoryName}</h2>
+                  <div className="h-[2px] w-[54px] rounded-full" style={{ backgroundColor: accentColor }} />
                   {isFilled(categoryDescription) ? (
                     <p className="max-w-3xl text-[0.92rem] leading-7 text-muted-foreground">{categoryDescription}</p>
                   ) : null}
