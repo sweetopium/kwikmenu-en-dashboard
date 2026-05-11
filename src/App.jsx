@@ -17,6 +17,7 @@ import LoginPage from "./pages/LoginPage.jsx";
 import RegisterPage from "./pages/RegisterPage.jsx";
 import { ProtectedRoute, PublicOnlyRoute } from "./components/auth/AuthGuards.jsx";
 import ActiveVenueQrRedirect from "./components/venue/ActiveVenueQrRedirect.jsx";
+import PublicVenueMenuPage from "./pages/PublicVenueMenuPage.jsx";
 
 function App() {
     return (
@@ -28,6 +29,7 @@ function App() {
                 <Route path="/register" element={<PublicOnlyRoute><OnboardingLayout><RegisterPage/></OnboardingLayout></PublicOnlyRoute>}/>
                 <Route path="/onboarding/help" element={<ProtectedRoute><OnboardingLayout><HelpPage/></OnboardingLayout></ProtectedRoute>}/>
                 <Route path="/onboarding/upload" element={<ProtectedRoute><OnboardingLayout><UploadPage/></OnboardingLayout></ProtectedRoute>}/>
+                <Route path="/m/:venueId" element={<PublicVenueMenuPage/>}/>
 
                 {/* Dashboard Flow */}
                 <Route path="/dashboard" element={<ProtectedRoute><DashboardLayout><DashboardHome/></DashboardLayout></ProtectedRoute>}/>
