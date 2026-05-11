@@ -108,8 +108,8 @@ const VenuePage = () => {
   const templateOptions = useMemo(
     () => [
       { id: 'classic', label: 'Классический' },
-      { id: 'minimal', label: 'Минималистичный' },
-      { id: 'accent', label: 'Акцентный' },
+      { id: 'minimal', label: 'Продвинутый' },
+      { id: 'accent', label: 'Премиум' },
     ],
     [],
   );

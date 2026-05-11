@@ -18,6 +18,7 @@ const HERO_BG = '#faf7f2';
 const SURFACE_BG = '#fffdfa';
 const FALLBACK_IMAGE_BG = '#efe7dc';
 const DEFAULT_PLACEHOLDER_LABEL = 'MENU';
+const DEFAULT_EMPTY_ITEM_IMAGE_URL = 'https://storage.yandexcloud.net/kwikmenu-ru/empty_item.webp';
 const SHEET_BACKDROP_TRANSITION = { duration: 0.2, ease: 'easeOut' };
 const SHEET_PANEL_TRANSITION = { duration: 0.28, ease: [0.22, 1, 0.36, 1] };
 
@@ -72,12 +73,13 @@ const PlaceholderImage = ({ label }) => (
 
 const MenuImage = ({ src, alt, placeholderLabel, eager = false, className = '' }) => {
   const [hasError, setHasError] = useState(false);
+  const resolvedSrc = isFilled(src) ? src : DEFAULT_EMPTY_ITEM_IMAGE_URL;
 
   useEffect(() => {
     setHasError(false);
-  }, [src]);
+  }, [resolvedSrc]);
 
-  if (!isFilled(src) || hasError) {
+  if (hasError) {
     return (
       <div className={className} style={{ backgroundColor: FALLBACK_IMAGE_BG }}>
         <PlaceholderImage label={placeholderLabel} />
@@ -88,7 +90,7 @@ const MenuImage = ({ src, alt, placeholderLabel, eager = false, className = '' }
   return (
     <div className={className} style={{ backgroundColor: FALLBACK_IMAGE_BG }}>
       <img
-        src={src}
+        src={resolvedSrc}
         alt={alt}
         loading={eager ? 'eager' : 'lazy'}
         decoding="async"
@@ -500,25 +502,23 @@ const ExtendedPublicMenuTemplate = ({
             borderColor: heroBorder,
           }}
         >
-          <div className="flex items-start justify-between gap-4">
-            <div className="min-w-0 space-y-3">
-              <div className="space-y-1.5">
-                {venueLogoUrl ? (
-                  <img src={venueLogoUrl} alt={venueName} className="h-auto max-h-10 w-auto object-contain sm:max-h-12" />
-                ) : (
-                  <>
-                    <div className="font-serif text-[2rem] font-medium leading-none tracking-[0.2em] text-foreground sm:text-[2.2rem]">{venueName.slice(0, 8).toUpperCase()}</div>
-                    <div className="text-[0.58rem] font-medium uppercase tracking-[0.34em] text-muted-foreground">Bistro</div>
-                  </>
-                )}
+          <div className="grid grid-cols-[auto_minmax(0,1fr)] gap-4 sm:grid-cols-[auto_minmax(0,1fr)_auto]">
+            {venueLogoUrl ? (
+              <img src={venueLogoUrl} alt={venueName} className="h-auto max-h-16 w-auto shrink-0 object-contain sm:max-h-[72px]" />
+            ) : (
+              <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-[1rem] border border-black/8 bg-white/30 font-serif text-[2rem] font-medium leading-none tracking-[0.2em] text-foreground sm:h-[72px] sm:w-[72px] sm:text-[2.2rem]">
+                {venueName.slice(0, 1).toUpperCase()}
               </div>
+            )}
 
+            <div className="min-w-0 space-y-2 self-start sm:pr-2">
+              <div className="font-serif text-[1.8rem] font-medium leading-[0.96] tracking-[0.01em] text-foreground sm:text-[2.2rem]">{venueName}</div>
               {isFilled(venueDescription) ? (
-                <p className="max-w-[18rem] text-[0.94rem] leading-[1.42] text-muted-foreground">{venueDescription}</p>
+                <p className="max-w-[23rem] text-[0.94rem] leading-[1.42] text-muted-foreground">{venueDescription}</p>
               ) : null}
             </div>
 
-            <div className="flex flex-col items-end gap-2">
+            <div className="col-span-2 flex items-start justify-between gap-2 sm:col-span-1 sm:flex-col sm:items-end">
               {visibleLanguages.length > 1 ? (
                 <div className="flex rounded-full border border-black/10 bg-white/55 p-1 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.24)]">
                   {visibleLanguages.map((menuLanguage) => {
@@ -544,8 +544,8 @@ const ExtendedPublicMenuTemplate = ({
               <button
                 type="button"
                 onClick={() => setOpenSheet({ type: 'about' })}
-                className="inline-flex items-center gap-1 border-b border-dashed pb-1 text-[0.78rem] font-medium text-muted-foreground transition hover:text-foreground"
-                style={{ borderColor: 'rgba(95,81,67,0.42)' }}
+                className="inline-flex h-9 items-center gap-1 rounded-full border px-3 text-[0.76rem] font-medium text-muted-foreground transition hover:border-black/15 hover:bg-black/5 hover:text-foreground"
+                style={{ borderColor: 'rgba(95,81,67,0.18)', backgroundColor: 'rgba(255,255,255,0.42)' }}
               >
                 <Info size={14} />
                 <span>{language === 'en' ? 'About' : 'О заведении'}</span>
@@ -674,9 +674,14 @@ const ExtendedPublicMenuTemplate = ({
                           alt={itemName}
                           placeholderLabel={venueName}
                           eager={itemIndex < 6}
-                          className="aspect-[4/3] overflow-hidden border-b border-black/5"
+                          className="aspect-[4/3] overflow-hidden"
                         />
-                        <div className="grid min-h-[96px] grid-rows-[1fr_auto] gap-2 px-3 py-3.5">
+                        <div
+                          className="relative z-10 -mt-[14px] grid min-h-[96px] grid-rows-[1fr_auto] gap-2 rounded-b-[1.35rem] px-3 pb-3.5 pt-3.5"
+                          style={{
+                            backgroundColor: SURFACE_BG
+                          }}
+                        >
                           <div className="text-[0.84rem] font-medium leading-[1.2] tracking-[-0.01em] text-foreground [display:-webkit-box] overflow-hidden [-webkit-box-orient:vertical] [-webkit-line-clamp:4]">
                             {itemName}
                           </div>
