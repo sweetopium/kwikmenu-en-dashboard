@@ -13,6 +13,7 @@ import {
 } from '../../../lib/publicMenuUtils';
 
 const SURFACE_COLOR = '#fff7ea';
+const PUBLIC_DESKTOP_BG = '#d9d9d9';
 
 const SimplePublicMenuTemplate = ({
   venue,
@@ -180,8 +181,9 @@ const SimplePublicMenuTemplate = ({
   };
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: pageTint, fontFamily: publicFontFamily }}>
-      <div className="mx-auto flex w-full max-w-[760px] flex-col gap-3 px-4 py-4 sm:gap-4 sm:px-6 sm:py-6">
+    <div className="min-h-screen" style={{ backgroundColor: PUBLIC_DESKTOP_BG, fontFamily: publicFontFamily }}>
+      <div className="mx-auto w-full max-w-[430px]">
+        <div className="flex min-h-screen w-full flex-col gap-3 px-4 py-4 sm:gap-4 sm:px-4 sm:py-4" style={{ backgroundColor: pageTint }}>
         <section
           className="overflow-hidden rounded-[2rem] border p-4 shadow-[0_16px_38px_rgba(18,54,47,0.12)] sm:p-5"
           style={{
@@ -479,6 +481,7 @@ const SimplePublicMenuTemplate = ({
             </div>
           </section>
         ) : null}
+        </div>
       </div>
     </div>
   );

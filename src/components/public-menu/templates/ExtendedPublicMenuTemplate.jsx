@@ -21,6 +21,7 @@ const DEFAULT_PLACEHOLDER_LABEL = 'MENU';
 const DEFAULT_EMPTY_ITEM_IMAGE_URL = 'https://storage.yandexcloud.net/kwikmenu-ru/empty_item.webp';
 const SHEET_BACKDROP_TRANSITION = { duration: 0.2, ease: 'easeOut' };
 const SHEET_PANEL_TRANSITION = { duration: 0.28, ease: [0.22, 1, 0.36, 1] };
+const PUBLIC_DESKTOP_BG = '#d9d9d9';
 
 const getScheduleLabel = (availableHours) => {
   if (!availableHours?.start || !availableHours?.end) {
@@ -493,8 +494,9 @@ const ExtendedPublicMenuTemplate = ({
   );
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: PAGE_BG, fontFamily: publicFontFamily }}>
-      <div className="mx-auto flex w-full max-w-[760px] flex-col gap-4 px-4 py-4 sm:px-6 sm:py-6">
+    <div className="min-h-screen" style={{ backgroundColor: PUBLIC_DESKTOP_BG, fontFamily: publicFontFamily }}>
+      <div className="mx-auto w-full max-w-[430px]">
+        <div className="flex min-h-screen w-full flex-col gap-4 px-4 py-4 sm:px-4 sm:py-4" style={{ backgroundColor: PAGE_BG }}>
         <section
           className="rounded-[2rem] border px-4 py-4 shadow-[0_16px_42px_rgba(55,48,41,0.05)] sm:px-5 sm:py-5"
           style={{
@@ -700,7 +702,8 @@ const ExtendedPublicMenuTemplate = ({
           })}
         </section>
 
-        {renderSheet()}
+          {renderSheet()}
+        </div>
       </div>
     </div>
   );

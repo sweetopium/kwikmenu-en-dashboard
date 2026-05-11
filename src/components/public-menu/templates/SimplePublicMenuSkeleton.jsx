@@ -9,6 +9,7 @@ const SKELETON_ACCENT = '#cfd4dd';
 const ACTIVE_CHIP_BG = '#d7dbe3';
 const ACTIVE_CHIP_BORDER = 'rgba(148, 163, 184, 0.2)';
 const ACTIVE_CHIP_SHADOW = '0 6px 14px rgba(15, 23, 42, 0.06)';
+const PUBLIC_DESKTOP_BG = '#d9d9d9';
 
 const SkeletonBar = ({ className = '' }) => (
   <div className={`animate-pulse rounded-full bg-black/8 ${className}`} />
@@ -79,8 +80,9 @@ const SkeletonSectionCard = ({ accentColor, panelBorder, titleWidth = 'w-40', ro
 
 const SimplePublicMenuSkeleton = ({ accentColor = '#6d67eb' }) => {
   return (
-    <div className="min-h-screen" style={{ backgroundColor: PAGE_SKELETON_BG, fontFamily: '"Avenir Next", "Manrope", Inter, "Helvetica Neue", Arial, sans-serif' }}>
-      <div className="mx-auto flex w-full max-w-[760px] flex-col gap-3 px-4 py-4 sm:gap-4 sm:px-6 sm:py-6">
+    <div className="min-h-screen" style={{ backgroundColor: PUBLIC_DESKTOP_BG, fontFamily: '"Avenir Next", "Manrope", Inter, "Helvetica Neue", Arial, sans-serif' }}>
+      <div className="mx-auto w-full max-w-[430px]">
+        <div className="flex min-h-screen w-full flex-col gap-3 px-4 py-4 sm:gap-4 sm:px-4 sm:py-4" style={{ backgroundColor: PAGE_SKELETON_BG }}>
         <section
           className="overflow-hidden rounded-[2rem] border p-4 shadow-[0_16px_38px_rgba(18,54,47,0.12)] sm:p-5"
           style={{
@@ -135,6 +137,7 @@ const SimplePublicMenuSkeleton = ({ accentColor = '#6d67eb' }) => {
             rows={3}
           />
         </section>
+        </div>
       </div>
     </div>
   );

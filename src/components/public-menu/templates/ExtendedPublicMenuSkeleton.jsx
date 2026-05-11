@@ -4,6 +4,7 @@ const HERO_BORDER = 'rgba(162, 142, 121, 0.18)';
 const SKELETON_BAR = '#ded8cf';
 const CARD_BG = '#fffdfa';
 const CARD_BORDER = 'rgba(162, 142, 121, 0.16)';
+const PUBLIC_DESKTOP_BG = '#d9d9d9';
 
 const SkeletonBar = ({ className = '' }) => (
   <div className={`animate-pulse rounded-full ${className}`} style={{ backgroundColor: SKELETON_BAR }} />
@@ -27,8 +28,9 @@ const CardSkeleton = () => (
 
 const ExtendedPublicMenuSkeleton = () => {
   return (
-    <div className="min-h-screen" style={{ backgroundColor: PAGE_BG, fontFamily: '"Avenir Next", "Manrope", Inter, "Helvetica Neue", Arial, sans-serif' }}>
-      <div className="mx-auto flex w-full max-w-[760px] flex-col gap-4 px-4 py-4 sm:px-6 sm:py-6">
+    <div className="min-h-screen" style={{ backgroundColor: PUBLIC_DESKTOP_BG, fontFamily: '"Avenir Next", "Manrope", Inter, "Helvetica Neue", Arial, sans-serif' }}>
+      <div className="mx-auto w-full max-w-[430px]">
+        <div className="flex min-h-screen w-full flex-col gap-4 px-4 py-4 sm:px-4 sm:py-4" style={{ backgroundColor: PAGE_BG }}>
         <section
           className="rounded-[2rem] border px-4 py-4 shadow-[0_16px_42px_rgba(55,48,41,0.05)] sm:px-5 sm:py-5"
           style={{ backgroundColor: HERO_BG, borderColor: HERO_BORDER }}
@@ -80,6 +82,7 @@ const ExtendedPublicMenuSkeleton = () => {
             </div>
           </div>
         </section>
+        </div>
       </div>
     </div>
   );
