@@ -1,8 +1,9 @@
 from __future__ import annotations
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
 from sqlalchemy.orm import Session
 
+from app.api.routes.analytics import record_public_menu_view
 from app.api.deps import get_db
 from app.api.routes.venues import build_public_path, build_public_url, get_or_create_venue_settings
 from app.models import Menu, Venue
@@ -24,6 +25,8 @@ PUBLIC_MENU_STATUSES = {"active", "published"}
 @router.get("/m/{venue_id}", response_model=PublicVenueMenusResponse)
 def get_public_venue_menus(
     venue_id: str,
+    request: Request,
+    response: Response,
     db: Session = Depends(get_db),
 ) -> PublicVenueMenusResponse:
     venue = db.query(Venue).filter(Venue.id == venue_id).first()
@@ -39,6 +42,13 @@ def get_public_venue_menus(
         .filter(Menu.venue_id == venue.id, Menu.status.in_(tuple(PUBLIC_MENU_STATUSES)))
         .order_by(Menu.updated_at.desc())
         .all()
+    )
+
+    record_public_menu_view(
+        db=db,
+        request=request,
+        response=response,
+        venue_id=venue.id,
     )
 
     return PublicVenueMenusResponse(
