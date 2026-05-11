@@ -1,12 +1,24 @@
-version: '3.8'
-
 services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: kwikmenu
+      POSTGRES_USER: kwikmenu
+      POSTGRES_PASSWORD: kwikmenu
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "15432:5432"
+
   backend:
     build:
       context: .
       dockerfile: backend/Dockerfile
     env_file:
       - backend/.env
+    depends_on:
+      - postgres
     restart: unless-stopped
     volumes:
       - backend_data:/app/.data
@@ -29,3 +41,4 @@ services:
 
 volumes:
   backend_data:
+  postgres_data:

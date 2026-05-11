@@ -66,6 +66,7 @@ const MenuImportFlow = ({
   successSecondaryLabel = 'Загрузить еще одно меню',
   successSecondaryTo,
   onStageChange,
+  venueId = null,
 }) => {
   const [stage, setStage] = useState('idle');
   const [menuSource, setMenuSource] = useState('file');
@@ -110,6 +111,7 @@ const MenuImportFlow = ({
         menuSource,
         files,
         menuLink,
+        venueId,
         context,
       });
 
@@ -121,8 +123,11 @@ const MenuImportFlow = ({
       }
 
       const result = finalJob.result;
-      saveImportedMenuToStorage(result.menu);
+      if (!result.menuId) {
+        saveImportedMenuToStorage(result.menu);
+      }
       setResultPreview({
+        menuId: result.menuId,
         sourceLabel: result.sourceSummary.length > 0
           ? result.sourceSummary.map((source) => source.name).join(', ')
           : (menuSource === 'link' ? menuLink.trim() : 'Без названия'),
@@ -210,7 +215,7 @@ const MenuImportFlow = ({
           <div className="flex items-start gap-3">
             <Sparkles size={18} className="mt-0.5 shrink-0 text-brand-purple" />
             <p className="text-sm leading-relaxed text-brand-purple/90">
-              Импорт завершен через backend job. Сущность меню пока не сохраняем в БД, поэтому после обработки ведем пользователя в существующий демо-редактор.
+              Импорт завершен через backend job. Результат сохранен как черновик меню и готов к открытию в редакторе.
             </p>
           </div>
         </div>
@@ -233,7 +238,7 @@ const MenuImportFlow = ({
 
         <div className="flex flex-col sm:flex-row gap-3">
           <Link
-            to={successPrimaryTo}
+            to={resultPreview.menuId ? `/dashboard/menu/${resultPreview.menuId}` : successPrimaryTo}
             className={`${primaryActionButtonClasses} flex h-11 sm:h-12 w-full items-center justify-center gap-2 px-5`}
           >
             {successPrimaryLabel}

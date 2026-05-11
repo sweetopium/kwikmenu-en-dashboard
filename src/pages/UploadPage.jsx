@@ -9,6 +9,7 @@ import { CountryField, DialPhoneField } from "../components/onboarding/CountryDi
 import { COUNTRIES, inputBaseClasses } from "../components/onboarding/countries";
 import OnboardingCard from "../components/onboarding/OnboardingCard";
 import MenuImportFlow from "../components/menu-import/MenuImportFlow";
+import { createVenue } from "../lib/venuesApi";
 
 const STEPS = [
   { id: 1, label: 'Данные' },
@@ -62,9 +63,27 @@ const UploadPage = () => {
   const [city, setCity] = useState('');
   const [selectedCountry, setSelectedCountry] = useState('ru');
   const [selectedDial, setSelectedDial] = useState('+7');
+  const [currentVenueId, setCurrentVenueId] = useState(() => {
+    if (typeof window === 'undefined') {
+      return null;
+    }
+    return window.localStorage.getItem('kwikmenu-active-venue');
+  });
 
-  const handleStep1Submit = (e) => {
+  const handleStep1Submit = async (e) => {
     e.preventDefault();
+    const venue = await createVenue({
+      name: restaurant,
+      phone: `${selectedDial} ${phone}`.trim(),
+      city,
+      country: selectedCountry,
+    });
+
+    if (typeof window !== 'undefined') {
+      window.localStorage.setItem('kwikmenu-active-venue', venue.id);
+    }
+
+    setCurrentVenueId(venue.id);
     setIsProfileStepCompleted(true);
   };
 
@@ -192,14 +211,14 @@ const UploadPage = () => {
         {isProfileStepCompleted && (
           <div className="flex flex-col flex-1 animate-in fade-in slide-in-from-right-4 duration-500">
             <MenuImportFlow
+              venueId={currentVenueId}
               context={importContext}
               introTitle="Загрузите меню"
               introDescription="Загрузите PDF, фотографии или ссылку. Создадим backend job, дождемся обработки и покажем результат."
               submitLabel="Отправить на распознавание"
               successTitle="Черновик меню подготовлен"
-              successDescription="Исходники обработаны backend-сервисом, итоговый JSON собран и проверен. Дальше можно открыть демо-редактор и продолжить работу вручную."
+              successDescription="Исходники обработаны backend-сервисом, итоговый JSON собран, сохранен как черновик и готов к редактированию."
               successPrimaryLabel="Открыть редактор меню"
-              successPrimaryTo="/dashboard/menu/imported"
               successSecondaryLabel="Перейти в кабинет"
               successSecondaryTo="/dashboard"
               onStageChange={setImportStage}

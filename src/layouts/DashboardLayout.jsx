@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard,
@@ -25,13 +25,10 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "../components/ui/dropdown-menu";
+import { listVenues } from "../lib/venuesApi";
+import { logoutSession } from "../lib/sessionApi";
 
-const MOCK_VENUES = [
-  { id: 'cafe-tatiana', name: 'Кафе «Татьяна»', plan: 'PRO-тариф' },
-  { id: 'coffee-arbat', name: 'Кофейня на Арбате', plan: 'PRO-тариф' },
-];
-
-const SidebarContent = ({ pathname, navItems, onNavigate }) => (
+const SidebarContent = ({ pathname, navItems, onNavigate, onLogout }) => (
   <>
     <div className="p-6 flex items-center gap-3 text-xl font-extrabold tracking-tight text-foreground">
       <div className="flex h-8 w-8 items-center justify-center rounded-[0.6rem] bg-brand-purple text-white shadow-md shadow-brand-purple/20 shrink-0">
@@ -98,7 +95,7 @@ const SidebarContent = ({ pathname, navItems, onNavigate }) => (
         </button>
       </div>
 
-      <button className="flex items-center gap-3 px-3 h-11 w-full text-sm font-semibold text-muted-foreground hover:bg-destructive/10 hover:text-destructive rounded-lg transition-colors group min-w-0">
+      <button onClick={onLogout} className="flex items-center gap-3 px-3 h-11 w-full text-sm font-semibold text-muted-foreground hover:bg-destructive/10 hover:text-destructive rounded-lg transition-colors group min-w-0">
         <LogOut size={18} className="group-hover:text-destructive transition-colors shrink-0" />
         <span className="truncate">Выйти</span>
       </button>
@@ -108,22 +105,39 @@ const SidebarContent = ({ pathname, navItems, onNavigate }) => (
 
 const DashboardLayout = ({ children }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [venues, setVenues] = useState([]);
   const location = useLocation();
   const navigate = useNavigate();
   const [activeVenueId, setActiveVenueId] = useState(() => {
     if (typeof window === 'undefined') {
-      return MOCK_VENUES[0].id;
+      return null;
     }
-
-    return window.localStorage.getItem('kwikmenu-active-venue') || MOCK_VENUES[0].id;
+    return window.localStorage.getItem('kwikmenu-active-venue');
   });
 
-  const activeVenue = MOCK_VENUES.find((venue) => venue.id === activeVenueId) || MOCK_VENUES[0];
+  useEffect(() => {
+    listVenues()
+      .then((nextVenues) => {
+        setVenues(nextVenues);
+        if (!nextVenues.length) {
+          return;
+        }
+
+        const nextActiveVenue = nextVenues.find((venue) => venue.id === activeVenueId) || nextVenues[0];
+        setActiveVenueId(nextActiveVenue.id);
+        window.localStorage.setItem('kwikmenu-active-venue', nextActiveVenue.id);
+      })
+      .catch(() => {
+        setVenues([]);
+      });
+  }, []);
+
+  const activeVenue = venues.find((venue) => venue.id === activeVenueId) || venues[0] || null;
 
   const navItems = [
     { icon: LayoutDashboard, label: 'Обзор', path: '/dashboard' },
     { icon: UtensilsCrossed, label: 'Меню', path: '/dashboard/menu' },
-    { icon: Building2, label: 'Заведение', path: `/dashboard/venues/${activeVenue.id}` },
+    { icon: Building2, label: 'Заведение', path: activeVenue ? `/dashboard/venues/${activeVenue.id}` : '/dashboard/venues' },
     { icon: UserRound, label: 'Аккаунт', path: '/dashboard/account' },
     { icon: CreditCard, label: 'Биллинг', path: '/dashboard/billing' },
     { icon: Sparkles, label: 'Подписка', path: '/dashboard/subscription' },
@@ -141,14 +155,20 @@ const DashboardLayout = ({ children }) => {
     }
   };
 
+  const handleLogout = async () => {
+    try {
+      await logoutSession();
+    } finally {
+      navigate('/login');
+    }
+  };
+
   return (
     <div className="flex min-h-screen w-full max-w-full overflow-x-hidden bg-secondary/20">
-      {/* ДЕСКТОП Сайдбар */}
       <aside className="hidden md:flex flex-col w-64 bg-card border-r border-border/60 fixed inset-y-0 z-20 shadow-[4px_0_24px_-12px_rgba(0,0,0,0.05)] overflow-x-hidden">
-        <SidebarContent pathname={location.pathname} navItems={navItems} />
+        <SidebarContent pathname={location.pathname} navItems={navItems} onLogout={handleLogout} />
       </aside>
 
-      {/* МОБИЛЬНЫЙ Сайдбар: оверлей */}
       {isMobileMenuOpen && (
         <div
           className="fixed inset-0 bg-black/40 backdrop-blur-sm z-40 md:hidden animate-in fade-in duration-200"
@@ -156,7 +176,6 @@ const DashboardLayout = ({ children }) => {
         />
       )}
 
-      {/* МОБИЛЬНЫЙ Сайдбар: шторка */}
       <aside
         className={`fixed inset-y-0 left-0 z-50 w-[280px] max-w-[85vw] bg-card border-r border-border/60 shadow-2xl transform transition-transform duration-300 ease-in-out md:hidden flex flex-col overflow-x-hidden ${
           isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
@@ -168,12 +187,10 @@ const DashboardLayout = ({ children }) => {
           </button>
         </div>
 
-        <SidebarContent pathname={location.pathname} navItems={navItems} onNavigate={() => setIsMobileMenuOpen(false)} />
+        <SidebarContent pathname={location.pathname} navItems={navItems} onNavigate={() => setIsMobileMenuOpen(false)} onLogout={handleLogout} />
       </aside>
 
-      {/* Основной контент */}
       <main className="flex-1 md:pl-64 flex flex-col min-h-screen w-full max-w-full min-w-0 overflow-x-hidden">
-        {/* Хедер */}
         <header className="h-18 border-b border-border/60 flex items-center justify-between px-4 sm:px-8 bg-card/80 backdrop-blur-xl sticky top-0 z-10 w-full max-w-full min-w-0 overflow-hidden shrink-0">
           <div className="md:hidden flex items-center gap-3 min-w-0">
             <button onClick={() => setIsMobileMenuOpen(true)} className={`${subtleIconButtonClasses} -ml-2 hover:bg-secondary shrink-0`}>
@@ -191,13 +208,13 @@ const DashboardLayout = ({ children }) => {
                 <button className="flex items-center gap-2 rounded-xl border border-border/60 bg-background px-3 py-2 hover:bg-secondary/50 transition-colors min-w-0 max-w-[220px] sm:max-w-[280px]">
                   <div className="text-left sm:text-right min-w-0">
                     <p className="text-xs sm:text-sm font-bold text-foreground truncate">
-                      {activeVenue.name}
+                      {activeVenue?.name || 'Заведение не выбрано'}
                     </p>
 
                     <div className="flex items-center justify-start sm:justify-end gap-1.5 mt-0.5">
                       <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse shrink-0" />
                       <p className="text-[10px] font-bold tracking-wider uppercase text-brand-purple truncate">
-                        {activeVenue.plan}
+                        PRO-тариф
                       </p>
                     </div>
                   </div>
@@ -207,14 +224,14 @@ const DashboardLayout = ({ children }) => {
 
               <DropdownMenuContent className="min-w-[260px]">
                 <DropdownMenuLabel>Текущее заведение</DropdownMenuLabel>
-                {MOCK_VENUES.map((venue) => (
+                {venues.map((venue) => (
                   <DropdownMenuItem
                     key={venue.id}
                     onSelect={() => handleVenueSwitch(venue.id)}
                     className="justify-between"
                   >
                     <span>{venue.name}</span>
-                    {activeVenue.id === venue.id ? <Check size={16} className="text-brand-purple" /> : null}
+                    {activeVenue?.id === venue.id ? <Check size={16} className="text-brand-purple" /> : null}
                   </DropdownMenuItem>
                 ))}
 
@@ -229,7 +246,6 @@ const DashboardLayout = ({ children }) => {
           </div>
         </header>
 
-        {/* Область под контент */}
         <div className="flex-1 p-4 sm:p-8 animate-in fade-in slide-in-from-bottom-2 duration-500 w-full max-w-full min-w-0 overflow-x-hidden">
           {children}
         </div>

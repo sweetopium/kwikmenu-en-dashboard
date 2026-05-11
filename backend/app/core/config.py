@@ -12,6 +12,12 @@ class Settings(BaseSettings):
 
     app_name: str = "KwikMenu Import API"
     app_env: str = "development"
+    database_url: str = "postgresql+psycopg://kwikmenu:kwikmenu@postgres:5432/kwikmenu"
+    auth_session_cookie_name: str = "kwikmenu_session"
+    auth_session_ttl_hours: int = 24 * 30
+    auth_cookie_secure: bool = False
+    auth_cookie_domain: str | None = None
+    auth_password_hash_iterations: int = 600_000
     menu_import_model: str = "google/gemini-3.1-flash-lite-preview"
     menu_import_max_completion_tokens: int = 8000
     menu_normalization_max_completion_tokens: int = 24000
@@ -24,6 +30,12 @@ class Settings(BaseSettings):
     openrouter_referer: str = "http://localhost:5173"
     openrouter_app_name: str = "KwikMenu Dashboard"
     openrouter_pdf_engine: str | None = None
+    oauth_google_client_id: str | None = None
+    oauth_google_client_secret: str | None = None
+    oauth_yandex_client_id: str | None = None
+    oauth_yandex_client_secret: str | None = None
+    oauth_mailru_client_id: str | None = None
+    oauth_mailru_client_secret: str | None = None
 
 
 @lru_cache(maxsize=1)

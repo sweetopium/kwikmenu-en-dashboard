@@ -3,6 +3,7 @@ export const MENU_NORMALIZATION_API_URL = import.meta.env.VITE_MENU_NORMALIZATIO
 export const normalizeMenu = async (menu) => {
   const response = await fetch(MENU_NORMALIZATION_API_URL, {
     method: 'POST',
+    credentials: 'include',
     headers: {
       'Content-Type': 'application/json',
     },

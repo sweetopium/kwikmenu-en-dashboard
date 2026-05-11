@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
   Plus, Utensils, Wine, Coffee,
@@ -7,6 +8,7 @@ import {
 
 import { Button } from "../components/ui/button";
 import { primaryActionButtonClasses, subtleIconButtonClasses } from "../lib/uiStyles";
+import { listMenus } from "../lib/menusApi";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -16,47 +18,22 @@ import {
   DropdownMenuTrigger,
 } from "../components/ui/dropdown-menu";
 
-// Мок-данные списка меню
-const mockMenus = [
-  {
-    id: 'main',
-    name: 'Основное меню',
-    description: 'Ежедневное меню с основными позициями, завтраками и десертами.',
-    status: 'active',
-    itemsCount: 42,
-    categoriesCount: 6,
-    icon: Utensils,
-    color: 'text-brand-purple',
-    bgColor: 'bg-brand-purple/10',
-    lastUpdated: 'Сегодня, 14:30'
-  },
-  {
-    id: 'bar',
-    name: 'Барная карта',
-    description: 'Алкогольные и безалкогольные напитки, авторские коктейли.',
-    status: 'active',
-    itemsCount: 128,
-    categoriesCount: 8,
-    icon: Wine,
-    color: 'text-blue-500',
-    bgColor: 'bg-blue-500/10',
-    lastUpdated: 'Вчера, 18:15'
-  },
-  {
-    id: 'seasonal',
-    name: 'Сезонное меню (Лето)',
-    description: 'Специальные летние предложения, холодные супы и лимонады.',
-    status: 'draft',
-    itemsCount: 14,
-    categoriesCount: 2,
-    icon: Coffee,
-    color: 'text-orange-500',
-    bgColor: 'bg-orange-500/10',
-    lastUpdated: '12 мая 2026'
-  }
-];
+const MENU_ICON_META = {
+  default: { icon: Utensils, color: 'text-brand-purple', bgColor: 'bg-brand-purple/10' },
+  draft: { icon: Coffee, color: 'text-orange-500', bgColor: 'bg-orange-500/10' },
+  active: { icon: Wine, color: 'text-blue-500', bgColor: 'bg-blue-500/10' },
+};
 
 const MenuListPage = () => {
+  const [menus, setMenus] = useState([]);
+
+  useEffect(() => {
+    const activeVenueId = window.localStorage.getItem('kwikmenu-active-venue');
+    listMenus({ venueId: activeVenueId || undefined })
+      .then(setMenus)
+      .catch(() => setMenus([]));
+  }, []);
+
   return (
     <div className="mx-auto space-y-6 sm:space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700 ease-out">
       <div className="bg-card border border-border/60 rounded-3xl shadow-sm overflow-hidden">
@@ -85,14 +62,17 @@ const MenuListPage = () => {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6">
-        {mockMenus.map((menu) => (
+        {menus.map((menu) => {
+          const iconMeta = MENU_ICON_META[menu.status] || MENU_ICON_META.default;
+          const Icon = iconMeta.icon;
+          return (
           <div
             key={menu.id}
             className="bg-card border border-border/60 rounded-3xl p-5 sm:p-6 shadow-sm flex flex-col group hover:border-brand-purple/30 hover:shadow-md transition-all"
           >
             <div className="flex justify-between items-start mb-5">
-              <div className={`w-11 h-11 rounded-xl flex items-center justify-center ${menu.bgColor} ${menu.color} shrink-0`}>
-                <menu.icon size={18} />
+              <div className={`w-11 h-11 rounded-xl flex items-center justify-center ${iconMeta.bgColor} ${iconMeta.color} shrink-0`}>
+                <Icon size={18} />
               </div>
 
               {menu.status === 'active' ? (
@@ -132,7 +112,7 @@ const MenuListPage = () => {
             <div className="flex items-center justify-between mt-auto pt-3 md:pt-4 border-t border-border/50 gap-4 -mb-2 md:-mb-0">
               <div className="flex items-center gap-2 text-muted-foreground">
                 <Calendar size={14} />
-                <span className="text-[11px] font-medium">{menu.lastUpdated}</span>
+                <span className="text-[11px] font-medium">{new Date(menu.updatedAt).toLocaleString('ru-RU')}</span>
               </div>
 
               <div className="flex items-center gap-2">
@@ -189,7 +169,7 @@ const MenuListPage = () => {
               </div>
             </div>
           </div>
-        ))}
+        )})}
       </div>
     </div>
   );

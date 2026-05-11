@@ -28,6 +28,7 @@ class MenuImportAcceptedResponse(StrictModel):
 
 
 class MenuImportResult(StrictModel):
+    menuId: str | None = None
     menu: MenuPayload
     sourceSummary: list[UploadedSource]
     categoryCount: int

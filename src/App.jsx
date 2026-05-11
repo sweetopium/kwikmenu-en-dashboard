@@ -15,6 +15,7 @@ import VenueListPage from "./pages/VenueListPage.jsx";
 import SubscriptionPlansPage from "./pages/SubscriptionPlansPage.jsx";
 import LoginPage from "./pages/LoginPage.jsx";
 import RegisterPage from "./pages/RegisterPage.jsx";
+import { ProtectedRoute, PublicOnlyRoute } from "./components/auth/AuthGuards.jsx";
 
 function App() {
     return (
@@ -22,24 +23,24 @@ function App() {
             <Routes>
                 {/* Onboarding Flow */}
                 <Route path="/" element={<OnboardingLayout><WelcomePage/></OnboardingLayout>}/>
-                <Route path="/login" element={<OnboardingLayout><LoginPage/></OnboardingLayout>}/>
-                <Route path="/register" element={<OnboardingLayout><RegisterPage/></OnboardingLayout>}/>
-                <Route path="/onboarding/help" element={<OnboardingLayout><HelpPage/></OnboardingLayout>}/>
-                <Route path="/onboarding/upload" element={<OnboardingLayout><UploadPage/></OnboardingLayout>}/>
+                <Route path="/login" element={<PublicOnlyRoute><OnboardingLayout><LoginPage/></OnboardingLayout></PublicOnlyRoute>}/>
+                <Route path="/register" element={<PublicOnlyRoute><OnboardingLayout><RegisterPage/></OnboardingLayout></PublicOnlyRoute>}/>
+                <Route path="/onboarding/help" element={<ProtectedRoute><OnboardingLayout><HelpPage/></OnboardingLayout></ProtectedRoute>}/>
+                <Route path="/onboarding/upload" element={<ProtectedRoute><OnboardingLayout><UploadPage/></OnboardingLayout></ProtectedRoute>}/>
 
                 {/* Dashboard Flow */}
-                <Route path="/dashboard" element={<DashboardLayout><DashboardHome/></DashboardLayout>}/>
-                <Route path="/dashboard/menu" element={<DashboardLayout><MenuListPage/></DashboardLayout>}/>
-                <Route path="/dashboard/menu/new" element={<DashboardLayout><MenuImportPage/></DashboardLayout>}/>
+                <Route path="/dashboard" element={<ProtectedRoute><DashboardLayout><DashboardHome/></DashboardLayout></ProtectedRoute>}/>
+                <Route path="/dashboard/menu" element={<ProtectedRoute><DashboardLayout><MenuListPage/></DashboardLayout></ProtectedRoute>}/>
+                <Route path="/dashboard/menu/new" element={<ProtectedRoute><DashboardLayout><MenuImportPage/></DashboardLayout></ProtectedRoute>}/>
                 <Route path="/dashboard/menu/import" element={<Navigate to="/dashboard/menu/new" replace/>}/>
-                <Route path="/dashboard/menu/:id" element={<DashboardLayout><MenuEditor/></DashboardLayout>}/>
-                <Route path="/dashboard/venues" element={<DashboardLayout><VenueListPage/></DashboardLayout>}/>
-                <Route path="/dashboard/venues/:id" element={<DashboardLayout><VenuePage/></DashboardLayout>}/>
+                <Route path="/dashboard/menu/:id" element={<ProtectedRoute><DashboardLayout><MenuEditor/></DashboardLayout></ProtectedRoute>}/>
+                <Route path="/dashboard/venues" element={<ProtectedRoute><DashboardLayout><VenueListPage/></DashboardLayout></ProtectedRoute>}/>
+                <Route path="/dashboard/venues/:id" element={<ProtectedRoute><DashboardLayout><VenuePage/></DashboardLayout></ProtectedRoute>}/>
                 <Route path="/dashboard/qr" element={<Navigate to="/dashboard/venues/cafe-tatiana?tab=qr" replace/>}/>
                 <Route path="/dashboard/venue" element={<Navigate to="/dashboard/venues" replace/>}/>
-                <Route path="/dashboard/account" element={<DashboardLayout><AccountPage/></DashboardLayout>}/>
-                <Route path="/dashboard/billing" element={<DashboardLayout><BillingPage/></DashboardLayout>}/>
-                <Route path="/dashboard/subscription" element={<DashboardLayout><SubscriptionPlansPage/></DashboardLayout>}/>
+                <Route path="/dashboard/account" element={<ProtectedRoute><DashboardLayout><AccountPage/></DashboardLayout></ProtectedRoute>}/>
+                <Route path="/dashboard/billing" element={<ProtectedRoute><DashboardLayout><BillingPage/></DashboardLayout></ProtectedRoute>}/>
+                <Route path="/dashboard/subscription" element={<ProtectedRoute><DashboardLayout><SubscriptionPlansPage/></DashboardLayout></ProtectedRoute>}/>
                 <Route path="/dashboard/settings" element={<Navigate to="/dashboard/account" replace/>}/>
 
                 {/* Fallback */}

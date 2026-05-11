@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { ChevronDown, Edit2, Plus, Search, Sparkles, Trash2 } from 'lucide-react';
 import { useParams } from 'react-router-dom';
 
@@ -13,6 +13,7 @@ import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import { loadImportedMenuFromStorage, saveImportedMenuToStorage } from "../lib/importedMenuStorage";
 import { normalizeMenu } from "../lib/menuNormalization";
+import { getMenu, updateMenu } from "../lib/menusApi";
 import { getLanguageMeta } from "../lib/languageMeta";
 import {
   formFieldClasses,
@@ -30,6 +31,7 @@ import {
 const MenuEditor = () => {
   const { id } = useParams();
   const isImportedMenu = id === 'imported';
+  const isRemoteMenu = Boolean(id) && !isImportedMenu;
   const resolveMenuPayload = () => {
     if (!isImportedMenu) {
       return simpleMenuPayload;
@@ -51,6 +53,9 @@ const MenuEditor = () => {
   const [targetCategoryId, setTargetCategoryId] = useState(null);
   const [deleteConfirm, setDeleteConfirm] = useState(null);
   const [isNormalizing, setIsNormalizing] = useState(false);
+  const [isLoadingRemoteMenu, setIsLoadingRemoteMenu] = useState(false);
+  const [remoteMenuError, setRemoteMenuError] = useState('');
+  const hasLoadedRemoteMenuRef = useRef(false);
 
   const activeCategory = menu.categories.find((category) => category.id === activeCategoryId);
   const filteredItems = activeCategory?.items?.filter((item) =>
@@ -61,7 +66,37 @@ const MenuEditor = () => {
   const localizedCategoryDescription = getLocalizedField(activeCategory, 'description', editorLanguage, menu.defaultLanguage);
 
   useEffect(() => {
+    if (isRemoteMenu) {
+      let cancelled = false;
+      setIsLoadingRemoteMenu(true);
+      setRemoteMenuError('');
+
+      getMenu(id)
+        .then((response) => {
+          if (cancelled) return;
+          const nextMenu = response.payload;
+          hasLoadedRemoteMenuRef.current = true;
+          setMenu(nextMenu);
+          setActiveCategoryId(nextMenu.categories[0]?.id || null);
+          setEditorLanguage(nextMenu.defaultLanguage || 'ru');
+          setSearchQuery('');
+        })
+        .catch((error) => {
+          if (cancelled) return;
+          setRemoteMenuError(error?.message || 'Не удалось загрузить меню');
+        })
+        .finally(() => {
+          if (cancelled) return;
+          setIsLoadingRemoteMenu(false);
+        });
+
+      return () => {
+        cancelled = true;
+      };
+    }
+
     const nextMenu = resolveMenuPayload();
+    hasLoadedRemoteMenuRef.current = true;
     setMenu(nextMenu);
     setActiveCategoryId(nextMenu.categories[0]?.id || null);
     setEditorLanguage(nextMenu.defaultLanguage || 'ru');
@@ -75,6 +110,26 @@ const MenuEditor = () => {
 
     saveImportedMenuToStorage(menu);
   }, [isImportedMenu, menu]);
+
+  useEffect(() => {
+    if (!isRemoteMenu || !hasLoadedRemoteMenuRef.current) {
+      return undefined;
+    }
+
+    const timeoutId = window.setTimeout(() => {
+      updateMenu(id, { payload: menu }).catch(() => {});
+    }, 800);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [id, isRemoteMenu, menu]);
+
+  if (isLoadingRemoteMenu) {
+    return <div className="rounded-3xl border border-border/60 bg-card p-8 text-sm text-muted-foreground shadow-sm">Загружаем меню...</div>;
+  }
+
+  if (remoteMenuError) {
+    return <div className="rounded-3xl border border-destructive/20 bg-destructive/5 p-8 text-sm text-destructive shadow-sm">{remoteMenuError}</div>;
+  }
 
   const handleAddCategory = () => {
     setEditingCategory({

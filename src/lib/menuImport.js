@@ -6,6 +6,7 @@ export const submitMenuImport = async ({
   menuSource,
   files = [],
   menuLink = '',
+  venueId = '',
   context = {},
 }) => {
   const formData = new FormData();
@@ -21,6 +22,10 @@ export const submitMenuImport = async ({
     formData.append('menu_link', trimString(menuLink));
   }
 
+  if (trimString(venueId)) {
+    formData.append('venue_id', trimString(venueId));
+  }
+
   Object.entries(context).forEach(([key, value]) => {
     const normalized = trimString(value);
     if (normalized) {
@@ -30,6 +35,7 @@ export const submitMenuImport = async ({
 
   const response = await fetch(MENU_IMPORT_API_URL, {
     method: 'POST',
+    credentials: 'include',
     body: formData,
   });
 
@@ -42,7 +48,9 @@ export const submitMenuImport = async ({
 };
 
 export const pollMenuImportStatus = async (jobId) => {
-  const response = await fetch(`${MENU_IMPORT_API_URL}/${jobId}`);
+  const response = await fetch(`${MENU_IMPORT_API_URL}/${jobId}`, {
+    credentials: 'include',
+  });
 
   if (!response.ok) {
     const errorText = await response.text().catch(() => '');

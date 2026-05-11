@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
   ArrowRight,
@@ -12,22 +13,17 @@ import {
 
 import { Button } from "../components/ui/button";
 import { primaryActionButtonClasses, subtleIconButtonClasses } from "../lib/uiStyles";
-
-const mockVenues = [
-  {
-    id: 'cafe-tatiana',
-    name: 'Кафе «Татьяна»',
-    city: 'Москва',
-    description: 'Основное заведение с цифровым меню, QR-кодами и гостевым Wi‑Fi.',
-    status: 'active',
-    menusCount: 3,
-    plan: 'PRO',
-    publicLinkReady: true,
-    lastUpdated: 'Сегодня, 14:30',
-  },
-];
+import { listVenues } from "../lib/venuesApi";
 
 const VenueListPage = () => {
+  const [venues, setVenues] = useState([]);
+
+  useEffect(() => {
+    listVenues()
+      .then(setVenues)
+      .catch(() => setVenues([]));
+  }, []);
+
   return (
     <div className="mx-auto space-y-6 sm:space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700 ease-out">
       <div className="bg-card border border-border/60 rounded-3xl shadow-sm overflow-hidden">
@@ -52,7 +48,7 @@ const VenueListPage = () => {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5 sm:gap-6">
-        {mockVenues.map((venue) => (
+        {venues.map((venue) => (
           <div
             key={venue.id}
             className="bg-card border border-border/60 rounded-3xl p-5 sm:p-6 shadow-sm flex flex-col group hover:border-brand-purple/30 hover:shadow-md transition-all"
@@ -63,7 +59,7 @@ const VenueListPage = () => {
               </div>
 
               <div className="px-3 py-1 bg-green-500/10 text-green-600 text-[11px] font-bold uppercase tracking-wider rounded-lg border border-green-500/20">
-                {venue.status === 'active' ? 'Активно' : 'Черновик'}
+                Активно
               </div>
             </div>
 
@@ -91,20 +87,20 @@ const VenueListPage = () => {
               <div className="flex items-center gap-2 bg-secondary/50 px-3 py-1.5 rounded-xl border border-border/50">
                 <LinkIcon size={14} className="text-muted-foreground" />
                 <span className="text-xs font-semibold text-muted-foreground">
-                  {venue.publicLinkReady ? 'Ссылка готова' : 'Нет ссылки'}
+                  Нет ссылки
                 </span>
               </div>
 
               <div className="flex items-center gap-2 bg-secondary/50 px-3 py-1.5 rounded-xl border border-border/50">
                 <CreditCard size={14} className="text-muted-foreground" />
-                <span className="text-xs font-semibold text-muted-foreground">{venue.plan}</span>
+                <span className="text-xs font-semibold text-muted-foreground">PRO</span>
               </div>
             </div>
 
             <div className="flex items-center justify-between mt-auto pt-3 md:pt-4 border-t border-border/50 gap-4 -mb-2 md:-mb-0">
               <div className="flex items-center gap-2 text-muted-foreground">
                 <Calendar size={14} />
-                <span className="text-[11px] font-medium">{venue.lastUpdated}</span>
+                <span className="text-[11px] font-medium">{new Date(venue.updatedAt).toLocaleString('ru-RU')}</span>
               </div>
 
               <div className="flex items-center gap-2">
