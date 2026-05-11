@@ -28,6 +28,7 @@ const SimplePublicMenuTemplate = ({
   const [passwordCopied, setPasswordCopied] = useState(false);
   const sectionRefs = useRef(new Map());
   const categoryChipRefs = useRef(new Map());
+  const categoryNavRef = useRef(null);
   const copyResetTimeoutRef = useRef(null);
   const categoryScrollTimeoutRef = useRef(null);
   const programmaticCategoryScrollRef = useRef(false);
@@ -118,13 +119,22 @@ const SimplePublicMenuTemplate = ({
       return;
     }
 
+    const navRect = categoryNavRef.current?.getBoundingClientRect();
+    const navHeight = navRect?.height || 0;
+    const stickyTopOffset = 12;
+    const extraGap = 12;
+    const targetTop = window.scrollY + element.getBoundingClientRect().top - navHeight - stickyTopOffset - extraGap;
+
     programmaticCategoryScrollRef.current = true;
     pendingCategoryIdRef.current = categoryId;
     if (categoryScrollTimeoutRef.current) {
       window.clearTimeout(categoryScrollTimeoutRef.current);
     }
 
-    element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    window.scrollTo({
+      top: Math.max(targetTop, 0),
+      behavior: 'smooth',
+    });
     categoryScrollTimeoutRef.current = window.setTimeout(() => {
       if (pendingCategoryIdRef.current) {
         setActiveCategoryId(pendingCategoryIdRef.current);
@@ -243,6 +253,7 @@ const SimplePublicMenuTemplate = ({
         {visibleCategories.length ? (
           <section className="sticky top-3 z-20">
             <div
+              ref={categoryNavRef}
               className="flex gap-1.5 overflow-x-auto pb-1 [&::-webkit-scrollbar]:hidden"
               style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
             >
