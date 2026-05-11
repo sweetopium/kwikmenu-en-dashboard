@@ -13,6 +13,8 @@ import AccountPage from "./pages/AccountPage.jsx";
 import BillingPage from "./pages/BillingPage.jsx";
 import VenueListPage from "./pages/VenueListPage.jsx";
 import SubscriptionPlansPage from "./pages/SubscriptionPlansPage.jsx";
+import LoginPage from "./pages/LoginPage.jsx";
+import RegisterPage from "./pages/RegisterPage.jsx";
 
 function App() {
     return (
@@ -20,6 +22,8 @@ function App() {
             <Routes>
                 {/* Onboarding Flow */}
                 <Route path="/" element={<OnboardingLayout><WelcomePage/></OnboardingLayout>}/>
+                <Route path="/login" element={<OnboardingLayout><LoginPage/></OnboardingLayout>}/>
+                <Route path="/register" element={<OnboardingLayout><RegisterPage/></OnboardingLayout>}/>
                 <Route path="/onboarding/help" element={<OnboardingLayout><HelpPage/></OnboardingLayout>}/>
                 <Route path="/onboarding/upload" element={<OnboardingLayout><UploadPage/></OnboardingLayout>}/>
 
