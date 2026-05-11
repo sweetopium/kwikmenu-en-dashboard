@@ -297,7 +297,6 @@ const SimplePublicMenuTemplate = ({
                     style={isSelected ? {
                       backgroundColor: accentColor,
                       borderColor: accentColor,
-                      boxShadow: `0 6px 14px ${hexToRgba(accentColor, 0.12)}`,
                       color: SURFACE_COLOR,
                     } : {
                       backgroundColor: SURFACE_COLOR,
