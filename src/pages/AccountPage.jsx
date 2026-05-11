@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Bell, LockKeyhole, Save, UserRound } from 'lucide-react';
 
 import { Button } from "../components/ui/button";
@@ -11,18 +11,133 @@ import {
   primaryActionButtonClasses,
   secondaryActionButtonClasses,
 } from "../lib/uiStyles";
+import {
+  changeCurrentUserPassword,
+  fetchCurrentUser,
+  updateCurrentUserProfile,
+} from "../lib/sessionApi";
 
 const AccountPage = () => {
   const [profile, setProfile] = useState({
-    name: 'Татьяна Васильева',
-    email: 'tatyana@kwikmenu.app',
-    phone: '+7 925 323 29 46',
+    name: '',
+    email: '',
+    phone: '',
+    hasPassword: true,
+    authProviders: [],
+  });
+  const [passwordForm, setPasswordForm] = useState({
+    currentPassword: '',
+    newPassword: '',
+    confirmPassword: '',
   });
   const [notifications, setNotifications] = useState({
     productUpdates: true,
     paymentAlerts: true,
     weeklyDigest: false,
   });
+  const [isLoading, setIsLoading] = useState(true);
+  const [savingProfile, setSavingProfile] = useState(false);
+  const [savingPassword, setSavingPassword] = useState(false);
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    fetchCurrentUser()
+      .then((user) => {
+        setProfile({
+          name: user.name || '',
+          email: user.email || '',
+          phone: user.phone || '',
+          hasPassword: Boolean(user.hasPassword),
+          authProviders: Array.isArray(user.authProviders) ? user.authProviders : [],
+        });
+      })
+      .catch((nextError) => {
+        setError(nextError.message || 'Не удалось загрузить аккаунт.');
+      })
+      .finally(() => setIsLoading(false));
+  }, []);
+
+  const providerOnly = !profile.hasPassword;
+  const linkedProvidersLabel = useMemo(() => {
+    const externalProviders = profile.authProviders.filter((provider) => provider !== 'password');
+    if (!externalProviders.length) {
+      return 'через внешний провайдер';
+    }
+
+    const providerLabels = {
+      google: 'Google',
+      yandex: 'Яндекс',
+      mailru: 'Mail.ru',
+    };
+
+    return externalProviders.map((provider) => providerLabels[provider] || provider).join(', ');
+  }, [profile.authProviders]);
+
+  const handleProfileSave = async () => {
+    setSavingProfile(true);
+    setError('');
+    try {
+      const user = await updateCurrentUserProfile({
+        name: profile.name,
+        email: profile.email,
+        phone: profile.phone || null,
+      });
+
+      setProfile((current) => ({
+        ...current,
+        name: user.name || '',
+        email: user.email || '',
+        phone: user.phone || '',
+        hasPassword: Boolean(user.hasPassword),
+        authProviders: Array.isArray(user.authProviders) ? user.authProviders : current.authProviders,
+      }));
+    } catch (nextError) {
+      setError(nextError.message || 'Не удалось сохранить профиль.');
+    } finally {
+      setSavingProfile(false);
+    }
+  };
+
+  const handlePasswordSave = async () => {
+    if (providerOnly) {
+      return;
+    }
+
+    setSavingPassword(true);
+    setError('');
+    try {
+      const user = await changeCurrentUserPassword(passwordForm);
+      setProfile((current) => ({
+        ...current,
+        hasPassword: Boolean(user.hasPassword),
+        authProviders: Array.isArray(user.authProviders) ? user.authProviders : current.authProviders,
+      }));
+      setPasswordForm({
+        currentPassword: '',
+        newPassword: '',
+        confirmPassword: '',
+      });
+    } catch (nextError) {
+      setError(nextError.message || 'Не удалось обновить пароль.');
+    } finally {
+      setSavingPassword(false);
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <div className="mx-auto space-y-6 sm:space-y-8">
+        <SettingsPageHeader
+          title="Аккаунт"
+          description="Управляйте личными данными и уведомлениями"
+          actionLabel={null}
+        />
+        <div className="bg-card border border-border/60 rounded-3xl shadow-sm p-8 text-sm text-muted-foreground">
+          Загружаем настройки аккаунта...
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="mx-auto space-y-6 sm:space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700 ease-out">
@@ -31,6 +146,12 @@ const AccountPage = () => {
         description="Управляйте личными данными и уведомлениями"
         actionLabel={null}
       />
+
+      {error ? (
+        <div className="rounded-2xl border border-destructive/20 bg-destructive/5 px-4 py-3 text-sm text-destructive">
+          {error}
+        </div>
+      ) : null}
 
       <div className="grid grid-cols-1 xl:grid-cols-[minmax(0,1.35fr)_minmax(320px,0.65fr)] gap-6">
         <div className="space-y-6">
@@ -73,9 +194,9 @@ const AccountPage = () => {
             </div>
 
             <div className="pt-4 border-t border-border/50 flex justify-end">
-              <Button className={`${primaryActionButtonClasses} px-5`}>
+              <Button onClick={handleProfileSave} disabled={savingProfile} className={`${primaryActionButtonClasses} px-5`}>
                 <Save size={18} className="mr-2" />
-                Сохранить
+                {savingProfile ? 'Сохраняем...' : 'Сохранить'}
               </Button>
             </div>
           </section>
@@ -126,29 +247,70 @@ const AccountPage = () => {
                 <LockKeyhole size={20} />
               </div>
               <div>
-                <h2 className="text-lg font-bold text-foreground">Пароль</h2>
-                <p className="text-sm text-muted-foreground">Обновите пароль для входа в кабинет.</p>
+                <h2 className="text-lg font-bold text-foreground">
+                  {providerOnly ? 'Способ входа' : 'Пароль'}
+                </h2>
+                <p className="text-sm text-muted-foreground">
+                  {providerOnly
+                    ? `Вы входите ${linkedProvidersLabel}. Смена пароля недоступна.`
+                    : 'Обновите пароль для входа в кабинет.'}
+                </p>
               </div>
             </div>
 
             <div className="space-y-4">
               <div className="space-y-2">
                 <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Текущий пароль</Label>
-                <Input type="password" className={formFieldClasses} value="password123" readOnly />
+                <Input
+                  type="password"
+                  className={formFieldClasses}
+                  value={providerOnly ? 'Недоступно' : passwordForm.currentPassword}
+                  onChange={(e) => setPasswordForm({ ...passwordForm, currentPassword: e.target.value })}
+                  readOnly={providerOnly}
+                  disabled={providerOnly}
+                  placeholder={providerOnly ? 'Недоступно для внешнего входа' : ''}
+                />
               </div>
               <div className="space-y-2">
                 <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Новый пароль</Label>
-                <Input type="password" className={formFieldClasses} placeholder="Минимум 8 символов" />
+                <Input
+                  type="password"
+                  className={formFieldClasses}
+                  value={providerOnly ? 'Недоступно' : passwordForm.newPassword}
+                  onChange={(e) => setPasswordForm({ ...passwordForm, newPassword: e.target.value })}
+                  readOnly={providerOnly}
+                  disabled={providerOnly}
+                  placeholder={providerOnly ? 'Смена пароля недоступна' : 'Минимум 8 символов'}
+                />
               </div>
               <div className="space-y-2">
                 <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Повторите новый пароль</Label>
-                <Input type="password" className={formFieldClasses} placeholder="Повторите пароль" />
+                <Input
+                  type="password"
+                  className={formFieldClasses}
+                  value={providerOnly ? 'Недоступно' : passwordForm.confirmPassword}
+                  onChange={(e) => setPasswordForm({ ...passwordForm, confirmPassword: e.target.value })}
+                  readOnly={providerOnly}
+                  disabled={providerOnly}
+                  placeholder={providerOnly ? 'Смена пароля недоступна' : 'Повторите пароль'}
+                />
               </div>
             </div>
 
+            {providerOnly ? (
+              <p className="text-sm text-muted-foreground">
+                Смена пароля недоступна, потому что этот аккаунт использует вход {linkedProvidersLabel}.
+              </p>
+            ) : null}
+
             <div className="pt-4 border-t border-border/50 flex justify-end">
-              <Button variant="outline" className={`${secondaryActionButtonClasses} px-5`}>
-                Обновить пароль
+              <Button
+                variant="outline"
+                onClick={handlePasswordSave}
+                disabled={providerOnly || savingPassword}
+                className={`${secondaryActionButtonClasses} px-5`}
+              >
+                {savingPassword ? 'Обновляем...' : 'Обновить пароль'}
               </Button>
             </div>
           </section>

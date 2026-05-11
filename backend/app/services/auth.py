@@ -45,6 +45,38 @@ def authenticate_user(db: Session, *, email: str, password: str) -> User:
     return user
 
 
+def update_user_profile(db: Session, *, user: User, name: str, email: str, phone: str | None) -> User:
+    normalized_email = email.strip().lower()
+    existing_user = db.query(User).filter(User.email == normalized_email, User.id != user.id).first()
+    if existing_user:
+        raise ValueError("Пользователь с таким email уже существует.")
+
+    user.name = name.strip()
+    user.email = normalized_email
+    user.phone = phone.strip() if phone else None
+    db.add(user)
+    db.flush()
+    return user
+
+
+def update_user_password(
+    db: Session,
+    *,
+    user: User,
+    current_password: str,
+    new_password: str,
+) -> User:
+    if not user.password_hash:
+        raise ValueError("Смена пароля недоступна для этого способа входа.")
+    if not verify_password(current_password, user.password_hash):
+        raise ValueError("Текущий пароль указан неверно.")
+
+    user.password_hash = hash_password(new_password)
+    db.add(user)
+    db.flush()
+    return user
+
+
 def create_session(
     db: Session,
     *,
