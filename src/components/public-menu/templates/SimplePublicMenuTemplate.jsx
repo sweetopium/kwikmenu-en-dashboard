@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { Globe, Menu as MenuIcon } from 'lucide-react';
+import { Check, Copy, Menu as MenuIcon, Wifi } from 'lucide-react';
 
 import {
   formatCurrency,
@@ -10,6 +10,8 @@ import {
   hexToRgba,
   isFilled,
 } from '../../../lib/publicMenuUtils';
+
+const SURFACE_COLOR = '#fff7ea';
 
 const SimplePublicMenuTemplate = ({
   venue,
@@ -23,7 +25,9 @@ const SimplePublicMenuTemplate = ({
   const defaultLanguage = payload?.defaultLanguage || 'ru';
   const [language, setLanguage] = useState(defaultLanguage);
   const [activeCategoryId, setActiveCategoryId] = useState(payload?.categories?.[0]?.id || '');
+  const [passwordCopied, setPasswordCopied] = useState(false);
   const sectionRefs = useRef(new Map());
+  const copyResetTimeoutRef = useRef(null);
 
   useEffect(() => {
     setLanguage(payload?.defaultLanguage || 'ru');
@@ -46,8 +50,8 @@ const SimplePublicMenuTemplate = ({
         }
       },
       {
-        rootMargin: '-140px 0px -55% 0px',
-        threshold: [0.1, 0.3, 0.5],
+        rootMargin: '-96px 0px -55% 0px',
+        threshold: [0.12, 0.24, 0.4],
       }
     );
 
@@ -61,18 +65,22 @@ const SimplePublicMenuTemplate = ({
     return () => observer.disconnect();
   }, [payload?.categories]);
 
-  const surfaceTint = useMemo(() => hexToRgba(accentColor, 0.08), [accentColor]);
-  const borderTint = useMemo(() => hexToRgba(accentColor, 0.2), [accentColor]);
-  const chipTint = useMemo(() => hexToRgba(accentColor, 0.12), [accentColor]);
+  const pageTint = useMemo(() => hexToRgba(accentColor, 0.13), [accentColor]);
+  const panelBorder = useMemo(() => hexToRgba(accentColor, 0.16), [accentColor]);
   const heroTextColor = useMemo(() => getContrastColor(accentColor), [accentColor]);
+  const heroBorder = useMemo(() => hexToRgba(heroTextColor, 0.18), [heroTextColor]);
+  const heroControlFill = useMemo(() => hexToRgba(heroTextColor, 0.08), [heroTextColor]);
+  const heroControlSelectedFill = useMemo(() => hexToRgba(heroTextColor, 0.16), [heroTextColor]);
+  const heroMutedColor = useMemo(() => hexToRgba(heroTextColor, 0.76), [heroTextColor]);
+  const publicFontFamily = '"Avenir Next", "Manrope", Inter, "Helvetica Neue", Arial, sans-serif';
 
   const visibleCategories = useMemo(
     () => (payload?.categories || []).filter((category) => !category.isHidden),
     [payload?.categories]
   );
 
-  const localizedMenuName = getLocalizedField(payload?.menuMeta, 'name', language, defaultLanguage);
-  const localizedVenueDescription = getLocalizedField(payload?.venue, 'description', language, defaultLanguage);
+  const venueDescription = venue?.description || '';
+  const showWifiCard = Boolean(venue?.wifi?.enabled && venue?.wifi?.ssid && venue?.wifi?.password);
 
   const scrollToCategory = (categoryId) => {
     const element = sectionRefs.current.get(categoryId);
@@ -84,108 +92,115 @@ const SimplePublicMenuTemplate = ({
     setActiveCategoryId(categoryId);
   };
 
+  const handleCopyWifiPassword = async () => {
+    const password = venue?.wifi?.password;
+    if (!password) {
+      return;
+    }
+
+    try {
+      await navigator.clipboard.writeText(password);
+      setPasswordCopied(true);
+      if (copyResetTimeoutRef.current) {
+        window.clearTimeout(copyResetTimeoutRef.current);
+      }
+      copyResetTimeoutRef.current = window.setTimeout(() => {
+        setPasswordCopied(false);
+      }, 1400);
+    } catch {}
+  };
+
   return (
-    <div className="min-h-screen bg-background">
-      <div className="mx-auto flex w-full max-w-6xl flex-col gap-5 px-4 py-4 sm:px-6 sm:py-6 lg:px-8">
+    <div className="min-h-screen" style={{ backgroundColor: pageTint, fontFamily: publicFontFamily }}>
+      <div className="mx-auto flex w-full max-w-[760px] flex-col gap-3 px-4 py-4 sm:gap-4 sm:px-6 sm:py-6">
         <section
-          className="overflow-hidden rounded-[2rem] border shadow-sm"
+          className="overflow-hidden rounded-[2rem] border p-4 shadow-[0_16px_38px_rgba(18,54,47,0.12)] sm:p-5"
           style={{
             backgroundColor: accentColor,
-            borderColor: borderTint,
+            borderColor: heroBorder,
             color: heroTextColor,
           }}
         >
-          <div className="flex flex-col gap-6 p-5 sm:p-7 lg:p-8">
-            <div className="flex flex-col gap-5 sm:flex-row sm:items-start">
-              <div
-                className="flex h-24 w-24 shrink-0 items-center justify-center rounded-[1.6rem] border text-4xl font-black"
-                style={{
-                  borderColor: hexToRgba(heroTextColor, 0.22),
-                  backgroundColor: hexToRgba(heroTextColor, 0.08),
-                }}
-              >
-                {venue?.design?.logoUrl ? (
-                  <img src={venue.design.logoUrl} alt={venue.name} className="h-full w-full object-cover" />
-                ) : (
-                  <span>{String(venue?.name || 'M').slice(0, 1)}</span>
-                )}
-              </div>
+          <div className="flex gap-3">
+            <div
+              className="flex h-[64px] w-[64px] shrink-0 items-center justify-center overflow-hidden rounded-[1rem] border text-[2rem] font-extrabold tracking-[-0.04em] sm:h-[72px] sm:w-[72px] sm:text-[2.2rem]"
+              style={{ borderColor: hexToRgba(heroTextColor, 0.72) }}
+            >
+              {venue?.design?.logoUrl ? (
+                <img src={venue.design.logoUrl} alt={venue.name} className="h-full w-full object-contain p-2.5" />
+              ) : (
+                <span>{String(venue?.name || 'M').slice(0, 1)}</span>
+              )}
+            </div>
 
-              <div className="min-w-0 flex-1 space-y-4">
-                <div className="space-y-1.5">
-                  <h1 className="text-3xl font-black tracking-tight sm:text-4xl">{venue?.name || 'Menu'}</h1>
-                  {isFilled(localizedMenuName) && localizedMenuName !== venue?.name ? (
-                    <p className="text-sm font-semibold uppercase tracking-[0.18em]" style={{ color: hexToRgba(heroTextColor, 0.72) }}>
-                      {localizedMenuName}
-                    </p>
-                  ) : null}
-                </div>
+            <div className="min-w-0 flex-1 pt-0.5">
+              <h1 className="text-[1.5rem] font-extrabold leading-none tracking-[-0.045em] sm:text-[1.9rem]">
+                {venue?.name || 'Menu'}
+              </h1>
 
-                <div className="flex flex-wrap gap-2">
-                  {(payload?.languages || []).map((menuLanguage) => {
-                    const isSelected = menuLanguage.code === language;
-                    return (
-                      <button
-                        key={menuLanguage.code}
-                        type="button"
-                        onClick={() => setLanguage(menuLanguage.code)}
-                        className="inline-flex h-11 min-w-[68px] items-center justify-center gap-2 rounded-2xl border px-4 text-sm font-semibold transition-all"
-                        style={{
-                          borderColor: isSelected ? hexToRgba(heroTextColor, 0.28) : hexToRgba(heroTextColor, 0.18),
-                          backgroundColor: isSelected ? hexToRgba(heroTextColor, 0.14) : hexToRgba(heroTextColor, 0.06),
-                          color: heroTextColor,
-                        }}
-                      >
-                        <span className="text-base">{getLanguagePillLabel(menuLanguage)}</span>
-                      </button>
-                    );
-                  })}
-                </div>
-
-                {isFilled(localizedVenueDescription) ? (
-                  <p className="max-w-4xl text-base leading-8 sm:text-[1.7rem] sm:leading-[1.45] lg:text-[1.9rem]">
-                    {localizedVenueDescription}
-                  </p>
-                ) : null}
+              <div className="mt-2 flex flex-wrap gap-1.5">
+                {(payload?.languages || []).map((menuLanguage) => {
+                  const isSelected = menuLanguage.code === language;
+                  return (
+                    <button
+                      key={menuLanguage.code}
+                      type="button"
+                      onClick={() => setLanguage(menuLanguage.code)}
+                      className="inline-flex h-8 min-w-[3.35rem] items-center justify-center rounded-[0.5rem] border px-2.5 text-[0.76rem] font-medium transition-all"
+                      style={{
+                        borderColor: isSelected ? hexToRgba(heroTextColor, 0.28) : hexToRgba(heroTextColor, 0.18),
+                        backgroundColor: isSelected ? heroControlSelectedFill : heroControlFill,
+                        color: heroTextColor,
+                      }}
+                    >
+                      {getLanguagePillLabel(menuLanguage)}
+                    </button>
+                  );
+                })}
               </div>
             </div>
           </div>
+
+          {isFilled(venueDescription) ? (
+            <p
+              className="mt-3 max-w-[92%] text-[0.84rem] font-normal leading-[1.5] tracking-[-0.01em] sm:text-[0.95rem]"
+              style={{ color: heroMutedColor }}
+            >
+              {venueDescription}
+            </p>
+          ) : null}
         </section>
 
         {availableMenus.length > 1 ? (
-          <section className="rounded-[2rem] border border-border/60 bg-card p-2 shadow-sm">
-            <div className="flex flex-wrap gap-2">
-              {availableMenus.map((menuOption) => {
-                const isSelected = menuOption.id === activeMenuId;
-                return (
-                  <button
-                    key={menuOption.id}
-                    type="button"
-                    onClick={() => onMenuChange(menuOption.id)}
-                    className="inline-flex min-h-11 items-center justify-center rounded-2xl border px-4 py-2 text-sm font-semibold transition-all"
-                    style={isSelected ? {
-                      backgroundColor: accentColor,
-                      borderColor: hexToRgba(accentColor, 0.45),
-                      color: heroTextColor,
-                    } : undefined}
-                  >
-                    {menuOption.name}
-                  </button>
-                );
-              })}
-            </div>
-          </section>
+          <div className="flex flex-wrap gap-1.5 overflow-x-auto">
+            {availableMenus.map((menuOption) => {
+              const isSelected = menuOption.id === activeMenuId;
+              return (
+                <button
+                  key={menuOption.id}
+                  type="button"
+                  onClick={() => onMenuChange(menuOption.id)}
+                  className="inline-flex min-h-10 items-center justify-center rounded-full border px-4 py-2 text-[0.82rem] font-medium transition-all"
+                  style={isSelected ? {
+                    backgroundColor: accentColor,
+                    borderColor: accentColor,
+                    color: SURFACE_COLOR,
+                  } : {
+                    backgroundColor: SURFACE_COLOR,
+                    borderColor: panelBorder,
+                    color: '#121815',
+                  }}
+                >
+                  {menuOption.name}
+                </button>
+              );
+            })}
+          </div>
         ) : null}
 
         {visibleCategories.length ? (
-          <section
-            className="sticky top-3 z-20 overflow-hidden rounded-[2rem] border bg-card/95 p-2 shadow-sm backdrop-blur"
-            style={{
-              borderColor: borderTint,
-              boxShadow: `0 16px 40px -32px ${hexToRgba(accentColor, 0.35)}`,
-            }}
-          >
-            <div className="flex gap-2 overflow-x-auto pb-1">
+          <section className="sticky top-3 z-20">
+            <div className="flex gap-1.5 overflow-x-auto pb-1">
               {visibleCategories.map((category) => {
                 const isSelected = category.id === activeCategoryId;
                 const categoryName = getLocalizedField(category, 'name', language, defaultLanguage) || category.name;
@@ -194,14 +209,16 @@ const SimplePublicMenuTemplate = ({
                     key={category.id}
                     type="button"
                     onClick={() => scrollToCategory(category.id)}
-                    className="shrink-0 rounded-2xl border px-5 py-3 text-sm font-semibold transition-all sm:text-base"
+                    className="shrink-0 rounded-full border px-4 py-2.5 text-[0.8rem] font-medium transition-all"
                     style={isSelected ? {
                       backgroundColor: accentColor,
-                      borderColor: hexToRgba(accentColor, 0.45),
-                      color: heroTextColor,
+                      borderColor: accentColor,
+                      boxShadow: `0 6px 14px ${hexToRgba(accentColor, 0.12)}`,
+                      color: SURFACE_COLOR,
                     } : {
-                      backgroundColor: surfaceTint,
-                      borderColor: borderTint,
+                      backgroundColor: SURFACE_COLOR,
+                      borderColor: panelBorder,
+                      color: '#121815',
                     }}
                   >
                     {categoryName}
@@ -212,7 +229,7 @@ const SimplePublicMenuTemplate = ({
           </section>
         ) : null}
 
-        <section className="space-y-5">
+        <section className="space-y-4">
           {visibleCategories.length ? visibleCategories.map((category) => {
             const categoryName = getLocalizedField(category, 'name', language, defaultLanguage) || category.name;
             const categoryDescription = getLocalizedField(category, 'description', language, defaultLanguage);
@@ -229,13 +246,17 @@ const SimplePublicMenuTemplate = ({
                     sectionRefs.current.delete(category.id);
                   }
                 }}
-                className="rounded-[2rem] border border-border/60 bg-card p-5 shadow-sm sm:p-8"
+                className="rounded-[2rem] border p-5 shadow-[0_14px_34px_rgba(18,54,47,0.09)] sm:p-6"
+                style={{
+                  backgroundColor: SURFACE_COLOR,
+                  borderColor: panelBorder,
+                }}
               >
-                <div className="mb-6 space-y-2 sm:mb-8">
-                  <h2 className="text-3xl font-black tracking-tight text-foreground sm:text-4xl">{categoryName}</h2>
-                  <div className="h-1 w-24 rounded-full" style={{ backgroundColor: accentColor }} />
+                <div className="mb-4 space-y-1.5 sm:mb-5">
+                  <h2 className="text-[1.15rem] font-bold tracking-[-0.025em] text-foreground sm:text-[1.35rem]">{categoryName}</h2>
+                  <div className="h-[3px] w-[76px] rounded-full" style={{ backgroundColor: accentColor }} />
                   {isFilled(categoryDescription) ? (
-                    <p className="max-w-3xl text-sm leading-7 text-muted-foreground sm:text-base">{categoryDescription}</p>
+                    <p className="max-w-3xl text-[0.92rem] leading-7 text-muted-foreground">{categoryDescription}</p>
                   ) : null}
                 </div>
 
@@ -250,49 +271,47 @@ const SimplePublicMenuTemplate = ({
                     return (
                       <article
                         key={item.id}
-                        className={`${index > 0 ? 'border-t border-border/50' : ''} py-5 sm:py-6`}
+                        className={`${index > 0 ? 'border-t' : ''} py-5`}
+                        style={{ borderColor: 'rgba(18, 54, 47, 0.1)' }}
                       >
                         <div className="flex items-start justify-between gap-4">
                           <div className="min-w-0 flex-1 space-y-2">
-                            <div className="flex flex-wrap items-center gap-2">
-                              <h3 className="text-xl font-bold tracking-tight text-foreground sm:text-[1.75rem]">{itemName}</h3>
-                            </div>
+                            <h3 className="text-[1.02rem] font-medium tracking-[-0.01em] text-foreground sm:text-[1.12rem]">{itemName}</h3>
 
                             {isFilled(itemDescription) ? (
-                              <p className="max-w-3xl text-sm leading-7 text-muted-foreground sm:text-base">{itemDescription}</p>
+                              <p className="max-w-3xl text-[0.88rem] leading-[1.45] text-muted-foreground">{itemDescription}</p>
                             ) : null}
 
                             {isFilled(itemMeasure) && !visibleVariants.length ? (
-                              <p className="text-sm font-medium text-muted-foreground">{itemMeasure}</p>
+                              <p className="text-[0.83rem] leading-[1.4] text-muted-foreground">{itemMeasure}</p>
                             ) : null}
                           </div>
 
                           {isFilled(itemPrice) ? (
-                            <div className="shrink-0 text-right text-xl font-black tracking-tight text-foreground sm:text-3xl">
+                            <div className="shrink-0 text-right text-[1.02rem] font-medium tracking-[-0.01em] text-foreground sm:text-[1.12rem]">
                               {itemPrice}
                             </div>
                           ) : null}
                         </div>
 
                         {visibleVariants.length ? (
-                          <div className="mt-4 border-l-2 pl-4" style={{ borderColor: chipTint }}>
-                            <div className="space-y-2.5">
+                          <div className="mt-2.5 border-l-2 pl-3" style={{ borderColor: 'rgba(18, 54, 47, 0.14)' }}>
+                            <div className="space-y-1.5">
                               {visibleVariants.map((variant) => {
                                 const variantLabel = getLocalizedField(variant, 'label', language, defaultLanguage) || variant.label;
                                 const variantMeasure = formatMeasure(variant.measureValue, variant.measureUnit);
-                                const variantMeta = variantMeasure && variantMeasure !== variantLabel
-                                  ? variantMeasure
-                                  : '';
+                                const variantMeta = variantMeasure && variantMeasure !== variantLabel ? variantMeasure : '';
+
                                 return (
                                   <div key={variant.id} className="flex items-start justify-between gap-4">
                                     <div className="min-w-0">
-                                      <div className="text-base font-medium text-muted-foreground sm:text-[1.1rem]">{variantLabel}</div>
+                                      <div className="text-[0.83rem] font-medium leading-[1.4] text-muted-foreground">{variantLabel}</div>
                                       {isFilled(variantMeta) ? (
-                                        <div className="text-sm text-muted-foreground/80">{variantMeta}</div>
+                                        <div className="text-[0.8rem] text-muted-foreground/80">{variantMeta}</div>
                                       ) : null}
                                     </div>
                                     {menu?.payload?.settings?.showVariantPrices !== false ? (
-                                      <div className="shrink-0 text-right text-lg font-bold text-foreground sm:text-2xl">
+                                      <div className="shrink-0 text-right text-[1.02rem] font-medium text-foreground">
                                         {formatCurrency(variant.price)}
                                       </div>
                                     ) : null}
@@ -309,7 +328,10 @@ const SimplePublicMenuTemplate = ({
               </div>
             );
           }) : (
-            <div className="rounded-[2rem] border border-border/60 bg-card p-8 text-center shadow-sm">
+            <div
+              className="rounded-[2rem] border p-8 text-center shadow-sm"
+              style={{ backgroundColor: SURFACE_COLOR, borderColor: panelBorder }}
+            >
               <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-secondary/60 text-muted-foreground">
                 <MenuIcon size={24} />
               </div>
@@ -321,15 +343,57 @@ const SimplePublicMenuTemplate = ({
           )}
         </section>
 
-        <footer className="rounded-[2rem] border border-border/60 bg-card px-5 py-4 shadow-sm">
-          <div className="flex flex-col gap-3 text-sm text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
-            <div className="flex items-center gap-2">
-              <Globe size={16} />
-              <span>{venue?.city ? `${venue.city}${venue.country ? `, ${venue.country}` : ''}` : venue?.country || 'KwikMenu'}</span>
+        {showWifiCard ? (
+          <section
+            className="rounded-[2rem] border p-5 shadow-[0_14px_34px_rgba(18,54,47,0.09)] sm:p-6"
+            style={{
+              backgroundColor: SURFACE_COLOR,
+              borderColor: panelBorder,
+            }}
+          >
+            <div className="flex items-start justify-between gap-4">
+              <div className="min-w-0">
+                <div className="flex items-center gap-2">
+                  <div
+                    className="flex h-9 w-9 items-center justify-center rounded-full"
+                    style={{ backgroundColor: hexToRgba(accentColor, 0.12), color: accentColor }}
+                  >
+                    <Wifi size={16} />
+                  </div>
+                  <h2 className="text-[1rem] font-bold tracking-[-0.02em] text-foreground sm:text-[1.08rem]">
+                    Гостевой Wi‑Fi
+                  </h2>
+                </div>
+                <p className="mt-2 text-[0.84rem] leading-[1.45] text-muted-foreground">
+                  Подключение доступно прямо из цифрового меню.
+                </p>
+              </div>
             </div>
-            <div>{payload?.languages?.length || 1} язык(ов) меню</div>
-          </div>
-        </footer>
+
+            <div className="mt-4 space-y-3 border-t pt-4" style={{ borderColor: 'rgba(18, 54, 47, 0.1)' }}>
+              <div className="flex items-start justify-between gap-4">
+                <span className="text-[0.8rem] uppercase tracking-[0.12em] text-muted-foreground">Сеть</span>
+                <span className="text-right text-[0.96rem] font-medium text-foreground">{venue.wifi.ssid}</span>
+              </div>
+              <div className="flex items-start justify-between gap-4">
+                <span className="text-[0.8rem] uppercase tracking-[0.12em] text-muted-foreground">Пароль</span>
+                <button
+                  type="button"
+                  onClick={handleCopyWifiPassword}
+                  className="inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-right transition-all hover:bg-black/3"
+                  style={{ borderColor: 'rgba(18, 54, 47, 0.12)' }}
+                >
+                  <span className="font-mono text-[0.92rem] font-medium tracking-[0.16em] text-foreground">
+                    {venue.wifi.password}
+                  </span>
+                  <span className="text-muted-foreground">
+                    {passwordCopied ? <Check size={14} /> : <Copy size={14} />}
+                  </span>
+                </button>
+              </div>
+            </div>
+          </section>
+        ) : null}
       </div>
     </div>
   );

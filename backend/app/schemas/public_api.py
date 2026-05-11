@@ -9,6 +9,12 @@ class PublicVenueDesignResponse(StrictModel):
     logoUrl: str | None = None
 
 
+class PublicVenueWifiResponse(StrictModel):
+    enabled: bool = False
+    ssid: str | None = None
+    password: str | None = None
+
+
 class PublicVenueQrResponse(StrictModel):
     style: str = "rounded"
     color: str = "#863bff"
@@ -30,6 +36,7 @@ class PublicVenueResponse(StrictModel):
     publicPath: str
     publicUrl: str
     design: PublicVenueDesignResponse
+    wifi: PublicVenueWifiResponse
     qr: PublicVenueQrResponse
 
 

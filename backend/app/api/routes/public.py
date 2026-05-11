@@ -14,6 +14,7 @@ from app.schemas.public_api import (
     PublicVenueMenusResponse,
     PublicVenueQrResponse,
     PublicVenueResponse,
+    PublicVenueWifiResponse,
 )
 
 
@@ -65,6 +66,11 @@ def get_public_venue_menus(
                 template=venue_settings.design_template,
                 accentColor=venue_settings.design_accent_color,
                 logoUrl=venue_settings.design_logo_url,
+            ),
+            wifi=PublicVenueWifiResponse(
+                enabled=venue_settings.wifi_enabled,
+                ssid=venue_settings.wifi_ssid,
+                password=venue_settings.wifi_password,
             ),
             qr=PublicVenueQrResponse(
                 style=venue_settings.qr_style,
