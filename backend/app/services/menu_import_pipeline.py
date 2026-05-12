@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import logging
 import re
 import unicodedata
 from pathlib import Path
@@ -20,6 +21,9 @@ from app.schemas.menu_extract import ExtractedItem, ExtractedPage, ExtractedSect
 from app.schemas.menu_import import MenuImportResult, UploadedSource
 from app.services.openrouter_client import OpenRouterClient
 from app.services.page_normalizer import NormalizedPage, PageNormalizer
+
+
+logger = logging.getLogger(__name__)
 
 
 def slugify(value: str, *, fallback: str) -> str:
@@ -59,15 +63,13 @@ class MenuImportPipeline:
 
         for page in pages:
             try:
-                extracted, page_warnings, fallback_used = self._parse_page(
+                normalized_page, page_warnings, fallback_used = self._parse_page(
                     page=page,
                     context=context,
                     previous_section_headings=previous_section_headings,
                 )
                 warnings.extend(page_warnings)
                 used_fallback = used_fallback or fallback_used
-                normalized_page = self._normalize_extracted_page(extracted)
-                self._validate_extracted_page(normalized_page, page)
                 extracted_pages.append(normalized_page)
                 previous_section_headings = [
                     section.heading.strip()
@@ -106,17 +108,39 @@ class MenuImportPipeline:
         previous_section_headings: list[str],
     ) -> tuple[ExtractedPage, list[str], bool]:
         if self.openrouter.enabled and page.source_kind in {"image", "pdf", "link"}:
-            extracted = self.openrouter.extract_page(
-                page_number=page.page_number,
-                source_kind=page.source_kind,
-                file_path=page.image_path,
-                file_name=page.source_name,
-                mime_type=page.mime_type,
-                menu_link=page.menu_link,
-                context=context,
-                previous_section_headings=previous_section_headings,
-            )
-            return extracted, [], False
+            attempts = max(1, self.settings.menu_import_page_parse_attempts)
+            last_error: ValueError | None = None
+
+            for attempt in range(1, attempts + 1):
+                extracted = self.openrouter.extract_page(
+                    page_number=page.page_number,
+                    source_kind=page.source_kind,
+                    file_path=page.image_path,
+                    file_name=page.source_name,
+                    mime_type=page.mime_type,
+                    menu_link=page.menu_link,
+                    context=context,
+                    previous_section_headings=previous_section_headings,
+                )
+                normalized_page = self._normalize_extracted_page(extracted)
+                try:
+                    self._validate_extracted_page(normalized_page, page)
+                    return normalized_page, [], False
+                except ValueError as exc:
+                    last_error = exc
+                    if attempt >= attempts:
+                        raise
+                    logger.warning(
+                        "Retrying menu parse for page %s (%s), attempt %s/%s after validation error: %s",
+                        page.page_number,
+                        page.source_name,
+                        attempt + 1,
+                        attempts,
+                        exc,
+                    )
+
+            if last_error is not None:
+                raise last_error
 
         warning = "OPENROUTER_API_KEY is not configured, fallback menu scaffold was generated."
         return self._build_fallback_page(page=page, context=context), [warning], True

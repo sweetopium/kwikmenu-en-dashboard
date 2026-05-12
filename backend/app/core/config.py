@@ -22,6 +22,7 @@ class Settings(BaseSettings):
     menu_import_max_completion_tokens: int = 8000
     menu_normalization_max_completion_tokens: int = 24000
     menu_import_request_timeout_seconds: int = 180
+    menu_import_page_parse_attempts: int = 3
     menu_import_max_items_per_single_category: int = 25
     menu_import_api_url: str = "http://localhost:8000"
     menu_import_frontend_origin: str = "http://localhost:5173"
