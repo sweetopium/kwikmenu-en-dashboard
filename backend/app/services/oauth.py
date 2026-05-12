@@ -7,9 +7,9 @@ import secrets
 from dataclasses import dataclass
 from typing import Any
 from urllib.parse import quote, urlencode
-from urllib.request import Request, urlopen
+from urllib.request import Request as UrlRequest, urlopen
 
-from fastapi import HTTPException, Request, Response, status
+from fastapi import HTTPException, Request as FastAPIRequest, Response, status
 
 from app.core.config import Settings, get_settings
 
@@ -46,14 +46,14 @@ def _request_json(
     method: str = "GET",
     headers: dict[str, str] | None = None,
     form_data: dict[str, str] | None = None,
-) -> dict[str, Any]:
+) -> Any:
     encoded_data = None
     request_headers = dict(headers or {})
     if form_data is not None:
         encoded_data = urlencode(form_data).encode("utf-8")
         request_headers.setdefault("Content-Type", "application/x-www-form-urlencoded")
 
-    request = Request(url=url, data=encoded_data, headers=request_headers, method=method)
+    request = UrlRequest(full_url=url, data=encoded_data, headers=request_headers, method=method)
     with urlopen(request, timeout=20) as response:
         return json.loads(response.read().decode("utf-8"))
 
@@ -99,7 +99,7 @@ def clear_oauth_state_cookie(response: Response) -> None:
     )
 
 
-def validate_oauth_state(request: Request, *, provider: str, state: str | None) -> None:
+def validate_oauth_state(request: FastAPIRequest, *, provider: str, state: str | None) -> None:
     cookie_value = request.cookies.get(OAUTH_STATE_COOKIE_NAME)
     if not state or not cookie_value or cookie_value != f"{provider}:{state}":
         raise OAuthError("OAuth state validation failed.")
