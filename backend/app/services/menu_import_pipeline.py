@@ -109,29 +109,29 @@ class MenuImportPipeline:
     ) -> tuple[ExtractedPage, list[str], bool]:
         if self.openrouter.enabled and page.source_kind in {"image", "pdf", "link"}:
             attempts = max(1, self.settings.menu_import_page_parse_attempts)
-            last_error: ValueError | None = None
+            last_error: Exception | None = None
 
             for attempt in range(1, attempts + 1):
-                extracted = self.openrouter.extract_page(
-                    page_number=page.page_number,
-                    source_kind=page.source_kind,
-                    file_path=page.image_path,
-                    file_name=page.source_name,
-                    mime_type=page.mime_type,
-                    menu_link=page.menu_link,
-                    context=context,
-                    previous_section_headings=previous_section_headings,
-                )
-                normalized_page = self._normalize_extracted_page(extracted)
                 try:
+                    extracted = self.openrouter.extract_page(
+                        page_number=page.page_number,
+                        source_kind=page.source_kind,
+                        file_path=page.image_path,
+                        file_name=page.source_name,
+                        mime_type=page.mime_type,
+                        menu_link=page.menu_link,
+                        context=context,
+                        previous_section_headings=previous_section_headings,
+                    )
+                    normalized_page = self._normalize_extracted_page(extracted)
                     self._validate_extracted_page(normalized_page, page)
                     return normalized_page, [], False
-                except ValueError as exc:
+                except (RuntimeError, ValueError) as exc:
                     last_error = exc
                     if attempt >= attempts:
                         raise
                     logger.warning(
-                        "Retrying menu parse for page %s (%s), attempt %s/%s after validation error: %s",
+                        "Retrying menu parse for page %s (%s), attempt %s/%s after parser error: %s",
                         page.page_number,
                         page.source_name,
                         attempt + 1,
