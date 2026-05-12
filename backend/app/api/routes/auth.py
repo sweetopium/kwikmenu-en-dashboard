@@ -20,8 +20,20 @@ from app.services.auth import (
     clear_session_cookie,
     create_session,
     create_user,
+    find_or_create_oauth_user,
     update_user_password,
     update_user_profile,
+)
+from app.services.oauth import (
+    build_authorize_url,
+    clear_oauth_state_cookie,
+    ensure_oauth_request_valid,
+    exchange_code_for_profile,
+    redirect_to_frontend,
+    redirect_to_frontend_login_error,
+    set_oauth_state_cookie,
+    validate_oauth_state,
+    OAuthError,
 )
 
 
@@ -181,8 +193,52 @@ def change_password(
 
 
 @router.get("/oauth/{provider}")
-def oauth_provider_redirect(provider: str) -> None:
-    raise HTTPException(
-        status_code=status.HTTP_501_NOT_IMPLEMENTED,
-        detail=f"OAuth provider '{provider}' is not configured yet on the new backend.",
-    )
+def oauth_provider_redirect(provider: str, response: Response) -> Response:
+    normalized_provider = ensure_oauth_request_valid(provider)
+    state = set_oauth_state_cookie(response, provider=normalized_provider)
+    response.status_code = status.HTTP_302_FOUND
+    response.headers["Location"] = build_authorize_url(normalized_provider, state=state)
+    return response
+
+
+@router.get("/oauth/{provider}/callback")
+def oauth_provider_callback(
+    provider: str,
+    request: Request,
+    response: Response,
+    code: str | None = None,
+    state: str | None = None,
+    error: str | None = None,
+    db: Session = Depends(get_db),
+) -> Response:
+    normalized_provider = ensure_oauth_request_valid(provider)
+    try:
+        if error:
+            raise OAuthError(f"{normalized_provider} OAuth was cancelled or rejected: {error}")
+        validate_oauth_state(request, provider=normalized_provider, state=state)
+        if not code:
+            raise OAuthError("OAuth callback did not include an authorization code.")
+
+        profile = exchange_code_for_profile(normalized_provider, code=code)
+        user = find_or_create_oauth_user(
+            db,
+            provider=profile.provider,
+            provider_account_id=profile.provider_account_id,
+            email=profile.email,
+            name=profile.name,
+        )
+        _, session_token = create_session(
+            db,
+            user=user,
+            ip_address=request.client.host if request.client else None,
+            user_agent=request.headers.get("user-agent"),
+        )
+        has_venues = db.query(Venue).filter(Venue.owner_user_id == user.id).first() is not None
+        db.commit()
+        attach_session_cookie(response, session_token)
+        clear_oauth_state_cookie(response)
+        return redirect_to_frontend(response, redirect_path=build_redirect_url(has_venues=has_venues))
+    except (OAuthError, ValueError) as exc:
+        db.rollback()
+        clear_oauth_state_cookie(response)
+        return redirect_to_frontend_login_error(response, detail=str(exc))

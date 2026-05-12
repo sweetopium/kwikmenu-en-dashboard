@@ -8,7 +8,7 @@ from sqlalchemy.orm import Session
 
 from app.core.config import get_settings
 from app.core.security import generate_session_token, hash_password, verify_password
-from app.models import SessionModel, User
+from app.models import AuthAccount, SessionModel, User
 
 
 def hash_session_token(token: str) -> str:
@@ -29,6 +29,22 @@ def create_user(db: Session, *, name: str, email: str, password: str) -> User:
         name=name.strip(),
         email=normalized_email,
         password_hash=hash_password(password),
+    )
+    db.add(user)
+    db.flush()
+    return user
+
+
+def create_oauth_user(db: Session, *, name: str, email: str) -> User:
+    normalized_email = email.strip().lower()
+    existing_user = db.query(User).filter(User.email == normalized_email).first()
+    if existing_user:
+        raise ValueError("Пользователь с таким email уже существует.")
+
+    user = User(
+        name=name.strip(),
+        email=normalized_email,
+        password_hash=None,
     )
     db.add(user)
     db.flush()
@@ -98,6 +114,51 @@ def create_session(
     db.add(session_row)
     db.flush()
     return session_row, raw_token
+
+
+def find_or_create_oauth_user(
+    db: Session,
+    *,
+    provider: str,
+    provider_account_id: str,
+    email: str | None,
+    name: str,
+) -> User:
+    existing_account = (
+        db.query(AuthAccount)
+        .filter(
+            AuthAccount.provider == provider,
+            AuthAccount.provider_account_id == provider_account_id,
+        )
+        .first()
+    )
+    if existing_account:
+        user = existing_account.user
+        if not user.is_active:
+            raise ValueError("Пользователь деактивирован.")
+        if email and not existing_account.email:
+            existing_account.email = email.strip().lower()
+            db.add(existing_account)
+            db.flush()
+        return user
+
+    normalized_email = email.strip().lower() if email else None
+    user = db.query(User).filter(User.email == normalized_email).first() if normalized_email else None
+    if user is None:
+        fallback_email = normalized_email or f"{provider}_{provider_account_id}@oauth.kwikmenu.app"
+        user = create_oauth_user(db, name=name, email=fallback_email)
+    elif not user.is_active:
+        raise ValueError("Пользователь деактивирован.")
+
+    auth_account = AuthAccount(
+        user_id=user.id,
+        provider=provider,
+        provider_account_id=provider_account_id,
+        email=normalized_email,
+    )
+    db.add(auth_account)
+    db.flush()
+    return user
 
 
 def attach_session_cookie(response: Response, session_token: str) -> None:
