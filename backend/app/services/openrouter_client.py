@@ -65,10 +65,9 @@ class OpenRouterClient:
                 }
             )
 
-        payload: dict[str, Any] = {
+        base_payload: dict[str, Any] = {
             "model": self.settings.menu_import_model,
             "temperature": 0,
-            "max_completion_tokens": self.settings.menu_import_max_completion_tokens,
             "messages": [
                 {
                     "role": "system",
@@ -91,7 +90,7 @@ class OpenRouterClient:
         }
 
         if self.settings.openrouter_pdf_engine and mime_type == "application/pdf":
-            payload["plugins"] = [
+            base_payload["plugins"] = [
                 {
                     "id": "file-parser",
                     "pdf": {
@@ -100,9 +99,25 @@ class OpenRouterClient:
                 }
             ]
 
+        token_budget = max(1, self.settings.menu_import_max_completion_tokens)
+        max_token_budget = max(token_budget, self.settings.menu_import_retry_max_completion_tokens)
         last_error: Exception | None = None
-        for attempt in range(2):
+        for attempt in range(3):
+            payload = {**base_payload, "max_completion_tokens": token_budget}
             response_payload = self._post_json(payload)
+            choice = response_payload["choices"][0]["message"]
+            finish_reason = response_payload["choices"][0].get("finish_reason")
+            raw_content = choice["content"]
+
+            if finish_reason == "length" and token_budget < max_token_budget:
+                previous_budget = token_budget
+                token_budget = min(max_token_budget, max(token_budget * 2, token_budget + 4000))
+                last_error = RuntimeError(
+                    f"OpenRouter response was truncated for page {page_number} ({file_name}) "
+                    f"at max_completion_tokens={previous_budget}."
+                )
+                continue
+
             raw_content = response_payload["choices"][0]["message"]["content"]
             try:
                 structured = self._decode_structured_content(
@@ -115,7 +130,8 @@ class OpenRouterClient:
                 if attempt == 0:
                     continue
                 raise RuntimeError(
-                    f"OpenRouter returned malformed structured content for page {page_number} ({file_name})."
+                    f"OpenRouter returned malformed structured content for page {page_number} ({file_name}). "
+                    f"finish_reason={finish_reason!r}, max_completion_tokens={token_budget}."
                 ) from exc
 
         raise RuntimeError(f"OpenRouter page extraction failed for page {page_number} ({file_name}).") from last_error

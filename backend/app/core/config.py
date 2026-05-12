@@ -19,7 +19,8 @@ class Settings(BaseSettings):
     auth_cookie_domain: str | None = None
     auth_password_hash_iterations: int = 600_000
     menu_import_model: str = "google/gemini-3.1-flash-lite-preview"
-    menu_import_max_completion_tokens: int = 8000
+    menu_import_max_completion_tokens: int = 12000
+    menu_import_retry_max_completion_tokens: int = 24000
     menu_normalization_max_completion_tokens: int = 24000
     menu_import_request_timeout_seconds: int = 180
     menu_import_page_parse_attempts: int = 3
