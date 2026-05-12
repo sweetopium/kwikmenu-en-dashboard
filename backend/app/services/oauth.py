@@ -53,7 +53,7 @@ def _request_json(
         encoded_data = urlencode(form_data).encode("utf-8")
         request_headers.setdefault("Content-Type", "application/x-www-form-urlencoded")
 
-    request = UrlRequest(full_url=url, data=encoded_data, headers=request_headers, method=method)
+    request = UrlRequest(url, data=encoded_data, headers=request_headers, method=method)
     with urlopen(request, timeout=20) as response:
         return json.loads(response.read().decode("utf-8"))
 
