@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import logging
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -10,6 +11,9 @@ from app.schemas.menu_import import UploadedSource
 
 IMAGE_EXTENSIONS = {".jpg", ".jpeg", ".png", ".webp", ".heic"}
 PDF_EXTENSION = ".pdf"
+
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass
@@ -94,6 +98,15 @@ class PageNormalizer:
             output_name = f"{source_path.stem}-page-{index + 1}.png"
             output_path = rendered_dir / output_name
             pixmap.save(output_path)
+            logger.info(
+                "Rendered PDF page source=%s page=%s size=%sx%s output=%s bytes=%s",
+                source_name,
+                index + 1,
+                pixmap.width,
+                pixmap.height,
+                output_path,
+                output_path.stat().st_size,
+            )
             pages.append(
                 NormalizedPage(
                     page_number=starting_page_number + index,

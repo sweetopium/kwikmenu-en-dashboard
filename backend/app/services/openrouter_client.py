@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import base64
 import json
+import logging
 import re
 import ssl
 from json import JSONDecodeError
@@ -14,6 +15,9 @@ import certifi
 from app.core.config import get_settings
 from app.schemas.menu import MenuPayload
 from app.schemas.menu_extract import ExtractedPage
+
+
+logger = logging.getLogger(__name__)
 
 
 class OpenRouterClient:
@@ -105,9 +109,20 @@ class OpenRouterClient:
         for attempt in range(3):
             payload = {**base_payload, "max_completion_tokens": token_budget}
             response_payload = self._post_json(payload)
-            choice = response_payload["choices"][0]["message"]
-            finish_reason = response_payload["choices"][0].get("finish_reason")
+            choice_payload = response_payload["choices"][0]
+            choice = choice_payload["message"]
+            finish_reason = choice_payload.get("finish_reason")
             raw_content = choice["content"]
+            response_meta = self._response_meta(response_payload, choice_payload, token_budget=token_budget)
+
+            logger.info(
+                "OpenRouter page parse response page=%s file=%s attempt=%s/%s %s",
+                page_number,
+                file_name,
+                attempt + 1,
+                3,
+                response_meta,
+            )
 
             if finish_reason == "length" and token_budget < max_token_budget:
                 previous_budget = token_budget
@@ -116,9 +131,15 @@ class OpenRouterClient:
                     f"OpenRouter response was truncated for page {page_number} ({file_name}) "
                     f"at max_completion_tokens={previous_budget}."
                 )
+                logger.warning(
+                    "OpenRouter truncated page parse page=%s file=%s %s raw_preview=%r",
+                    page_number,
+                    file_name,
+                    response_meta,
+                    self._preview_content(raw_content),
+                )
                 continue
 
-            raw_content = response_payload["choices"][0]["message"]["content"]
             try:
                 structured = self._decode_structured_content(
                     raw_content,
@@ -127,6 +148,13 @@ class OpenRouterClient:
                 return ExtractedPage.model_validate(structured)
             except Exception as exc:  # noqa: BLE001
                 last_error = exc
+                logger.warning(
+                    "OpenRouter malformed page parse page=%s file=%s %s raw_preview=%r",
+                    page_number,
+                    file_name,
+                    response_meta,
+                    self._preview_content(raw_content),
+                )
                 if attempt == 0:
                     continue
                 raise RuntimeError(
@@ -330,6 +358,34 @@ class OpenRouterClient:
             add_candidate(stripped[object_start:object_end + 1].strip())
 
         return candidates
+
+    def _preview_content(self, raw_content: Any, *, limit: int = 500) -> str:
+        if isinstance(raw_content, list):
+            text = "".join(
+                chunk.get("text", "") if isinstance(chunk, dict) else str(chunk)
+                for chunk in raw_content
+            )
+        else:
+            text = str(raw_content)
+
+        normalized = re.sub(r"\s+", " ", text).strip()
+        if len(normalized) <= limit:
+            return normalized
+        return f"{normalized[:limit]}..."
+
+    def _response_meta(self, response_payload: dict[str, Any], choice_payload: dict[str, Any], *, token_budget: int) -> str:
+        usage = response_payload.get("usage") or {}
+        return (
+            f"id={response_payload.get('id')!r} "
+            f"provider={response_payload.get('provider')!r} "
+            f"model={response_payload.get('model')!r} "
+            f"finish_reason={choice_payload.get('finish_reason')!r} "
+            f"native_finish_reason={choice_payload.get('native_finish_reason')!r} "
+            f"token_budget={token_budget} "
+            f"prompt_tokens={usage.get('prompt_tokens')} "
+            f"completion_tokens={usage.get('completion_tokens')} "
+            f"total_tokens={usage.get('total_tokens')}"
+        )
 
     def _post_json(self, payload: dict[str, Any]) -> dict[str, Any]:
         data = json.dumps(payload).encode("utf-8")

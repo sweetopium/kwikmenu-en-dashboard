@@ -112,6 +112,7 @@ class MenuImportPipeline:
             last_error: Exception | None = None
 
             for attempt in range(1, attempts + 1):
+                normalized_page: ExtractedPage | None = None
                 try:
                     extracted = self.openrouter.extract_page(
                         page_number=page.page_number,
@@ -128,6 +129,13 @@ class MenuImportPipeline:
                     return normalized_page, [], False
                 except (RuntimeError, ValueError) as exc:
                     last_error = exc
+                    if normalized_page is not None:
+                        logger.warning(
+                            "Page parse summary before retry page=%s file=%s sections=%s",
+                            page.page_number,
+                            page.source_name,
+                            self._summarize_sections(normalized_page),
+                        )
                     if attempt >= attempts:
                         raise
                     logger.warning(
@@ -144,6 +152,17 @@ class MenuImportPipeline:
 
         warning = "OPENROUTER_API_KEY is not configured, fallback menu scaffold was generated."
         return self._build_fallback_page(page=page, context=context), [warning], True
+
+    def _summarize_sections(self, extracted: ExtractedPage) -> list[dict[str, Any]]:
+        return [
+            {
+                "heading": section.heading,
+                "continued": section.continuedFromPreviousPage,
+                "continues": section.continuesToNextPage,
+                "items": len(section.items),
+            }
+            for section in extracted.sections
+        ]
 
     def _build_fallback_page(self, *, page: NormalizedPage, context: dict[str, str]) -> ExtractedPage:
         display_name = context.get("restaurant_name") or "Импортированное меню"

@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import hashlib
+import logging
 import shutil
 from datetime import datetime, timezone
 from pathlib import Path
@@ -26,6 +28,7 @@ from app.services.page_normalizer import IMAGE_EXTENSIONS, PDF_EXTENSION
 
 router = APIRouter(prefix="/api/menu-imports", tags=["menu-imports"])
 pipeline = MenuImportPipeline()
+logger = logging.getLogger(__name__)
 
 
 @router.post("", response_model=MenuImportAcceptedResponse, status_code=status.HTTP_202_ACCEPTED)
@@ -71,6 +74,17 @@ async def create_menu_import(
 
         kind = _detect_source_kind(target_path)
         size_bytes = target_path.stat().st_size
+        file_sha256 = _sha256_file(target_path)
+        logger.info(
+            "Saved menu import upload job_id=%s user_id=%s file=%s kind=%s content_type=%s size=%s sha256=%s",
+            job.id,
+            current_user.id,
+            uploaded_file.filename,
+            kind,
+            uploaded_file.content_type,
+            size_bytes,
+            file_sha256,
+        )
         db.add(
             MenuImportSource(
                 job_id=job.id,
@@ -118,6 +132,15 @@ def process_job(job_id: str) -> None:
         job = db.query(MenuImportJob).filter(MenuImportJob.id == job_id).first()
         if job is None:
             return
+
+        logger.info(
+            "Starting menu import job job_id=%s user_id=%s source_count=%s menu_source=%s menu_link=%s",
+            job.id,
+            job.user_id,
+            len(job.sources),
+            job.menu_source,
+            bool(job.menu_link),
+        )
 
         job.status = MenuImportStatus.processing.value
         job.started_at = datetime.now(timezone.utc)
@@ -167,6 +190,15 @@ def process_job(job_id: str) -> None:
         job.used_fallback = result.usedFallback
         db.add(job)
         db.commit()
+        logger.info(
+            "Completed menu import job job_id=%s menu_id=%s categories=%s items=%s warnings=%s used_fallback=%s",
+            job.id,
+            menu.id,
+            job.category_count,
+            job.item_count,
+            job.warnings,
+            job.used_fallback,
+        )
     except Exception as exc:  # noqa: BLE001
         db.rollback()
         job = db.query(MenuImportJob).filter(MenuImportJob.id == job_id).first()
@@ -176,8 +208,17 @@ def process_job(job_id: str) -> None:
             job.error = str(exc)
             db.add(job)
             db.commit()
+            logger.exception("Menu import job failed job_id=%s error=%s", job.id, exc)
     finally:
         db.close()
+
+
+def _sha256_file(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as source:
+        for chunk in iter(lambda: source.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
 
 
 def serialize_job(job: MenuImportJob) -> MenuImportJobResponse:
