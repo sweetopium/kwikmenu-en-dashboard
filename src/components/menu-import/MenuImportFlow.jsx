@@ -26,6 +26,7 @@ const STATUS_META = {
 
 const POLL_INTERVAL_MS = 1500;
 const IMPORT_POLL_TIMEOUT_MS = 60_000;
+const BACKGROUND_POLL_INTERVAL_MS = 5000;
 
 const delayWithAbort = (ms, signal) =>
   new Promise((resolve, reject) => {
@@ -124,6 +125,7 @@ const MenuImportFlow = ({
   const [importIssue, setImportIssue] = useState(null);
   const [resultPreview, setResultPreview] = useState(null);
   const [backgroundJobId, setBackgroundJobId] = useState(null);
+  const [backgroundStatusMessage, setBackgroundStatusMessage] = useState('');
   const [isResumingWait, setIsResumingWait] = useState(false);
   const activeRequestRef = useRef(null);
 
@@ -143,6 +145,7 @@ const MenuImportFlow = ({
     setImportIssue(null);
     setResultPreview(null);
     setBackgroundJobId(null);
+    setBackgroundStatusMessage('');
     setIsResumingWait(false);
     setFiles([]);
     setMenuLink('');
@@ -157,6 +160,7 @@ const MenuImportFlow = ({
 
     if (completion.status === 'deferred') {
       setBackgroundJobId(jobId);
+      setBackgroundStatusMessage('Продолжаем следить за статусом импорта в фоне.');
       setStage('background');
       return;
     }
@@ -187,6 +191,7 @@ const MenuImportFlow = ({
       warnings: result.warnings || [],
     });
     setBackgroundJobId(null);
+    setBackgroundStatusMessage('');
     setStage('success');
   };
 
@@ -208,6 +213,7 @@ const MenuImportFlow = ({
     setErrorMessage('');
     setImportIssue(null);
     setBackgroundJobId(null);
+    setBackgroundStatusMessage('');
     setStage('uploading');
 
     try {
@@ -241,6 +247,64 @@ const MenuImportFlow = ({
       activeRequestRef.current = null;
     }
   };
+
+  useEffect(() => {
+    if (stage !== 'background' || !backgroundJobId) {
+      return undefined;
+    }
+
+    let cancelled = false;
+    let timeoutId = null;
+    const controller = new AbortController();
+
+    const pollInBackground = async () => {
+      try {
+        const job = await pollMenuImportStatus(backgroundJobId, { signal: controller.signal });
+        if (cancelled) {
+          return;
+        }
+
+        if (job.status === 'completed') {
+          setStage('processing');
+          await resolveImportCompletion({ jobId: backgroundJobId, signal: controller.signal });
+          return;
+        }
+
+        if (job.status === 'failed' || job.status === 'timed_out') {
+          const issue = buildImportIssue({
+            kind: job.status === 'timed_out' ? 'timed_out' : 'failed',
+            message: job.error,
+          });
+          setImportIssue(issue);
+          setErrorMessage(job.error || 'Не удалось обработать меню.');
+          setStage('error');
+          setBackgroundJobId(null);
+          setBackgroundStatusMessage('');
+          return;
+        }
+
+        setBackgroundStatusMessage('Импорт всё ещё выполняется. Как только backend завершит job, экран обновится автоматически.');
+        timeoutId = window.setTimeout(pollInBackground, BACKGROUND_POLL_INTERVAL_MS);
+      } catch (error) {
+        if (cancelled || error?.name === 'AbortError') {
+          return;
+        }
+
+        setBackgroundStatusMessage('Не удалось обновить статус прямо сейчас. Повторим проверку автоматически.');
+        timeoutId = window.setTimeout(pollInBackground, BACKGROUND_POLL_INTERVAL_MS);
+      }
+    };
+
+    timeoutId = window.setTimeout(pollInBackground, BACKGROUND_POLL_INTERVAL_MS);
+
+    return () => {
+      cancelled = true;
+      controller.abort();
+      if (timeoutId) {
+        window.clearTimeout(timeoutId);
+      }
+    };
+  }, [backgroundJobId, stage]);
 
   const handleResumeWaiting = async () => {
     if (!backgroundJobId) {
@@ -407,6 +471,10 @@ const MenuImportFlow = ({
 
         <div className="rounded-2xl border border-brand-purple/20 bg-brand-purple/5 p-4 sm:p-5 text-sm leading-relaxed text-brand-purple/90">
           Импорт не остановлен: backend job все еще обрабатывает документ. Ошибку покажем только если сервер вернет статус `failed` или `timed_out`.
+        </div>
+
+        <div className="rounded-2xl border border-border/60 bg-secondary/15 p-4 text-sm text-muted-foreground">
+          {backgroundStatusMessage || 'Проверяем статус импорта в фоне...'}
         </div>
 
         <div className="flex flex-col sm:flex-row gap-3">
