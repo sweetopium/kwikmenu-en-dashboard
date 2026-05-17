@@ -27,13 +27,6 @@ const STATUS_META = {
 const POLL_INTERVAL_MS = 1500;
 const IMPORT_POLL_TIMEOUT_MS = 60_000;
 
-class MenuImportPollingTimeoutError extends Error {
-  constructor(message) {
-    super(message);
-    this.name = 'MenuImportPollingTimeoutError';
-  }
-}
-
 const delayWithAbort = (ms, signal) =>
   new Promise((resolve, reject) => {
     if (signal?.aborted) {
@@ -61,11 +54,16 @@ const DEFAULT_IMPORT_ACTIONS = [
   'Если ошибка повторяется, отправьте исходный файл в поддержку и опишите, что именно не удалось разобрать.',
 ];
 
+const LONG_RUNNING_META = {
+  title: 'Импорт занимает больше обычного',
+  description: 'Мы продолжаем разбор меню на сервере. Можно перейти в кабинет и проверить результат позже, либо снова начать ожидание здесь.',
+};
+
 const buildImportIssue = ({ kind, message }) => {
   if (kind === 'timed_out') {
     return {
-      title: 'Не удалось разобрать меню за 1 минуту',
-      message: message || 'Разбор занял слишком много времени, поэтому мы остановили импорт, чтобы не держать вас в вечной обработке.',
+      title: 'Импорт остановлен по таймауту',
+      message: message || 'Backend остановил обработку меню по лимиту времени.',
       actions: DEFAULT_IMPORT_ACTIONS,
     };
   }
@@ -125,6 +123,8 @@ const MenuImportFlow = ({
   const [errorMessage, setErrorMessage] = useState('');
   const [importIssue, setImportIssue] = useState(null);
   const [resultPreview, setResultPreview] = useState(null);
+  const [backgroundJobId, setBackgroundJobId] = useState(null);
+  const [isResumingWait, setIsResumingWait] = useState(false);
   const activeRequestRef = useRef(null);
 
   useEffect(() => {
@@ -142,9 +142,52 @@ const MenuImportFlow = ({
     setErrorMessage('');
     setImportIssue(null);
     setResultPreview(null);
+    setBackgroundJobId(null);
+    setIsResumingWait(false);
     setFiles([]);
     setMenuLink('');
     setMenuSource('file');
+  };
+
+  const resolveImportCompletion = async ({ jobId, signal }) => {
+    const completion = await waitForImportCompletion(jobId, {
+      signal,
+      timeoutMs: IMPORT_POLL_TIMEOUT_MS,
+    });
+
+    if (completion.status === 'deferred') {
+      setBackgroundJobId(jobId);
+      setStage('background');
+      return;
+    }
+
+    const finalJob = completion.job;
+    if (finalJob.status === 'failed' || finalJob.status === 'timed_out') {
+      const importError = new Error(finalJob.error || 'Не удалось обработать меню.');
+      importError.importIssue = buildImportIssue({
+        kind: finalJob.status === 'timed_out' ? 'timed_out' : 'failed',
+        message: finalJob.error,
+      });
+      throw importError;
+    }
+
+    const result = finalJob.result;
+    if (!result.menuId) {
+      saveImportedMenuToStorage(result.menu);
+    }
+    setResultPreview({
+      menuId: result.menuId,
+      sourceLabel: result.sourceSummary.length > 0
+        ? result.sourceSummary.map((source) => source.name).join(', ')
+        : (menuSource === 'link' ? menuLink.trim() : 'Без названия'),
+      detectedCategories: result.categoryCount,
+      detectedItems: result.itemCount,
+      documentCount: result.documentCount,
+      usedFallback: result.usedFallback,
+      warnings: result.warnings || [],
+    });
+    setBackgroundJobId(null);
+    setStage('success');
   };
 
   const handleSubmit = async (event) => {
@@ -164,6 +207,7 @@ const MenuImportFlow = ({
 
     setErrorMessage('');
     setImportIssue(null);
+    setBackgroundJobId(null);
     setStage('uploading');
 
     try {
@@ -180,51 +224,55 @@ const MenuImportFlow = ({
       });
 
       setStage('processing');
-      const finalJob = await waitForImportCompletion(submission.jobId, {
+      await resolveImportCompletion({
+        jobId: submission.jobId,
         signal: requestController.signal,
-        timeoutMs: IMPORT_POLL_TIMEOUT_MS,
       });
-
-      if (finalJob.status === 'failed' || finalJob.status === 'timed_out') {
-        const importError = new Error(finalJob.error || 'Не удалось обработать меню.');
-        importError.importIssue = buildImportIssue({
-          kind: finalJob.status === 'timed_out' ? 'timed_out' : 'failed',
-          message: finalJob.error,
-        });
-        throw importError;
-      }
-
-      const result = finalJob.result;
-      if (!result.menuId) {
-        saveImportedMenuToStorage(result.menu);
-      }
-      setResultPreview({
-        menuId: result.menuId,
-        sourceLabel: result.sourceSummary.length > 0
-          ? result.sourceSummary.map((source) => source.name).join(', ')
-          : (menuSource === 'link' ? menuLink.trim() : 'Без названия'),
-        detectedCategories: result.categoryCount,
-        detectedItems: result.itemCount,
-        documentCount: result.documentCount,
-        usedFallback: result.usedFallback,
-        warnings: result.warnings || [],
-      });
-      setStage('success');
     } catch (error) {
       if (error?.name === 'AbortError') {
         return;
       }
 
-      const issue = error?.importIssue || (
-        error instanceof MenuImportPollingTimeoutError
-          ? buildImportIssue({ kind: 'timed_out', message: error.message })
-          : buildImportIssue({ kind: 'failed', message: error instanceof Error ? error.message : '' })
-      );
+      const issue = error?.importIssue || buildImportIssue({ kind: 'failed', message: error instanceof Error ? error.message : '' });
       setImportIssue(issue);
       setErrorMessage(error instanceof Error ? error.message : 'Не удалось отправить меню в обработку. Попробуйте еще раз.');
       setStage('error');
     } finally {
       activeRequestRef.current = null;
+    }
+  };
+
+  const handleResumeWaiting = async () => {
+    if (!backgroundJobId) {
+      return;
+    }
+
+    try {
+      setIsResumingWait(true);
+      setErrorMessage('');
+      setImportIssue(null);
+      setStage('processing');
+
+      activeRequestRef.current?.abort();
+      const requestController = new AbortController();
+      activeRequestRef.current = requestController;
+
+      await resolveImportCompletion({
+        jobId: backgroundJobId,
+        signal: requestController.signal,
+      });
+    } catch (error) {
+      if (error?.name === 'AbortError') {
+        return;
+      }
+
+      const issue = error?.importIssue || buildImportIssue({ kind: 'failed', message: error instanceof Error ? error.message : '' });
+      setImportIssue(issue);
+      setErrorMessage(error instanceof Error ? error.message : 'Не удалось получить статус импорта. Попробуйте еще раз.');
+      setStage('error');
+    } finally {
+      activeRequestRef.current = null;
+      setIsResumingWait(false);
     }
   };
 
@@ -340,6 +388,51 @@ const MenuImportFlow = ({
     );
   }
 
+  if (stage === 'background') {
+    const SecondaryActionTag = successSecondaryTo ? Link : 'button';
+
+    return (
+      <div className="space-y-6 py-2 sm:py-4">
+        <div className="flex flex-col items-center text-center">
+          <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-brand-purple/10 text-brand-purple">
+            <LoaderCircle size={32} className="animate-spin" />
+          </div>
+          <h3 className="text-xl sm:text-3xl font-extrabold tracking-tight text-foreground">
+            {LONG_RUNNING_META.title}
+          </h3>
+          <p className="mt-2 max-w-xl text-sm sm:text-base leading-relaxed text-muted-foreground">
+            {LONG_RUNNING_META.description}
+          </p>
+        </div>
+
+        <div className="rounded-2xl border border-brand-purple/20 bg-brand-purple/5 p-4 sm:p-5 text-sm leading-relaxed text-brand-purple/90">
+          Импорт не остановлен: backend job все еще обрабатывает документ. Ошибку покажем только если сервер вернет статус `failed` или `timed_out`.
+        </div>
+
+        <div className="flex flex-col sm:flex-row gap-3">
+          <Button
+            type="button"
+            onClick={handleResumeWaiting}
+            disabled={isResumingWait}
+            className={`w-full sm:w-auto sm:min-w-[220px] ${primaryActionButtonClasses}`}
+          >
+            <span className="flex items-center gap-2">
+              <RefreshCw size={16} className={isResumingWait ? 'animate-spin' : ''} />
+              {isResumingWait ? 'Проверяем статус...' : 'Продолжить ожидание'}
+            </span>
+          </Button>
+
+          <SecondaryActionTag
+            {...(successSecondaryTo ? { to: successSecondaryTo } : { type: 'button', onClick: resetFlow })}
+            className={`${secondaryActionButtonClasses} flex h-11 sm:h-12 w-full sm:w-auto items-center justify-center px-5`}
+          >
+            {successSecondaryTo ? successSecondaryLabel : 'Закрыть'}
+          </SecondaryActionTag>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       <div className="space-y-2">
@@ -427,14 +520,12 @@ const waitForImportCompletion = async (jobId, { signal, timeoutMs }) => {
 
   while (true) {
     if (Date.now() - startedAt >= timeoutMs) {
-      throw new MenuImportPollingTimeoutError(
-        'Разбор меню занял больше 1 минуты. Попробуйте разбить меню на несколько файлов или загрузить более чистый PDF.'
-      );
+      return { status: 'deferred' };
     }
 
     const job = await pollMenuImportStatus(jobId, { signal });
     if (job.status === 'completed' || job.status === 'failed' || job.status === 'timed_out') {
-      return job;
+      return { status: 'resolved', job };
     }
     await delayWithAbort(POLL_INTERVAL_MS, signal);
   }

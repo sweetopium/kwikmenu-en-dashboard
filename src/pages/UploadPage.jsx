@@ -101,7 +101,7 @@ const UploadPage = () => {
       return 1;
     }
 
-    return ['uploading', 'processing', 'success'].includes(importStage) ? 3 : 2;
+    return ['uploading', 'processing', 'background', 'success'].includes(importStage) ? 3 : 2;
   }, [importStage, isProfileStepCompleted]);
 
   const importContext = {
@@ -114,7 +114,7 @@ const UploadPage = () => {
 
   return (
     <div className="max-w-2xl mx-auto flex flex-col space-y-6 py-3 sm:py-4 animate-in fade-in slide-in-from-bottom-4 duration-700 ease-out w-full">
-      {importStage !== 'uploading' && importStage !== 'processing' && importStage !== 'success' && (
+      {!['uploading', 'processing', 'background', 'success'].includes(importStage) && (
         <div className="flex items-center">
           {!isProfileStepCompleted ? (
             <Link
