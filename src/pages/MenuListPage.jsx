@@ -115,6 +115,10 @@ const MenuListPage = () => {
               <p className="text-sm text-muted-foreground mt-2 line-clamp-2 leading-relaxed">
                 {menu.description}
               </p>
+              <div className="mt-3 flex items-center gap-2 text-muted-foreground">
+                <Calendar size={14} />
+                <span className="text-[11px] font-medium">{new Date(menu.updatedAt).toLocaleString('ru-RU')}</span>
+              </div>
             </div>
 
             <div className="flex flex-wrap items-center gap-3 mb-6">
@@ -131,13 +135,7 @@ const MenuListPage = () => {
               </div>
             </div>
 
-            <div className="flex items-center justify-between mt-auto pt-3 md:pt-4 border-t border-border/50 gap-4 -mb-2 md:-mb-0">
-              <div className="flex items-center gap-2 text-muted-foreground">
-                <Calendar size={14} />
-                <span className="text-[11px] font-medium">{new Date(menu.updatedAt).toLocaleString('ru-RU')}</span>
-              </div>
-
-              <div className="flex items-center gap-2">
+            <div className="flex items-center justify-end mt-auto pt-3 md:pt-4 border-t border-border/50 gap-2 flex-wrap -mb-2 md:-mb-0">
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <button className={`${subtleIconButtonClasses} hover:bg-secondary cursor-pointer`}>
@@ -167,39 +165,26 @@ const MenuListPage = () => {
                     ) : null}
 
                     <DropdownMenuSeparator />
-
-                    {menu.status === 'active' ? (
-                      <DropdownMenuItem
-                        onSelect={(event) => {
-                          event.preventDefault();
-                          handlePublishToggle(menu);
-                        }}
-                        disabled={busyMenuId === menu.id}
-                      >
-                        <Download size={16} />
-                        {busyMenuId === menu.id ? 'Обновляем...' : 'Снять с публикации'}
-                      </DropdownMenuItem>
-                    ) : (
-                      <DropdownMenuItem
-                        onSelect={(event) => {
-                          event.preventDefault();
-                          handlePublishToggle(menu);
-                        }}
-                        disabled={busyMenuId === menu.id}
-                      >
-                        <Upload size={16} />
-                        {busyMenuId === menu.id ? 'Обновляем...' : 'Опубликовать'}
-                      </DropdownMenuItem>
-                    )}
-
-                    <DropdownMenuSeparator />
-
                     <DropdownMenuItem variant="destructive">
                       <Trash2 size={16} />
                       Удалить
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
+
+                <button
+                  type="button"
+                  onClick={() => handlePublishToggle(menu)}
+                  disabled={busyMenuId === menu.id}
+                  className={`h-10 sm:h-12 px-3 sm:px-4 rounded-lg border font-bold text-xs sm:text-sm flex items-center gap-2 transition-all shadow-sm disabled:opacity-60 disabled:cursor-not-allowed ${
+                    menu.status === 'active'
+                      ? 'border-border/60 bg-background text-foreground hover:bg-secondary'
+                      : 'border-brand-purple/20 bg-brand-purple/10 text-brand-purple hover:bg-brand-purple/15'
+                  }`}
+                >
+                  {menu.status === 'active' ? <Download size={16} /> : <Upload size={16} />}
+                  {busyMenuId === menu.id ? 'Обновляем...' : menu.status === 'active' ? 'Снять с публикации' : 'Опубликовать'}
+                </button>
 
                 <Link
                   to={`/dashboard/menu/${menu.id}`}
@@ -208,7 +193,6 @@ const MenuListPage = () => {
                   Редактировать
                   <ArrowRight size={16} />
                 </Link>
-              </div>
             </div>
           </div>
         )})}
