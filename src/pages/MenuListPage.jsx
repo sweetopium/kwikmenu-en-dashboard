@@ -58,11 +58,11 @@ const MenuListPage = () => {
 
   return (
     <div className="mx-auto space-y-6 sm:space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700 ease-out">
+      {/* Шапка страницы */}
       <div className="bg-card border border-border/60 rounded-3xl shadow-sm overflow-hidden">
         <div className="p-6 sm:p-8">
           <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-5">
             <div className="min-w-0">
-
               <h1 className="text-2xl sm:text-3xl font-extrabold text-foreground tracking-tight">
                 Ваше меню
               </h1>
@@ -74,8 +74,8 @@ const MenuListPage = () => {
             <div className="w-full sm:w-auto shrink-0">
               <Button asChild className={`${primaryActionButtonClasses} px-5 shrink-0 cursor-pointer`}>
                 <Link to="/dashboard/menu/new">
-                <Plus size={18} className="mr-2" />
-                Создать меню
+                  <Plus size={18} className="mr-2" />
+                  Создать меню
                 </Link>
               </Button>
             </div>
@@ -83,82 +83,58 @@ const MenuListPage = () => {
         </div>
       </div>
 
+      {/* Сетка меню */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6">
         {menus.map((menu) => {
           const iconMeta = MENU_ICON_META[menu.status] || MENU_ICON_META.default;
           const Icon = iconMeta.icon;
+
           return (
-          <div
-            key={menu.id}
-            className="bg-card border border-border/60 rounded-3xl p-5 sm:p-6 shadow-sm flex flex-col group hover:border-brand-purple/30 hover:shadow-md transition-all"
-          >
-            <div className="flex justify-between items-start mb-5">
-              <div className={`w-11 h-11 rounded-xl flex items-center justify-center ${iconMeta.bgColor} ${iconMeta.color} shrink-0`}>
-                <Icon size={18} />
-              </div>
+            <div
+              key={menu.id}
+              className="bg-card border border-border/60 rounded-3xl p-5 sm:p-6 shadow-sm flex flex-col group hover:border-brand-purple/30 hover:shadow-md transition-all"
+            >
+              {/* Шапка карточки: Иконка, Статус и Меню (...) */}
+              <div className="flex justify-between items-start mb-4">
+                <div className="flex items-center gap-3">
+                  <div className={`w-11 h-11 rounded-xl flex items-center justify-center ${iconMeta.bgColor} ${iconMeta.color} shrink-0`}>
+                    <Icon size={18} />
+                  </div>
 
-              {menu.status === 'active' ? (
-                <div className="px-3 py-1 bg-green-500/10 text-green-600 text-[11px] font-bold uppercase tracking-wider rounded-lg border border-green-500/20">
-                  Активно
+                  {menu.status === 'active' ? (
+                    <div className="px-2.5 py-1 bg-green-500/10 text-green-600 text-[11px] font-bold uppercase tracking-wider rounded-md border border-green-500/20">
+                      Активно
+                    </div>
+                  ) : (
+                    <div className="px-2.5 py-1 bg-secondary text-muted-foreground text-[11px] font-bold uppercase tracking-wider rounded-md border border-border/50">
+                      Черновик
+                    </div>
+                  )}
                 </div>
-              ) : (
-                <div className="px-3 py-1 bg-secondary text-muted-foreground text-[11px] font-bold uppercase tracking-wider rounded-lg border border-border/50">
-                  Черновик
-                </div>
-              )}
-            </div>
 
-            <div className="mb-6 flex-1 min-w-0">
-              <h3 className="text-xl font-bold text-foreground group-hover:text-brand-purple transition-colors truncate">
-                {menu.name}
-              </h3>
-              <p className="text-sm text-muted-foreground mt-2 line-clamp-2 leading-relaxed">
-                {menu.description}
-              </p>
-              <div className="mt-3 flex items-center gap-2 text-muted-foreground">
-                <Calendar size={14} />
-                <span className="text-[11px] font-medium">{new Date(menu.updatedAt).toLocaleString('ru-RU')}</span>
-              </div>
-            </div>
-
-            <div className="flex flex-wrap items-center gap-3 mb-6">
-              <div className="flex items-center gap-2 bg-secondary/50 px-3 py-1.5 rounded-xl border border-border/50">
-                <LayoutGrid size={14} className="text-muted-foreground" />
-                <span className="text-xs font-semibold text-muted-foreground">Категории</span>
-                <span className="text-xs font-black text-foreground">{menu.categoriesCount}</span>
-              </div>
-
-              <div className="flex items-center gap-2 bg-secondary/50 px-3 py-1.5 rounded-xl border border-border/50">
-                <FolderOpen size={14} className="text-muted-foreground" />
-                <span className="text-xs font-semibold text-muted-foreground">Блюда</span>
-                <span className="text-xs font-black text-foreground">{menu.itemsCount}</span>
-              </div>
-            </div>
-
-            <div className="flex items-center justify-end mt-auto pt-3 md:pt-4 border-t border-border/50 gap-2 flex-wrap -mb-2 md:-mb-0">
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <button className={`${subtleIconButtonClasses} hover:bg-secondary cursor-pointer`}>
-                      <MoreHorizontal size={18} />
+                    <button className={`${subtleIconButtonClasses} -mt-1 -mr-2 hover:bg-secondary cursor-pointer`}>
+                      <MoreHorizontal size={20} />
                     </button>
                   </DropdownMenuTrigger>
 
-                  <DropdownMenuContent>
+                  <DropdownMenuContent align="end">
                     <DropdownMenuLabel>Действия с меню</DropdownMenuLabel>
                     <DropdownMenuItem asChild>
                       <Link to={`/dashboard/menu/${menu.id}`}>
-                        <Pencil size={16} />
+                        <Pencil size={16} className="mr-2" />
                         Редактировать
                       </Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem>
-                      <Copy size={16} />
+                      <Copy size={16} className="mr-2" />
                       Дублировать
                     </DropdownMenuItem>
                     {menu.venueId ? (
                       <DropdownMenuItem asChild>
                         <Link to={`/dashboard/venues/${menu.venueId}?tab=qr`}>
-                          <QrCode size={16} />
+                          <QrCode size={16} className="mr-2" />
                           Посмотреть QR меню
                         </Link>
                       </DropdownMenuItem>
@@ -166,36 +142,68 @@ const MenuListPage = () => {
 
                     <DropdownMenuSeparator />
                     <DropdownMenuItem variant="destructive">
-                      <Trash2 size={16} />
+                      <Trash2 size={16} className="mr-2" />
                       Удалить
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
+              </div>
 
+              {/* Тело карточки: Название и описание */}
+              <div className="mb-4 flex-1 min-w-0">
+                <h3 className="text-xl font-bold text-foreground group-hover:text-brand-purple transition-colors truncate">
+                  {menu.name}
+                </h3>
+                {menu.description && (
+                  <p className="text-sm text-muted-foreground mt-2 line-clamp-2 leading-relaxed">
+                    {menu.description}
+                  </p>
+                )}
+              </div>
+
+              {/* Метаданные: Дата, Категории, Блюда */}
+              <div className="flex flex-wrap items-center gap-x-4 gap-y-2 mb-5 text-sm text-muted-foreground border-b border-border/50 pb-5">
+                <div className="flex items-center gap-1.5">
+                  <Calendar size={14} />
+                  <span className="text-[12px] font-medium">{new Date(menu.updatedAt).toLocaleString('ru-RU')}</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <LayoutGrid size={14} />
+                  <span className="text-[12px] font-medium">{menu.categoriesCount} кат.</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <FolderOpen size={14} />
+                  <span className="text-[12px] font-medium">{menu.itemsCount} блюд</span>
+                </div>
+              </div>
+
+              {/* Подвал карточки: Кнопки действий (Всегда в один ряд) */}
+              <div className="flex flex-row gap-2 sm:gap-3 mt-auto">
                 <button
                   type="button"
                   onClick={() => handlePublishToggle(menu)}
                   disabled={busyMenuId === menu.id}
-                  className={`h-10 sm:h-12 px-3 sm:px-4 rounded-lg border font-bold text-xs sm:text-sm flex items-center gap-2 transition-all shadow-sm disabled:opacity-60 disabled:cursor-not-allowed ${
+                  className={`flex-1 h-10 sm:h-12 px-2 sm:px-4 rounded-lg border font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 sm:gap-2 transition-all disabled:opacity-60 disabled:cursor-not-allowed ${
                     menu.status === 'active'
                       ? 'border-border/60 bg-background text-foreground hover:bg-secondary'
                       : 'border-brand-purple/20 bg-brand-purple/10 text-brand-purple hover:bg-brand-purple/15'
                   }`}
                 >
-                  {menu.status === 'active' ? <Download size={16} /> : <Upload size={16} />}
-                  {busyMenuId === menu.id ? 'Обновляем...' : menu.status === 'active' ? 'Снять с публикации' : 'Опубликовать'}
+                  {menu.status === 'active' ? <Download size={16} className="shrink-0" /> : <Upload size={16} className="shrink-0" />}
+                  <span className="truncate">{busyMenuId === menu.id ? 'Обновление' : menu.status === 'active' ? 'Снять' : 'Опубликовать'}</span>
                 </button>
 
                 <Link
                   to={`/dashboard/menu/${menu.id}`}
-                  className="h-10 sm:h-12 px-4 rounded-lg bg-foreground hover:bg-foreground/90 text-background font-bold text-sm flex items-center gap-2 transition-all shadow-sm cursor-pointer"
+                  className="flex-1 h-10 sm:h-12 px-2 sm:px-4 rounded-lg bg-foreground hover:bg-foreground/90 text-background font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 sm:gap-2 transition-all cursor-pointer"
                 >
-                  Редактировать
-                  <ArrowRight size={16} />
+                  <span className="truncate">Редактировать</span>
+                  <ArrowRight size={16} className="shrink-0" />
                 </Link>
+              </div>
             </div>
-          </div>
-        )})}
+          );
+        })}
       </div>
     </div>
   );
