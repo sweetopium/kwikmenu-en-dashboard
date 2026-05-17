@@ -2,6 +2,8 @@
 
 Frontend on Vite/React and backend on FastAPI for menu import and normalization.
 
+Menu imports are processed asynchronously via Celery + Redis. The API only creates a job and the worker processes it in the background.
+
 ## Local dev
 
 Backend:
@@ -52,7 +54,9 @@ http://YOUR_SERVER_IP/
 What runs:
 - `frontend` serves the built Vite app via nginx on port `80`
 - `frontend` proxies `/api/*` to `backend`
-- `backend` stores uploads in a Docker volume mounted to `/app/.data`
+- `backend` serves API and stores uploads in a Docker volume mounted to `/app/.data`
+- `worker` processes menu import jobs from Redis
+- `redis` stores the job queue for Celery
 
 Stop:
 

@@ -13,6 +13,8 @@ class Settings(BaseSettings):
     app_name: str = "KwikMenu Import API"
     app_env: str = "development"
     database_url: str = "postgresql+psycopg://kwikmenu:kwikmenu@postgres:5432/kwikmenu"
+    celery_broker_url: str = "redis://redis:6379/0"
+    celery_result_backend: str = "redis://redis:6379/1"
     auth_session_cookie_name: str = "kwikmenu_session"
     auth_session_ttl_hours: int = 24 * 30
     auth_cookie_secure: bool = False
@@ -25,6 +27,8 @@ class Settings(BaseSettings):
     menu_import_request_timeout_seconds: int = 180
     menu_import_page_parse_attempts: int = 3
     menu_import_max_items_per_single_category: int = 25
+    menu_import_task_soft_time_limit_seconds: int = 60
+    menu_import_task_hard_time_limit_seconds: int = 70
     menu_import_api_url: str = "http://localhost:8000"
     menu_import_frontend_origin: str = "http://localhost:5173"
     menu_import_frontend_origin_regex: str = r"https?://(localhost|127\.0\.0\.1)(:\d+)?"

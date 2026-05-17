@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { AlertCircle, ArrowRight, CheckCircle2, LoaderCircle, RefreshCw, Sparkles, WandSparkles } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
@@ -24,8 +24,58 @@ const STATUS_META = {
   },
 };
 
-const delay = (ms) => new Promise((resolve) => window.setTimeout(resolve, ms));
 const POLL_INTERVAL_MS = 1500;
+const IMPORT_POLL_TIMEOUT_MS = 60_000;
+
+class MenuImportPollingTimeoutError extends Error {
+  constructor(message) {
+    super(message);
+    this.name = 'MenuImportPollingTimeoutError';
+  }
+}
+
+const delayWithAbort = (ms, signal) =>
+  new Promise((resolve, reject) => {
+    if (signal?.aborted) {
+      reject(new DOMException('Aborted', 'AbortError'));
+      return;
+    }
+
+    const timeoutId = window.setTimeout(() => {
+      signal?.removeEventListener('abort', handleAbort);
+      resolve();
+    }, ms);
+
+    const handleAbort = () => {
+      window.clearTimeout(timeoutId);
+      reject(new DOMException('Aborted', 'AbortError'));
+    };
+
+    signal?.addEventListener('abort', handleAbort, { once: true });
+  });
+
+const DEFAULT_IMPORT_ACTIONS = [
+  'Проверьте, что PDF или фотографии четкие, не обрезаны и не повернуты.',
+  'Если меню большое, загрузите его частями: например, напитки и еду отдельно.',
+  'Попробуйте загрузить более легкий PDF или импорт по прямой ссылке на меню.',
+  'Если ошибка повторяется, отправьте исходный файл в поддержку и опишите, что именно не удалось разобрать.',
+];
+
+const buildImportIssue = ({ kind, message }) => {
+  if (kind === 'timed_out') {
+    return {
+      title: 'Не удалось разобрать меню за 1 минуту',
+      message: message || 'Разбор занял слишком много времени, поэтому мы остановили импорт, чтобы не держать вас в вечной обработке.',
+      actions: DEFAULT_IMPORT_ACTIONS,
+    };
+  }
+
+  return {
+    title: 'Возникла проблема с импортом меню',
+    message: message || 'Мы не смогли обработать исходный файл и не создали черновик меню.',
+    actions: DEFAULT_IMPORT_ACTIONS,
+  };
+};
 
 const StageItem = ({ isActive, isDone, title, description }) => (
   <div className={`rounded-2xl border p-4 transition-colors ${
@@ -73,19 +123,28 @@ const MenuImportFlow = ({
   const [files, setFiles] = useState([]);
   const [menuLink, setMenuLink] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
+  const [importIssue, setImportIssue] = useState(null);
   const [resultPreview, setResultPreview] = useState(null);
+  const activeRequestRef = useRef(null);
 
   useEffect(() => {
     onStageChange?.(stage);
   }, [onStageChange, stage]);
 
+  useEffect(() => () => {
+    activeRequestRef.current?.abort();
+  }, []);
+
   const resetFlow = () => {
+    activeRequestRef.current?.abort();
+    activeRequestRef.current = null;
     setStage('idle');
-      setErrorMessage('');
-      setResultPreview(null);
-      setFiles([]);
-      setMenuLink('');
-      setMenuSource('file');
+    setErrorMessage('');
+    setImportIssue(null);
+    setResultPreview(null);
+    setFiles([]);
+    setMenuLink('');
+    setMenuSource('file');
   };
 
   const handleSubmit = async (event) => {
@@ -104,22 +163,35 @@ const MenuImportFlow = ({
     }
 
     setErrorMessage('');
+    setImportIssue(null);
     setStage('uploading');
 
     try {
+      activeRequestRef.current?.abort();
+      const requestController = new AbortController();
+      activeRequestRef.current = requestController;
       const submission = await submitMenuImport({
         menuSource,
         files,
         menuLink,
         venueId,
         context,
+        signal: requestController.signal,
       });
 
       setStage('processing');
-      const finalJob = await waitForImportCompletion(submission.jobId);
+      const finalJob = await waitForImportCompletion(submission.jobId, {
+        signal: requestController.signal,
+        timeoutMs: IMPORT_POLL_TIMEOUT_MS,
+      });
 
-      if (finalJob.status === 'failed') {
-        throw new Error(finalJob.error || 'Не удалось обработать меню.');
+      if (finalJob.status === 'failed' || finalJob.status === 'timed_out') {
+        const importError = new Error(finalJob.error || 'Не удалось обработать меню.');
+        importError.importIssue = buildImportIssue({
+          kind: finalJob.status === 'timed_out' ? 'timed_out' : 'failed',
+          message: finalJob.error,
+        });
+        throw importError;
       }
 
       const result = finalJob.result;
@@ -139,8 +211,20 @@ const MenuImportFlow = ({
       });
       setStage('success');
     } catch (error) {
+      if (error?.name === 'AbortError') {
+        return;
+      }
+
+      const issue = error?.importIssue || (
+        error instanceof MenuImportPollingTimeoutError
+          ? buildImportIssue({ kind: 'timed_out', message: error.message })
+          : buildImportIssue({ kind: 'failed', message: error instanceof Error ? error.message : '' })
+      );
+      setImportIssue(issue);
       setErrorMessage(error instanceof Error ? error.message : 'Не удалось отправить меню в обработку. Попробуйте еще раз.');
       setStage('error');
+    } finally {
+      activeRequestRef.current = null;
     }
   };
 
@@ -293,7 +377,19 @@ const MenuImportFlow = ({
           <div className="rounded-2xl border border-red-500/20 bg-red-500/5 p-4 text-sm text-red-600">
             <div className="flex items-start gap-3">
               <AlertCircle size={18} className="mt-0.5 shrink-0" />
-              <p className="leading-relaxed">{errorMessage}</p>
+              <div className="space-y-3">
+                <div>
+                  <p className="font-bold text-red-700">{importIssue?.title || 'Импорт не завершен'}</p>
+                  <p className="leading-relaxed">{importIssue?.message || errorMessage}</p>
+                </div>
+                {importIssue?.actions?.length ? (
+                  <div className="space-y-1 text-red-700/90">
+                    {importIssue.actions.map((action) => (
+                      <p key={action} className="leading-relaxed">- {action}</p>
+                    ))}
+                  </div>
+                ) : null}
+              </div>
             </div>
           </div>
         )}
@@ -326,13 +422,21 @@ const MenuImportFlow = ({
   );
 };
 
-const waitForImportCompletion = async (jobId) => {
+const waitForImportCompletion = async (jobId, { signal, timeoutMs }) => {
+  const startedAt = Date.now();
+
   while (true) {
-    const job = await pollMenuImportStatus(jobId);
-    if (job.status === 'completed' || job.status === 'failed') {
+    if (Date.now() - startedAt >= timeoutMs) {
+      throw new MenuImportPollingTimeoutError(
+        'Разбор меню занял больше 1 минуты. Попробуйте разбить меню на несколько файлов или загрузить более чистый PDF.'
+      );
+    }
+
+    const job = await pollMenuImportStatus(jobId, { signal });
+    if (job.status === 'completed' || job.status === 'failed' || job.status === 'timed_out') {
       return job;
     }
-    await delay(POLL_INTERVAL_MS);
+    await delayWithAbort(POLL_INTERVAL_MS, signal);
   }
 };
 

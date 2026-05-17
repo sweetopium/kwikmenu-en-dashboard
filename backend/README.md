@@ -20,8 +20,8 @@ uvicorn app.main:app --reload
 
 ## Notes
 
-- Jobs are stored in memory.
 - Uploaded files are stored in `backend/.data/uploads`.
+- Menu imports are queued through Redis and processed by a separate Celery worker.
 - If `OPENROUTER_API_KEY` is not configured, the parser finishes in fallback mode and still returns a schema-valid menu JSON scaffold.
 
 ## Docker

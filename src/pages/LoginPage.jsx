@@ -1,6 +1,6 @@
 import {useMemo, useState} from "react";
 import {Link, useNavigate} from "react-router-dom";
-import {ArrowRight, Loader2} from "lucide-react";
+import {Loader2} from "lucide-react";
 import {FcGoogle} from "react-icons/fc";
 import {FaYandex} from "react-icons/fa6";
 import {SiMaildotru} from "react-icons/si";
@@ -139,6 +139,13 @@ const LoginPage = () => {
 
         <p className="text-center text-[11px] text-muted-foreground sm:text-sm">
           Продолжая, вы подтверждаете согласие с условиями сервиса и политикой обработки данных.
+        </p>
+
+        <p className="text-center text-[11px] text-muted-foreground sm:text-sm">
+          Нет аккаунта?{' '}
+          <Link to="/register" className="font-semibold text-brand-purple transition-colors hover:text-brand-purple/80">
+            Зарегистрируйтесь
+          </Link>
         </p>
       </div>
     </AuthShell>

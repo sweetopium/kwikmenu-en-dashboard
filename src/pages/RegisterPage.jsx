@@ -1,6 +1,6 @@
 import {useState} from "react";
-import {useNavigate} from "react-router-dom";
-import {ArrowRight, Loader2} from "lucide-react";
+import {Link, useNavigate} from "react-router-dom";
+import {Loader2} from "lucide-react";
 import {FcGoogle} from "react-icons/fc";
 import {FaYandex} from "react-icons/fa6";
 import {SiMaildotru} from "react-icons/si";
@@ -170,6 +170,13 @@ const RegisterPage = () => {
 
         <p className="text-center text-[11px] text-muted-foreground sm:text-sm">
           После регистрации можно сразу перейти к загрузке первого меню и заполнению данных заведения.
+        </p>
+
+        <p className="text-center text-[11px] text-muted-foreground sm:text-sm">
+          Уже есть аккаунт?{' '}
+          <Link to="/login" className="font-semibold text-brand-purple transition-colors hover:text-brand-purple/80">
+            Войти
+          </Link>
         </p>
       </div>
     </AuthShell>

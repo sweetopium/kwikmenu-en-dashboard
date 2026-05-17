@@ -7,10 +7,12 @@ from app.schemas.menu import MenuPayload, StrictModel
 
 
 class MenuImportStatus(str, Enum):
+    queued = "queued"
     accepted = "accepted"
     processing = "processing"
     completed = "completed"
     failed = "failed"
+    timed_out = "timed_out"
 
 
 class UploadedSource(StrictModel):

@@ -8,6 +8,7 @@ export const submitMenuImport = async ({
   menuLink = '',
   venueId = '',
   context = {},
+  signal,
 }) => {
   const formData = new FormData();
 
@@ -37,6 +38,7 @@ export const submitMenuImport = async ({
     method: 'POST',
     credentials: 'include',
     body: formData,
+    signal,
   });
 
   if (!response.ok) {
@@ -47,9 +49,10 @@ export const submitMenuImport = async ({
   return response.json();
 };
 
-export const pollMenuImportStatus = async (jobId) => {
+export const pollMenuImportStatus = async (jobId, { signal } = {}) => {
   const response = await fetch(`${MENU_IMPORT_API_URL}/${jobId}`, {
     credentials: 'include',
+    signal,
   });
 
   if (!response.ok) {
