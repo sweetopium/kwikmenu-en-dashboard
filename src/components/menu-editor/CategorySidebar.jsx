@@ -1,5 +1,6 @@
 import { ChevronDown, ChevronUp, Plus } from 'lucide-react';
 import { getAvailableHoursLabel, getLocalizedField } from "./menuEditorUtils";
+import {primaryActionButtonClasses} from "../../lib/uiStyles.js";
 
 const CategorySidebar = ({
   categories,
@@ -16,7 +17,7 @@ const CategorySidebar = ({
 
       <button
         onClick={onAddCategory}
-        className="text-brand-purple hover:bg-brand-purple/10 p-1.5 rounded-lg transition-colors shrink-0"
+        className={`${primaryActionButtonClasses} sm:h-[44px] h-[44px] px-4 shrink-0`}
       >
         <Plus size={20} strokeWidth={3} />
       </button>
