@@ -13,7 +13,7 @@ const CategorySidebar = ({
 }) => (
   <div className="w-full max-w-full min-w-0 md:w-[320px] border-b md:border-b-0 md:border-r border-border/60 bg-secondary/10 flex flex-col shrink-0 overflow-hidden">
     <div className="p-4 sm:p-5 flex items-center justify-between border-b border-border/60 bg-card/50 shrink-0">
-      <h2 className="font-extrabold text-foreground tracking-tight text-lg">КАТЕГОРИИ</h2>
+      <h2 className="font-extrabold text-foreground tracking-tight text-md">Категории</h2>
 
       <button
         onClick={onAddCategory}

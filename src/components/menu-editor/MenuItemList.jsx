@@ -1,7 +1,7 @@
 import MenuItemCard from "./MenuItemCard";
 
 const MenuItemList = ({ items, language, defaultLanguage, onEditItem, onDeleteItem }) => (
-  <div className="flex-1 overflow-y-auto overflow-x-hidden p-4 sm:p-6 lg:p-8 space-y-3 bg-secondary/5 min-w-0 max-w-full">
+  <div className="flex-1 overflow-y-auto overflow-x-hidden p-4 sm:p-6 lg:p-4 space-y-3 bg-secondary/5 min-w-0 max-w-full">
     {items.length === 0 ? (
       <div className="text-center py-20 text-muted-foreground">
         <p>Нет блюд в этой категории</p>
