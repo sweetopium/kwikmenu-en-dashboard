@@ -471,23 +471,27 @@ const ExtendedPublicMenuTemplate = ({
             exit={{ opacity: 0 }}
             transition={SHEET_BACKDROP_TRANSITION}
           />
-          <motion.div
-            className="absolute inset-x-0 bottom-0 overflow-hidden rounded-t-[2rem] border border-black/5 bg-[#fffdf8] shadow-[0_-24px_72px_rgba(36,31,27,0.18)]"
-            initial={{ y: '100%' }}
-            animate={{ y: 0 }}
-            exit={{ y: '100%' }}
-            transition={SHEET_PANEL_TRANSITION}
-          >
-            <div className="sticky top-0 z-10 grid grid-cols-[1fr_auto_1fr] items-center border-b border-black/5 bg-[#fffdf8]/90 px-4 py-3 backdrop-blur-xl">
-              <div />
-              <div className="h-1 w-12 rounded-full bg-black/15" />
-              <button type="button" onClick={() => setOpenSheet(null)} className="justify-self-end rounded-full p-2 text-foreground/70 transition hover:bg-black/5 hover:text-foreground">
-                <X size={18} />
-              </button>
-            </div>
+          <div className="pointer-events-none absolute inset-0 flex justify-center">
+            <div className="relative h-full w-full max-w-[430px]">
+              <motion.div
+                className="pointer-events-auto absolute inset-x-0 bottom-0 overflow-hidden rounded-t-[2rem] border border-black/5 bg-[#fffdf8] shadow-[0_-24px_72px_rgba(36,31,27,0.18)]"
+                initial={{ y: '100%' }}
+                animate={{ y: 0 }}
+                exit={{ y: '100%' }}
+                transition={SHEET_PANEL_TRANSITION}
+              >
+                <div className="sticky top-0 z-10 grid grid-cols-[1fr_auto_1fr] items-center border-b border-black/5 bg-[#fffdf8]/90 px-4 py-3 backdrop-blur-xl">
+                  <div />
+                  <div className="h-1 w-12 rounded-full bg-black/15" />
+                  <button type="button" onClick={() => setOpenSheet(null)} className="justify-self-end rounded-full p-2 text-foreground/70 transition hover:bg-black/5 hover:text-foreground">
+                    <X size={18} />
+                  </button>
+                </div>
 
-            {renderSheetContent()}
-          </motion.div>
+                {renderSheetContent()}
+              </motion.div>
+            </div>
+          </div>
         </div>
       ) : null}
     </AnimatePresence>
