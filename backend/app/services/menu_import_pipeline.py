@@ -19,6 +19,7 @@ from app.schemas.menu import (
 )
 from app.schemas.menu_extract import ExtractedItem, ExtractedPage, ExtractedSection, ExtractedVariant
 from app.schemas.menu_import import MenuImportResult, UploadedSource
+from app.services.menu_normalization_service import MenuNormalizationService
 from app.services.openrouter_client import OpenRouterClient
 from app.services.page_normalizer import NormalizedPage, PageNormalizer
 
@@ -37,6 +38,7 @@ class MenuImportPipeline:
         self.settings = get_settings()
         self.openrouter = OpenRouterClient()
         self.page_normalizer = PageNormalizer()
+        self.menu_normalizer = MenuNormalizationService()
 
     def run(
         self,
@@ -88,6 +90,7 @@ class MenuImportPipeline:
         menu_payload = self._merge_pages(extracted_pages=extracted_pages, context=context)
         menu_payload = self._repair_missing_measure_units(menu_payload)
         validated_menu = MenuPayload.model_validate(menu_payload.model_dump())
+        validated_menu = self.menu_normalizer.apply_deterministic_cleanup(validated_menu)
         self._validate_final_menu(validated_menu)
 
         return MenuImportResult(

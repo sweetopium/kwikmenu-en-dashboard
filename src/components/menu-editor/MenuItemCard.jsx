@@ -1,10 +1,11 @@
 import { GripVertical, Image as ImageIcon, Edit2, Trash2 } from 'lucide-react';
 import { Switch } from "../ui/switch";
-import { formatMeasure } from "./menuEditorUtils";
+import { formatMeasure, getItemPriceDisplay } from "./menuEditorUtils";
 
 const MenuItemCard = ({ item, language, defaultLanguage, onEdit, onDelete }) => {
   const name = language !== defaultLanguage && item.translations?.[language]?.name ? item.translations[language].name : item.name;
   const desc = language !== defaultLanguage && item.translations?.[language]?.description ? item.translations[language].description : item.description;
+  const priceDisplay = getItemPriceDisplay(item);
 
   return (
     <div className="group flex flex-col sm:flex-row sm:items-center bg-card border border-border/60 rounded-2xl shadow-sm hover:shadow-md hover:border-brand-purple/30 transition-all min-w-0 max-w-full overflow-hidden">
@@ -35,9 +36,9 @@ const MenuItemCard = ({ item, language, defaultLanguage, onEdit, onDelete }) => 
             <h3 className="font-bold text-sm leading-snug sm:text-base text-foreground break-words">
               {name}
             </h3>
-            {(!item.variants || item.variants.length === 0) && (
+            {priceDisplay && (
               <span className="font-extrabold text-sm text-foreground sm:hidden shrink-0">
-                {item.price}
+                {priceDisplay}
               </span>
             )}
           </div>
@@ -70,9 +71,9 @@ const MenuItemCard = ({ item, language, defaultLanguage, onEdit, onDelete }) => 
       <div className="flex items-center justify-between sm:justify-end gap-3 sm:gap-6 w-full sm:w-auto px-3 py-2.5 sm:p-4 sm:pl-2 bg-secondary/30 sm:bg-transparent border-t border-border/50 sm:border-t-0">
 
         {/* Цена (Показывается ТОЛЬКО на десктопе) */}
-        {(!item.variants || item.variants.length === 0) && (
+        {priceDisplay && (
           <div className="font-extrabold text-sm sm:text-base whitespace-nowrap text-foreground hidden sm:block">
-            {item.price}
+            {priceDisplay}
           </div>
         )}
 

@@ -62,3 +62,44 @@ export const getAvailableHoursLabel = (availableHours) => {
   if (!availableHours?.start || !availableHours?.end) return '';
   return `${availableHours.start} - ${availableHours.end}`;
 };
+
+const parseEditorPriceValue = (value) => {
+  const text = String(value || '').trim();
+  if (!text) return null;
+
+  const normalized = text.replace(/\s+/g, '').replace(',', '.');
+  const match = normalized.match(/-?\d+(?:\.\d+)?/);
+  if (!match) return null;
+
+  const numeric = Number.parseFloat(match[0]);
+  return Number.isFinite(numeric) ? numeric : null;
+};
+
+const formatEditorPriceValue = (value) => {
+  if (!Number.isFinite(value)) return '';
+  return Number.isInteger(value) ? `${value}` : value.toLocaleString('ru-RU');
+};
+
+export const getItemPriceDisplay = (item) => {
+  const variants = Array.isArray(item?.variants) ? item.variants.filter((variant) => variant?.price) : [];
+  if (!variants.length) {
+    return item?.price || '';
+  }
+
+  const numericPrices = variants
+    .map((variant) => parseEditorPriceValue(variant.price))
+    .filter((price) => price !== null);
+
+  if (!numericPrices.length) {
+    return 'Разные цены';
+  }
+
+  const minPrice = Math.min(...numericPrices);
+  const maxPrice = Math.max(...numericPrices);
+
+  if (minPrice === maxPrice) {
+    return `${formatEditorPriceValue(minPrice)} ₽`;
+  }
+
+  return `от ${formatEditorPriceValue(minPrice)} до ${formatEditorPriceValue(maxPrice)} ₽`;
+};

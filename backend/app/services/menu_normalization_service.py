@@ -12,6 +12,11 @@ class MenuNormalizationService:
     def __init__(self) -> None:
         self.openrouter = OpenRouterClient()
 
+    def apply_deterministic_cleanup(self, menu: MenuPayload) -> MenuPayload:
+        normalized_menu = self._apply_deterministic_cleanup(menu)
+        normalized_menu = MenuPayload.model_validate(normalized_menu.model_dump())
+        return normalized_menu
+
     def run(self, menu: MenuPayload) -> MenuNormalizationResult:
         warnings: list[str] = []
         used_fallback = False
@@ -29,8 +34,7 @@ class MenuNormalizationService:
             used_fallback = True
             warnings.append("OPENROUTER_API_KEY is not configured, deterministic normalizer was used.")
 
-        normalized_menu = self._apply_deterministic_cleanup(normalized_menu)
-        normalized_menu = MenuPayload.model_validate(normalized_menu.model_dump())
+        normalized_menu = self.apply_deterministic_cleanup(normalized_menu)
         self._validate_shape_integrity(original=menu, normalized=normalized_menu)
 
         return MenuNormalizationResult(

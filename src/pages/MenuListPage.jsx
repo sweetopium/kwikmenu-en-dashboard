@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import {
   Plus, Utensils, Wine, Coffee,
   MoreHorizontal, Calendar, LayoutGrid, ArrowRight, FolderOpen,
-  Pencil, Copy, Upload, Download, Trash2
+  Pencil, Copy, Upload, Download, Trash2, QrCode
 } from 'lucide-react';
 
 import { Button } from "../components/ui/button";
@@ -157,6 +157,14 @@ const MenuListPage = () => {
                       <Copy size={16} />
                       Дублировать
                     </DropdownMenuItem>
+                    {menu.venueId ? (
+                      <DropdownMenuItem asChild>
+                        <Link to={`/dashboard/venues/${menu.venueId}?tab=qr`}>
+                          <QrCode size={16} />
+                          Посмотреть QR меню
+                        </Link>
+                      </DropdownMenuItem>
+                    ) : null}
 
                     <DropdownMenuSeparator />
 
@@ -197,7 +205,7 @@ const MenuListPage = () => {
                   to={`/dashboard/menu/${menu.id}`}
                   className="h-10 sm:h-12 px-4 rounded-lg bg-foreground hover:bg-foreground/90 text-background font-bold text-sm flex items-center gap-2 transition-all shadow-sm cursor-pointer"
                 >
-                  Открыть
+                  Редактировать
                   <ArrowRight size={16} />
                 </Link>
               </div>
