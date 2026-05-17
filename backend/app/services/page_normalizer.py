@@ -68,18 +68,6 @@ class PageNormalizer:
                 page_index += 1
                 continue
 
-        if menu_source == "link" and menu_link:
-            normalized_pages.append(
-                NormalizedPage(
-                    page_number=page_index,
-                    source_name="menu-link",
-                    source_kind="link",
-                    mime_type="text/uri-list",
-                    image_path=None,
-                    menu_link=menu_link,
-                )
-            )
-
         return normalized_pages
 
     def _render_pdf_pages(

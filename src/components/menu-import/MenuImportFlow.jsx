@@ -57,7 +57,7 @@ const delayWithAbort = (ms, signal) =>
 const DEFAULT_IMPORT_ACTIONS = [
   'Проверьте, что PDF или фотографии четкие, не обрезаны и не повернуты.',
   'Если меню большое, загрузите его частями: например, напитки и еду отдельно.',
-  'Попробуйте загрузить более легкий PDF или импорт по прямой ссылке на меню.',
+  'Попробуйте загрузить более легкий PDF или вставить прямую ссылку на PDF-файл меню.',
   'Если ошибка повторяется, отправьте исходный файл в поддержку и опишите, что именно не удалось разобрать.',
 ];
 
@@ -157,7 +157,7 @@ const MenuImportFlow = ({
     }
 
     if (menuSource === 'link' && !menuLink.trim()) {
-      setErrorMessage('Укажите ссылку на меню, чтобы отправить ее в обработку.');
+      setErrorMessage('Укажите прямую ссылку на PDF-файл меню, чтобы отправить его в обработку.');
       setStage('error');
       return;
     }
@@ -368,7 +368,7 @@ const MenuImportFlow = ({
             multiple
             fileTabLabel="Загрузить файлы"
             fileTabMobileLabel="Файлы"
-            linkPlaceholder="Ссылка на Google Drive, Яндекс.Диск или сайт"
+            linkPlaceholder="Прямая ссылка на PDF-файл меню"
             dropzoneHeight="h-36 sm:h-40"
           />
         </div>

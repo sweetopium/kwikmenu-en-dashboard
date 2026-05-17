@@ -19,6 +19,7 @@ from app.schemas.menu_import import (
     MenuImportStatus,
 )
 from app.services.menu_import_jobs import serialize_job
+from app.services.pdf_link_downloader import PdfLinkDownloadError, download_pdf_from_url
 from app.services.page_normalizer import IMAGE_EXTENSIONS, PDF_EXTENSION
 
 
@@ -60,6 +61,30 @@ async def create_menu_import(
     upload_dir = UPLOADS_ROOT / job.id
     upload_dir.mkdir(parents=True, exist_ok=True)
     job.upload_dir = str(upload_dir)
+
+    if menu_source == "link" and menu_link:
+        try:
+            downloaded_pdf = download_pdf_from_url(url=menu_link, target_dir=upload_dir)
+        except PdfLinkDownloadError as exc:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc)) from exc
+
+        logger.info(
+            "Downloaded menu import PDF from link job_id=%s user_id=%s file=%s size=%s sha256=%s",
+            job.id,
+            current_user.id,
+            downloaded_pdf.file_name,
+            downloaded_pdf.size_bytes,
+            downloaded_pdf.sha256,
+        )
+        db.add(
+            MenuImportSource(
+                job_id=job.id,
+                name=downloaded_pdf.file_name,
+                kind="pdf",
+                mime_type=downloaded_pdf.mime_type,
+                size_bytes=downloaded_pdf.size_bytes,
+            )
+        )
 
     for uploaded_file in uploaded_files:
         target_path = upload_dir / uploaded_file.filename

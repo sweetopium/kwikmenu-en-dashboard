@@ -214,7 +214,7 @@ const UploadPage = () => {
               venueId={currentVenueId}
               context={importContext}
               introTitle="Загрузите меню"
-              introDescription="Загрузите PDF, фотографии или ссылку. Создадим backend job, дождемся обработки и покажем результат."
+              introDescription="Загрузите PDF, фотографии или вставьте прямую ссылку на PDF. Создадим backend job, дождемся обработки и покажем результат."
               submitLabel="Отправить на распознавание"
               successTitle="Черновик меню подготовлен"
               successDescription="Исходники обработаны backend-сервисом, итоговый JSON собран, сохранен как черновик и готов к редактированию."
