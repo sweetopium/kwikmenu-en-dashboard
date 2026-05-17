@@ -265,8 +265,29 @@ const MenuImportFlow = ({
         }
 
         if (job.status === 'completed') {
-          setStage('processing');
-          await resolveImportCompletion({ jobId: backgroundJobId, signal: controller.signal });
+          const result = job.result;
+          if (!result) {
+            throw new Error('Импорт завершился без результата меню.');
+          }
+
+          if (!result.menuId) {
+            saveImportedMenuToStorage(result.menu);
+          }
+
+          setResultPreview({
+            menuId: result.menuId,
+            sourceLabel: result.sourceSummary.length > 0
+              ? result.sourceSummary.map((source) => source.name).join(', ')
+              : (menuSource === 'link' ? menuLink.trim() : 'Без названия'),
+            detectedCategories: result.categoryCount,
+            detectedItems: result.itemCount,
+            documentCount: result.documentCount,
+            usedFallback: result.usedFallback,
+            warnings: result.warnings || [],
+          });
+          setBackgroundJobId(null);
+          setBackgroundStatusMessage('');
+          setStage('success');
           return;
         }
 
