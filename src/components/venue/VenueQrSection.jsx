@@ -49,18 +49,6 @@ const VenueQrSection = ({ value, onChange, onSave, isSaving = false }) => {
     }
   };
 
-  const copyMenuLink = async () => {
-    if (!qrValue) {
-      return;
-    }
-
-    try {
-      await navigator.clipboard.writeText(qrValue);
-    } catch (error) {
-      console.error('Не удалось скопировать ссылку', error);
-    }
-  };
-
   const previewProps = {
     qrValue,
     qrColor: value.color,
@@ -85,7 +73,7 @@ const VenueQrSection = ({ value, onChange, onSave, isSaving = false }) => {
         <div className="p-6 sm:p-8">
           <div className="xl:hidden space-y-4 mb-6">
             <QrPreview {...previewProps} mobile />
-            <DirectMenuLink embedded displayValue={qrDisplayValue} onCopy={copyMenuLink} />
+            <DirectMenuLink embedded displayValue={qrDisplayValue} href={qrValue} action="open" />
           </div>
 
           <div className="grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_400px] gap-6 lg:gap-8 relative w-full max-w-full min-w-0">
@@ -132,7 +120,7 @@ const VenueQrSection = ({ value, onChange, onSave, isSaving = false }) => {
             <div className="hidden xl:block w-full shrink-0 self-start">
               <div className="sticky top-24 space-y-4">
                 <QrPreview {...previewProps} />
-                <DirectMenuLink embedded displayValue={qrDisplayValue} onCopy={copyMenuLink} />
+                <DirectMenuLink embedded displayValue={qrDisplayValue} href={qrValue} action="open" />
               </div>
             </div>
           </div>
