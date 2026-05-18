@@ -5,6 +5,7 @@ from datetime import datetime, timedelta, timezone
 import secrets
 
 from fastapi import APIRouter, Depends, Header, HTTPException, Query, Request, status
+from pydantic import Field
 from sqlalchemy import func, text
 from sqlalchemy.orm import Session
 
@@ -22,6 +23,7 @@ from app.models import (
     Venue,
     VenueSettings,
 )
+from app.schemas.menu import MenuPayload, StrictModel
 
 
 router = APIRouter(prefix="/api/admin", tags=["admin"])
@@ -32,6 +34,15 @@ PERIOD_DAYS = {
     "30d": 30,
     "90d": 90,
 }
+
+
+class AdminBulkDeleteUsersRequest(StrictModel):
+    userIds: list[str] = Field(min_length=1, max_length=100)
+
+
+class AdminMenuUpdateRequest(StrictModel):
+    payload: MenuPayload
+    status: str | None = Field(default=None, max_length=32)
 
 
 def _client_ip(request: Request) -> str:
@@ -89,6 +100,58 @@ def _menu_counts(menu: Menu) -> tuple[int, int]:
         if isinstance(category, dict):
             items_count += len(category.get("items") or [])
     return len(categories), items_count
+
+
+def _serialize_admin_menu(menu: Menu, venue: Venue, user: User) -> dict:
+    categories_count, items_count = _menu_counts(menu)
+    return {
+        "id": menu.id,
+        "venueId": venue.id,
+        "venueName": venue.name,
+        "owner": {"id": user.id, "email": user.email, "name": user.name},
+        "name": menu.name,
+        "slug": menu.slug,
+        "description": menu.description,
+        "status": menu.status,
+        "payload": MenuPayload.model_validate(menu.payload).model_dump(mode="json"),
+        "categoriesCount": categories_count,
+        "itemsCount": items_count,
+        "createdAt": menu.created_at,
+        "updatedAt": menu.updated_at,
+    }
+
+
+def _delete_users(db: Session, user_ids: list[str]) -> dict:
+    unique_user_ids = list(dict.fromkeys(user_ids))
+    users = db.query(User).filter(User.id.in_(unique_user_ids)).all()
+    found_ids = [user.id for user in users]
+    if not found_ids:
+        return {"requested": len(unique_user_ids), "deleted": 0, "missing": unique_user_ids}
+
+    venue_ids = [venue_id for (venue_id,) in db.query(Venue.id).filter(Venue.owner_user_id.in_(found_ids)).all()]
+    menu_ids = [menu_id for (menu_id,) in db.query(Menu.id).filter(Menu.venue_id.in_(venue_ids)).all()] if venue_ids else []
+
+    if menu_ids:
+        db.query(ProductEvent).filter(ProductEvent.menu_id.in_(menu_ids)).update({ProductEvent.menu_id: None}, synchronize_session=False)
+        db.query(PublicMenuEvent).filter(PublicMenuEvent.menu_id.in_(menu_ids)).update({PublicMenuEvent.menu_id: None}, synchronize_session=False)
+        db.query(MenuImportJob).filter(MenuImportJob.menu_id.in_(menu_ids)).update({MenuImportJob.menu_id: None}, synchronize_session=False)
+
+    if venue_ids:
+        db.query(ProductEvent).filter(ProductEvent.venue_id.in_(venue_ids)).update({ProductEvent.venue_id: None}, synchronize_session=False)
+        db.query(MenuImportJob).filter(MenuImportJob.venue_id.in_(venue_ids)).update({MenuImportJob.venue_id: None}, synchronize_session=False)
+        db.query(PublicMenuEvent).filter(PublicMenuEvent.venue_id.in_(venue_ids)).delete(synchronize_session=False)
+
+    db.query(ProductEvent).filter(ProductEvent.user_id.in_(found_ids)).update({ProductEvent.user_id: None}, synchronize_session=False)
+    db.query(SessionModel).filter(SessionModel.user_id.in_(found_ids)).delete(synchronize_session=False)
+    db.query(AuthAccount).filter(AuthAccount.user_id.in_(found_ids)).delete(synchronize_session=False)
+    db.query(User).filter(User.id.in_(found_ids)).delete(synchronize_session=False)
+    db.commit()
+
+    return {
+        "requested": len(unique_user_ids),
+        "deleted": len(found_ids),
+        "missing": [user_id for user_id in unique_user_ids if user_id not in set(found_ids)],
+    }
 
 
 @router.get("/overview")
@@ -262,6 +325,24 @@ def get_admin_user_detail(
     }
 
 
+@router.delete("/users/{user_id}")
+def delete_admin_user(
+    user_id: str,
+    _: None = AdminAccess,
+    db: Session = Depends(get_db),
+) -> dict:
+    return _delete_users(db, [user_id])
+
+
+@router.post("/users/bulk-delete")
+def bulk_delete_admin_users(
+    payload: AdminBulkDeleteUsersRequest,
+    _: None = AdminAccess,
+    db: Session = Depends(get_db),
+) -> dict:
+    return _delete_users(db, payload.userIds)
+
+
 @router.get("/venues")
 def list_admin_venues(
     q: str | None = Query(default=None),
@@ -386,6 +467,57 @@ def list_admin_menus(
             for menu, venue, user in rows
         ],
     }
+
+
+@router.get("/menus/{menu_id}")
+def get_admin_menu(
+    menu_id: str,
+    _: None = AdminAccess,
+    db: Session = Depends(get_db),
+) -> dict:
+    row = (
+        db.query(Menu, Venue, User)
+        .join(Venue, Venue.id == Menu.venue_id)
+        .join(User, User.id == Venue.owner_user_id)
+        .filter(Menu.id == menu_id)
+        .first()
+    )
+    if row is None:
+        raise HTTPException(status_code=404, detail="Menu not found.")
+    menu, venue, user = row
+    return _serialize_admin_menu(menu, venue, user)
+
+
+@router.patch("/menus/{menu_id}")
+def update_admin_menu(
+    menu_id: str,
+    payload: AdminMenuUpdateRequest,
+    _: None = AdminAccess,
+    db: Session = Depends(get_db),
+) -> dict:
+    row = (
+        db.query(Menu, Venue, User)
+        .join(Venue, Venue.id == Menu.venue_id)
+        .join(User, User.id == Venue.owner_user_id)
+        .filter(Menu.id == menu_id)
+        .first()
+    )
+    if row is None:
+        raise HTTPException(status_code=404, detail="Menu not found.")
+
+    menu, venue, user = row
+    menu_payload = MenuPayload.model_validate(payload.payload.model_dump())
+    menu.name = menu_payload.menuMeta.name
+    menu.slug = menu_payload.menuMeta.slug or menu.slug
+    menu.description = menu_payload.menuMeta.description
+    menu.payload = menu_payload.model_dump(mode="json")
+    if payload.status:
+        menu.status = payload.status
+
+    db.add(menu)
+    db.commit()
+    db.refresh(menu)
+    return _serialize_admin_menu(menu, venue, user)
 
 
 @router.get("/imports")

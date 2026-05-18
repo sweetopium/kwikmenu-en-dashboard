@@ -62,9 +62,19 @@ export const adminFetch = async (path, options = {}) => {
 export const fetchOverview = (period = '7d') => adminFetch(`/overview?period=${period}`);
 export const fetchUsers = () => adminFetch('/users?limit=100');
 export const fetchUserDetail = (id) => adminFetch(`/users/${id}`);
+export const deleteUser = (id) => adminFetch(`/users/${id}`, { method: 'DELETE' });
+export const bulkDeleteUsers = (userIds) => adminFetch('/users/bulk-delete', {
+  method: 'POST',
+  body: JSON.stringify({ userIds }),
+});
 export const fetchVenues = () => adminFetch('/venues?limit=100');
 export const fetchVenueDetail = (id) => adminFetch(`/venues/${id}`);
 export const fetchMenus = () => adminFetch('/menus?limit=100');
+export const fetchMenuDetail = (id) => adminFetch(`/menus/${id}`);
+export const updateMenu = (id, payload) => adminFetch(`/menus/${id}`, {
+  method: 'PATCH',
+  body: JSON.stringify(payload),
+});
 export const fetchImports = () => adminFetch('/imports?limit=100');
 export const fetchHelpRequests = () => adminFetch('/help-requests?limit=100');
 export const fetchPublicMenuAnalytics = (period = '7d') => adminFetch(`/analytics/public-menu?period=${period}`);

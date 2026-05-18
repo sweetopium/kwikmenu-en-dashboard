@@ -1,13 +1,16 @@
 import { useEffect, useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
+import { Trash2 } from 'lucide-react';
 import { DataTable } from '../components/admin/DataTable';
 import { PageHeader } from '../components/admin/PageHeader';
 import { StatusBadge } from '../components/admin/StatusBadge';
-import { fetchUserDetail } from '../lib/adminApi';
+import { Button } from '../components/ui/Button';
+import { deleteUser, fetchUserDetail } from '../lib/adminApi';
 import { formatDateTime } from '../lib/formatters';
 
 const UserDetailPage = () => {
   const { id } = useParams();
+  const navigate = useNavigate();
   const [data, setData] = useState(null);
   const [error, setError] = useState('');
 
@@ -17,9 +20,29 @@ const UserDetailPage = () => {
 
   const user = data?.user;
 
+  const handleDelete = async () => {
+    if (!user) {
+      return;
+    }
+    const confirmed = window.confirm(`Удалить пользователя ${user.email}? Будут удалены его сессии, заведения и меню.`);
+    if (!confirmed) {
+      return;
+    }
+    try {
+      await deleteUser(user.id);
+      navigate('/users');
+    } catch (nextError) {
+      setError(nextError.message);
+    }
+  };
+
   return (
     <>
-      <PageHeader title={user?.name || 'Пользователь'} description={user ? `${user.email} · создан ${formatDateTime(user.createdAt)}` : 'Загрузка...'} />
+      <PageHeader
+        title={user?.name || 'Пользователь'}
+        description={user ? `${user.email} · создан ${formatDateTime(user.createdAt)}` : 'Загрузка...'}
+        actions={user ? <Button variant="destructive" onClick={handleDelete}><Trash2 size={16} />Удалить пользователя</Button> : null}
+      />
       {error ? <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-bold text-red-700">{error}</div> : null}
       {user ? (
         <div className="grid gap-4 lg:grid-cols-3">

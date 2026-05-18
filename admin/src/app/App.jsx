@@ -5,6 +5,7 @@ import BillingPage from '../pages/BillingPage';
 import HelpRequestsPage from '../pages/HelpRequestsPage';
 import ImportsPage from '../pages/ImportsPage';
 import LoginPage from '../pages/LoginPage';
+import MenuEditorPage from '../pages/MenuEditorPage';
 import MenusPage from '../pages/MenusPage';
 import OverviewPage from '../pages/OverviewPage';
 import ProductEventsPage from '../pages/ProductEventsPage';
@@ -33,6 +34,7 @@ const App = () => (
       <Route path="/venues" element={<VenuesPage />} />
       <Route path="/venues/:id" element={<VenueDetailPage />} />
       <Route path="/menus" element={<MenusPage />} />
+      <Route path="/menus/:id/edit" element={<MenuEditorPage />} />
       <Route path="/imports" element={<ImportsPage />} />
       <Route path="/help-requests" element={<HelpRequestsPage />} />
       <Route path="/analytics" element={<AnalyticsPage />} />

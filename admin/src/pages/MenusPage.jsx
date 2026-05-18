@@ -19,7 +19,7 @@ const MenusPage = () => {
       <PageHeader title="Меню" description="Все меню платформы, статусы и размер payload." />
       {error ? <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-bold text-red-700">{error}</div> : null}
       <DataTable rows={data.items} columns={[
-        { key: 'name', label: 'Меню', render: (row) => <span className="font-black">{row.name}<span className="block text-xs text-muted-foreground">{row.owner.email}</span></span> },
+        { key: 'name', label: 'Меню', render: (row) => <Link className="font-black text-brand-purple hover:underline" to={`/menus/${row.id}/edit`}>{row.name}<span className="block text-xs text-muted-foreground">{row.owner.email}</span></Link> },
         { key: 'status', label: 'Статус', render: (row) => <StatusBadge value={row.status} /> },
         { key: 'venue', label: 'Заведение', render: (row) => <Link className="font-bold text-brand-purple hover:underline" to={`/venues/${row.venue.id}`}>{row.venue.name}</Link> },
         { key: 'categoriesCount', label: 'Категории' },
