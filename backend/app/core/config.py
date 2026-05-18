@@ -38,6 +38,9 @@ class Settings(BaseSettings):
     menu_import_frontend_origin_regex: str | None = None
     menu_import_api_url: str = "http://localhost:8000"
     public_menu_base_url: str | None = None
+    admin_frontend_origin: str = "http://localhost:5174"
+    admin_api_key: str | None = None
+    admin_allowed_ips: str = "*"
 
     auth_session_cookie_name: str = "kwikmenu_session"
     auth_session_ttl_hours: int = 720
