@@ -9,6 +9,7 @@ import { Switch } from "../ui/switch";
 import { CountryField, DialPhoneField } from "./CountryDialFields";
 import { COUNTRIES, inputBaseClasses } from "./countries";
 import MenuSourcePicker from "./MenuSourcePicker";
+import { submitHelpRequest } from "../../lib/helpRequestsApi";
 
 const SelectChevron = () => (
   <svg width="12" height="12" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -16,10 +17,14 @@ const SelectChevron = () => (
   </svg>
 );
 
+const RequiredAsterisk = () => <span className="text-red-500">*</span>;
+
 const HelpRequestForm = ({ onClose = null }) => {
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState('');
   const [menuSource, setMenuSource] = useState('file');
+  const [menuFile, setMenuFile] = useState(null);
   const [fileName, setFileName] = useState('');
   const [uploadLater, setUploadLater] = useState(false);
   const [name, setName] = useState('');
@@ -34,35 +39,27 @@ const HelpRequestForm = ({ onClose = null }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
+    setSubmitError('');
 
-    const payload = {
-      name,
-      phone: `${selectedDial} ${phone}`,
-      messenger,
-      country: selectedCountry,
-      city,
-      restaurant,
-      uploadLater,
-      menuStatus: uploadLater ? "upload_later" : menuSource,
-      menuValue: uploadLater ? null : (menuSource === 'file' ? fileName : menuLink),
-    };
+    const country = COUNTRIES.find((item) => item.id === selectedCountry);
 
     try {
-      const response = await fetch('https://n8n.rtctrf.com/webhook-test/5fbe7bd4-d627-4315-9a1b-ad1ac1fb6617', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(payload),
+      await submitHelpRequest({
+        name,
+        phone: `${selectedDial} ${phone}`,
+        messenger,
+        countryCode: selectedCountry,
+        countryName: country?.name || selectedCountry,
+        city,
+        restaurantName: restaurant,
+        uploadLater,
+        menuSource,
+        menuLink,
+        menuFile,
       });
-
-      if (response.ok) {
-        setIsSubmitted(true);
-      } else {
-        console.error('Ошибка отправки данных');
-      }
+      setIsSubmitted(true);
     } catch (error) {
-      console.error('Ошибка сети:', error);
+      setSubmitError(error instanceof Error ? error.message : 'Не удалось отправить заявку. Попробуйте ещё раз.');
     } finally {
       setIsSubmitting(false);
     }
@@ -104,9 +101,15 @@ const HelpRequestForm = ({ onClose = null }) => {
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-5 sm:space-y-6">
+            {submitError ? (
+              <div className="rounded-2xl border border-destructive/20 bg-destructive/5 px-4 py-3 text-sm text-destructive">
+                {submitError}
+              </div>
+            ) : null}
+
             <div className="space-y-1.5 sm:space-y-2">
               <Label htmlFor="name" className="text-foreground font-medium ml-1 text-[11px] sm:text-xs sm:text-sm">
-                Имя
+                Имя <RequiredAsterisk />
               </Label>
               <Input
                 id="name"
@@ -129,13 +132,14 @@ const HelpRequestForm = ({ onClose = null }) => {
 
             <div className="space-y-1.5 sm:space-y-2">
               <Label htmlFor="messenger" className="text-foreground font-medium ml-1 text-[11px] sm:text-xs sm:text-sm">
-                Мессенджер для связи
+                Мессенджер для связи <RequiredAsterisk />
               </Label>
               <div className="relative">
                 <select
                   id="messenger"
                   value={messenger}
                   onChange={(e) => setMessenger(e.target.value)}
+                  required
                   className={`${inputBaseClasses} pr-10 cursor-pointer text-[11px] sm:text-base`}
                 >
                   <option value="telegram">Telegram</option>
@@ -150,17 +154,18 @@ const HelpRequestForm = ({ onClose = null }) => {
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-              <CountryField selectedCountry={selectedCountry} onCountryChange={handleCountryChange} />
+              <CountryField selectedCountry={selectedCountry} onCountryChange={handleCountryChange} required />
 
               <div className="space-y-1.5 sm:space-y-2">
                 <Label htmlFor="city" className="text-foreground font-medium ml-1 text-[11px] sm:text-xs sm:text-sm">
-                  Город
+                  Город <RequiredAsterisk />
                 </Label>
                 <Input
                   id="city"
                   value={city}
                   onChange={(e) => setCity(e.target.value)}
                   placeholder="Например: Москва"
+                  required
                   className={inputBaseClasses}
                 />
               </div>
@@ -168,20 +173,21 @@ const HelpRequestForm = ({ onClose = null }) => {
 
             <div className="space-y-1.5 sm:space-y-2">
               <Label htmlFor="restaurant" className="text-foreground font-medium ml-1 text-[11px] sm:text-xs sm:text-sm">
-                Название заведения
+                Название заведения <RequiredAsterisk />
               </Label>
               <Input
                 id="restaurant"
                 value={restaurant}
                 onChange={(e) => setRestaurant(e.target.value)}
                 placeholder="Например: Кафе «Татьяна»"
+                required
                 className={inputBaseClasses}
               />
             </div>
 
             <div className="space-y-2 sm:space-y-3 pt-1 sm:pt-2">
               <Label className="text-foreground font-medium ml-1 text-[11px] sm:text-xs sm:text-sm">
-                Загрузить меню
+                Загрузить меню <RequiredAsterisk />
               </Label>
 
               {!uploadLater && (
@@ -189,7 +195,11 @@ const HelpRequestForm = ({ onClose = null }) => {
                   menuSource={menuSource}
                   onMenuSourceChange={setMenuSource}
                   fileName={fileName}
-                  onFileChange={(e) => setFileName(e.target.files?.[0]?.name || '')}
+                  onFileChange={(e) => {
+                    const nextFile = e.target.files?.[0] || null;
+                    setMenuFile(nextFile);
+                    setFileName(nextFile?.name || '');
+                  }}
                   menuLink={menuLink}
                   onMenuLinkChange={setMenuLink}
                   inputClassName={inputBaseClasses}
