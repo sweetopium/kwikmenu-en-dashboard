@@ -1,214 +1,342 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { ArrowLeft, Code2, Eye, Plus, Save, Trash2 } from 'lucide-react';
-import { PageHeader } from '../components/admin/PageHeader';
-import { StatusBadge } from '../components/admin/StatusBadge';
+import { Check, ChevronDown, Code2, Edit2, ExternalLink, Plus, Save, Search, Trash2 } from 'lucide-react';
+
+import CategoryModal from '@dashboard/components/menu-editor/CategoryModal';
+import CategorySidebar from '@dashboard/components/menu-editor/CategorySidebar';
+import DeleteConfirmModal from '@dashboard/components/menu-editor/DeleteConfirmModal';
+import ItemModal from '@dashboard/components/menu-editor/ItemModal';
+import MenuItemList from '@dashboard/components/menu-editor/MenuItemList';
+import MenuMetaModal from '@dashboard/components/menu-editor/MenuMetaModal';
+import {
+  getAvailableHoursLabel,
+  getLocalizedField,
+  setLocalizedField,
+} from '@dashboard/components/menu-editor/menuEditorUtils';
+import { TOP_MENU_LANGUAGES } from '@dashboard/lib/languageMeta';
+import {
+  formFieldClasses,
+  formSelectClasses,
+  primaryActionButtonClasses,
+  secondaryActionButtonClasses,
+  subtleIconButtonClasses,
+} from '@dashboard/lib/uiStyles';
+
 import { Button } from '../components/ui/Button';
 import { fetchMenuDetail, updateMenu } from '../lib/adminApi';
-import { cn } from '../lib/utils';
 
-const makeId = (prefix) => `${prefix}-${Date.now()}-${Math.random().toString(16).slice(2, 8)}`;
+const makeCategory = (sortOrder) => ({
+  id: `cat-${Date.now()}`,
+  name: '',
+  description: '',
+  translations: {},
+  sortOrder,
+  isHidden: false,
+  imageUrl: null,
+  availableHours: null,
+  items: [],
+});
 
-const TextInput = ({ label, value, onChange, placeholder }) => (
-  <label className="block">
-    <span className="text-xs font-bold uppercase tracking-[0.1em] text-muted-foreground">{label}</span>
-    <input
-      value={value || ''}
-      onChange={(event) => onChange(event.target.value)}
-      placeholder={placeholder}
-      className="mt-1 h-10 w-full rounded-lg border border-border bg-background px-3 text-sm font-semibold outline-none focus:border-brand-purple"
-    />
-  </label>
-);
-
-const TextArea = ({ label, value, onChange, rows = 3 }) => (
-  <label className="block">
-    <span className="text-xs font-bold uppercase tracking-[0.1em] text-muted-foreground">{label}</span>
-    <textarea
-      value={value || ''}
-      onChange={(event) => onChange(event.target.value)}
-      rows={rows}
-      className="mt-1 w-full resize-y rounded-lg border border-border bg-background px-3 py-2 text-sm font-semibold outline-none focus:border-brand-purple"
-    />
-  </label>
-);
+const makeItem = (sortOrder) => ({
+  id: `item-${Date.now()}`,
+  name: '',
+  description: '',
+  translations: {},
+  price: '',
+  measureValue: '',
+  measureUnit: 'ml',
+  tags: [],
+  badge: null,
+  availableHours: null,
+  sortOrder,
+  isAvailable: true,
+  imageUrl: null,
+  variants: [],
+});
 
 const MenuEditorPage = () => {
   const { id } = useParams();
   const [menuRecord, setMenuRecord] = useState(null);
-  const [payload, setPayload] = useState(null);
-  const [activeCategoryId, setActiveCategoryId] = useState(null);
-  const [activeItemId, setActiveItemId] = useState(null);
+  const [menu, setMenu] = useState(null);
   const [status, setStatus] = useState('draft');
-  const [jsonMode, setJsonMode] = useState(false);
+  const [activeCategoryId, setActiveCategoryId] = useState(null);
+  const [editorLanguage, setEditorLanguage] = useState('ru');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [editingCategory, setEditingCategory] = useState(null);
+  const [editingItem, setEditingItem] = useState(null);
+  const [editingMenuMeta, setEditingMenuMeta] = useState(null);
+  const [modalMode, setModalMode] = useState('edit');
+  const [originalCategoryId, setOriginalCategoryId] = useState(null);
+  const [targetCategoryId, setTargetCategoryId] = useState(null);
+  const [deleteConfirm, setDeleteConfirm] = useState(null);
   const [jsonText, setJsonText] = useState('');
+  const [isJsonOpen, setIsJsonOpen] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState('');
   const [notice, setNotice] = useState('');
-  const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
     fetchMenuDetail(id)
       .then((data) => {
         setMenuRecord(data);
-        setPayload(data.payload);
+        setMenu(data.payload);
         setStatus(data.status);
         setActiveCategoryId(data.payload.categories?.[0]?.id || null);
-        setActiveItemId(data.payload.categories?.[0]?.items?.[0]?.id || null);
+        setEditorLanguage(data.payload.defaultLanguage || 'ru');
         setJsonText(JSON.stringify(data.payload, null, 2));
       })
       .catch((nextError) => setError(nextError.message));
   }, [id]);
 
+  useEffect(() => {
+    if (menu) {
+      setJsonText(JSON.stringify(menu, null, 2));
+    }
+  }, [menu]);
+
   const activeCategory = useMemo(
-    () => payload?.categories?.find((category) => category.id === activeCategoryId) || payload?.categories?.[0] || null,
-    [payload, activeCategoryId],
-  );
-  const activeItem = useMemo(
-    () => activeCategory?.items?.find((item) => item.id === activeItemId) || activeCategory?.items?.[0] || null,
-    [activeCategory, activeItemId],
+    () => menu?.categories?.find((category) => category.id === activeCategoryId) || null,
+    [menu, activeCategoryId],
   );
 
-  const setNextPayload = (updater) => {
-    setPayload((current) => {
-      const next = typeof updater === 'function' ? updater(current) : updater;
-      setJsonText(JSON.stringify(next, null, 2));
-      return next;
-    });
-  };
-
-  const updateMenuMeta = (patch) => {
-    setNextPayload((current) => ({
-      ...current,
-      menuMeta: { ...current.menuMeta, ...patch },
-    }));
-  };
-
-  const updateVenue = (patch) => {
-    setNextPayload((current) => ({
-      ...current,
-      venue: { ...current.venue, ...patch },
-    }));
-  };
-
-  const updateActiveCategory = (patch) => {
-    setNextPayload((current) => ({
-      ...current,
-      categories: current.categories.map((category) => (
-        category.id === activeCategory.id ? { ...category, ...patch } : category
-      )),
-    }));
-  };
-
-  const updateActiveItem = (patch) => {
-    setNextPayload((current) => ({
-      ...current,
-      categories: current.categories.map((category) => (
-        category.id === activeCategory.id
-          ? {
-              ...category,
-              items: category.items.map((item) => (
-                item.id === activeItem.id ? { ...item, ...patch } : item
-              )),
-            }
-          : category
-      )),
-    }));
-  };
-
-  const addCategory = () => {
-    const category = {
-      id: makeId('cat'),
-      name: 'Новая категория',
-      description: '',
-      sortOrder: (payload.categories?.length || 0) + 1,
-      isHidden: false,
-      imageUrl: null,
-      items: [],
-      translations: {},
-    };
-    setNextPayload((current) => ({ ...current, categories: [...current.categories, category] }));
-    setActiveCategoryId(category.id);
-    setActiveItemId(null);
-  };
-
-  const deleteCategory = () => {
-    if (!activeCategory || !window.confirm(`Удалить категорию "${activeCategory.name}" со всеми позициями?`)) {
-      return;
-    }
-    setNextPayload((current) => {
-      const categories = current.categories.filter((category) => category.id !== activeCategory.id);
-      setActiveCategoryId(categories[0]?.id || null);
-      setActiveItemId(categories[0]?.items?.[0]?.id || null);
-      return { ...current, categories };
-    });
-  };
-
-  const addItem = () => {
+  const filteredItems = useMemo(() => {
     if (!activeCategory) {
+      return [];
+    }
+
+    const query = searchQuery.trim().toLowerCase();
+    if (!query) {
+      return activeCategory.items || [];
+    }
+
+    return (activeCategory.items || []).filter((item) =>
+      getLocalizedField(item, 'name', editorLanguage, menu.defaultLanguage).toLowerCase().includes(query)
+    );
+  }, [activeCategory, editorLanguage, menu, searchQuery]);
+
+  if (!menu) {
+    return (
+      <div className="rounded-3xl border border-border/60 bg-card p-8 text-sm font-semibold text-muted-foreground shadow-sm">
+        {error || 'Загружаем меню...'}
+      </div>
+    );
+  }
+
+  const localizedMenuName = getLocalizedField(menu.menuMeta, 'name', editorLanguage, menu.defaultLanguage);
+  const localizedCategoryName = getLocalizedField(activeCategory, 'name', editorLanguage, menu.defaultLanguage);
+  const localizedCategoryDescription = getLocalizedField(activeCategory, 'description', editorLanguage, menu.defaultLanguage);
+  const publicPreviewUrl = menuRecord?.venueId ? `https://kwik.blockranker.co/m/${menuRecord.venueId}?menu=${id}` : null;
+
+  const handleEditorLanguageChange = (languageCode) => {
+    const selectedLanguage = TOP_MENU_LANGUAGES.find((language) => language.code === languageCode);
+    setEditorLanguage(languageCode);
+    if (!selectedLanguage || menu.languages.some((language) => language.code === languageCode)) {
       return;
     }
-    const item = {
-      id: makeId('item'),
-      name: 'Новая позиция',
-      description: '',
-      price: '',
-      measureValue: null,
-      measureUnit: 'portion',
-      sortOrder: (activeCategory.items?.length || 0) + 1,
-      isAvailable: true,
-      imageUrl: null,
-      tags: [],
-      badge: null,
-      translations: {},
-      variants: [],
-    };
-    setNextPayload((current) => ({
-      ...current,
-      categories: current.categories.map((category) => (
-        category.id === activeCategory.id ? { ...category, items: [...category.items, item] } : category
-      )),
-    }));
-    setActiveItemId(item.id);
+    setMenu({ ...menu, languages: [...menu.languages, selectedLanguage] });
   };
 
-  const deleteItem = () => {
-    if (!activeItem || !window.confirm(`Удалить позицию "${activeItem.name}"?`)) {
+  const handleAddCategory = () => {
+    setEditingCategory(makeCategory(menu.categories.length + 1));
+  };
+
+  const handleEditCategory = () => {
+    if (!activeCategory) return;
+    setEditingCategory(JSON.parse(JSON.stringify(activeCategory)));
+  };
+
+  const handleSaveCategory = () => {
+    const isExisting = menu.categories.some((category) => category.id === editingCategory.id);
+    const nextCategories = isExisting
+      ? menu.categories.map((category) => category.id === editingCategory.id ? editingCategory : category)
+      : [...menu.categories, editingCategory];
+
+    setMenu({ ...menu, categories: nextCategories });
+    setActiveCategoryId(editingCategory.id);
+    setEditingCategory(null);
+  };
+
+  const moveCategory = (index, direction) => {
+    const nextCategories = [...menu.categories];
+    const targetIndex = index + direction;
+    if (targetIndex < 0 || targetIndex >= nextCategories.length) {
       return;
     }
-    setNextPayload((current) => ({
-      ...current,
-      categories: current.categories.map((category) => (
-        category.id === activeCategory.id
-          ? { ...category, items: category.items.filter((item) => item.id !== activeItem.id) }
+
+    [nextCategories[index], nextCategories[targetIndex]] = [nextCategories[targetIndex], nextCategories[index]];
+    setMenu({
+      ...menu,
+      categories: nextCategories.map((category, categoryIndex) => ({ ...category, sortOrder: categoryIndex + 1 })),
+    });
+  };
+
+  const handleEditMenuMeta = () => {
+    setEditingMenuMeta(JSON.parse(JSON.stringify(menu.menuMeta)));
+  };
+
+  const handleSaveMenuMeta = () => {
+    setMenu({ ...menu, menuMeta: editingMenuMeta });
+    setEditingMenuMeta(null);
+  };
+
+  const handleAddItemClick = () => {
+    if (!activeCategory) return;
+    setModalMode('add');
+    setOriginalCategoryId(null);
+    setTargetCategoryId(activeCategory.id);
+    setEditingItem(makeItem((activeCategory.items?.length || 0) + 1));
+  };
+
+  const handleEditItemClick = (item) => {
+    setModalMode('edit');
+    setOriginalCategoryId(activeCategoryId);
+    setTargetCategoryId(activeCategoryId);
+    setEditingItem(JSON.parse(JSON.stringify(item)));
+  };
+
+  const handleSaveItem = () => {
+    if (!editingItem.name.trim()) {
+      window.alert('Пожалуйста, введите название блюда');
+      return;
+    }
+
+    let nextCategories = [...menu.categories];
+    if (modalMode === 'add') {
+      nextCategories = nextCategories.map((category) => (
+        category.id === targetCategoryId
+          ? { ...category, items: [...(category.items || []), editingItem] }
           : category
-      )),
-    }));
-    setActiveItemId(null);
+      ));
+    } else if (originalCategoryId === targetCategoryId) {
+      nextCategories = nextCategories.map((category) => (
+        category.id === originalCategoryId
+          ? { ...category, items: category.items.map((item) => item.id === editingItem.id ? editingItem : item) }
+          : category
+      ));
+    } else {
+      nextCategories = nextCategories.map((category) => {
+        if (category.id === originalCategoryId) {
+          return { ...category, items: category.items.filter((item) => item.id !== editingItem.id) };
+        }
+        if (category.id === targetCategoryId) {
+          return { ...category, items: [...(category.items || []), editingItem] };
+        }
+        return category;
+      });
+    }
+
+    setMenu({ ...menu, categories: nextCategories });
+    setEditingItem(null);
+    if (targetCategoryId !== activeCategoryId) {
+      setActiveCategoryId(targetCategoryId);
+    }
   };
 
-  const syncJsonToPayload = () => {
+  const handleVariantChange = (index, field, value, language = menu.defaultLanguage) => {
+    const nextVariants = [...(editingItem.variants || [])];
+    nextVariants[index] = field === 'label'
+      ? setLocalizedField(nextVariants[index], field, value, language, menu.defaultLanguage)
+      : { ...nextVariants[index], [field]: value };
+    setEditingItem({ ...editingItem, variants: nextVariants });
+  };
+
+  const addVariant = () => {
+    const nextVariant = {
+      id: `var-${Date.now()}`,
+      label: '',
+      translations: {},
+      price: '',
+      measureValue: '',
+      measureUnit: 'ml',
+      sortOrder: (editingItem.variants?.length || 0) + 1,
+      isAvailable: true,
+    };
+    setEditingItem({
+      ...editingItem,
+      variants: editingItem.variants ? [...editingItem.variants, nextVariant] : [nextVariant],
+      price: '',
+      measureValue: '',
+      measureUnit: 'ml',
+    });
+  };
+
+  const removeVariant = (index) => {
+    const nextVariants = editingItem.variants.filter((_, variantIndex) => variantIndex !== index);
+    setEditingItem({
+      ...editingItem,
+      variants: nextVariants.length
+        ? nextVariants.map((variant, variantIndex) => ({ ...variant, sortOrder: variantIndex + 1 }))
+        : undefined,
+    });
+  };
+
+  const handleDeleteCategoryClick = () => {
+    if (!activeCategory) return;
+    setDeleteConfirm({ type: 'category', id: activeCategory.id, name: localizedCategoryName });
+  };
+
+  const handleDeleteItemClick = (item) => {
+    setDeleteConfirm({
+      type: 'item',
+      id: item.id,
+      name: getLocalizedField(item, 'name', editorLanguage, menu.defaultLanguage),
+      categoryId: activeCategoryId,
+    });
+  };
+
+  const executeDelete = () => {
+    if (!deleteConfirm) return;
+
+    if (deleteConfirm.type === 'category') {
+      const nextCategories = menu.categories.filter((category) => category.id !== deleteConfirm.id);
+      setMenu({
+        ...menu,
+        categories: nextCategories.map((category, index) => ({ ...category, sortOrder: index + 1 })),
+      });
+      setActiveCategoryId(nextCategories[0]?.id || null);
+    } else if (deleteConfirm.type === 'item') {
+      setMenu({
+        ...menu,
+        categories: menu.categories.map((category) => (
+          category.id === deleteConfirm.categoryId
+            ? {
+                ...category,
+                items: category.items
+                  .filter((item) => item.id !== deleteConfirm.id)
+                  .map((item, index) => ({ ...item, sortOrder: index + 1 })),
+              }
+            : category
+        )),
+      });
+    }
+
+    setDeleteConfirm(null);
+  };
+
+  const applyJsonPayload = () => {
     try {
       const parsed = JSON.parse(jsonText);
-      setPayload(parsed);
+      setMenu(parsed);
       setActiveCategoryId(parsed.categories?.[0]?.id || null);
-      setActiveItemId(parsed.categories?.[0]?.items?.[0]?.id || null);
       setError('');
+      setIsJsonOpen(false);
     } catch (nextError) {
       setError(`JSON невалидный: ${nextError.message}`);
     }
   };
 
   const saveMenu = async () => {
-    const nextPayload = jsonMode ? JSON.parse(jsonText) : payload;
     setIsSaving(true);
     setError('');
     setNotice('');
     try {
-      const updated = await updateMenu(id, { payload: nextPayload, status });
+      const payload = isJsonOpen ? JSON.parse(jsonText) : menu;
+      const updated = await updateMenu(id, { payload, status });
       setMenuRecord(updated);
-      setPayload(updated.payload);
-      setJsonText(JSON.stringify(updated.payload, null, 2));
-      setNotice('Меню сохранено.');
+      setMenu(updated.payload);
+      setStatus(updated.status);
+      setNotice('Меню сохранено');
+      window.setTimeout(() => setNotice(''), 2500);
     } catch (nextError) {
       setError(nextError.message);
     } finally {
@@ -216,168 +344,217 @@ const MenuEditorPage = () => {
     }
   };
 
-  if (!payload) {
-    return (
-      <>
-        <PageHeader title="Редактор меню" description="Загрузка..." />
-        {error ? <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-bold text-red-700">{error}</div> : null}
-      </>
-    );
-  }
-
   return (
-    <>
-      <PageHeader
-        title={payload.menuMeta.name || menuRecord?.name || 'Редактор меню'}
-        description={menuRecord ? `${menuRecord.venueName} · ${menuRecord.owner.email}` : 'Админское редактирование меню'}
-        actions={(
-          <>
-            <Link to="/menus" className="inline-flex h-9 items-center gap-2 rounded-lg border border-border bg-card px-3 text-sm font-bold hover:bg-secondary">
-              <ArrowLeft size={16} />
-              Назад
-            </Link>
-            <select value={status} onChange={(event) => setStatus(event.target.value)} className="h-9 rounded-lg border border-border bg-card px-3 text-sm font-bold outline-none">
-              <option value="draft">draft</option>
-              <option value="active">active</option>
-              <option value="published">published</option>
-            </select>
-            <Button variant="outline" onClick={() => setJsonMode((value) => !value)}>
-              {jsonMode ? <Eye size={16} /> : <Code2 size={16} />}
-              {jsonMode ? 'Форма' : 'JSON'}
-            </Button>
-            <Button onClick={saveMenu} disabled={isSaving}>
-              <Save size={16} />
-              {isSaving ? 'Сохраняем...' : 'Сохранить'}
-            </Button>
-          </>
-        )}
-      />
+    <div className="space-y-4">
+      <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+        <div className="min-w-0">
+          <Link to="/menus" className="text-xs font-bold uppercase tracking-[0.12em] text-muted-foreground hover:text-foreground">
+            ← Все меню
+          </Link>
+          <h1 className="mt-1 truncate text-2xl font-black tracking-tight text-foreground">
+            {localizedMenuName || menuRecord?.name || 'Редактор меню'}
+          </h1>
+          <p className="text-sm text-muted-foreground">
+            {menuRecord?.venueName} · {menuRecord?.owner?.email}
+          </p>
+        </div>
 
-      <div className="flex items-center gap-2">
-        <StatusBadge value={status} />
-        <span className="text-xs font-bold text-muted-foreground">{menuRecord?.categoriesCount || 0} категорий · {menuRecord?.itemsCount || 0} позиций</span>
+        <div className="flex flex-wrap items-center gap-2">
+          <select
+            value={status}
+            onChange={(event) => setStatus(event.target.value)}
+            className={`${formSelectClasses} !h-10 !w-auto !rounded-xl !text-sm`}
+          >
+            <option value="draft">draft</option>
+            <option value="active">active</option>
+            <option value="published">published</option>
+          </select>
+
+          <Button variant="outline" onClick={() => setIsJsonOpen((value) => !value)} className={secondaryActionButtonClasses}>
+            <Code2 size={15} />
+            JSON
+          </Button>
+
+          <Button onClick={saveMenu} disabled={isSaving} className={primaryActionButtonClasses}>
+            {isSaving ? <Check size={16} /> : <Save size={16} />}
+            {isSaving ? 'Сохраняем...' : 'Сохранить'}
+          </Button>
+        </div>
       </div>
 
       {error ? <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-bold text-red-700">{error}</div> : null}
       {notice ? <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-bold text-emerald-700">{notice}</div> : null}
 
-      {jsonMode ? (
-        <section className="rounded-2xl border border-border/70 bg-card p-5 shadow-sm">
+      {isJsonOpen ? (
+        <div className="rounded-3xl border border-border/60 bg-card p-4 shadow-sm">
           <div className="mb-3 flex items-center justify-between">
             <h2 className="text-lg font-black">Payload JSON</h2>
-            <Button variant="outline" onClick={syncJsonToPayload}>Применить JSON к форме</Button>
+            <Button variant="outline" onClick={applyJsonPayload}>Применить к форме</Button>
           </div>
           <textarea
             value={jsonText}
             onChange={(event) => setJsonText(event.target.value)}
-            className="h-[620px] w-full resize-y rounded-xl border border-border bg-background p-4 font-mono text-xs outline-none focus:border-brand-purple"
+            className="h-[520px] w-full resize-y rounded-2xl border border-border bg-background p-4 font-mono text-xs outline-none focus:border-brand-purple"
           />
-        </section>
-      ) : (
-        <div className="grid gap-4 lg:grid-cols-[280px_1fr_360px]">
-          <aside className="rounded-2xl border border-border/70 bg-card p-4 shadow-sm">
-            <div className="mb-3 flex items-center justify-between">
-              <h2 className="font-black">Категории</h2>
-              <Button size="sm" variant="outline" onClick={addCategory}><Plus size={14} />Кат.</Button>
-            </div>
-            <div className="space-y-2">
-              {payload.categories.map((category) => (
-                <button
-                  key={category.id}
-                  onClick={() => {
-                    setActiveCategoryId(category.id);
-                    setActiveItemId(category.items?.[0]?.id || null);
-                  }}
-                  className={cn(
-                    'w-full rounded-xl px-3 py-2 text-left text-sm font-bold transition-colors',
-                    activeCategory?.id === category.id ? 'bg-brand-purple/10 text-brand-purple' : 'hover:bg-secondary',
-                  )}
-                >
-                  {category.name || 'Без названия'}
-                  <span className="block text-xs font-semibold text-muted-foreground">{category.items?.length || 0} позиций</span>
-                </button>
-              ))}
-            </div>
-          </aside>
-
-          <section className="space-y-4">
-            <div className="rounded-2xl border border-border/70 bg-card p-5 shadow-sm">
-              <h2 className="mb-4 text-lg font-black">Основное</h2>
-              <div className="grid gap-4 sm:grid-cols-2">
-                <TextInput label="Название меню" value={payload.menuMeta.name} onChange={(value) => updateMenuMeta({ name: value })} />
-                <TextInput label="Slug" value={payload.menuMeta.slug} onChange={(value) => updateMenuMeta({ slug: value })} />
-                <TextInput label="Валюта" value={payload.currency} onChange={(value) => setNextPayload((current) => ({ ...current, currency: value.toUpperCase() }))} />
-                <TextInput label="Название заведения" value={payload.venue.name} onChange={(value) => updateVenue({ name: value })} />
-                <div className="sm:col-span-2">
-                  <TextArea label="Описание меню" value={payload.menuMeta.description || ''} onChange={(value) => updateMenuMeta({ description: value })} />
-                </div>
-              </div>
-            </div>
-
-            {activeCategory ? (
-              <div className="rounded-2xl border border-border/70 bg-card p-5 shadow-sm">
-                <div className="mb-4 flex items-center justify-between">
-                  <h2 className="text-lg font-black">Категория</h2>
-                  <Button variant="destructive" size="sm" onClick={deleteCategory}><Trash2 size={14} />Удалить</Button>
-                </div>
-                <div className="grid gap-4 sm:grid-cols-2">
-                  <TextInput label="Название" value={activeCategory.name} onChange={(value) => updateActiveCategory({ name: value })} />
-                  <TextInput label="Image URL" value={activeCategory.imageUrl || ''} onChange={(value) => updateActiveCategory({ imageUrl: value || null })} />
-                  <div className="sm:col-span-2">
-                    <TextArea label="Описание" value={activeCategory.description || ''} onChange={(value) => updateActiveCategory({ description: value })} />
-                  </div>
-                  <label className="flex items-center gap-2 text-sm font-bold">
-                    <input type="checkbox" checked={Boolean(activeCategory.isHidden)} onChange={(event) => updateActiveCategory({ isHidden: event.target.checked })} className="h-4 w-4 accent-brand-purple" />
-                    Скрыта
-                  </label>
-                </div>
-              </div>
-            ) : null}
-          </section>
-
-          <aside className="rounded-2xl border border-border/70 bg-card p-4 shadow-sm">
-            <div className="mb-3 flex items-center justify-between">
-              <h2 className="font-black">Позиции</h2>
-              <Button size="sm" variant="outline" onClick={addItem} disabled={!activeCategory}><Plus size={14} />Поз.</Button>
-            </div>
-            <div className="mb-4 max-h-72 space-y-2 overflow-y-auto">
-              {(activeCategory?.items || []).map((item) => (
-                <button
-                  key={item.id}
-                  onClick={() => setActiveItemId(item.id)}
-                  className={cn(
-                    'w-full rounded-xl px-3 py-2 text-left text-sm font-bold transition-colors',
-                    activeItem?.id === item.id ? 'bg-brand-purple/10 text-brand-purple' : 'hover:bg-secondary',
-                  )}
-                >
-                  {item.name || 'Без названия'}
-                  <span className="block text-xs font-semibold text-muted-foreground">{item.price || 'без цены'}</span>
-                </button>
-              ))}
-            </div>
-
-            {activeItem ? (
-              <div className="space-y-4 border-t border-border pt-4">
-                <div className="flex items-center justify-between">
-                  <h3 className="font-black">Позиция</h3>
-                  <Button variant="destructive" size="sm" onClick={deleteItem}><Trash2 size={14} /></Button>
-                </div>
-                <TextInput label="Название" value={activeItem.name} onChange={(value) => updateActiveItem({ name: value })} />
-                <TextInput label="Цена" value={activeItem.price || ''} onChange={(value) => updateActiveItem({ price: value })} />
-                <TextInput label="Image URL" value={activeItem.imageUrl || ''} onChange={(value) => updateActiveItem({ imageUrl: value || null })} />
-                <TextArea label="Описание" value={activeItem.description || ''} onChange={(value) => updateActiveItem({ description: value })} rows={4} />
-                <label className="flex items-center gap-2 text-sm font-bold">
-                  <input type="checkbox" checked={Boolean(activeItem.isAvailable)} onChange={(event) => updateActiveItem({ isAvailable: event.target.checked })} className="h-4 w-4 accent-brand-purple" />
-                  Доступна
-                </label>
-              </div>
-            ) : (
-              <div className="rounded-xl bg-secondary/50 p-4 text-sm font-semibold text-muted-foreground">Выбери позицию или создай новую.</div>
-            )}
-          </aside>
         </div>
-      )}
-    </>
+      ) : null}
+
+      <div className="bg-card border border-border/60 rounded-3xl shadow-sm flex flex-col md:flex-row overflow-hidden min-h-[calc(100vh-13rem)] relative w-full max-w-full min-w-0">
+        <CategorySidebar
+          categories={menu.categories}
+          activeCategoryId={activeCategoryId}
+          language={editorLanguage}
+          defaultLanguage={menu.defaultLanguage}
+          onAddCategory={handleAddCategory}
+          onSelectCategory={setActiveCategoryId}
+          onMoveCategory={moveCategory}
+        />
+
+        <div className="flex-1 flex flex-col bg-background relative min-w-0 w-full max-w-full overflow-hidden">
+          {activeCategory ? (
+            <div className="p-3 sm:p-5 lg:p-3 border-b border-border/60 flex flex-col gap-3 bg-card z-10 sticky top-0 min-w-0 max-w-full overflow-hidden">
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 w-full min-w-0 sm:justify-end md:ml-auto md:w-auto md:max-w-full md:rounded-xl md:border md:border-border/70 md:bg-secondary/35 md:px-2.5 md:py-2.5 mb-0 md:mb-3">
+                <div className="grid grid-cols-2 gap-2.5 w-full sm:w-auto sm:flex sm:flex-row shrink-0">
+                  <div className="relative w-fit min-w-0">
+                    <select
+                      value={editorLanguage}
+                      onChange={(event) => handleEditorLanguageChange(event.target.value)}
+                      className={`${formSelectClasses} !w-auto h-10 sm:h-10 text-xs sm:text-sm !pl-2.5 !pr-8`}
+                    >
+                      {TOP_MENU_LANGUAGES.map((language) => (
+                        <option key={language.code} value={language.code}>
+                          {language.flag} {language.shortLabel}
+                        </option>
+                      ))}
+                    </select>
+                    <div className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none">
+                      <ChevronDown size={14} />
+                    </div>
+                  </div>
+
+                  <Button variant="outline" onClick={handleEditMenuMeta} className={`${secondaryActionButtonClasses} sm:h-10 h-10 px-4 w-full sm:w-auto shrink-0 text-xs sm:text-sm`}>
+                    Редактировать
+                  </Button>
+
+                  {publicPreviewUrl ? (
+                    <Button variant="outline" className={`${secondaryActionButtonClasses} sm:h-10 h-10 px-4 w-full sm:w-auto shrink-0 text-xs sm:text-sm`}>
+                      <a href={publicPreviewUrl} target="_blank" rel="noreferrer" className="flex items-center gap-2">
+                        <ExternalLink size={14} />
+                        Превью
+                      </a>
+                    </Button>
+                  ) : null}
+                </div>
+
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 w-full sm:w-auto min-w-0 sm:flex-none">
+                  <div className="relative flex-1 sm:w-56 min-w-0">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={14} />
+                    <input
+                      placeholder="Поиск блюда..."
+                      value={searchQuery}
+                      onChange={(event) => setSearchQuery(event.target.value)}
+                      className={`${formFieldClasses} h-10 text-xs sm:text-sm !pl-[30px]`}
+                    />
+                  </div>
+
+                  <Button onClick={handleAddItemClick} className={`${primaryActionButtonClasses} sm:h-10 h-10 px-3.5 shrink-0 text-xs sm:text-sm`}>
+                    <Plus size={16} />
+                    Блюдо
+                  </Button>
+                </div>
+              </div>
+
+              <div className="flex flex-col min-w-0 max-w-full">
+                <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-muted-foreground mb-1.5">
+                  {localizedMenuName}
+                </p>
+                <div className="flex items-center gap-2.5 min-w-0 max-w-full">
+                  <h1 className="text-xl sm:text-[22px] font-extrabold text-foreground tracking-tight truncate min-w-0">
+                    {localizedCategoryName}
+                  </h1>
+
+                  <div className="flex items-center gap-1 shrink-0">
+                    <button
+                      onClick={handleEditCategory}
+                      className={`${subtleIconButtonClasses} w-9 h-9 hover:text-brand-purple hover:bg-brand-purple/10 hover:border-brand-purple/30 shadow-sm`}
+                    >
+                      <Edit2 size={14} />
+                    </button>
+
+                    <button
+                      onClick={handleDeleteCategoryClick}
+                      className={`${subtleIconButtonClasses} w-9 h-9 hover:text-destructive hover:bg-destructive/10 hover:border-destructive/30 shadow-sm`}
+                    >
+                      <Trash2 size={14} />
+                    </button>
+                  </div>
+                </div>
+
+                {localizedCategoryDescription ? (
+                  <p className="text-xs sm:text-[13px] text-muted-foreground mt-1 max-w-2xl leading-relaxed truncate whitespace-normal line-clamp-2">
+                    {localizedCategoryDescription}
+                  </p>
+                ) : null}
+
+                {activeCategory.availableHours?.start && activeCategory.availableHours?.end ? (
+                  <p className="text-[11px] font-semibold text-foreground/80 mt-1.5">
+                    Доступно: {getAvailableHoursLabel(activeCategory.availableHours)}
+                  </p>
+                ) : null}
+              </div>
+            </div>
+          ) : (
+            <div className="p-8 border-b border-border/60 bg-card">
+              <h1 className="text-xl font-bold text-muted-foreground">Выберите категорию</h1>
+            </div>
+          )}
+
+          <MenuItemList
+            items={filteredItems}
+            language={editorLanguage}
+            defaultLanguage={menu.defaultLanguage}
+            onEditItem={handleEditItemClick}
+            onDeleteItem={handleDeleteItemClick}
+          />
+        </div>
+      </div>
+
+      <DeleteConfirmModal deleteConfirm={deleteConfirm} onCancel={() => setDeleteConfirm(null)} onConfirm={executeDelete} />
+
+      <CategoryModal
+        category={editingCategory}
+        language={editorLanguage}
+        defaultLanguage={menu.defaultLanguage}
+        onChange={setEditingCategory}
+        onCancel={() => setEditingCategory(null)}
+        onSave={handleSaveCategory}
+      />
+
+      <MenuMetaModal
+        menuMeta={editingMenuMeta}
+        language={editorLanguage}
+        defaultLanguage={menu.defaultLanguage}
+        onChange={setEditingMenuMeta}
+        onCancel={() => setEditingMenuMeta(null)}
+        onSave={handleSaveMenuMeta}
+      />
+
+      <ItemModal
+        item={editingItem}
+        mode={modalMode}
+        categories={menu.categories}
+        language={editorLanguage}
+        defaultLanguage={menu.defaultLanguage}
+        targetCategoryId={targetCategoryId}
+        onTargetCategoryChange={setTargetCategoryId}
+        onChange={setEditingItem}
+        onVariantChange={handleVariantChange}
+        onAddVariant={addVariant}
+        onRemoveVariant={removeVariant}
+        onCancel={() => setEditingItem(null)}
+        onSave={handleSaveItem}
+      />
+    </div>
   );
 };
 
