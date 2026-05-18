@@ -13,11 +13,20 @@ import UserDetailPage from '../pages/UserDetailPage';
 import UsersPage from '../pages/UsersPage';
 import VenueDetailPage from '../pages/VenueDetailPage';
 import VenuesPage from '../pages/VenuesPage';
+import { getStoredAdminKey } from '../lib/adminApi';
+
+const RequireAdminKey = () => {
+  if (!getStoredAdminKey()) {
+    return <Navigate to="/login" replace />;
+  }
+
+  return <AdminLayout />;
+};
 
 const App = () => (
   <Routes>
     <Route path="/login" element={<LoginPage />} />
-    <Route element={<AdminLayout />}>
+    <Route element={<RequireAdminKey />}>
       <Route index element={<OverviewPage />} />
       <Route path="/users" element={<UsersPage />} />
       <Route path="/users/:id" element={<UserDetailPage />} />

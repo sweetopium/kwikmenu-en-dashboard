@@ -15,6 +15,16 @@ from app.core.config import get_settings
 from app.core.paths import DATA_ROOT, UPLOADS_ROOT
 
 
+def parse_cors_origins(*values: str | None) -> list[str]:
+    origins: list[str] = []
+    for value in values:
+        for origin in (value or "").split(","):
+            normalized_origin = origin.strip().rstrip("/")
+            if normalized_origin and normalized_origin not in origins:
+                origins.append(normalized_origin)
+    return origins
+
+
 def create_app() -> FastAPI:
     settings = get_settings()
     DATA_ROOT.mkdir(parents=True, exist_ok=True)
@@ -24,14 +34,14 @@ def create_app() -> FastAPI:
 
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=[
+        allow_origins=parse_cors_origins(
             settings.menu_import_frontend_origin,
             settings.admin_frontend_origin,
             "http://127.0.0.1:5173",
             "http://localhost:5173",
             "http://127.0.0.1:5174",
             "http://localhost:5174",
-        ],
+        ),
         allow_origin_regex=settings.menu_import_frontend_origin_regex,
         allow_credentials=True,
         allow_methods=["*"],

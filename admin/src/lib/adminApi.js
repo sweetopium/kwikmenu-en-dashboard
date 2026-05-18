@@ -47,6 +47,12 @@ export const adminFetch = async (path, options = {}) => {
   });
 
   if (!response.ok) {
+    if (response.status === 401) {
+      storeAdminKey('');
+      if (window.location.pathname !== '/login') {
+        window.location.assign('/login');
+      }
+    }
     await parseApiError(response);
   }
 
