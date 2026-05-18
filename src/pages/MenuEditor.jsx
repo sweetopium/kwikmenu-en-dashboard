@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { ChevronDown, Edit2, Plus, Search, Sparkles, Trash2 } from 'lucide-react';
+import { ChevronDown, Edit2, ExternalLink, Plus, Search, Sparkles, Trash2 } from 'lucide-react';
 import { useParams } from 'react-router-dom';
 
 import CategoryModal from "../components/menu-editor/CategoryModal";
@@ -14,7 +14,7 @@ import { Input } from "../components/ui/input";
 import { loadImportedMenuFromStorage, saveImportedMenuToStorage } from "../lib/importedMenuStorage";
 import { normalizeMenu } from "../lib/menuNormalization";
 import { getMenu, updateMenu } from "../lib/menusApi";
-import { getLanguageMeta } from "../lib/languageMeta";
+import { TOP_MENU_LANGUAGES } from "../lib/languageMeta";
 import {
   formFieldClasses,
   formSelectClasses,
@@ -55,6 +55,7 @@ const MenuEditor = () => {
   const [isNormalizing, setIsNormalizing] = useState(false);
   const [isLoadingRemoteMenu, setIsLoadingRemoteMenu] = useState(false);
   const [remoteMenuError, setRemoteMenuError] = useState('');
+  const [remoteVenueId, setRemoteVenueId] = useState(null);
   const hasLoadedRemoteMenuRef = useRef(false);
 
   const activeCategory = menu.categories.find((category) => category.id === activeCategoryId);
@@ -64,6 +65,7 @@ const MenuEditor = () => {
   const localizedMenuName = getLocalizedField(menu.menuMeta, 'name', editorLanguage, menu.defaultLanguage);
   const localizedCategoryName = getLocalizedField(activeCategory, 'name', editorLanguage, menu.defaultLanguage);
   const localizedCategoryDescription = getLocalizedField(activeCategory, 'description', editorLanguage, menu.defaultLanguage);
+  const publicPreviewUrl = isRemoteMenu && remoteVenueId ? `/m/${remoteVenueId}?menu=${id}` : null;
 
   useEffect(() => {
     if (isRemoteMenu) {
@@ -76,6 +78,7 @@ const MenuEditor = () => {
           if (cancelled) return;
           const nextMenu = response.payload;
           hasLoadedRemoteMenuRef.current = true;
+          setRemoteVenueId(response.venueId || null);
           setMenu(nextMenu);
           setActiveCategoryId(nextMenu.categories[0]?.id || null);
           setEditorLanguage(nextMenu.defaultLanguage || 'ru');
@@ -97,6 +100,7 @@ const MenuEditor = () => {
 
     const nextMenu = resolveMenuPayload();
     hasLoadedRemoteMenuRef.current = true;
+    setRemoteVenueId(null);
     setMenu(nextMenu);
     setActiveCategoryId(nextMenu.categories[0]?.id || null);
     setEditorLanguage(nextMenu.defaultLanguage || 'ru');
@@ -319,6 +323,20 @@ const MenuEditor = () => {
     });
   };
 
+  const handleEditorLanguageChange = (languageCode) => {
+    const selectedLanguage = TOP_MENU_LANGUAGES.find((language) => language.code === languageCode);
+
+    setEditorLanguage(languageCode);
+    if (!selectedLanguage || menu.languages.some((language) => language.code === languageCode)) {
+      return;
+    }
+
+    setMenu({
+      ...menu,
+      languages: [...menu.languages, selectedLanguage],
+    });
+  };
+
   const removeVariant = (index) => {
     const updatedVariants = editingItem.variants.filter((_, variantIndex) => variantIndex !== index);
 
@@ -388,113 +406,120 @@ const MenuEditor = () => {
 
       <div className="flex-1 flex flex-col bg-background relative min-w-0 w-full max-w-full overflow-hidden">
         {activeCategory ? (
-          <div className="p-4 sm:p-6 lg:p-4 border-b border-border/60 flex flex-col gap-4 bg-card z-10 sticky top-0 min-w-0 max-w-full overflow-hidden">
-            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full min-w-0 sm:justify-end md:ml-auto md:w-auto md:max-w-full md:rounded-xl md:border md:border-border/70 md:bg-secondary/35 md:px-3 md:py-3 mb-0 md:mb-4">
-              <div className="grid grid-cols-2 gap-3 w-full sm:w-auto sm:flex sm:flex-row shrink-0">
-                <div className="relative min-w-0 sm:min-w-[156px]">
+          <div className="p-3 sm:p-5 lg:p-3 border-b border-border/60 flex flex-col gap-3 bg-card z-10 sticky top-0 min-w-0 max-w-full overflow-hidden">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 w-full min-w-0 sm:justify-end md:ml-auto md:w-auto md:max-w-full md:rounded-xl md:border md:border-border/70 md:bg-secondary/35 md:px-2.5 md:py-2.5 mb-0 md:mb-3">
+              <div className="grid grid-cols-2 gap-2.5 w-full sm:w-auto sm:flex sm:flex-row shrink-0">
+                <div className="relative w-fit min-w-0">
                   <select
                     value={editorLanguage}
-                    onChange={(event) => setEditorLanguage(event.target.value)}
-                    className={formSelectClasses}
+                    onChange={(event) => handleEditorLanguageChange(event.target.value)}
+                    className={`${formSelectClasses} !w-auto h-10 sm:h-10 text-xs sm:text-sm !pl-2.5 !pr-8`}
                   >
-                    {menu.languages.map((language) => {
-                      const meta = getLanguageMeta(language.code);
-                      const flag = language.flag || meta?.flag || '🌐';
-                      const label = language.nativeName || meta?.label || language.shortLabel || language.code.toUpperCase();
-
-                      return (
-                        <option key={language.code} value={language.code}>
-                          {flag} {label}
-                        </option>
-                      );
-                    })}
+                    {TOP_MENU_LANGUAGES.map((language) => (
+                      <option key={language.code} value={language.code}>
+                        {language.flag} {language.shortLabel}
+                      </option>
+                    ))}
                   </select>
 
                   <div className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none">
-                    <ChevronDown size={16} />
+                    <ChevronDown size={14} />
                   </div>
                 </div>
 
                 <Button
                   variant="outline"
                   onClick={handleEditMenuMeta}
-                  className={`${secondaryActionButtonClasses} sm:h-[44px] h-[44px] px-5 w-full sm:w-auto shrink-0`}
+                  className={`${secondaryActionButtonClasses} sm:h-10 h-10 px-4 w-full sm:w-auto shrink-0 text-xs sm:text-sm`}
                 >
                   Редактировать
                 </Button>
+
+                {publicPreviewUrl && (
+                  <Button
+                    asChild
+                    variant="outline"
+                    className={`${secondaryActionButtonClasses} sm:h-10 h-10 px-4 w-full sm:w-auto shrink-0 text-xs sm:text-sm`}
+                  >
+                    <a href={publicPreviewUrl} target="_blank" rel="noreferrer">
+                      <ExternalLink size={14} className="mr-2" />
+                      Превью
+                    </a>
+                  </Button>
+                )}
 
                 {isImportedMenu && (
                   <Button
                     variant="outline"
                     onClick={handleNormalizeMenu}
                     disabled={isNormalizing}
-                    className={`${secondaryActionButtonClasses} sm:h-[44px] h-[44px] px-5 w-full sm:w-auto shrink-0`}
+                    className={`${secondaryActionButtonClasses} sm:h-10 h-10 px-4 w-full sm:w-auto shrink-0 text-xs sm:text-sm`}
                   >
-                    <Sparkles size={16} className="mr-2" />
+                    <Sparkles size={14} className="mr-2" />
                     {isNormalizing ? 'Нормализация...' : 'Нормализовать'}
                   </Button>
                 )}
               </div>
 
-              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full sm:w-auto min-w-0 sm:flex-none">
-                <div className="relative flex-1 sm:w-64 min-w-0">
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 w-full sm:w-auto min-w-0 sm:flex-none">
+                <div className="relative flex-1 sm:w-56 min-w-0">
                   <Search
                     className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
-                    size={16}
+                    size={14}
                   />
 
                   <Input
                     placeholder="Поиск блюда..."
                     value={searchQuery}
                     onChange={(event) => setSearchQuery(event.target.value)}
-                    className={`${formFieldClasses} !pl-[30px]`}
+                    className={`${formFieldClasses} h-10 text-xs sm:text-sm !pl-[30px]`}
                   />
                 </div>
 
                 <Button
                   onClick={handleAddItemClick}
-                  className={`${primaryActionButtonClasses} sm:h-[44px] h-[44px] px-4 shrink-0`}
+                  className={`${primaryActionButtonClasses} sm:h-10 h-10 px-3.5 shrink-0 text-xs sm:text-sm`}
                 >
-                  <Plus size={18} className="mr-2" />
+                  <Plus size={16} className="mr-2" />
                   Блюдо
                 </Button>
               </div>
             </div>
 
             <div className="flex flex-col min-w-0 max-w-full">
-              <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-muted-foreground mb-2">
+              <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-muted-foreground mb-1.5">
                 {localizedMenuName}
               </p>
-              <div className="flex items-center gap-3 min-w-0 max-w-full">
-                <h1 className="text-2xl sm:text-2xl font-extrabold text-foreground tracking-tight truncate min-w-0">
+              <div className="flex items-center gap-2.5 min-w-0 max-w-full">
+                <h1 className="text-xl sm:text-[22px] font-extrabold text-foreground tracking-tight truncate min-w-0">
                   {localizedCategoryName}
                 </h1>
 
                 <div className="flex items-center gap-1 shrink-0">
                   <button
                     onClick={handleEditCategory}
-                    className={`${subtleIconButtonClasses} hover:text-brand-purple hover:bg-brand-purple/10 hover:border-brand-purple/30 shadow-sm`}
+                    className={`${subtleIconButtonClasses} w-9 h-9 hover:text-brand-purple hover:bg-brand-purple/10 hover:border-brand-purple/30 shadow-sm`}
                   >
-                    <Edit2 size={15} />
+                    <Edit2 size={14} />
                   </button>
 
                   <button
                     onClick={handleDeleteCategoryClick}
-                    className={`${subtleIconButtonClasses} hover:text-destructive hover:bg-destructive/10 hover:border-destructive/30 shadow-sm`}
+                    className={`${subtleIconButtonClasses} w-9 h-9 hover:text-destructive hover:bg-destructive/10 hover:border-destructive/30 shadow-sm`}
                   >
-                    <Trash2 size={15} />
+                    <Trash2 size={14} />
                   </button>
                 </div>
               </div>
 
               {localizedCategoryDescription && (
-                <p className="text-sm text-muted-foreground mt-1.5 max-w-2xl leading-relaxed truncate whitespace-normal line-clamp-2">
+                <p className="text-xs sm:text-[13px] text-muted-foreground mt-1 max-w-2xl leading-relaxed truncate whitespace-normal line-clamp-2">
                   {localizedCategoryDescription}
                 </p>
               )}
 
               {activeCategory.availableHours?.start && activeCategory.availableHours?.end && (
-                <p className="text-xs font-semibold text-foreground/80 mt-2">
+                <p className="text-[11px] font-semibold text-foreground/80 mt-1.5">
                   Доступно: {getAvailableHoursLabel(activeCategory.availableHours)}
                 </p>
               )}

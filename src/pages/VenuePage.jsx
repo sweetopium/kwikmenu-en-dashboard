@@ -18,6 +18,8 @@ import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
 import { Switch } from "../components/ui/switch";
 import { Textarea } from "../components/ui/textarea";
+import { DialPhoneField, formatPhoneByDial, stripPhoneDigits } from "../components/onboarding/CountryDialFields";
+import { COUNTRIES } from "../components/onboarding/countries";
 import SettingsPageHeader from "../components/settings/SettingsPageHeader";
 import VenueQrSection from "../components/venue/VenueQrSection";
 import {
@@ -86,6 +88,32 @@ const fileToDataUrl = (file) =>
     reader.readAsDataURL(file);
   });
 
+const DEFAULT_PHONE_COUNTRY = COUNTRIES[0];
+
+const resolvePhoneParts = (phone) => {
+  const normalizedPhone = `${phone || ''}`.trim();
+  const matchedCountry = COUNTRIES
+    .slice()
+    .sort((a, b) => b.dial.length - a.dial.length)
+    .find((country) => normalizedPhone.startsWith(country.dial));
+
+  const country = matchedCountry || DEFAULT_PHONE_COUNTRY;
+  const localPhone = normalizedPhone.startsWith(country.dial)
+    ? normalizedPhone.slice(country.dial.length).trim()
+    : normalizedPhone;
+
+  return {
+    selectedCountryId: country.id,
+    selectedDial: country.dial,
+    localPhone: formatPhoneByDial(localPhone, country.dial),
+  };
+};
+
+const buildFullPhone = ({ selectedDial, localPhone }) => {
+  const digits = stripPhoneDigits(localPhone);
+  return digits ? `${selectedDial} ${localPhone}`.trim() : '';
+};
+
 const VenuePage = () => {
   const { id: venueId } = useParams();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -93,6 +121,9 @@ const VenuePage = () => {
   const activeTab = VENUE_TABS.some((tab) => tab.id === requestedTab) ? requestedTab : 'profile';
 
   const [venueData, setVenueData] = useState(EMPTY_VENUE);
+  const [phoneCountryId, setPhoneCountryId] = useState(DEFAULT_PHONE_COUNTRY.id);
+  const [phoneDial, setPhoneDial] = useState(DEFAULT_PHONE_COUNTRY.dial);
+  const [phoneLocalNumber, setPhoneLocalNumber] = useState('');
   const [wifiData, setWifiData] = useState(EMPTY_WIFI);
   const [designData, setDesignData] = useState(EMPTY_DESIGN);
   const [qrData, setQrData] = useState(EMPTY_QR);
@@ -119,6 +150,11 @@ const VenuePage = () => {
     [],
   );
 
+  const handlePhoneDialChange = (nextDial) => {
+    setPhoneDial(nextDial);
+    setPhoneLocalNumber((currentPhone) => formatPhoneByDial(currentPhone, nextDial));
+  };
+
   const handleTabChange = (tabId) => {
     const nextParams = new URLSearchParams(searchParams);
 
@@ -132,6 +168,7 @@ const VenuePage = () => {
   };
 
   const applyVenuePayload = (venue, settings) => {
+    const phoneParts = resolvePhoneParts(venue.phone);
     setVenueData({
       name: venue.name || '',
       description: venue.description || '',
@@ -141,6 +178,9 @@ const VenuePage = () => {
       currency: venue.currency || settings?.currency || 'RUB',
       publicUrl: venue.publicUrl || settings?.qr?.publicUrl || '',
     });
+    setPhoneCountryId(phoneParts.selectedCountryId);
+    setPhoneDial(phoneParts.selectedDial);
+    setPhoneLocalNumber(phoneParts.localPhone);
 
     if (settings) {
       setWifiData({
@@ -207,11 +247,12 @@ const VenuePage = () => {
       const venue = await updateVenueProfile(venueId, {
         name: venueData.name,
         description: venueData.description || null,
-        phone: venueData.phone || null,
+        phone: buildFullPhone({ selectedDial: phoneDial, localPhone: phoneLocalNumber }) || null,
         city: venueData.city || null,
         country: venueData.country || null,
         currency: venueData.currency || 'RUB',
       });
+      const phoneParts = resolvePhoneParts(venue.phone);
       setVenueData((current) => ({
         ...current,
         name: venue.name || '',
@@ -222,6 +263,9 @@ const VenuePage = () => {
         currency: venue.currency || 'RUB',
         publicUrl: venue.publicUrl || current.publicUrl,
       }));
+      setPhoneCountryId(phoneParts.selectedCountryId);
+      setPhoneDial(phoneParts.selectedDial);
+      setPhoneLocalNumber(phoneParts.localPhone);
     } catch (nextError) {
       setError(nextError.message || 'Не удалось сохранить профиль заведения.');
     } finally {
@@ -411,11 +455,18 @@ const VenuePage = () => {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Телефон для связи</Label>
-                    <Input
-                      value={venueData.phone}
-                      onChange={(e) => setVenueData({ ...venueData, phone: e.target.value })}
-                      className={formFieldClasses}
+                    <DialPhoneField
+                      label="Телефон для связи"
+                      phone={phoneLocalNumber}
+                      selectedDial={phoneDial}
+                      selectedCountryId={phoneCountryId}
+                      onCountryChange={setPhoneCountryId}
+                      onDialChange={handlePhoneDialChange}
+                      onPhoneChange={setPhoneLocalNumber}
+                      labelClassName="text-xs font-semibold text-muted-foreground uppercase tracking-wider"
+                      inputClassName={formFieldClasses}
+                      selectClassName={formFieldClasses}
+                      selectWrapperClassName="w-[92px] sm:w-[108px]"
                     />
                   </div>
                 </div>

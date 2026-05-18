@@ -1,16 +1,16 @@
 export const LANGUAGE_META = {
-  en: { flag: '🇬🇧', label: 'English' },
+  en: { flag: '🇬🇧', shortLabel: 'EN', label: 'English' },
   es: { flag: '🇪🇸', label: 'Español' },
   fr: { flag: '🇫🇷', label: 'Français' },
   de: { flag: '🇩🇪', label: 'Deutsch' },
   it: { flag: '🇮🇹', label: 'Italiano' },
   pt: { flag: '🇵🇹', label: 'Português' },
   pt_br: { flag: '🇧🇷', label: 'Português (BR)' },
-  ru: { flag: '🇷🇺', label: 'Русский' },
+  ru: { flag: '🇷🇺', shortLabel: 'RU', label: 'Русский' },
   uk: { flag: '🇺🇦', label: 'Українська' },
-  kk: { flag: '🇰🇿', label: 'Қазақша' },
+  kk: { flag: '🇰🇿', shortLabel: 'KZ', label: 'Қазақша' },
   tr: { flag: '🇹🇷', label: 'Türkçe' },
-  ar: { flag: '🇦🇪', label: 'العربية' },
+  ar: { flag: '🇦🇪', shortLabel: 'AR', label: 'العربية' },
   he: { flag: '🇮🇱', label: 'עברית' },
   hi: { flag: '🇮🇳', label: 'हिन्दी' },
   zh: { flag: '🇨🇳', label: '中文' },
@@ -20,6 +20,19 @@ export const LANGUAGE_META = {
   nl: { flag: '🇳🇱', label: 'Nederlands' },
   cs: { flag: '🇨🇿', label: 'Čeština' },
 };
+
+export const TOP_MENU_LANGUAGES = [
+  { code: 'ru', shortLabel: 'RU', nativeName: 'Русский', flag: '🇷🇺' },
+  { code: 'en', shortLabel: 'EN', nativeName: 'English', flag: '🇬🇧' },
+  { code: 'ar', shortLabel: 'AR', nativeName: 'العربية', flag: '🇦🇪' },
+  { code: 'kk', shortLabel: 'KZ', nativeName: 'Қазақша', flag: '🇰🇿' },
+  { code: 'tr', shortLabel: 'TR', nativeName: 'Türkçe', flag: '🇹🇷' },
+  { code: 'de', shortLabel: 'DE', nativeName: 'Deutsch', flag: '🇩🇪' },
+  { code: 'fr', shortLabel: 'FR', nativeName: 'Français', flag: '🇫🇷' },
+  { code: 'es', shortLabel: 'ES', nativeName: 'Español', flag: '🇪🇸' },
+  { code: 'zh', shortLabel: 'ZH', nativeName: '中文', flag: '🇨🇳' },
+  { code: 'he', shortLabel: 'HE', nativeName: 'עברית', flag: '🇮🇱' },
+];
 
 export const getLanguageMeta = (code) => {
   if (!code) return null;
