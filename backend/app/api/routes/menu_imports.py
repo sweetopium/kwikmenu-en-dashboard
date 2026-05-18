@@ -21,6 +21,7 @@ from app.schemas.menu_import import (
 from app.services.menu_import_jobs import serialize_job
 from app.services.pdf_link_downloader import PdfLinkDownloadError, download_pdf_from_url
 from app.services.page_normalizer import IMAGE_EXTENSIONS, PDF_EXTENSION
+from app.services.product_analytics import record_product_event
 
 
 router = APIRouter(prefix="/api/menu-imports", tags=["menu-imports"])
@@ -117,6 +118,23 @@ async def create_menu_import(
     db.add(job)
     db.commit()
     db.refresh(job)
+
+    record_product_event(
+        db,
+        request=request,
+        user=current_user,
+        event_name="menu_import_submitted",
+        source="backend",
+        venue_id=job.venue_id,
+        properties={
+            "job_id": job.id,
+            "menu_source": job.menu_source,
+            "source_count": len(job.sources),
+            "has_link": bool(job.menu_link),
+            "flow": job.context.get("flow"),
+        },
+        commit=True,
+    )
 
     try:
         process_menu_import_job_task.delay(job.id)

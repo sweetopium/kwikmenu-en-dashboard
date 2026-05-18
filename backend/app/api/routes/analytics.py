@@ -10,7 +10,13 @@ from sqlalchemy.orm import Session
 
 from app.api.deps import get_current_user, get_db
 from app.models import Menu, PublicMenuEvent, User, Venue
-from app.schemas.analytics_api import AnalyticsSeriesPointResponse, VenueAnalyticsOverviewResponse
+from app.schemas.analytics_api import (
+    AnalyticsSeriesPointResponse,
+    ProductEventCreateRequest,
+    ProductEventResponse,
+    VenueAnalyticsOverviewResponse,
+)
+from app.services.product_analytics import record_product_event
 
 
 router = APIRouter(prefix="/api/analytics", tags=["analytics"])
@@ -207,3 +213,43 @@ def get_venue_analytics_overview(
 
     get_owned_venue_or_404(db, venue_id=venue_id, user_id=current_user.id)
     return build_analytics_overview(db=db, venue_id=venue_id, period=period)
+
+
+@router.post("/product-events", response_model=ProductEventResponse)
+def create_product_event(
+    payload: ProductEventCreateRequest,
+    request: Request,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+) -> ProductEventResponse:
+    if payload.venueId:
+        get_owned_venue_or_404(db, venue_id=payload.venueId, user_id=current_user.id)
+    if payload.menuId:
+        menu = (
+            db.query(Menu)
+            .join(Venue, Venue.id == Menu.venue_id)
+            .filter(Menu.id == payload.menuId, Venue.owner_user_id == current_user.id)
+            .first()
+        )
+        if menu is None:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Menu not found.")
+        if payload.venueId and menu.venue_id != payload.venueId:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Menu does not belong to venue.")
+
+    event = record_product_event(
+        db,
+        request=request,
+        user=current_user,
+        event_name=payload.eventName,
+        source=payload.source,
+        venue_id=payload.venueId,
+        menu_id=payload.menuId,
+        page=payload.page,
+        properties=payload.properties,
+        commit=True,
+    )
+    return ProductEventResponse(
+        id=event.id,
+        eventName=event.event_name,
+        createdAt=event.created_at,
+    )

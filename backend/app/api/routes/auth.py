@@ -24,6 +24,7 @@ from app.services.auth import (
     update_user_password,
     update_user_profile,
 )
+from app.services.product_analytics import record_product_event
 from app.services.oauth import (
     build_authorize_url,
     clear_oauth_state_cookie,
@@ -68,11 +69,20 @@ def register(
 
     try:
         user = create_user(db, name=payload.name, email=payload.email, password=payload.password)
-        _, session_token = create_session(
+        session_row, session_token = create_session(
             db,
             user=user,
             ip_address=request.client.host if request.client else None,
             user_agent=request.headers.get("user-agent"),
+        )
+        record_product_event(
+            db,
+            request=request,
+            user=user,
+            session=session_row,
+            event_name="register_completed",
+            source="backend",
+            properties={"auth_provider": "password"},
         )
         db.commit()
     except ValueError as exc:
@@ -95,13 +105,22 @@ def login(
 ) -> AuthResponse:
     try:
         user = authenticate_user(db, email=payload.email, password=payload.password)
-        _, session_token = create_session(
+        session_row, session_token = create_session(
             db,
             user=user,
             ip_address=request.client.host if request.client else None,
             user_agent=request.headers.get("user-agent"),
         )
         has_venues = db.query(Venue).filter(Venue.owner_user_id == user.id).first() is not None
+        record_product_event(
+            db,
+            request=request,
+            user=user,
+            session=session_row,
+            event_name="login_completed",
+            source="backend",
+            properties={"auth_provider": "password", "has_venues": has_venues},
+        )
         db.commit()
     except ValueError as exc:
         db.rollback()
@@ -227,13 +246,22 @@ def oauth_provider_callback(
             email=profile.email,
             name=profile.name,
         )
-        _, session_token = create_session(
+        session_row, session_token = create_session(
             db,
             user=user,
             ip_address=request.client.host if request.client else None,
             user_agent=request.headers.get("user-agent"),
         )
         has_venues = db.query(Venue).filter(Venue.owner_user_id == user.id).first() is not None
+        record_product_event(
+            db,
+            request=request,
+            user=user,
+            session=session_row,
+            event_name="login_completed",
+            source="backend",
+            properties={"auth_provider": normalized_provider, "has_venues": has_venues},
+        )
         db.commit()
         attach_session_cookie(response, session_token)
         clear_oauth_state_cookie(response)

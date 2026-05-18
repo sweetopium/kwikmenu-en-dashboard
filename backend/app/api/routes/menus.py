@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
 from sqlalchemy.orm import Session
 
 from app.api.deps import get_current_user, get_db
@@ -8,6 +8,7 @@ from app.core.slugs import slugify
 from app.models import Menu, User, Venue
 from app.schemas.menu import MenuPayload
 from app.schemas.menu_api import MenuListItemResponse, MenuResponse, MenuUpdateRequest
+from app.services.product_analytics import record_product_event
 
 
 router = APIRouter(prefix="/api/menus", tags=["menus"])
@@ -84,6 +85,7 @@ def get_menu(
 def update_menu(
     menu_id: str,
     payload: MenuUpdateRequest,
+    request: Request,
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ) -> MenuResponse:
@@ -98,6 +100,20 @@ def update_menu(
     menu.payload = menu_payload.model_dump(mode="json")
     if payload.status:
         menu.status = payload.status
+    record_product_event(
+        db,
+        request=request,
+        user=current_user,
+        event_name="menu_saved",
+        source="backend",
+        venue_id=menu.venue_id,
+        menu_id=menu.id,
+        properties={
+            "status": menu.status,
+            "categories_count": len(menu_payload.categories),
+            "items_count": sum(len(category.items) for category in menu_payload.categories),
+        },
+    )
     db.add(menu)
     db.commit()
     db.refresh(menu)
@@ -107,6 +123,7 @@ def update_menu(
 @router.post("/{menu_id}/publish", response_model=MenuResponse)
 def publish_menu(
     menu_id: str,
+    request: Request,
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ) -> MenuResponse:
@@ -115,6 +132,15 @@ def publish_menu(
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Menu not found.")
 
     menu.status = "active"
+    record_product_event(
+        db,
+        request=request,
+        user=current_user,
+        event_name="menu_published",
+        source="backend",
+        venue_id=menu.venue_id,
+        menu_id=menu.id,
+    )
     db.add(menu)
     db.commit()
     db.refresh(menu)
@@ -124,6 +150,7 @@ def publish_menu(
 @router.post("/{menu_id}/unpublish", response_model=MenuResponse)
 def unpublish_menu(
     menu_id: str,
+    request: Request,
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ) -> MenuResponse:
@@ -132,6 +159,15 @@ def unpublish_menu(
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Menu not found.")
 
     menu.status = "draft"
+    record_product_event(
+        db,
+        request=request,
+        user=current_user,
+        event_name="menu_unpublished",
+        source="backend",
+        venue_id=menu.venue_id,
+        menu_id=menu.id,
+    )
     db.add(menu)
     db.commit()
     db.refresh(menu)

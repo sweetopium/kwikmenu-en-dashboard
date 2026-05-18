@@ -12,6 +12,7 @@ import {
 } from "../../lib/uiStyles";
 import { saveImportedMenuToStorage } from "../../lib/importedMenuStorage";
 import { pollMenuImportStatus, submitMenuImport } from "../../lib/menuImport";
+import { trackProductEvent } from "../../lib/productAnalytics";
 
 const STATUS_META = {
   uploading: {
@@ -138,6 +139,7 @@ const MenuImportFlow = ({
   }, []);
 
   const resetFlow = () => {
+    trackProductEvent('menu_import_reset_clicked', { venueId });
     activeRequestRef.current?.abort();
     activeRequestRef.current = null;
     setStage('idle');
@@ -159,6 +161,10 @@ const MenuImportFlow = ({
     });
 
     if (completion.status === 'deferred') {
+      trackProductEvent('menu_import_background_wait_shown', {
+        venueId,
+        properties: { job_id: jobId },
+      });
       setBackgroundJobId(jobId);
       setBackgroundStatusMessage('Продолжаем следить за статусом импорта в фоне.');
       setStage('background');
@@ -190,6 +196,17 @@ const MenuImportFlow = ({
       usedFallback: result.usedFallback,
       warnings: result.warnings || [],
     });
+    trackProductEvent('menu_import_result_ready', {
+      venueId,
+      menuId: finalJob.result?.menuId,
+      properties: {
+        job_id: jobId,
+        category_count: result.categoryCount,
+        item_count: result.itemCount,
+        document_count: result.documentCount,
+        used_fallback: result.usedFallback,
+      },
+    });
     setBackgroundJobId(null);
     setBackgroundStatusMessage('');
     setStage('success');
@@ -215,6 +232,15 @@ const MenuImportFlow = ({
     setBackgroundJobId(null);
     setBackgroundStatusMessage('');
     setStage('uploading');
+    trackProductEvent('menu_import_submit_clicked', {
+      venueId,
+      properties: {
+        menu_source: menuSource,
+        files_count: files.length,
+        has_link: Boolean(menuLink.trim()),
+        flow: context.flow,
+      },
+    });
 
     try {
       activeRequestRef.current?.abort();
@@ -285,6 +311,17 @@ const MenuImportFlow = ({
             usedFallback: result.usedFallback,
             warnings: result.warnings || [],
           });
+          trackProductEvent('menu_import_result_ready', {
+            venueId,
+            menuId: result.menuId,
+            properties: {
+              job_id: backgroundJobId,
+              category_count: result.categoryCount,
+              item_count: result.itemCount,
+              document_count: result.documentCount,
+              used_fallback: result.usedFallback,
+            },
+          });
           setBackgroundJobId(null);
           setBackgroundStatusMessage('');
           setStage('success');
@@ -334,6 +371,10 @@ const MenuImportFlow = ({
 
     try {
       setIsResumingWait(true);
+      trackProductEvent('menu_import_wait_resumed', {
+        venueId,
+        properties: { job_id: backgroundJobId },
+      });
       setErrorMessage('');
       setImportIssue(null);
       setStage('processing');
@@ -541,7 +582,13 @@ const MenuImportFlow = ({
 
           <MenuSourcePicker
             menuSource={menuSource}
-            onMenuSourceChange={setMenuSource}
+            onMenuSourceChange={(nextSource) => {
+              setMenuSource(nextSource);
+              trackProductEvent('menu_import_source_selected', {
+                venueId,
+                properties: { menu_source: nextSource, flow: context.flow },
+              });
+            }}
             files={files}
             onFileChange={(event) => setFiles(Array.from(event.target.files || []))}
             menuLink={menuLink}

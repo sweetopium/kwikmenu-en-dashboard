@@ -16,6 +16,7 @@ import {
 } from "../components/ui/dropdown-menu";
 import { getVenueAnalyticsOverview } from "../lib/analyticsApi";
 import { fetchCurrentUser } from "../lib/sessionApi";
+import { trackProductEvent } from "../lib/productAnalytics";
 
 const PERIOD_OPTIONS = [
   { label: 'Сегодня', value: 'today' },
@@ -69,6 +70,13 @@ const DashboardHome = () => {
       .then((user) => setUserName(user.name || ''))
       .catch(() => setUserName(''));
   }, []);
+
+  useEffect(() => {
+    trackProductEvent('dashboard_viewed', {
+      venueId: activeVenueId,
+      properties: { has_active_venue: Boolean(activeVenueId) },
+    });
+  }, [activeVenueId]);
 
   useEffect(() => {
     if (!activeVenueId) {
@@ -138,7 +146,13 @@ const DashboardHome = () => {
               {PERIOD_OPTIONS.map((period) => (
                 <DropdownMenuItem
                   key={period.value}
-                  onSelect={() => setSelectedPeriod(period.value)}
+                  onSelect={() => {
+                    setSelectedPeriod(period.value);
+                    trackProductEvent('analytics_period_changed', {
+                      venueId: activeVenueId,
+                      properties: { period: period.value },
+                    });
+                  }}
                   className="justify-between"
                 >
                   <span>{period.label}</span>
@@ -246,6 +260,10 @@ const DashboardHome = () => {
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
         <Link
           to="/dashboard/menu"
+          onClick={() => trackProductEvent('dashboard_action_clicked', {
+            venueId: activeVenueId,
+            properties: { action: 'open_menu_editor' },
+          })}
           className="bg-card border border-border/60 rounded-3xl p-6 sm:p-8 shadow-sm flex flex-col justify-between group hover:border-foreground/20 transition-all hover:-translate-y-1 min-h-[220px] sm:min-h-[250px]"
         >
           <div className="w-14 h-14 rounded-2xl bg-secondary flex items-center justify-center mb-8 group-hover:bg-foreground group-hover:text-background transition-colors">
@@ -259,6 +277,10 @@ const DashboardHome = () => {
 
         <Link
           to={activeVenueQrPath}
+          onClick={() => trackProductEvent('dashboard_action_clicked', {
+            venueId: activeVenueId,
+            properties: { action: 'download_qr' },
+          })}
           className="bg-card border border-border/60 rounded-3xl p-6 sm:p-8 shadow-sm flex flex-col justify-between group hover:border-foreground/20 transition-all hover:-translate-y-1 min-h-[220px] sm:min-h-[250px]"
         >
           <div className="w-14 h-14 rounded-2xl bg-secondary flex items-center justify-center mb-8 group-hover:bg-foreground group-hover:text-background transition-colors">
@@ -274,6 +296,10 @@ const DashboardHome = () => {
           href={publicMenuUrl}
           target="_blank"
           rel="noreferrer"
+          onClick={() => trackProductEvent('dashboard_action_clicked', {
+            venueId: activeVenueId,
+            properties: { action: 'open_public_menu' },
+          })}
           className="bg-card border border-border/60 rounded-3xl p-6 sm:p-8 shadow-sm flex flex-col justify-between group hover:border-foreground/20 transition-all hover:-translate-y-1 min-h-[220px] sm:min-h-[250px]"
         >
           <div className="w-14 h-14 rounded-2xl bg-secondary flex items-center justify-center mb-8 group-hover:bg-foreground group-hover:text-background transition-colors">

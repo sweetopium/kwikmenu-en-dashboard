@@ -37,6 +37,7 @@ import {
   updateVenueQr,
   updateVenueWifi,
 } from "../lib/venuesApi";
+import { trackProductEvent } from "../lib/productAnalytics";
 
 const VENUE_TABS = [
   { id: 'profile', label: 'Профиль', mobileLabel: 'Профиль', icon: Store },
@@ -156,6 +157,10 @@ const VenuePage = () => {
   };
 
   const handleTabChange = (tabId) => {
+    trackProductEvent('venue_tab_changed', {
+      venueId,
+      properties: { tab: tabId },
+    });
     const nextParams = new URLSearchParams(searchParams);
 
     if (tabId === 'profile') {
@@ -221,6 +226,10 @@ const VenuePage = () => {
         getVenueSettings(venueId),
       ]);
       applyVenuePayload(venue, settings);
+      trackProductEvent('venue_opened', {
+        venueId,
+        properties: { active_tab: activeTab },
+      });
     } catch (nextError) {
       setError(nextError.message || 'Не удалось загрузить заведение.');
     } finally {
@@ -699,6 +708,7 @@ const VenuePage = () => {
                   href={qrData.publicUrl || venueData.publicUrl || '#'}
                   target="_blank"
                   rel="noreferrer"
+                  onClick={() => trackProductEvent('public_menu_link_opened', { venueId })}
                   className="inline-flex items-center h-11 rounded-lg bg-white px-5 text-gray-900 hover:bg-gray-100 font-bold gap-2 transition-colors"
                 >
                   Открыть меню
@@ -713,6 +723,8 @@ const VenuePage = () => {
               value={qrData}
               onChange={setQrData}
               onSave={handleSaveQr}
+              onDownload={() => trackProductEvent('qr_downloaded', { venueId })}
+              onOpenPublicLink={() => trackProductEvent('public_menu_link_opened', { venueId })}
               isSaving={savingState.qr}
             />
           )}

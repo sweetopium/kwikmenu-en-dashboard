@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 from sqlalchemy.orm import Session
 
 from app.api.deps import get_current_user, get_db
@@ -18,6 +18,7 @@ from app.schemas.venue_api import (
     VenueWifiSettingsResponse,
     VenueWifiSettingsUpdateRequest,
 )
+from app.services.product_analytics import record_product_event
 
 
 router = APIRouter(prefix="/api/venues", tags=["venues"])
@@ -128,6 +129,7 @@ def list_venues(
 @router.post("", response_model=VenueResponse, status_code=status.HTTP_201_CREATED)
 def create_venue(
     payload: VenueCreateRequest,
+    request: Request,
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ) -> VenueResponse:
@@ -147,6 +149,15 @@ def create_venue(
         currency=(payload.currency or "RUB").strip().upper(),
     )
     db.add(venue_settings)
+    record_product_event(
+        db,
+        request=request,
+        user=current_user,
+        event_name="venue_created",
+        source="backend",
+        venue_id=venue.id,
+        properties={"has_phone": bool(venue.phone), "has_city": bool(venue.city), "currency": venue_settings.currency},
+    )
     db.commit()
     db.refresh(venue)
     return serialize_venue(venue)
@@ -169,6 +180,7 @@ def get_venue(
 def update_venue_profile(
     venue_id: str,
     payload: VenueProfileUpdateRequest,
+    request: Request,
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ) -> VenueResponse:
@@ -182,6 +194,15 @@ def update_venue_profile(
     venue.description = payload.description.strip() if payload.description else None
     venue_settings.currency = (payload.currency or "RUB").strip().upper()
 
+    record_product_event(
+        db,
+        request=request,
+        user=current_user,
+        event_name="venue_profile_saved",
+        source="backend",
+        venue_id=venue.id,
+        properties={"has_phone": bool(venue.phone), "has_description": bool(venue.description), "currency": venue_settings.currency},
+    )
     db.commit()
     db.refresh(venue)
     return serialize_venue(venue, menus_count=db.query(Menu).filter(Menu.venue_id == venue.id).count())
@@ -203,6 +224,7 @@ def get_venue_settings(
 def update_venue_wifi_settings(
     venue_id: str,
     payload: VenueWifiSettingsUpdateRequest,
+    request: Request,
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ) -> VenueSettingsResponse:
@@ -213,6 +235,15 @@ def update_venue_wifi_settings(
     venue_settings.wifi_ssid = payload.ssid.strip() if payload.ssid else None
     venue_settings.wifi_password = payload.password.strip() if payload.password else None
 
+    record_product_event(
+        db,
+        request=request,
+        user=current_user,
+        event_name="venue_wifi_saved",
+        source="backend",
+        venue_id=venue.id,
+        properties={"enabled": venue_settings.wifi_enabled, "has_ssid": bool(venue_settings.wifi_ssid)},
+    )
     db.commit()
     db.refresh(venue_settings)
     db.refresh(venue)
@@ -223,6 +254,7 @@ def update_venue_wifi_settings(
 def update_venue_design_settings(
     venue_id: str,
     payload: VenueDesignSettingsUpdateRequest,
+    request: Request,
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ) -> VenueSettingsResponse:
@@ -233,6 +265,15 @@ def update_venue_design_settings(
     venue_settings.design_accent_color = payload.accentColor.strip()
     venue_settings.design_logo_url = payload.logoUrl.strip() if payload.logoUrl else None
 
+    record_product_event(
+        db,
+        request=request,
+        user=current_user,
+        event_name="venue_design_saved",
+        source="backend",
+        venue_id=venue.id,
+        properties={"template": venue_settings.design_template, "has_logo": bool(venue_settings.design_logo_url)},
+    )
     db.commit()
     db.refresh(venue_settings)
     db.refresh(venue)
@@ -243,6 +284,7 @@ def update_venue_design_settings(
 def update_venue_qr_settings(
     venue_id: str,
     payload: VenueQrSettingsUpdateRequest,
+    request: Request,
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ) -> VenueSettingsResponse:
@@ -257,6 +299,20 @@ def update_venue_qr_settings(
     venue_settings.qr_frame_color = payload.frameColor.strip()
     venue_settings.public_menu_enabled = payload.publicMenuEnabled
 
+    record_product_event(
+        db,
+        request=request,
+        user=current_user,
+        event_name="venue_qr_saved",
+        source="backend",
+        venue_id=venue.id,
+        properties={
+            "style": venue_settings.qr_style,
+            "has_frame": venue_settings.qr_has_frame,
+            "has_logo": bool(venue_settings.qr_logo_url),
+            "public_menu_enabled": venue_settings.public_menu_enabled,
+        },
+    )
     db.commit()
     db.refresh(venue_settings)
     db.refresh(venue)

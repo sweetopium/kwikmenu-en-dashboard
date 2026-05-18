@@ -9,6 +9,7 @@ import {
 import { Button } from "../components/ui/button";
 import { primaryActionButtonClasses, subtleIconButtonClasses } from "../lib/uiStyles";
 import { listMenus, publishMenu, unpublishMenu } from "../lib/menusApi";
+import { trackProductEvent } from "../lib/productAnalytics";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -30,6 +31,7 @@ const MenuListPage = () => {
 
   useEffect(() => {
     const activeVenueId = window.localStorage.getItem('kwikmenu-active-venue');
+    trackProductEvent('menu_list_viewed', { venueId: activeVenueId });
     listMenus({ venueId: activeVenueId || undefined })
       .then(setMenus)
       .catch(() => setMenus([]));
@@ -73,7 +75,12 @@ const MenuListPage = () => {
 
             <div className="w-full sm:w-auto shrink-0">
               <Button asChild className={`${primaryActionButtonClasses} px-5 shrink-0 cursor-pointer`}>
-                <Link to="/dashboard/menu/new">
+                <Link
+                  to="/dashboard/menu/new"
+                  onClick={() => trackProductEvent('menu_create_clicked', {
+                    venueId: typeof window !== 'undefined' ? window.localStorage.getItem('kwikmenu-active-venue') : null,
+                  })}
+                >
                   <Plus size={18} className="mr-2" />
                   Создать меню
                 </Link>
@@ -122,7 +129,14 @@ const MenuListPage = () => {
                   <DropdownMenuContent align="end">
                     <DropdownMenuLabel>Действия с меню</DropdownMenuLabel>
                     <DropdownMenuItem asChild>
-                      <Link to={`/dashboard/menu/${menu.id}`}>
+                      <Link
+                        to={`/dashboard/menu/${menu.id}`}
+                        onClick={() => trackProductEvent('menu_card_opened', {
+                          venueId: menu.venueId,
+                          menuId: menu.id,
+                          properties: { source: 'menu_card_dropdown' },
+                        })}
+                      >
                         <Pencil size={16} className="mr-2" />
                         Редактировать
                       </Link>
@@ -133,7 +147,13 @@ const MenuListPage = () => {
                     </DropdownMenuItem>
                     {menu.venueId ? (
                       <DropdownMenuItem asChild>
-                        <Link to={`/dashboard/venues/${menu.venueId}?tab=qr`}>
+                        <Link
+                          to={`/dashboard/venues/${menu.venueId}?tab=qr`}
+                          onClick={() => trackProductEvent('menu_qr_clicked', {
+                            venueId: menu.venueId,
+                            menuId: menu.id,
+                          })}
+                        >
                           <QrCode size={16} className="mr-2" />
                           Посмотреть QR меню
                         </Link>
@@ -181,7 +201,14 @@ const MenuListPage = () => {
               <div className="flex flex-row gap-2 sm:gap-3 mt-auto">
                 <button
                   type="button"
-                  onClick={() => handlePublishToggle(menu)}
+                  onClick={() => {
+                    trackProductEvent(menu.status === 'active' ? 'menu_unpublish_clicked' : 'menu_publish_clicked', {
+                      venueId: menu.venueId,
+                      menuId: menu.id,
+                      properties: { current_status: menu.status },
+                    });
+                    handlePublishToggle(menu);
+                  }}
                   disabled={busyMenuId === menu.id}
                   className={`flex-1 h-10 sm:h-12 px-2 sm:px-4 rounded-lg border font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 sm:gap-2 transition-all disabled:opacity-60 disabled:cursor-not-allowed ${
                     menu.status === 'active'
@@ -195,6 +222,11 @@ const MenuListPage = () => {
 
                 <Link
                   to={`/dashboard/menu/${menu.id}`}
+                  onClick={() => trackProductEvent('menu_card_opened', {
+                    venueId: menu.venueId,
+                    menuId: menu.id,
+                    properties: { source: 'menu_card_button' },
+                  })}
                   className="flex-1 h-10 sm:h-12 px-2 sm:px-4 rounded-lg bg-foreground hover:bg-foreground/90 text-background font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 sm:gap-2 transition-all cursor-pointer"
                 >
                   <span className="truncate">Редактировать</span>

@@ -16,6 +16,7 @@ from app.schemas.menu_import import (
     UploadedSource,
 )
 from app.services.menu_import_pipeline import MenuImportPipeline
+from app.services.product_analytics import record_product_event
 
 
 logger = logging.getLogger(__name__)
@@ -68,6 +69,7 @@ def process_menu_import_job(job_id: str) -> None:
             sources=sources,
         )
 
+        user = db.query(User).filter(User.id == job.user_id).first()
         venue = _ensure_job_venue(db, job=job, result=result)
         menu = Menu(
             venue_id=venue.id,
@@ -90,6 +92,24 @@ def process_menu_import_job(job_id: str) -> None:
         job.item_count = result.itemCount
         job.document_count = result.documentCount
         job.used_fallback = result.usedFallback
+        record_product_event(
+            db,
+            event_name="menu_import_completed",
+            source="backend",
+            user=user,
+            venue_id=venue.id,
+            menu_id=menu.id,
+            properties={
+                "job_id": job.id,
+                "menu_source": job.menu_source,
+                "category_count": job.category_count,
+                "item_count": job.item_count,
+                "document_count": job.document_count,
+                "used_fallback": job.used_fallback,
+                "warnings_count": len(job.warnings or []),
+                "flow": job.context.get("flow"),
+            },
+        )
         db.add(job)
         db.commit()
         logger.info(
@@ -179,6 +199,21 @@ def _mark_job_failed(
     job.status = status.value
     job.completed_at = datetime.now(timezone.utc)
     job.error = error_message
+    user = db.query(User).filter(User.id == job.user_id).first()
+    record_product_event(
+        db,
+        event_name="menu_import_failed",
+        source="backend",
+        user=user,
+        venue_id=job.venue_id,
+        menu_id=job.menu_id,
+        properties={
+            "job_id": job.id,
+            "status": status.value,
+            "menu_source": job.menu_source,
+            "flow": job.context.get("flow"),
+        },
+    )
     db.add(job)
     db.commit()
 

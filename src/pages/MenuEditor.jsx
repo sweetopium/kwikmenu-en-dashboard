@@ -15,6 +15,7 @@ import { loadImportedMenuFromStorage, saveImportedMenuToStorage } from "../lib/i
 import { normalizeMenu } from "../lib/menuNormalization";
 import { getMenu, updateMenu } from "../lib/menusApi";
 import { TOP_MENU_LANGUAGES } from "../lib/languageMeta";
+import { trackProductEvent } from "../lib/productAnalytics";
 import {
   formFieldClasses,
   formSelectClasses,
@@ -79,6 +80,14 @@ const MenuEditor = () => {
           const nextMenu = response.payload;
           hasLoadedRemoteMenuRef.current = true;
           setRemoteVenueId(response.venueId || null);
+          trackProductEvent('menu_editor_viewed', {
+            venueId: response.venueId,
+            menuId: response.id,
+            properties: {
+              status: response.status,
+              categories_count: nextMenu.categories?.length || 0,
+            },
+          });
           setMenu(nextMenu);
           setActiveCategoryId(nextMenu.categories[0]?.id || null);
           setEditorLanguage(nextMenu.defaultLanguage || 'ru');
@@ -101,6 +110,10 @@ const MenuEditor = () => {
     const nextMenu = resolveMenuPayload();
     hasLoadedRemoteMenuRef.current = true;
     setRemoteVenueId(null);
+    trackProductEvent('menu_editor_viewed', {
+      menuId: isImportedMenu ? null : id,
+      properties: { mode: isImportedMenu ? 'imported_local' : 'mock' },
+    });
     setMenu(nextMenu);
     setActiveCategoryId(nextMenu.categories[0]?.id || null);
     setEditorLanguage(nextMenu.defaultLanguage || 'ru');
@@ -327,6 +340,11 @@ const MenuEditor = () => {
     const selectedLanguage = TOP_MENU_LANGUAGES.find((language) => language.code === languageCode);
 
     setEditorLanguage(languageCode);
+    trackProductEvent('menu_editor_language_changed', {
+      venueId: remoteVenueId,
+      menuId: isRemoteMenu ? id : null,
+      properties: { language: languageCode },
+    });
     if (!selectedLanguage || menu.languages.some((language) => language.code === languageCode)) {
       return;
     }
@@ -381,6 +399,10 @@ const MenuEditor = () => {
 
   const handleNormalizeMenu = async () => {
     setIsNormalizing(true);
+    trackProductEvent('menu_normalize_clicked', {
+      venueId: remoteVenueId,
+      menuId: isRemoteMenu ? id : null,
+    });
 
     try {
       const response = await normalizeMenu(menu);
@@ -441,7 +463,15 @@ const MenuEditor = () => {
                     variant="outline"
                     className={`${secondaryActionButtonClasses} sm:h-10 h-10 px-4 w-full sm:w-auto shrink-0 text-xs sm:text-sm`}
                   >
-                    <a href={publicPreviewUrl} target="_blank" rel="noreferrer">
+                    <a
+                      href={publicPreviewUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      onClick={() => trackProductEvent('menu_editor_preview_clicked', {
+                        venueId: remoteVenueId,
+                        menuId: id,
+                      })}
+                    >
                       <ExternalLink size={14} className="mr-2" />
                       Превью
                     </a>
@@ -471,13 +501,29 @@ const MenuEditor = () => {
                   <Input
                     placeholder="Поиск блюда..."
                     value={searchQuery}
-                    onChange={(event) => setSearchQuery(event.target.value)}
+                    onChange={(event) => {
+                      const nextValue = event.target.value;
+                      if (!searchQuery && nextValue) {
+                        trackProductEvent('menu_editor_search_used', {
+                          venueId: remoteVenueId,
+                          menuId: isRemoteMenu ? id : null,
+                        });
+                      }
+                      setSearchQuery(nextValue);
+                    }}
                     className={`${formFieldClasses} h-10 text-xs sm:text-sm !pl-[30px]`}
                   />
                 </div>
 
                 <Button
-                  onClick={handleAddItemClick}
+                  onClick={() => {
+                    trackProductEvent('item_create_clicked', {
+                      venueId: remoteVenueId,
+                      menuId: isRemoteMenu ? id : null,
+                      properties: { category_id: activeCategoryId },
+                    });
+                    handleAddItemClick();
+                  }}
                   className={`${primaryActionButtonClasses} sm:h-10 h-10 px-3.5 shrink-0 text-xs sm:text-sm`}
                 >
                   <Plus size={16} className="mr-2" />
