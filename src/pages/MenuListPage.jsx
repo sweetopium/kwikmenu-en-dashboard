@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import {
   Plus, Utensils, Wine, Coffee,
   MoreHorizontal, Calendar, LayoutGrid, ArrowRight, FolderOpen,
-  Pencil, Copy, Upload, Download, Trash2, QrCode
+  Pencil, Copy, Upload, Download, Trash2, QrCode, ToggleLeft, ToggleRight
 } from 'lucide-react';
 
 import { Button } from "../components/ui/button";
@@ -199,6 +199,8 @@ const MenuListPage = () => {
 
               {/* Подвал карточки: Кнопки действий (Всегда в один ряд) */}
               <div className="flex flex-row gap-2 sm:gap-3 mt-auto">
+
+
                 <button
                   type="button"
                   onClick={() => {
@@ -210,15 +212,28 @@ const MenuListPage = () => {
                     handlePublishToggle(menu);
                   }}
                   disabled={busyMenuId === menu.id}
-                  className={`flex-1 h-10 sm:h-12 px-2 sm:px-4 rounded-lg border font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 sm:gap-2 transition-all disabled:opacity-60 disabled:cursor-not-allowed ${
+                  className={`flex-1 h-10 sm:h-12 px-2 sm:px-3 rounded-lg border font-bold text-xs sm:text-xs flex items-center justify-center gap-1.5 sm:gap-2 transition-all disabled:opacity-60 disabled:cursor-not-allowed ${
                     menu.status === 'active'
-                      ? 'border-border/60 bg-background text-foreground hover:bg-secondary'
-                      : 'border-brand-purple/20 bg-brand-purple/10 text-brand-purple hover:bg-brand-purple/15'
+                      ? 'border-orange-500/20 bg-orange-500/10 text-orange-600'
+                      : 'border-green-500/20 bg-green-500/10 text-green-600'
                   }`}
                 >
-                  {menu.status === 'active' ? <Download size={16} className="shrink-0" /> : <Upload size={16} className="shrink-0" />}
-                  <span className="truncate">{busyMenuId === menu.id ? 'Обновление' : menu.status === 'active' ? 'Снять' : 'Опубликовать'}</span>
+                  {menu.status === 'active' ? <ToggleLeft size={16} className="shrink-0" /> : <ToggleRight size={16} className="shrink-0" />}
+                  <span className="truncate">{busyMenuId === menu.id ? 'Обновление' : menu.status === 'active' ? 'Выкл' : 'Вкл'}</span>
                 </button>
+
+                <Link
+                  to={`/dashboard/venues/${menu.venueId}?tab=qr`}
+                  target={'_blank'}
+                  onClick={() => trackProductEvent('menu_qr_clicked', {
+                    venueId: menu.venueId,
+                    menuId: menu.id,
+                    properties: { source: 'menu_card_button' },
+                  })}
+                  className="flex-1 h-10 sm:h-12 px-2 sm:px-3 rounded-lg bg-foreground hover:bg-foreground/90 text-background font-bold text-xs sm:text-xs flex items-center justify-center gap-1.5 sm:gap-2 transition-all cursor-pointer"
+                >
+                  <span className="truncate">Посмотреть QR</span>
+                </Link>
 
                 <Link
                   to={`/dashboard/menu/${menu.id}`}
@@ -227,10 +242,9 @@ const MenuListPage = () => {
                     menuId: menu.id,
                     properties: { source: 'menu_card_button' },
                   })}
-                  className="flex-1 h-10 sm:h-12 px-2 sm:px-4 rounded-lg bg-foreground hover:bg-foreground/90 text-background font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 sm:gap-2 transition-all cursor-pointer"
+                  className="flex-1 h-10 sm:h-12 px-2 sm:px-3 rounded-lg bg-foreground hover:bg-foreground/90 text-background font-bold text-xs sm:text-xs flex items-center justify-center gap-1.5 sm:gap-2 transition-all cursor-pointer"
                 >
-                  <span className="truncate">Редактировать</span>
-                  <ArrowRight size={16} className="shrink-0" />
+                  <span className="truncate">Редактор</span>
                 </Link>
               </div>
             </div>
