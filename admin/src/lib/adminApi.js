@@ -80,3 +80,10 @@ export const fetchHelpRequests = () => adminFetch('/help-requests?limit=100');
 export const fetchPublicMenuAnalytics = (period = '7d') => adminFetch(`/analytics/public-menu?period=${period}`);
 export const fetchProductEventAnalytics = (period = '7d') => adminFetch(`/analytics/product-events?period=${period}`);
 export const fetchSystemHealth = () => adminFetch('/system/health');
+export const fetchBillingPlans = () => adminFetch('/billing/plans');
+export const updateBillingPlan = (planId, payload) => adminFetch(`/billing/plans/${planId}`, {
+  method: 'PATCH',
+  body: JSON.stringify(payload),
+});
+export const fetchBillingSubscriptions = () => adminFetch('/billing/subscriptions');
+export const processBillingRenewals = () => adminFetch('/billing/process-renewals', { method: 'POST' });

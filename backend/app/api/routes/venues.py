@@ -18,6 +18,7 @@ from app.schemas.venue_api import (
     VenueWifiSettingsResponse,
     VenueWifiSettingsUpdateRequest,
 )
+from app.services.billing import assert_can_create_venue, assert_template_allowed, get_effective_subscription
 from app.services.product_analytics import record_product_event
 
 
@@ -133,6 +134,7 @@ def create_venue(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ) -> VenueResponse:
+    assert_can_create_venue(db, current_user)
     venue = Venue(
         owner_user_id=current_user.id,
         name=payload.name.strip(),
@@ -260,6 +262,8 @@ def update_venue_design_settings(
 ) -> VenueSettingsResponse:
     venue = get_user_venue_or_404(db, current_user, venue_id)
     venue_settings = get_or_create_venue_settings(db, venue)
+    subscription = get_effective_subscription(db, current_user)
+    assert_template_allowed(subscription, payload.template)
 
     venue_settings.design_template = payload.template.strip()
     venue_settings.design_accent_color = payload.accentColor.strip()

@@ -16,6 +16,7 @@ from app.schemas.menu_import import (
     UploadedSource,
 )
 from app.services.menu_import_pipeline import MenuImportPipeline
+from app.services.billing import assert_can_create_menu_for_venue, assert_menu_within_plan_limits, get_effective_subscription
 from app.services.product_analytics import record_product_event
 
 
@@ -71,6 +72,9 @@ def process_menu_import_job(job_id: str) -> None:
 
         user = db.query(User).filter(User.id == job.user_id).first()
         venue = _ensure_job_venue(db, job=job, result=result)
+        subscription = get_effective_subscription(db, user)
+        assert_can_create_menu_for_venue(db, subscription, venue.id)
+        assert_menu_within_plan_limits(subscription, result.menu)
         menu = Menu(
             venue_id=venue.id,
             name=result.menu.menuMeta.name,

@@ -18,6 +18,7 @@ from app.schemas.menu_import import (
     MenuImportJobResponse,
     MenuImportStatus,
 )
+from app.services.billing import assert_can_create_menu_import
 from app.services.menu_import_jobs import serialize_job
 from app.services.pdf_link_downloader import PdfLinkDownloadError, download_pdf_from_url
 from app.services.page_normalizer import IMAGE_EXTENSIONS, PDF_EXTENSION
@@ -38,6 +39,7 @@ async def create_menu_import(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ) -> MenuImportAcceptedResponse:
+    assert_can_create_menu_import(db, current_user)
     uploaded_files = files or []
     context = await _extract_context(request)
     if not uploaded_files and not (menu_source == "link" and menu_link):

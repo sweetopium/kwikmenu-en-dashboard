@@ -8,6 +8,7 @@ from app.core.slugs import slugify
 from app.models import Menu, User, Venue
 from app.schemas.menu import MenuPayload
 from app.schemas.menu_api import MenuListItemResponse, MenuResponse, MenuUpdateRequest
+from app.services.billing import assert_menu_within_plan_limits, get_effective_subscription
 from app.services.product_analytics import record_product_event
 
 
@@ -94,6 +95,8 @@ def update_menu(
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Menu not found.")
 
     menu_payload = MenuPayload.model_validate(payload.payload.model_dump())
+    subscription = get_effective_subscription(db, current_user)
+    assert_menu_within_plan_limits(subscription, menu_payload)
     menu.name = menu_payload.menuMeta.name
     menu.slug = slugify(menu_payload.menuMeta.slug or menu_payload.menuMeta.name, fallback=menu.id)
     menu.description = menu_payload.menuMeta.description

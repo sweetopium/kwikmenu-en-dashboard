@@ -32,6 +32,9 @@ def create_user(db: Session, *, name: str, email: str, password: str) -> User:
     )
     db.add(user)
     db.flush()
+    from app.services.billing import ensure_default_subscription
+
+    ensure_default_subscription(db, user)
     return user
 
 
@@ -48,6 +51,9 @@ def create_oauth_user(db: Session, *, name: str, email: str) -> User:
     )
     db.add(user)
     db.flush()
+    from app.services.billing import ensure_default_subscription
+
+    ensure_default_subscription(db, user)
     return user
 
 

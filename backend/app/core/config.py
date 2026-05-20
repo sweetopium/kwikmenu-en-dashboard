@@ -59,6 +59,23 @@ class Settings(BaseSettings):
     help_requests_telegram_chat_id: str | None = None
 
     currency: str = "RUB"
+    billing_trial_days: int = 14
+    billing_grace_period_days: int = 3
+    billing_default_plan_code: str = "starter"
+
+    unitpay_base_url: str = "https://unitpay.ru"
+    unitpay_api_url: str = "https://unitpay.ru/api"
+    unitpay_public_key: str | None = None
+    unitpay_project_id: int | None = None
+    unitpay_secret_key: str | None = None
+    unitpay_login: str | None = None
+    unitpay_test_mode: bool = False
+    unitpay_payment_type: str = "card"
+    unitpay_hide_other_methods: bool = True
+    unitpay_callback_url: str | None = None
+    unitpay_success_url: str | None = None
+    unitpay_fail_url: str | None = None
+    unitpay_allowed_ips: str = ""
 
 
 @lru_cache(maxsize=1)

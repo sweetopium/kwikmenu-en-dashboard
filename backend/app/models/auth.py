@@ -19,6 +19,16 @@ class User(UUIDPrimaryKeyMixin, TimestampMixin, Base):
 
     sessions: Mapped[list["SessionModel"]] = relationship(back_populates="user", cascade="all, delete-orphan")
     auth_accounts: Mapped[list["AuthAccount"]] = relationship(back_populates="user", cascade="all, delete-orphan")
+    subscription: Mapped["UserSubscription | None"] = relationship(
+        back_populates="user",
+        cascade="all, delete-orphan",
+        uselist=False,
+    )
+    payment_transactions: Mapped[list["PaymentTransaction"]] = relationship(
+        back_populates="user",
+        cascade="all, delete-orphan",
+    )
+    billing_events: Mapped[list["BillingEvent"]] = relationship(back_populates="user")
 
 
 class SessionModel(UUIDPrimaryKeyMixin, TimestampMixin, Base):
