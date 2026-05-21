@@ -62,9 +62,21 @@ const MenuEditor = () => {
   const hasLoadedRemoteMenuRef = useRef(false);
 
   const activeCategory = menu.categories.find((category) => category.id === activeCategoryId);
-  const filteredItems = activeCategory?.items?.filter((item) =>
-    getLocalizedField(item, 'name', editorLanguage, menu.defaultLanguage).toLowerCase().includes(searchQuery.toLowerCase())
-  ) || [];
+  const filteredItems = searchQuery
+    ? menu.categories.flatMap((category) => {
+        const categoryName = getLocalizedField(category, 'name', editorLanguage, menu.defaultLanguage);
+        return (category.items || []).map((item) => ({
+          ...item,
+          categoryId: category.id,
+          categoryName: categoryName,
+        }));
+      }).filter((item) =>
+        getLocalizedField(item, 'name', editorLanguage, menu.defaultLanguage).toLowerCase().includes(searchQuery.toLowerCase())
+      )
+    : activeCategory?.items?.map((item) => ({
+        ...item,
+        categoryId: activeCategoryId,
+      })) || [];
   const localizedMenuName = getLocalizedField(menu.menuMeta, 'name', editorLanguage, menu.defaultLanguage);
   const localizedCategoryName = getLocalizedField(activeCategory, 'name', editorLanguage, menu.defaultLanguage);
   const localizedCategoryDescription = getLocalizedField(activeCategory, 'description', editorLanguage, menu.defaultLanguage);
@@ -233,8 +245,9 @@ const MenuEditor = () => {
 
   const handleEditItemClick = (item) => {
     setModalMode('edit');
-    setOriginalCategoryId(activeCategoryId);
-    setTargetCategoryId(activeCategoryId);
+    const itemCategoryId = item.categoryId || activeCategoryId;
+    setOriginalCategoryId(itemCategoryId);
+    setTargetCategoryId(itemCategoryId);
     setEditingItem(JSON.parse(JSON.stringify(item)));
   };
 
@@ -248,11 +261,12 @@ const MenuEditor = () => {
   };
 
   const handleDeleteItemClick = (item) => {
+    const itemCategoryId = item.categoryId || activeCategoryId;
     setDeleteConfirm({
       type: 'item',
       id: item.id,
       name: getLocalizedField(item, 'name', editorLanguage, menu.defaultLanguage),
-      categoryId: activeCategoryId,
+      categoryId: itemCategoryId,
     });
   };
 

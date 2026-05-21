@@ -32,6 +32,13 @@ const MenuItemCard = ({ item, language, defaultLanguage, onEdit, onDelete }) => 
         {/* Инфо-блок */}
         <div className="flex flex-col flex-1 min-w-0 pt-0.5">
 
+          {/* Категория блюда (при поиске) */}
+          {item.categoryName && (
+            <span className="text-[10px] font-bold tracking-wider text-brand-purple uppercase mb-0.5">
+              {item.categoryName}
+            </span>
+          )}
+
           {/* Название и Цена */}
           <div className="flex items-start justify-between gap-2 min-w-0">
             {/* Убрали truncate, добавили break-words и leading-snug для аккуратного переноса строк */}
