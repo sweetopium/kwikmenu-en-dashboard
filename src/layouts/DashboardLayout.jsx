@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard,
@@ -27,83 +28,89 @@ import {
 } from "../components/ui/dropdown-menu";
 import { listVenues } from "../lib/venuesApi";
 import { logoutSession } from "../lib/sessionApi";
+import LanguageSwitcher from "../components/LanguageSwitcher";
 
-const SidebarContent = ({ pathname, navItems, onNavigate, onLogout }) => (
-  <>
-    <div className="p-6 flex items-center gap-3 text-xl font-extrabold tracking-tight text-foreground">
-      <div className="flex h-8 w-8 items-center justify-center rounded-[0.6rem] bg-brand-purple text-white shadow-md shadow-brand-purple/20 shrink-0">
-        <Zap className="h-4 w-4" fill="currentColor" />
+const SidebarContent = ({ pathname, navItems, onNavigate, onLogout }) => {
+  const { t } = useTranslation();
+
+  return (
+    <>
+      <div className="p-6 flex items-center gap-3 text-xl font-extrabold tracking-tight text-foreground">
+        <div className="flex h-8 w-8 items-center justify-center rounded-[0.6rem] bg-brand-purple text-white shadow-md shadow-brand-purple/20 shrink-0">
+          <Zap className="h-4 w-4" fill="currentColor" />
+        </div>
+        <span className="truncate">KwikMenu</span>
       </div>
-      <span className="truncate">KwikMenu</span>
-    </div>
 
-    <div className="px-4 py-2 text-xs font-semibold text-muted-foreground/50 uppercase tracking-wider mb-1">
-      Главное меню
-    </div>
+      <div className="px-4 py-2 text-xs font-semibold text-muted-foreground/50 uppercase tracking-wider mb-1">
+        {t('navigation.mainMenu', 'Главное меню')}
+      </div>
 
-    <nav className="flex-1 px-3 space-y-1.5 overflow-y-auto overflow-x-hidden">
-      {navItems.map((item) => {
-        const isActive = item.path === '/dashboard'
-          ? pathname === item.path
-          : item.path.startsWith('/dashboard/venues/')
-            ? pathname === '/dashboard/venues' || pathname.startsWith('/dashboard/venues/')
-            : pathname === item.path || pathname.startsWith(`${item.path}/`);
+      <nav className="flex-1 px-3 space-y-1.5 overflow-y-auto overflow-x-hidden">
+        {navItems.map((item) => {
+          const isActive = item.path === '/dashboard'
+            ? pathname === item.path
+            : item.path.startsWith('/dashboard/venues/')
+              ? pathname === '/dashboard/venues' || pathname.startsWith('/dashboard/venues/')
+              : pathname === item.path || pathname.startsWith(`${item.path}/`);
 
-        return (
-          <Link
-            key={item.path}
-            to={item.path}
-            onClick={onNavigate}
-            className={`flex items-center gap-3 px-3 py-2.5 text-sm font-semibold rounded-xl transition-all duration-200 group min-w-0 ${
-              isActive
-                ? 'bg-brand-purple/10 text-brand-purple'
-                : 'text-muted-foreground hover:bg-secondary/60 hover:text-foreground'
-            }`}
-          >
-            <item.icon
-              size={18}
-              className={`shrink-0 ${
+          return (
+            <Link
+              key={item.path}
+              to={item.path}
+              onClick={onNavigate}
+              className={`flex items-center gap-3 px-3 py-2.5 text-sm font-semibold rounded-xl transition-all duration-200 group min-w-0 ${
                 isActive
-                  ? 'text-brand-purple'
-                  : 'text-muted-foreground group-hover:text-foreground transition-colors'
+                  ? 'bg-brand-purple/10 text-brand-purple'
+                  : 'text-muted-foreground hover:bg-secondary/60 hover:text-foreground'
               }`}
-            />
+            >
+              <item.icon
+                size={18}
+                className={`shrink-0 ${
+                  isActive
+                    ? 'text-brand-purple'
+                    : 'text-muted-foreground group-hover:text-foreground transition-colors'
+                }`}
+              />
 
-            <span className="truncate">{item.label}</span>
+              <span className="truncate">{item.label}</span>
 
-            {isActive && (
-              <div className="ml-auto w-1.5 h-1.5 rounded-full bg-brand-purple shrink-0" />
-            )}
-          </Link>
-        );
-      })}
-    </nav>
+              {isActive && (
+                <div className="ml-auto w-1.5 h-1.5 rounded-full bg-brand-purple shrink-0" />
+              )}
+            </Link>
+          );
+        })}
+      </nav>
 
-    <div className="p-4 mt-auto">
-      <div className="bg-secondary/40 border border-border/50 rounded-2xl p-4 mb-4">
-        <div className="flex items-center gap-2 font-bold text-sm text-foreground mb-1">
-          <LifeBuoy size={16} className="text-brand-purple shrink-0" />
-          <span className="truncate">Нужна помощь?</span>
+      <div className="p-4 mt-auto">
+        <div className="bg-secondary/40 border border-border/50 rounded-2xl p-4 mb-4">
+          <div className="flex items-center gap-2 font-bold text-sm text-foreground mb-1">
+            <LifeBuoy size={16} className="text-brand-purple shrink-0" />
+            <span className="truncate">{t('navigation.needHelp', 'Нужна помощь?')}</span>
+          </div>
+
+          <p className="text-xs text-muted-foreground mb-3 leading-relaxed">
+            {t('navigation.supportDesc', 'Напишите нашему менеджеру, мы всегда на связи.')}
+          </p>
+
+          <button className="w-full h-11 text-xs font-bold bg-background border border-border hover:bg-secondary transition-colors rounded-lg text-foreground">
+            {t('navigation.contactSupport', 'Написать в поддержку')}
+          </button>
         </div>
 
-        <p className="text-xs text-muted-foreground mb-3 leading-relaxed">
-          Напишите нашему менеджеру, мы всегда на связи.
-        </p>
-
-        <button className="w-full h-11 text-xs font-bold bg-background border border-border hover:bg-secondary transition-colors rounded-lg text-foreground">
-          Написать в поддержку
+        <button onClick={onLogout} className="flex items-center gap-3 px-3 h-11 w-full text-sm font-semibold text-muted-foreground hover:bg-destructive/10 hover:text-destructive rounded-lg transition-colors group min-w-0">
+          <LogOut size={18} className="group-hover:text-destructive transition-colors shrink-0" />
+          <span className="truncate">{t('navigation.logout', 'Выйти')}</span>
         </button>
       </div>
-
-      <button onClick={onLogout} className="flex items-center gap-3 px-3 h-11 w-full text-sm font-semibold text-muted-foreground hover:bg-destructive/10 hover:text-destructive rounded-lg transition-colors group min-w-0">
-        <LogOut size={18} className="group-hover:text-destructive transition-colors shrink-0" />
-        <span className="truncate">Выйти</span>
-      </button>
-    </div>
-  </>
-);
+    </>
+  );
+};
 
 const DashboardLayout = ({ children }) => {
+  const { t } = useTranslation();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [venues, setVenues] = useState([]);
   const location = useLocation();
@@ -135,12 +142,12 @@ const DashboardLayout = ({ children }) => {
   const activeVenue = venues.find((venue) => venue.id === activeVenueId) || venues[0] || null;
 
   const navItems = [
-    { icon: LayoutDashboard, label: 'Обзор', path: '/dashboard' },
-    { icon: UtensilsCrossed, label: 'Меню', path: '/dashboard/menu' },
-    { icon: Building2, label: 'Заведение', path: activeVenue ? `/dashboard/venues/${activeVenue.id}` : '/dashboard/venues' },
-    { icon: UserRound, label: 'Аккаунт', path: '/dashboard/account' },
-    { icon: CreditCard, label: 'Биллинг', path: '/dashboard/billing' },
-    { icon: Sparkles, label: 'Подписка', path: '/dashboard/subscription' },
+    { icon: LayoutDashboard, label: t('navigation.home', 'Обзор'), path: '/dashboard' },
+    { icon: UtensilsCrossed, label: t('navigation.menu', 'Меню'), path: '/dashboard/menu' },
+    { icon: Building2, label: t('navigation.venue', 'Заведение'), path: activeVenue ? `/dashboard/venues/${activeVenue.id}` : '/dashboard/venues' },
+    { icon: UserRound, label: t('navigation.account', 'Аккаунт'), path: '/dashboard/account' },
+    { icon: CreditCard, label: t('navigation.billing', 'Биллинг'), path: '/dashboard/billing' },
+    { icon: Sparkles, label: t('navigation.subscription', 'Подписка'), path: '/dashboard/subscription' },
   ];
 
   const handleVenueSwitch = (venueId) => {
@@ -203,18 +210,19 @@ const DashboardLayout = ({ children }) => {
           </div>
 
           <div className="ml-auto flex items-center gap-3 min-w-0 shrink-0">
+            <LanguageSwitcher />
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <button className="flex items-center gap-2 rounded-xl border border-border/60 bg-background px-3 py-2 hover:bg-secondary/50 transition-colors min-w-0 max-w-[220px] sm:max-w-[280px]">
                   <div className="text-left sm:text-right min-w-0">
                     <p className="text-xs sm:text-sm font-bold text-foreground truncate">
-                      {activeVenue?.name || 'Заведение не выбрано'}
+                      {activeVenue?.name || t('navigation.noVenueSelected', 'Заведение не выбрано')}
                     </p>
 
                     <div className="flex items-center justify-start sm:justify-end gap-1.5 mt-0.5">
                       <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse shrink-0" />
                       <p className="text-[10px] font-bold tracking-wider uppercase text-brand-purple truncate">
-                        PRO-тариф
+                        {t('navigation.proTariff', 'PRO-тариф')}
                       </p>
                     </div>
                   </div>
@@ -223,7 +231,7 @@ const DashboardLayout = ({ children }) => {
               </DropdownMenuTrigger>
 
               <DropdownMenuContent className="min-w-[260px]">
-                <DropdownMenuLabel>Текущее заведение</DropdownMenuLabel>
+                <DropdownMenuLabel>{t('navigation.currentVenue', 'Текущее заведение')}</DropdownMenuLabel>
                 {venues.map((venue) => (
                   <DropdownMenuItem
                     key={venue.id}
@@ -239,7 +247,7 @@ const DashboardLayout = ({ children }) => {
 
                 <DropdownMenuItem onSelect={() => navigate('/dashboard/venues')}>
                   <Plus size={16} />
-                  Добавить заведение
+                  {t('navigation.addVenue', 'Добавить заведение')}
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>

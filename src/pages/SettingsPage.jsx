@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   Store, Wifi, Paintbrush, ShieldCheck,
   Save, MapPin, CreditCard,
@@ -19,6 +20,7 @@ import {
 } from "../lib/uiStyles";
 
 const SettingsPage = () => {
+  const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState('profile');
 
   // Состояние данных заведения (подтягиваем то, что было в анбординге)
@@ -40,10 +42,10 @@ const SettingsPage = () => {
   });
 
   const tabs = [
-    { id: 'profile', label: 'Профиль', icon: Store },
-    { id: 'wifi', label: 'Wi-Fi', icon: Wifi },
-    { id: 'design', label: 'Внешний вид', icon: Paintbrush },
-    { id: 'billing', label: 'Тариф и оплата', icon: CreditCard },
+    { id: 'profile', label: t('venues.tabs.profile', 'Профиль'), icon: Store },
+    { id: 'wifi', label: t('venues.tabs.wifi', 'Wi-Fi'), icon: Wifi },
+    { id: 'design', label: t('venues.tabs.design', 'Внешний вид'), icon: Paintbrush },
+    { id: 'billing', label: t('settings.tabs.billing', 'Тариф и оплата'), icon: CreditCard },
   ];
 
   return (
@@ -52,12 +54,12 @@ const SettingsPage = () => {
       {/* Хедер страницы */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-card border border-border/60 p-6 rounded-3xl shadow-sm">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-extrabold text-foreground tracking-tight">Настройки</h1>
-          <p className="text-sm text-muted-foreground mt-1">Управляйте информацией о заведении и параметрами меню</p>
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-foreground tracking-tight">{t('settings.title', 'Настройки')}</h1>
+          <p className="text-sm text-muted-foreground mt-1">{t('settings.subtitle', 'Управляйте информацией о заведении и параметрами меню')}</p>
         </div>
         <Button className={`${primaryActionButtonClasses} px-6`}>
           <Save size={18} className="mr-2" />
-          Сохранить изменения
+          {t('settings.saveChanges', 'Сохранить изменения')}
         </Button>
       </div>
 
@@ -92,7 +94,7 @@ const SettingsPage = () => {
               <div className="p-6 sm:p-8 space-y-6">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                   <div className="space-y-2">
-                    <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Название заведения</Label>
+                    <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">{t('venues.fields.name', 'Название заведения')}</Label>
                     <Input
                       value={venueData.name}
                       onChange={(e) => setVenueData({...venueData, name: e.target.value})}
@@ -100,7 +102,7 @@ const SettingsPage = () => {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Телефон для связи</Label>
+                    <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">{t('venues.fields.phone', 'Телефон для связи')}</Label>
                     <Input
                       value={venueData.phone}
                       onChange={(e) => setVenueData({...venueData, phone: e.target.value})}
@@ -110,18 +112,18 @@ const SettingsPage = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Описание</Label>
+                  <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">{t('venues.fields.description', 'Описание')}</Label>
                   <Textarea
                     value={venueData.description}
                     onChange={(e) => setVenueData({...venueData, description: e.target.value})}
                     className={formTextareaClasses}
-                    placeholder="Расскажите гостям о вашем заведении..."
+                    placeholder={t('venues.fields.descriptionPlaceholder', 'Расскажите гостям о вашем заведении...')}
                   />
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 border-t border-border/50 pt-6">
                   <div className="space-y-2">
-                    <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Город</Label>
+                    <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">{t('venues.fields.city', 'Город')}</Label>
                     <div className="relative">
                       <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={16} />
                       <Input
@@ -132,7 +134,7 @@ const SettingsPage = () => {
                     </div>
                   </div>
                   <div className="space-y-2">
-                    <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Валюта меню</Label>
+                    <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">{t('venues.fields.currency', 'Валюта меню')}</Label>
                     <div className="relative">
                       <select
                         value={venueData.currency}
@@ -161,8 +163,8 @@ const SettingsPage = () => {
             <div className="bg-card border border-border/60 rounded-3xl shadow-sm p-6 sm:p-8 space-y-8">
               <div className="flex items-center justify-between">
                 <div className="space-y-1">
-                  <h3 className="text-lg font-bold text-foreground">Гостевой Wi-Fi</h3>
-                  <p className="text-sm text-muted-foreground">Данные будут отображаться в меню для быстрого подключения гостей</p>
+                  <h3 className="text-lg font-bold text-foreground">{t('venues.wifi.title', 'Гостевой Wi-Fi')}</h3>
+                  <p className="text-sm text-muted-foreground">{t('venues.wifi.subtitle', 'Данные будут отображаться in menu для быстрого подключения гостей')}</p>
                 </div>
                 <Switch
                   checked={wifiData.enabled}
@@ -173,21 +175,21 @@ const SettingsPage = () => {
 
               <div className={`grid grid-cols-1 sm:grid-cols-2 gap-6 transition-opacity ${!wifiData.enabled ? 'opacity-40 pointer-events-none' : ''}`}>
                 <div className="space-y-2">
-                  <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Название сети (SSID)</Label>
+                  <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">{t('venues.wifi.ssid', 'Название сети (SSID)')}</Label>
                   <Input
                     value={wifiData.ssid}
                     onChange={(e) => setWifiData({...wifiData, ssid: e.target.value})}
-                    placeholder="Например: Guest_WiFi"
+                    placeholder={t('venues.wifi.ssidPlaceholder', 'Например: Guest_WiFi')}
                     className={formFieldClasses}
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Пароль</Label>
+                  <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">{t('venues.wifi.password', 'Пароль')}</Label>
                   <Input
                     type="password"
                     value={wifiData.password}
                     onChange={(e) => setWifiData({...wifiData, password: e.target.value})}
-                    placeholder="Введите пароль"
+                    placeholder={t('venues.wifi.passwordPlaceholder', 'Введите пароль')}
                     className={formFieldClasses}
                   />
                 </div>
@@ -198,7 +200,7 @@ const SettingsPage = () => {
                   <Wifi size={20} />
                 </div>
                 <p className="text-xs text-brand-purple/80 leading-relaxed">
-                  При активации этой функции в вашем цифровом меню появится кнопка «Подключиться к Wi-Fi». Гостям не нужно будет вводить пароль вручную — всё произойдет автоматически.
+                  {t('venues.wifi.hint', 'При активации этой функции в вашем цифровом меню появится кнопка «Подключиться к Wi-Fi». Гостям не нужно будет вводить пароль вручную — всё произойдет автоматически.')}
                 </p>
               </div>
             </div>
@@ -208,34 +210,41 @@ const SettingsPage = () => {
           {activeTab === 'design' && (
             <div className="space-y-6">
               <div className="bg-card border border-border/60 rounded-3xl shadow-sm p-6 sm:p-8 space-y-6">
-                <h3 className="text-lg font-bold text-foreground">Дизайн меню</h3>
+                <h3 className="text-lg font-bold text-foreground">{t('venues.design.title', 'Дизайн меню')}</h3>
 
                 <div className="space-y-4">
-                  <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Цветовая тема</Label>
+                  <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">{t('venues.design.colorTheme', 'Цветовая тема')}</Label>
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                    {['Светлая', 'Темная', 'Авто', 'Брендовая'].map((theme) => (
+                    {[
+                      ['Светлая', 'venues.design.themes.light', 'Светлая'],
+                      ['Темная', 'venues.design.themes.dark', 'Темная'],
+                      ['Авто', 'venues.design.themes.auto', 'Авто'],
+                      ['Брендовая', 'venues.design.themes.brand', 'Брендовая']
+                    ].map(([themeKey, translationKey, defaultVal]) => (
                       <button
-                        key={theme}
+                        key={themeKey}
                         className={`p-4 rounded-xl border-2 text-sm font-bold transition-all text-center ${
-                          theme === 'Светлая' ? 'border-brand-purple bg-brand-purple/5 text-brand-purple' : 'border-border/40 hover:border-border text-muted-foreground'
+                          themeKey === 'Светлая' ? 'border-brand-purple bg-brand-purple/5 text-brand-purple' : 'border-border/40 hover:border-border text-muted-foreground'
                         }`}
                       >
-                        {theme}
+                        {t(translationKey, defaultVal)}
                       </button>
                     ))}
                   </div>
                 </div>
 
                 <div className="pt-6 border-t border-border/50 space-y-4">
-                  <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Логотип заведения в меню</Label>
+                  <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">{t('venues.design.logoLabel', 'Логотип заведения в меню')}</Label>
                   <div className="flex items-center gap-6">
                     <div className="w-24 h-24 rounded-2xl bg-secondary/30 border-2 border-dashed border-input flex items-center justify-center cursor-pointer hover:bg-secondary/50 transition-colors">
                       <ImageIcon className="text-muted-foreground" size={32} />
                     </div>
                     <div className="space-y-1">
-                      <p className="text-sm font-bold">Загрузите квадратное лого</p>
-                      <p className="text-xs text-muted-foreground">Рекомендуемый размер 512x512px, формат PNG или SVG</p>
-                      <Button variant="outline" size="sm" className="mt-2 rounded-lg border-border/60 text-[10px] uppercase tracking-wider font-black">Выбрать файл</Button>
+                      <p className="text-sm font-bold">{t('venues.design.logoUploadTitle', 'Загрузите квадратное лого')}</p>
+                      <p className="text-xs text-muted-foreground">{t('venues.design.logoUploadDesc', 'Рекомендуемый размер 512x512px, формат PNG или SVG')}</p>
+                      <Button variant="outline" size="sm" className="mt-2 rounded-lg border-border/60 text-[10px] uppercase tracking-wider font-black">
+                        {t('venues.design.btnSelectFile', 'Выбрать файл')}
+                      </Button>
                     </div>
                   </div>
                 </div>
@@ -243,11 +252,11 @@ const SettingsPage = () => {
 
               <div className="bg-gradient-to-br from-gray-900 to-gray-800 p-6 rounded-3xl shadow-xl text-white flex items-center justify-between">
                 <div className="space-y-1">
-                  <p className="text-xs font-bold text-brand-purple uppercase tracking-widest">Предпросмотр</p>
-                  <h4 className="text-lg font-extrabold">Посмотрите, как меню видят гости</h4>
+                  <p className="text-xs font-bold text-brand-purple uppercase tracking-widest">{t('venues.design.previewLabel', 'Предпросмотр')}</p>
+                  <h4 className="text-lg font-extrabold">{t('venues.design.previewTitle', 'Посмотрите, как меню видят гости')}</h4>
                 </div>
                 <Button className="h-11 rounded-lg bg-white text-gray-900 hover:bg-gray-100 font-bold gap-2 px-5">
-                  Открыть меню
+                  {t('venues.design.btnOpenMenu', 'Открыть меню')}
                   <ExternalLink size={16} />
                 </Button>
               </div>
@@ -263,23 +272,23 @@ const SettingsPage = () => {
                     <ShieldCheck size={24} />
                   </div>
                   <div>
-                    <h3 className="text-lg font-extrabold text-foreground">PRO Тариф</h3>
-                    <p className="text-sm text-brand-purple font-bold">Активен до 24.06.2026</p>
+                    <h3 className="text-lg font-extrabold text-foreground">{t('settings.billing.proTariff', 'PRO Тариф')}</h3>
+                    <p className="text-sm text-brand-purple font-bold">{t('settings.billing.activeUntil', 'Активен до {{date}}', { date: '24.06.2026' })}</p>
                   </div>
                 </div>
                 <div className="text-right hidden sm:block">
-                  <p className="text-2xl font-black text-foreground">990 ₽ <span className="text-sm text-muted-foreground font-medium">/ мес</span></p>
+                  <p className="text-2xl font-black text-foreground">990 ₽ <span className="text-sm text-muted-foreground font-medium">{t('billing.perMonth', '/ мес')}</span></p>
                 </div>
               </div>
               <div className="p-6 sm:p-8 space-y-6">
                 <div className="space-y-4">
-                  <h4 className="text-sm font-bold text-foreground">Ваши преимущества:</h4>
+                  <h4 className="text-sm font-bold text-foreground">{t('settings.billing.advantages', 'Ваши преимущества:')}</h4>
                   <ul className="space-y-3">
                     {[
-                      'Неограниченное количество блюд и категорий',
-                      'Кастомизация дизайна QR-кодов и меню',
-                      'Приоритетная поддержка 24/7',
-                      'Аналитика просмотров и кликов'
+                      t('settings.billing.features.0', 'Неограниченное количество блюд и категорий'),
+                      t('settings.billing.features.1', 'Кастомизация дизайна QR-кодов и меню'),
+                      t('settings.billing.features.2', 'Приоритетная поддержка 24/7'),
+                      t('settings.billing.features.3', 'Аналитика просмотров и кликов')
                     ].map((feature, i) => (
                       <li key={i} className="flex items-center gap-3 text-sm text-muted-foreground font-medium">
                         <div className="w-1.5 h-1.5 rounded-full bg-green-500"></div>
@@ -289,8 +298,12 @@ const SettingsPage = () => {
                   </ul>
                 </div>
                 <div className="pt-6 border-t border-border/50 flex flex-col sm:flex-row gap-3">
-                  <Button variant="outline" className={`flex-1 ${secondaryActionButtonClasses}`}>Квитанции и чеки</Button>
-                  <Button variant="destructive" className="flex-1 h-10 sm:h-12 rounded-lg font-bold bg-red-500/10 text-red-500 border-none hover:bg-red-500/20">Отменить подписку</Button>
+                  <Button variant="outline" className={`flex-1 ${secondaryActionButtonClasses}`}>
+                    {t('settings.billing.invoices', 'Квитанции и чеки')}
+                  </Button>
+                  <Button variant="destructive" className="flex-1 h-10 sm:h-12 rounded-lg font-bold bg-red-500/10 text-red-500 border-none hover:bg-red-500/20">
+                    {t('settings.billing.cancelSubscription', 'Отменить подписку')}
+                  </Button>
                 </div>
               </div>
             </div>

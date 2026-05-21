@@ -1,5 +1,6 @@
 import { Label } from "../ui/label";
 import { Input } from "../ui/input";
+import { useTranslation } from "react-i18next";
 import { COUNTRIES, inputBaseClasses } from "./countries";
 
 const SelectChevron = () => (
@@ -15,56 +16,61 @@ export const DialPhoneField = ({
   onDialChange,
   selectedCountryId,
   onCountryChange,
-  label = 'Контактный телефон',
+  label,
   required = false,
   labelClassName = 'text-foreground font-medium ml-1 text-[11px] sm:text-xs sm:text-sm',
   inputClassName = inputBaseClasses,
   selectClassName = inputBaseClasses,
   selectWrapperClassName = 'w-[100px] sm:w-[120px]',
-}) => (
-  <div className="space-y-1.5 sm:space-y-2">
-    <Label htmlFor="phone" className={labelClassName}>
-      {label} {required && <span className="text-red-500">*</span>}
-    </Label>
-    <div className="flex gap-2">
-      <div className={`relative shrink-0 ${selectWrapperClassName}`}>
-        <select
-          value={selectedCountryId || selectedDial}
-          onChange={(e) => {
-            const country = COUNTRIES.find((item) => item.id === e.target.value);
+}) => {
+  const { t } = useTranslation();
+  const displayLabel = label !== undefined ? label : t('common.phone', { defaultValue: 'Контактный телефон' });
 
-            if (country) {
-              onCountryChange?.(country.id);
-              onDialChange(country.dial);
-              return;
-            }
+  return (
+    <div className="space-y-1.5 sm:space-y-2">
+      <Label htmlFor="phone" className={labelClassName}>
+        {displayLabel} {required && <span className="text-red-500">*</span>}
+      </Label>
+      <div className="flex gap-2">
+        <div className={`relative shrink-0 ${selectWrapperClassName}`}>
+          <select
+            value={selectedCountryId || selectedDial}
+            onChange={(e) => {
+              const country = COUNTRIES.find((item) => item.id === e.target.value);
 
-            onDialChange(e.target.value);
-          }}
-          className={`${selectClassName} appearance-none pr-7 sm:pr-8 cursor-pointer text-[11px] sm:text-base`}
-        >
-          {COUNTRIES.map((country) => (
-            <option key={`dial-${country.id}`} value={selectedCountryId ? country.id : country.dial}>
-              {country.flag} {country.dial}
-            </option>
-          ))}
-        </select>
-        <div className="absolute right-2.5 sm:right-3 top-1/2 -translate-y-1/2 pointer-events-none text-muted-foreground">
-          <SelectChevron />
+              if (country) {
+                onCountryChange?.(country.id);
+                onDialChange(country.dial);
+                return;
+              }
+
+              onDialChange(e.target.value);
+            }}
+            className={`${selectClassName} appearance-none pr-7 sm:pr-8 cursor-pointer text-[11px] sm:text-base`}
+          >
+            {COUNTRIES.map((country) => (
+              <option key={`dial-${country.id}`} value={selectedCountryId ? country.id : country.dial}>
+                {country.flag} {country.dial}
+              </option>
+            ))}
+          </select>
+          <div className="absolute right-2.5 sm:right-3 top-1/2 -translate-y-1/2 pointer-events-none text-muted-foreground">
+            <SelectChevron />
+          </div>
         </div>
+        <Input
+          id="phone"
+          type="tel"
+          value={phone}
+          onChange={(e) => onPhoneChange(formatPhoneByDial(e.target.value, selectedDial))}
+          placeholder="(999) 000-00-00"
+          required={required}
+          className={`${inputClassName} flex-1`}
+        />
       </div>
-      <Input
-        id="phone"
-        type="tel"
-        value={phone}
-        onChange={(e) => onPhoneChange(formatPhoneByDial(e.target.value, selectedDial))}
-        placeholder="(999) 000-00-00"
-        required={required}
-        className={`${inputClassName} flex-1`}
-      />
     </div>
-  </div>
-);
+  );
+};
 
 export const stripPhoneDigits = (value) => `${value || ''}`.replace(/\D/g, '');
 
@@ -140,29 +146,34 @@ export const formatPhoneByDial = (value, dial) => {
 export const CountryField = ({
   selectedCountry,
   onCountryChange,
-  label = 'Страна',
+  label,
   required = false,
-}) => (
-  <div className="space-y-1.5 sm:space-y-2">
-    <Label htmlFor="country" className="text-foreground font-medium ml-1 text-[11px] sm:text-xs sm:text-sm">
-      {label} {required && <span className="text-red-500">*</span>}
-    </Label>
-    <div className="relative">
-      <select
-        id="country"
-        value={selectedCountry}
-        onChange={(e) => onCountryChange(e.target.value)}
-        className={`${inputBaseClasses} pr-10 cursor-pointer text-[11px] sm:text-base`}
-      >
-        {COUNTRIES.map((country) => (
-          <option key={country.id} value={country.id}>
-            {country.flag} {country.name}
-          </option>
-        ))}
-      </select>
-      <div className="absolute right-3.5 sm:right-4 top-1/2 -translate-y-1/2 pointer-events-none text-muted-foreground">
-        <SelectChevron />
+}) => {
+  const { t } = useTranslation();
+  const displayLabel = label !== undefined ? label : t('common.country', { defaultValue: 'Страна' });
+
+  return (
+    <div className="space-y-1.5 sm:space-y-2">
+      <Label htmlFor="country" className="text-foreground font-medium ml-1 text-[11px] sm:text-xs sm:text-sm">
+        {displayLabel} {required && <span className="text-red-500">*</span>}
+      </Label>
+      <div className="relative">
+        <select
+          id="country"
+          value={selectedCountry}
+          onChange={(e) => onCountryChange(e.target.value)}
+          className={`${inputBaseClasses} pr-10 cursor-pointer text-[11px] sm:text-base`}
+        >
+          {COUNTRIES.map((country) => (
+            <option key={country.id} value={country.id}>
+              {country.flag} {t(`countries.${country.id}`, { defaultValue: country.name })}
+            </option>
+          ))}
+        </select>
+        <div className="absolute right-3.5 sm:right-4 top-1/2 -translate-y-1/2 pointer-events-none text-muted-foreground">
+          <SelectChevron />
+        </div>
       </div>
     </div>
-  </div>
-);
+  );
+};

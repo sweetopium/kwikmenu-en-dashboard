@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import {
   Users, Eye,
   ArrowUpRight, QrCode,
@@ -18,12 +19,7 @@ import { getVenueAnalyticsOverview } from "../lib/analyticsApi";
 import { fetchCurrentUser } from "../lib/sessionApi";
 import { trackProductEvent } from "../lib/productAnalytics";
 
-const PERIOD_OPTIONS = [
-  { label: 'Сегодня', value: 'today' },
-  { label: 'Вчера', value: 'yesterday' },
-  { label: 'Последние 7 дней', value: '7d' },
-  { label: 'Последние 30 дней', value: '30d' },
-];
+const PERIOD_OPTIONS = ['today', 'yesterday', '7d', '30d'];
 
 const getDeltaStyles = (value) => {
   if (value >= 0) {
@@ -42,6 +38,7 @@ const getDeltaStyles = (value) => {
 };
 
 const DashboardHome = () => {
+  const { t, i18n } = useTranslation();
   const [selectedPeriod, setSelectedPeriod] = useState('7d');
   const [overview, setOverview] = useState({
     totalViews: 0,
@@ -98,7 +95,7 @@ const DashboardHome = () => {
         setOverview(payload);
       })
       .catch((nextError) => {
-        setError(nextError.message || 'Не удалось загрузить аналитику.');
+        setError(nextError.message || t('dashboard.errors.analyticsLoadFailed'));
         setOverview({
           totalViews: 0,
           uniqueVisitors: 0,
@@ -108,11 +105,11 @@ const DashboardHome = () => {
         });
       })
       .finally(() => setIsLoading(false));
-  }, [activeVenueId, selectedPeriod]);
+  }, [activeVenueId, selectedPeriod, t]);
 
   const selectedPeriodLabel = useMemo(
-    () => PERIOD_OPTIONS.find((option) => option.value === selectedPeriod)?.label || 'Последние 7 дней',
-    [selectedPeriod]
+    () => t(`dashboard.periods.${selectedPeriod}`),
+    [selectedPeriod, t]
   );
   const chartData = overview.series || [];
   const maxViews = Math.max(1, ...chartData.map((point) => point.views || 0));
@@ -124,10 +121,10 @@ const DashboardHome = () => {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl sm:text-3xl font-extrabold text-foreground tracking-tight">
-            {userName ? `Добро пожаловать, ${userName}!` : 'Обзор аналитики'}
+            {userName ? t('dashboard.welcomeUser', { name: userName }) : t('dashboard.analyticsOverview')}
           </h1>
           <p className="text-sm text-muted-foreground mt-1">
-            Отслеживайте открытия публичного меню и уникальных гостей по заведению.
+            {t('dashboard.subtitle')}
           </p>
         </div>
 
@@ -143,20 +140,20 @@ const DashboardHome = () => {
             </DropdownMenuTrigger>
 
             <DropdownMenuContent className="min-w-[220px]">
-              {PERIOD_OPTIONS.map((period) => (
+              {PERIOD_OPTIONS.map((periodVal) => (
                 <DropdownMenuItem
-                  key={period.value}
+                  key={periodVal}
                   onSelect={() => {
-                    setSelectedPeriod(period.value);
+                    setSelectedPeriod(periodVal);
                     trackProductEvent('analytics_period_changed', {
                       venueId: activeVenueId,
-                      properties: { period: period.value },
+                      properties: { period: periodVal },
                     });
                   }}
                   className="justify-between"
                 >
-                  <span>{period.label}</span>
-                  {selectedPeriod === period.value ? <Check size={16} className="text-brand-purple" /> : null}
+                  <span>{t(`dashboard.periods.${periodVal}`)}</span>
+                  {selectedPeriod === periodVal ? <Check size={16} className="text-brand-purple" /> : null}
                 </DropdownMenuItem>
               ))}
             </DropdownMenuContent>
@@ -183,9 +180,9 @@ const DashboardHome = () => {
             </div>
           </div>
           <div className="mt-4 sm:mt-6">
-            <p className="text-[10px] sm:text-xs font-bold text-muted-foreground uppercase tracking-[0.12em] sm:tracking-wider">Открытия меню</p>
+            <p className="text-[10px] sm:text-xs font-bold text-muted-foreground uppercase tracking-[0.12em] sm:tracking-wider">{t('dashboard.menuViews')}</p>
             <h3 className="text-3xl sm:text-4xl font-black text-foreground mt-1 leading-none">
-              {isLoading ? '...' : overview.totalViews.toLocaleString('ru-RU')}
+              {isLoading ? '...' : overview.totalViews.toLocaleString(i18n.language === 'ru' ? 'ru-RU' : 'en-US')}
             </h3>
           </div>
         </div>
@@ -202,9 +199,9 @@ const DashboardHome = () => {
             </div>
           </div>
           <div className="mt-4 sm:mt-6">
-            <p className="text-[10px] sm:text-xs font-bold text-muted-foreground uppercase tracking-[0.12em] sm:tracking-wider">Уникальные гости</p>
+            <p className="text-[10px] sm:text-xs font-bold text-muted-foreground uppercase tracking-[0.12em] sm:tracking-wider">{t('dashboard.uniqueGuests')}</p>
             <h3 className="text-3xl sm:text-4xl font-black text-foreground mt-1 leading-none">
-              {isLoading ? '...' : overview.uniqueVisitors.toLocaleString('ru-RU')}
+              {isLoading ? '...' : overview.uniqueVisitors.toLocaleString(i18n.language === 'ru' ? 'ru-RU' : 'en-US')}
             </h3>
           </div>
         </div>
@@ -213,12 +210,12 @@ const DashboardHome = () => {
       <div className="bg-card border border-border/60 rounded-3xl p-6 sm:p-8 shadow-sm flex flex-col">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
           <div>
-            <h2 className="text-xl font-bold text-foreground">Динамика просмотров</h2>
-            <p className="text-sm text-muted-foreground mt-1">Сравнение открытий меню и уникальных гостей</p>
+            <h2 className="text-xl font-bold text-foreground">{t('dashboard.chart.title')}</h2>
+            <p className="text-sm text-muted-foreground mt-1">{t('dashboard.chart.subtitle')}</p>
           </div>
           <div className="flex items-center gap-4 text-xs font-bold">
-            <div className="flex items-center gap-2"><div className="w-3.5 h-3.5 rounded-md bg-brand-purple"></div>Просмотры</div>
-            <div className="flex items-center gap-2"><div className="w-3.5 h-3.5 rounded-md bg-secondary border border-border"></div>Уникальные</div>
+            <div className="flex items-center gap-2"><div className="w-3.5 h-3.5 rounded-md bg-brand-purple"></div>{t('dashboard.chart.legendViews')}</div>
+            <div className="flex items-center gap-2"><div className="w-3.5 h-3.5 rounded-md bg-secondary border border-border"></div>{t('dashboard.chart.legendUnique')}</div>
           </div>
         </div>
 
@@ -232,7 +229,7 @@ const DashboardHome = () => {
           {(chartData.length ? chartData : [{ label: '—', views: 0, uniqueVisitors: 0 }]).map((data, index) => {
             const heightViews = `${((data.views || 0) / maxViews) * 100}%`;
             const heightUnique = `${((data.uniqueVisitors || 0) / maxViews) * 100}%`;
-            const isWeekend = data.label === 'Сб' || data.label === 'Вс';
+            const isWeekend = data.label === 'Сб' || data.label === 'Вс' || data.label === 'Sa' || data.label === 'Su';
 
             return (
               <div key={`${data.date || 'empty'}-${index}`} className="flex flex-col items-center flex-1 group z-10">
@@ -250,7 +247,9 @@ const DashboardHome = () => {
                     style={{ height: heightUnique }}
                   ></div>
                 </div>
-                <span className={`text-sm font-bold mt-4 ${isWeekend ? 'text-brand-purple' : 'text-muted-foreground'}`}>{data.label}</span>
+                <span className={`text-sm font-bold mt-4 ${isWeekend ? 'text-brand-purple' : 'text-muted-foreground'}`}>
+                  {t('days.' + data.label, { defaultValue: data.label })}
+                </span>
               </div>
             );
           })}
@@ -270,8 +269,8 @@ const DashboardHome = () => {
             <Pencil size={28} />
           </div>
           <div>
-            <h3 className="font-bold text-xl text-foreground">Открыть редактор меню</h3>
-            <p className="text-sm text-muted-foreground mt-1">Изменить категории, позиции и переводы</p>
+            <h3 className="font-bold text-xl text-foreground">{t('dashboard.actions.editMenu.title')}</h3>
+            <p className="text-sm text-muted-foreground mt-1">{t('dashboard.actions.editMenu.description')}</p>
           </div>
         </Link>
 
@@ -287,8 +286,8 @@ const DashboardHome = () => {
             <QrCode size={28} />
           </div>
           <div>
-            <h3 className="font-bold text-xl text-foreground">Скачать QR-коды</h3>
-            <p className="text-sm text-muted-foreground mt-1">Для печати и соцсетей</p>
+            <h3 className="font-bold text-xl text-foreground">{t('dashboard.actions.downloadQr.title')}</h3>
+            <p className="text-sm text-muted-foreground mt-1">{t('dashboard.actions.downloadQr.description')}</p>
           </div>
         </Link>
 
@@ -306,8 +305,8 @@ const DashboardHome = () => {
             <ExternalLink size={28} />
           </div>
           <div>
-            <h3 className="font-bold text-xl text-foreground">Открыть публичное меню</h3>
-            <p className="text-sm text-muted-foreground mt-1">Проверить, как меню видят гости</p>
+            <h3 className="font-bold text-xl text-foreground">{t('dashboard.actions.openPublic.title')}</h3>
+            <p className="text-sm text-muted-foreground mt-1">{t('dashboard.actions.openPublic.description')}</p>
           </div>
         </a>
       </div>

@@ -4,6 +4,7 @@ import {Loader2} from "lucide-react";
 import {FcGoogle} from "react-icons/fc";
 import {FaYandex} from "react-icons/fa6";
 import {SiMaildotru} from "react-icons/si";
+import {useTranslation} from "react-i18next";
 import AuthShell from "../components/auth/AuthShell.jsx";
 import SocialProviderButton from "../components/auth/SocialProviderButton.jsx";
 import AuthField from "../components/auth/AuthField.jsx";
@@ -13,6 +14,7 @@ import { primaryActionButtonClasses } from "../lib/uiStyles.js";
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 const LoginPage = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [form, setForm] = useState({
     email: "",
@@ -27,13 +29,13 @@ const LoginPage = () => {
     const nextErrors = {};
 
     if (!form.email.trim()) {
-      nextErrors.email = "Введите email";
+      nextErrors.email = t('login.errEmailRequired');
     } else if (!emailPattern.test(form.email.trim())) {
-      nextErrors.email = "Укажите корректный email";
+      nextErrors.email = t('login.errEmailInvalid');
     }
 
     if (!form.password) {
-      nextErrors.password = "Введите пароль";
+      nextErrors.password = t('login.errPasswordRequired');
     }
 
     setErrors(nextErrors);
@@ -68,7 +70,7 @@ const LoginPage = () => {
 
       navigate(result?.redirectUrl || getPostLoginRedirect());
     } catch (error) {
-      setSubmitError(error.message || "Не удалось выполнить вход");
+      setSubmitError(error.message || t('login.errGeneral'));
     } finally {
       setPending(false);
     }
@@ -76,38 +78,38 @@ const LoginPage = () => {
 
   return (
     <AuthShell
-      title="С возвращением"
-      subtitle="Рады видеть вас снова. Введите данные для входа в личный кабинет"
+      title={t('login.title')}
+      subtitle={t('login.subtitle')}
     >
       <div className="space-y-6 sm:space-y-8">
         <div className="grid grid-cols-3 gap-3 sm:grid-cols-3">
           <SocialProviderButton icon={FcGoogle} label="Google" onClick={() => handleProviderClick("google")}/>
-          <SocialProviderButton icon={FaYandex} label="Яндекс" iconClassName="text-[#fc3f1d]" onClick={() => handleProviderClick("yandex")}/>
+          <SocialProviderButton icon={FaYandex} label="Yandex" iconClassName="text-[#fc3f1d]" onClick={() => handleProviderClick("yandex")}/>
           <SocialProviderButton icon={SiMaildotru} label="Mail" iconClassName="text-[#005ff9]" onClick={() => handleProviderClick("mailru")}/>
         </div>
 
         <div className="flex items-center gap-4 text-[11px] font-semibold uppercase tracking-[0.22em] text-muted-foreground sm:text-xs">
           <div className="h-px flex-1 bg-border"/>
-          <span>или через почту</span>
+          <span>{t('login.orEmail')}</span>
           <div className="h-px flex-1 bg-border"/>
         </div>
 
         <form className="space-y-5" onSubmit={handleSubmit}>
           <AuthField
-            label="Email"
+            label={t('login.email')}
             type="email"
             autoComplete="email"
-            placeholder="name@example.com"
+            placeholder={t('login.emailPlaceholder')}
             value={form.email}
             onChange={updateField("email")}
             error={errors.email}
           />
 
           <AuthField
-            label="Пароль"
+            label={t('login.password')}
             type="password"
             autoComplete="current-password"
-            placeholder="Введите пароль"
+            placeholder={t('login.passwordPlaceholder')}
             value={form.password}
             onChange={updateField("password")}
             error={errors.password}
@@ -116,7 +118,7 @@ const LoginPage = () => {
                 href={forgotPasswordUrl}
                 className="text-xs font-semibold text-brand-purple transition-colors hover:text-brand-purple/80 sm:text-sm"
               >
-                Забыли пароль?
+                {t('login.forgotPassword')}
               </a>
             }
           />
@@ -132,19 +134,19 @@ const LoginPage = () => {
             disabled={pending}
             className={`w-full ${primaryActionButtonClasses} disabled:translate-y-0 disabled:opacity-60`}
           >
-            {pending ? <Loader2 className="h-5 w-5 animate-spin"/> : "Войти в систему"}
+            {pending ? <Loader2 className="h-5 w-5 animate-spin"/> : t('login.btnSubmit')}
 
           </button>
         </form>
 
         <p className="text-center text-[11px] text-muted-foreground sm:text-sm">
-          Продолжая, вы подтверждаете согласие с условиями сервиса и политикой обработки данных.
+          {t('login.footerLegal')}
         </p>
 
         <p className="text-center text-[11px] text-muted-foreground sm:text-sm">
-          Нет аккаунта?{' '}
+          {t('login.noAccount')}{' '}
           <Link to="/register" className="font-semibold text-brand-purple transition-colors hover:text-brand-purple/80">
-            Зарегистрируйтесь
+            {t('login.registerLink')}
           </Link>
         </p>
       </div>

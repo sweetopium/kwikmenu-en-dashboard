@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import DirectMenuLink from "../components/qr/DirectMenuLink";
 import QrDesignControls from "../components/qr/QrDesignControls";
@@ -10,11 +11,12 @@ const QR_VALUE = "https://kwikmenu.com/cafe-tatiana";
 const QR_DISPLAY_VALUE = "kwikmenu.com/cafe-tatiana";
 
 const QrManager = () => {
+  const { t } = useTranslation();
   const [qrColor, setQrColor] = useState('#863bff');
   const [qrStyle, setQrStyle] = useState('rounded'); // 'square' | 'rounded' | 'dots'
   const [logoFile, setLogoFile] = useState(null);
   const [hasFrame, setHasFrame] = useState(true);
-  const [frameText, setFrameText] = useState('СКАНИРУЙ МЕНЮ');
+  const [frameText, setFrameText] = useState(() => t('qr.preview.defaultFrameText', 'СКАНИРУЙ МЕНЮ'));
   const [frameColor, setFrameColor] = useState('#08060d');
 
   const handleLogoUpload = (e) => {
@@ -26,7 +28,7 @@ const QrManager = () => {
   };
 
   const downloadQR = () => {
-    const canvas = document.getElementById('kwikmenu-qr-canvas');
+    const canvas = document.getElementById('kwikmenu-qr-canvas') || document.getElementById('kwikmenu-qr-canvas-mobile');
 
     if (canvas) {
       const pngUrl = canvas
@@ -46,7 +48,7 @@ const QrManager = () => {
     try {
       await navigator.clipboard.writeText(QR_VALUE);
     } catch (error) {
-      console.error('Не удалось скопировать ссылку', error);
+      console.error(t('qr.manager.errors.copyFailed', 'Не удалось скопировать ссылку'), error);
     }
   };
 
@@ -66,11 +68,11 @@ const QrManager = () => {
       <div className="flex-1 space-y-6 min-w-0 max-w-full">
         <div className="bg-card border border-border/60 p-6 sm:p-8 rounded-3xl shadow-sm">
           <h1 className="text-2xl sm:text-3xl font-extrabold text-foreground tracking-tight">
-            Управление QR-кодами
+            {t('qr.manager.title', 'Управление QR-кодами')}
           </h1>
 
           <p className="text-sm text-muted-foreground mt-2 max-w-2xl leading-relaxed">
-            Настройте внешний вид QR-кода под стиль вашего заведения и скачайте его в высоком качестве для размещения на тейбл-тентах или наклейках.
+            {t('qr.manager.subtitle', 'Настройте внешний вид QR-кода под стиль вашего заведения и скачайте его в высоком качестве для размещения на тейбл-тентах или наклейках.')}
           </p>
         </div>
 

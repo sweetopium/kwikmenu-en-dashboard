@@ -1,11 +1,13 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Zap, HelpCircle, ChevronRight } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 import OnboardingCard from "../components/onboarding/OnboardingCard";
 import HelpRequestForm from "../components/onboarding/HelpRequestForm";
 
 const WelcomePage = () => {
+  const { t } = useTranslation();
   const [isHelpOpen, setIsHelpOpen] = useState(false);
 
   useEffect(() => {
@@ -28,10 +30,10 @@ const WelcomePage = () => {
       <div className="max-w-2xl mx-auto text-center space-y-10 py-3 sm:py-8 animate-in fade-in slide-in-from-bottom-4 duration-700 ease-out">
         <div className="space-y-4">
           <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight text-foreground">
-            Как вы хотите начать?
+            {t('welcome.title')}
           </h1>
           <p className="mx-auto max-w-xl text-sm leading-relaxed text-muted-foreground sm:text-base">
-            Выберите удобный сценарий: пройти запуск самостоятельно или оставить заявку, и мы поможем подготовить меню и QR-код.
+            {t('welcome.description')}
           </p>
         </div>
 
@@ -52,9 +54,9 @@ const WelcomePage = () => {
               </div>
             </div>
             <div className="mt-8">
-              <h3 className="font-bold text-2xl text-foreground">Самостоятельно</h3>
+              <h3 className="font-bold text-2xl text-foreground">{t('welcome.self')}</h3>
               <p className="text-base text-muted-foreground mt-3 leading-relaxed">
-                Сначала создайте аккаунт, затем загрузите действующее меню и запустите AI-разбор.
+                {t('welcome.selfDesc')}
               </p>
             </div>
           </Link>
@@ -76,9 +78,9 @@ const WelcomePage = () => {
               </div>
             </div>
             <div className="mt-8">
-              <h3 className="font-bold text-2xl text-foreground">Нужна помощь</h3>
+              <h3 className="font-bold text-2xl text-foreground">{t('welcome.help')}</h3>
               <p className="text-base text-muted-foreground mt-3 leading-relaxed">
-                Оставьте заявку, и менеджер поможет с переносом меню и подготовкой готового QR-кода.
+                {t('welcome.helpDesc')}
               </p>
             </div>
           </button>

@@ -1,16 +1,18 @@
 import { FileText, WandSparkles } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 import MenuImportFlow from "../components/menu-import/MenuImportFlow";
 import SettingsPageHeader from "../components/settings/SettingsPageHeader";
 
 const MenuImportPage = () => {
+  const { t } = useTranslation();
   const activeVenueId = typeof window !== 'undefined' ? window.localStorage.getItem('kwikmenu-active-venue') : null;
 
   return (
     <div className="mx-auto space-y-6 sm:space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700 ease-out">
       <SettingsPageHeader
-        title="Новое меню"
-        description="Экран импорта для рабочего кабинета. Отправляем исходники в backend job, сохраняем результат и открываем черновик меню."
+        title={t('menuImportPage.header.title')}
+        description={t('menuImportPage.header.description')}
         actionLabel={null}
       />
 
@@ -19,13 +21,13 @@ const MenuImportPage = () => {
           <MenuImportFlow
             venueId={activeVenueId}
             context={{ flow: 'dashboard', trigger: 'menu_create' }}
-            introTitle="Импортируйте меню"
-            introDescription="Поддерживаем PDF, фотографии и прямую ссылку на PDF-файл. После обработки сохраним черновик меню и откроем его в редакторе."
-            submitLabel="Создать черновик меню"
-            successTitle="Импорт завершен"
-            successDescription="Backend job принял исходники, собрал итоговый JSON, сохранил меню и подготовил его к редактированию."
-            successPrimaryLabel="Открыть редактор"
-            successSecondaryLabel="Загрузить другой файл"
+            introTitle={t('menuImportPage.flow.introTitle')}
+            introDescription={t('menuImportPage.flow.introDescription')}
+            submitLabel={t('menuImportPage.flow.submitLabel')}
+            successTitle={t('menuImportPage.flow.successTitle')}
+            successDescription={t('menuImportPage.flow.successDescription')}
+            successPrimaryLabel={t('menuImportPage.flow.successPrimaryLabel')}
+            successSecondaryLabel={t('menuImportPage.flow.successSecondaryLabel')}
           />
         </section>
 
@@ -36,19 +38,19 @@ const MenuImportPage = () => {
                 <WandSparkles size={20} />
               </div>
               <div>
-                <h2 className="text-lg font-bold text-foreground">Что делает импорт</h2>
-                <p className="text-sm text-muted-foreground">Работает через backend import job и polling.</p>
+                <h2 className="text-lg font-bold text-foreground">{t('menuImportPage.sidebar.whatItDoes.title')}</h2>
+                <p className="text-sm text-muted-foreground">{t('menuImportPage.sidebar.whatItDoes.subtitle')}</p>
               </div>
             </div>
 
             <div className="space-y-3">
               {[
-                'Принимаем PDF, фотографии или прямую ссылку на PDF.',
-                'Создаем backend job и сохраняем исходники локально.',
-                'Показываем статусы загрузки, обработки, успеха и ошибки через polling.',
-                'После успеха создаем черновик меню и открываем редактор.',
-              ].map((item) => (
-                <div key={item} className="rounded-2xl border border-border/60 bg-secondary/15 px-4 py-4 text-sm leading-relaxed text-muted-foreground">
+                t('menuImportPage.sidebar.whatItDoes.item1'),
+                t('menuImportPage.sidebar.whatItDoes.item2'),
+                t('menuImportPage.sidebar.whatItDoes.item3'),
+                t('menuImportPage.sidebar.whatItDoes.item4'),
+              ].map((item, idx) => (
+                <div key={idx} className="rounded-2xl border border-border/60 bg-secondary/15 px-4 py-4 text-sm leading-relaxed text-muted-foreground">
                   {item}
                 </div>
               ))}
@@ -61,13 +63,13 @@ const MenuImportPage = () => {
                 <FileText size={20} />
               </div>
               <div>
-                <h2 className="text-lg font-bold text-foreground">Следующий этап</h2>
-                <p className="text-sm text-muted-foreground">Текущий контур уже сохраняет меню и venue на backend.</p>
+                <h2 className="text-lg font-bold text-foreground">{t('menuImportPage.sidebar.nextStage.title')}</h2>
+                <p className="text-sm text-muted-foreground">{t('menuImportPage.sidebar.nextStage.subtitle')}</p>
               </div>
             </div>
 
             <p className="text-sm leading-relaxed text-muted-foreground">
-              Следующим шагом сюда добавим историю импортов, повторные загрузки и выбор целевого заведения прямо перед запуском job.
+              {t('menuImportPage.sidebar.nextStage.description')}
             </p>
           </section>
         </aside>

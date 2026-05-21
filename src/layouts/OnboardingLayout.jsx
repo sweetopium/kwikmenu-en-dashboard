@@ -1,9 +1,13 @@
 import {Link} from "react-router-dom";
 import {Zap} from "lucide-react";
+import LanguageSwitcher from "../components/LanguageSwitcher.jsx";
 
 const OnboardingLayout = ({children}) => (
     // УБРАЛ justify-center, ДОБАВИЛ pt-12 sm:pt-20 (отступ сверху всегда фиксированный)
-    <div className="min-h-screen bg-secondary/30 flex flex-col items-center pt-10 sm:pt-15 px-6 pb-6">
+    <div className="min-h-screen bg-secondary/30 flex flex-col items-center pt-10 sm:pt-15 px-6 pb-6 relative">
+        <div className="absolute top-4 right-4 z-50">
+            <LanguageSwitcher />
+        </div>
         <div className="w-full max-w-4xl">
             <div className="flex justify-center sm:mb-8 mb-6">
                 <Link to="/"
@@ -20,4 +24,4 @@ const OnboardingLayout = ({children}) => (
     </div>
 );
 
-export default OnboardingLayout
+export default OnboardingLayout;

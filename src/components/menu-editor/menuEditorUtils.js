@@ -8,11 +8,12 @@ export const MEASURE_UNITS = [
   { value: 'portion', label: 'порция' },
 ];
 
-export const formatMeasure = (value, unitCode) => {
+export const formatMeasure = (value, unitCode, t) => {
   if (!value) return '';
   if (!unitCode || unitCode === 'null') return `${value}`.trim();
   const unit = MEASURE_UNITS.find((item) => item.value === unitCode);
-  return `${value} ${unit && unit.value ? unit.label : ''}`.trim();
+  const label = t && unit ? t(`menuEditor.measureUnits.${unit.value || 'notSpecified'}`, { defaultValue: unit.label }) : (unit ? unit.label : '');
+  return `${value} ${label}`.trim();
 };
 
 export const DIETARY_TAG_OPTIONS = [
@@ -80,10 +81,11 @@ const formatEditorPriceValue = (value) => {
   return Number.isInteger(value) ? `${value}` : value.toLocaleString('ru-RU');
 };
 
-export const getItemPriceDisplay = (item) => {
+export const getItemPriceDisplay = (item, t) => {
   const variants = Array.isArray(item?.variants) ? item.variants.filter((variant) => variant?.price) : [];
   if (!variants.length) {
-    return item?.price || '';
+    if (!item?.price) return '';
+    return t ? t('menuEditor.priceValue', { price: item.price, defaultValue: `${item.price} ₽` }) : `${item.price} ₽`;
   }
 
   const numericPrices = variants
@@ -91,15 +93,20 @@ export const getItemPriceDisplay = (item) => {
     .filter((price) => price !== null);
 
   if (!numericPrices.length) {
-    return 'Разные цены';
+    return t ? t('menuEditor.differentPrices', { defaultValue: 'Разные цены' }) : 'Разные цены';
   }
 
   const minPrice = Math.min(...numericPrices);
   const maxPrice = Math.max(...numericPrices);
 
   if (minPrice === maxPrice) {
-    return `${formatEditorPriceValue(minPrice)} ₽`;
+    const formatted = formatEditorPriceValue(minPrice);
+    return t ? t('menuEditor.priceValue', { price: formatted, defaultValue: `${formatted} ₽` }) : `${formatted} ₽`;
   }
 
-  return `от ${formatEditorPriceValue(minPrice)} до ${formatEditorPriceValue(maxPrice)} ₽`;
+  const minFormatted = formatEditorPriceValue(minPrice);
+  const maxFormatted = formatEditorPriceValue(maxPrice);
+  return t
+    ? t('menuEditor.priceRange', { min: minFormatted, max: maxFormatted, defaultValue: `от ${minFormatted} до ${maxFormatted} ₽` })
+    : `от ${minFormatted} до ${maxFormatted} ₽`;
 };

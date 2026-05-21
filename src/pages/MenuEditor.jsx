@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { ChevronDown, Edit2, ExternalLink, Plus, Search, Sparkles, Trash2 } from 'lucide-react';
 import { useParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 import CategoryModal from "../components/menu-editor/CategoryModal";
 import CategorySidebar from "../components/menu-editor/CategorySidebar";
@@ -30,6 +31,7 @@ import {
 } from "../components/menu-editor/menuEditorUtils";
 
 const MenuEditor = () => {
+  const { t } = useTranslation();
   const { id } = useParams();
   const isImportedMenu = id === 'imported';
   const isRemoteMenu = Boolean(id) && !isImportedMenu;
@@ -95,7 +97,7 @@ const MenuEditor = () => {
         })
         .catch((error) => {
           if (cancelled) return;
-          setRemoteMenuError(error?.message || 'Не удалось загрузить меню');
+          setRemoteMenuError(error?.message || t('menuEditor.errors.loadFailed', 'Не удалось загрузить меню'));
         })
         .finally(() => {
           if (cancelled) return;
@@ -141,7 +143,7 @@ const MenuEditor = () => {
   }, [id, isRemoteMenu, menu]);
 
   if (isLoadingRemoteMenu) {
-    return <div className="rounded-3xl border border-border/60 bg-card p-8 text-sm text-muted-foreground shadow-sm">Загружаем меню...</div>;
+    return <div className="rounded-3xl border border-border/60 bg-card p-8 text-sm text-muted-foreground shadow-sm">{t('common.loading', 'Загрузка...')}</div>;
   }
 
   if (remoteMenuError) {
@@ -256,7 +258,7 @@ const MenuEditor = () => {
 
   const handleSaveItem = () => {
     if (!editingItem.name.trim()) {
-      alert('Пожалуйста, введите название блюда');
+      alert(t('menuEditor.errors.itemNameRequired', 'Пожалуйста, введите название блюда'));
       return;
     }
 
@@ -408,7 +410,7 @@ const MenuEditor = () => {
       const response = await normalizeMenu(menu);
       setMenu(response.menu);
     } catch (error) {
-      alert(error?.message || 'Не удалось нормализовать меню');
+      alert(error?.message || t('menuEditor.errors.normalizeFailed', 'Не удалось нормализовать меню'));
     } finally {
       setIsNormalizing(false);
     }
@@ -454,7 +456,7 @@ const MenuEditor = () => {
                   onClick={handleEditMenuMeta}
                   className={`${secondaryActionButtonClasses} sm:h-10 h-10 px-4 w-full sm:w-auto shrink-0 text-xs sm:text-sm`}
                 >
-                  Редактировать
+                  {t('menuEditor.btnEdit', 'Редактировать')}
                 </Button>
 
                 {publicPreviewUrl && (
@@ -473,7 +475,7 @@ const MenuEditor = () => {
                       })}
                     >
                       <ExternalLink size={14} className="mr-2" />
-                      Превью
+                      {t('menuEditor.btnPreview', 'Превью')}
                     </a>
                   </Button>
                 )}
@@ -486,7 +488,7 @@ const MenuEditor = () => {
                     className={`${secondaryActionButtonClasses} sm:h-10 h-10 px-4 w-full sm:w-auto shrink-0 text-xs sm:text-sm`}
                   >
                     <Sparkles size={14} className="mr-2" />
-                    {isNormalizing ? 'Нормализация...' : 'Нормализовать'}
+                    {isNormalizing ? t('menuEditor.btnNormalizing', 'Нормализация...') : t('menuEditor.btnNormalize', 'Нормализовать')}
                   </Button>
                 )}
               </div>
@@ -499,7 +501,7 @@ const MenuEditor = () => {
                   />
 
                   <Input
-                    placeholder="Поиск блюда..."
+                    placeholder={t('menuEditor.searchPlaceholder', 'Поиск блюда...')}
                     value={searchQuery}
                     onChange={(event) => {
                       const nextValue = event.target.value;
@@ -527,7 +529,7 @@ const MenuEditor = () => {
                   className={`${primaryActionButtonClasses} sm:h-10 h-10 px-3.5 shrink-0 text-xs sm:text-sm`}
                 >
                   <Plus size={16} className="mr-2" />
-                  Блюдо
+                  {t('menuEditor.btnAddItem', 'Блюдо')}
                 </Button>
               </div>
             </div>
@@ -566,14 +568,14 @@ const MenuEditor = () => {
 
               {activeCategory.availableHours?.start && activeCategory.availableHours?.end && (
                 <p className="text-[11px] font-semibold text-foreground/80 mt-1.5">
-                  Доступно: {getAvailableHoursLabel(activeCategory.availableHours)}
+                  {t('menuEditor.availableHours', 'Доступно')}: {getAvailableHoursLabel(activeCategory.availableHours)}
                 </p>
               )}
             </div>
           </div>
         ) : (
           <div className="p-8 border-b border-border/60 bg-card">
-            <h1 className="text-xl font-bold text-muted-foreground">Выберите категорию</h1>
+            <h1 className="text-xl font-bold text-muted-foreground">{t('menuEditor.selectCategoryPlaceholder', 'Выберите категорию')}</h1>
           </div>
         )}
 

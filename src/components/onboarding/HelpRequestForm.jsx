@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { CheckCircle2, Send, X } from 'lucide-react';
 import { FaTelegram } from "react-icons/fa6";
+import { useTranslation } from 'react-i18next';
 
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
@@ -20,6 +21,7 @@ const SelectChevron = () => (
 const RequiredAsterisk = () => <span className="text-red-500">*</span>;
 
 const HelpRequestForm = ({ onClose = null }) => {
+  const { t } = useTranslation();
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState('');
@@ -59,7 +61,7 @@ const HelpRequestForm = ({ onClose = null }) => {
       });
       setIsSubmitted(true);
     } catch (error) {
-      setSubmitError(error instanceof Error ? error.message : 'Не удалось отправить заявку. Попробуйте ещё раз.');
+      setSubmitError(error instanceof Error ? error.message : t('helpForm.errSubmit'));
     } finally {
       setIsSubmitting(false);
     }
@@ -81,10 +83,10 @@ const HelpRequestForm = ({ onClose = null }) => {
           <div className="mb-6 flex items-start justify-between gap-4 sm:mb-8">
             <div className="space-y-2 sm:space-y-3">
               <h2 className="text-xl sm:text-3xl font-extrabold tracking-tight text-foreground">
-                Заявка на перенос меню
+                {t('helpForm.title')}
               </h2>
               <p className="text-muted-foreground text-xs sm:text-base leading-relaxed">
-                Оставьте контакты, менеджер свяжется и подготовит меню
+                {t('helpForm.subtitle')}
               </p>
             </div>
 
@@ -93,7 +95,7 @@ const HelpRequestForm = ({ onClose = null }) => {
                 type="button"
                 onClick={onClose}
                 className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-border/60 bg-background text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
-                aria-label="Закрыть форму"
+                aria-label={t('helpForm.closeAria')}
               >
                 <X size={18} />
               </button>
@@ -109,13 +111,13 @@ const HelpRequestForm = ({ onClose = null }) => {
 
             <div className="space-y-1.5 sm:space-y-2">
               <Label htmlFor="name" className="text-foreground font-medium ml-1 text-[11px] sm:text-xs sm:text-sm">
-                Имя <RequiredAsterisk />
+                {t('helpForm.nameLabel')} <RequiredAsterisk />
               </Label>
               <Input
                 id="name"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                placeholder="Как к вам обращаться?"
+                placeholder={t('helpForm.namePlaceholder')}
                 required
                 className={inputBaseClasses}
               />
@@ -126,13 +128,13 @@ const HelpRequestForm = ({ onClose = null }) => {
               selectedDial={selectedDial}
               onPhoneChange={setPhone}
               onDialChange={setSelectedDial}
-              label="Номер телефона"
+              label={t('helpForm.phoneLabel')}
               required
             />
 
             <div className="space-y-1.5 sm:space-y-2">
               <Label htmlFor="messenger" className="text-foreground font-medium ml-1 text-[11px] sm:text-xs sm:text-sm">
-                Мессенджер для связи <RequiredAsterisk />
+                {t('helpForm.messengerLabel')} <RequiredAsterisk />
               </Label>
               <div className="relative">
                 <select
@@ -143,9 +145,9 @@ const HelpRequestForm = ({ onClose = null }) => {
                   className={`${inputBaseClasses} pr-10 cursor-pointer text-[11px] sm:text-base`}
                 >
                   <option value="telegram">Telegram</option>
-                  <option value="max">Макс</option>
+                  <option value="max">Max</option>
                   <option value="whatsapp">WhatsApp*</option>
-                  <option value="call">Телефонный звонок</option>
+                  <option value="call">{t('helpForm.messengerOptions.call')}</option>
                 </select>
                 <div className="absolute right-3.5 sm:right-4 top-1/2 -translate-y-1/2 pointer-events-none text-muted-foreground">
                   <SelectChevron />
@@ -154,17 +156,17 @@ const HelpRequestForm = ({ onClose = null }) => {
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-              <CountryField selectedCountry={selectedCountry} onCountryChange={handleCountryChange} required />
+              <CountryField selectedCountry={selectedCountry} onCountryChange={handleCountryChange} label={t('helpForm.countryLabel')} required />
 
               <div className="space-y-1.5 sm:space-y-2">
                 <Label htmlFor="city" className="text-foreground font-medium ml-1 text-[11px] sm:text-xs sm:text-sm">
-                  Город <RequiredAsterisk />
+                  {t('helpForm.cityLabel')} <RequiredAsterisk />
                 </Label>
                 <Input
                   id="city"
                   value={city}
                   onChange={(e) => setCity(e.target.value)}
-                  placeholder="Например: Москва"
+                  placeholder={t('helpForm.cityPlaceholder')}
                   required
                   className={inputBaseClasses}
                 />
@@ -173,13 +175,13 @@ const HelpRequestForm = ({ onClose = null }) => {
 
             <div className="space-y-1.5 sm:space-y-2">
               <Label htmlFor="restaurant" className="text-foreground font-medium ml-1 text-[11px] sm:text-xs sm:text-sm">
-                Название заведения <RequiredAsterisk />
+                {t('helpForm.restaurantLabel')} <RequiredAsterisk />
               </Label>
               <Input
                 id="restaurant"
                 value={restaurant}
                 onChange={(e) => setRestaurant(e.target.value)}
-                placeholder="Например: Кафе «Татьяна»"
+                placeholder={t('helpForm.restaurantPlaceholder')}
                 required
                 className={inputBaseClasses}
               />
@@ -187,7 +189,7 @@ const HelpRequestForm = ({ onClose = null }) => {
 
             <div className="space-y-2 sm:space-y-3 pt-1 sm:pt-2">
               <Label className="text-foreground font-medium ml-1 text-[11px] sm:text-xs sm:text-sm">
-                Загрузить меню <RequiredAsterisk />
+                {t('helpForm.uploadMenuLabel')} <RequiredAsterisk />
               </Label>
 
               {!uploadLater && (
@@ -213,7 +215,7 @@ const HelpRequestForm = ({ onClose = null }) => {
                   onCheckedChange={setUploadLater}
                 />
                 <Label htmlFor="upload-later" className="text-xs sm:text-sm font-medium cursor-pointer text-foreground select-none">
-                  Загружу меню позже
+                  {t('helpForm.uploadLater')}
                 </Label>
               </div>
             </div>
@@ -227,18 +229,18 @@ const HelpRequestForm = ({ onClose = null }) => {
                 {isSubmitting ? (
                   <span className="flex items-center gap-2">
                     <span className="w-4 h-4 sm:w-5 sm:h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                    Отправляем...
+                    {t('helpForm.btnSubmitting')}
                   </span>
                 ) : (
                   <span className="flex items-center gap-2">
                     <Send size={16} className="sm:w-[18px] sm:h-[18px]" />
-                    Оставить заявку
+                    {t('helpForm.btnSubmit')}
                   </span>
                 )}
               </Button>
 
               <p className="text-[9px] sm:text-[11px] text-muted-foreground/70 text-center mt-3 sm:mt-4 leading-tight">
-                * WhatsApp — мессенджер, принадлежащий компании Meta, признанной экстремистской организацией, деятельность которой запрещена на территории РФ.
+                {t('helpForm.legalNote')}
               </p>
             </div>
           </form>
@@ -251,7 +253,7 @@ const HelpRequestForm = ({ onClose = null }) => {
                 type="button"
                 onClick={onClose}
                 className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-border/60 bg-background text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
-                aria-label="Закрыть форму"
+                aria-label={t('helpForm.closeAria')}
               >
                 <X size={18} />
               </button>
@@ -262,10 +264,10 @@ const HelpRequestForm = ({ onClose = null }) => {
             <CheckCircle2 size={32} className="sm:w-10 sm:h-10" />
           </div>
           <h3 className="text-lg sm:text-2xl font-bold text-foreground mb-2 sm:mb-3 text-center">
-            Заявка принята!
+            {t('helpForm.successTitle')}
           </h3>
           <p className="text-muted-foreground text-xs sm:text-base mb-8 max-w-[240px] sm:max-w-[280px] text-center">
-            Мы свяжемся с вами в ближайшее время!
+            {t('helpForm.successText')}
           </p>
 
           <div className="w-full border border-brand-purple/30 bg-brand-purple/5 p-4 sm:p-5 rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-4">
@@ -276,8 +278,8 @@ const HelpRequestForm = ({ onClose = null }) => {
                 className="w-12 h-12 sm:w-14 sm:h-14 rounded-full object-cover shadow-sm bg-secondary/50"
               />
               <div className="text-left">
-                <p className="text-sm sm:text-base font-bold text-foreground">Анна</p>
-                <p className="text-xs sm:text-sm text-muted-foreground">Персональный менеджер</p>
+                <p className="text-sm sm:text-base font-bold text-foreground">{t('helpForm.managerName')}</p>
+                <p className="text-xs sm:text-sm text-muted-foreground">{t('helpForm.managerTitle')}</p>
               </div>
             </div>
             <a
@@ -287,7 +289,7 @@ const HelpRequestForm = ({ onClose = null }) => {
               className="w-full sm:w-auto flex items-center justify-center gap-2 px-5 py-2.5 bg-background border border-border/50 text-brand-purple rounded-xl text-sm font-semibold hover:bg-secondary/50 transition-colors shadow-sm"
             >
               <FaTelegram size={24} color="#3A9FFE" />
-              Написать в Telegram
+              {t('helpForm.writeToTelegram')}
             </a>
           </div>
         </div>

@@ -1,0 +1,657 @@
+{
+  "welcome": {
+    "title": "Как вы хотите начать?",
+    "description": "Выберите удобный сценарий: пройти запуск самостоятельно или оставить заявку, и мы поможем подготовить меню и QR-код.",
+    "self": "Самостоятельно",
+    "selfDesc": "Сначала создайте аккаунт, затем загрузите действующее меню и запустите AI-разбор.",
+    "help": "Нужна помощь",
+    "helpDesc": "Оставьте заявку, и менеджер поможет с переносом меню и подготовкой готового QR-кода."
+  },
+  "login": {
+    "title": "С возвращением",
+    "subtitle": "Рады видеть вас снова. Введите данные для входа в личный кабинет",
+    "orEmail": "или через почту",
+    "email": "Email",
+    "emailPlaceholder": "name@example.com",
+    "password": "Пароль",
+    "passwordPlaceholder": "Введите пароль",
+    "forgotPassword": "Забыли пароль?",
+    "btnSubmit": "Войти в систему",
+    "footerLegal": "Продолжая, вы подтверждаете согласие с условиями сервиса и политикой обработки данных.",
+    "noAccount": "Нет аккаунта?",
+    "registerLink": "Зарегистрируйтесь",
+    "errEmailRequired": "Введите email",
+    "errEmailInvalid": "Укажите корректный email",
+    "errPasswordRequired": "Введите пароль",
+    "errGeneral": "Не удалось выполнить вход"
+  },
+  "register": {
+    "title": "Создать аккаунт",
+    "subtitle": "Введите данные для регистрации в системе, это займет меньше минуты",
+    "orEmail": "или через почту",
+    "name": "Ваше имя",
+    "namePlaceholder": "Например: Александр",
+    "email": "Email",
+    "emailPlaceholder": "name@example.com",
+    "password": "Пароль",
+    "passwordPlaceholder": "Минимум 8 символов",
+    "confirmPassword": "Повторите пароль",
+    "confirmPasswordPlaceholder": "Повторите пароль",
+    "btnSubmit": "Зарегистрироваться",
+    "footerLegal": "После регистрации можно сразу перейти к загрузке первого меню и заполнению данных заведения.",
+    "hasAccount": "Уже есть аккаунт?",
+    "loginLink": "Войти",
+    "errNameRequired": "Введите имя",
+    "errNameShort": "Имя должно быть не короче 2 символов",
+    "errEmailRequired": "Введите email",
+    "errEmailInvalid": "Укажите корректный email",
+    "errPasswordRequired": "Введите пароль",
+    "errPasswordShort": "Пароль должен быть не короче 8 символов",
+    "errConfirmRequired": "Повторите пароль",
+    "errPasswordsDontMatch": "Пароли не совпадают",
+    "errGeneral": "Не удалось создать аккаунт"
+  },
+  "common": {
+    "or": "или",
+    "back": "Назад",
+    "next": "Далее",
+    "cancel": "Отмена",
+    "save": "Сохранить",
+    "close": "Закрыть",
+    "loading": "Загрузка...",
+    "error": "Ошибка",
+    "backToChoice": "К выбору",
+    "phone": "Контактный телефон",
+    "country": "Страна",
+    "saving": "Сохраняем..."
+  },
+  "countries": {
+    "ru": "Россия",
+    "kz": "Казахстан",
+    "by": "Беларусь",
+    "de": "Германия",
+    "uz": "Узбекистан",
+    "il": "Израиль",
+    "us": "США",
+    "kg": "Кыргызстан",
+    "lv": "Латвия",
+    "md": "Молдова",
+    "ee": "Эстония",
+    "ae": "ОАЭ",
+    "az": "Азербайджан",
+    "tj": "Таджикистан",
+    "ge": "Грузия",
+    "am": "Армения",
+    "lt": "Литва",
+    "tr": "Турция",
+    "cy": "Кипр",
+    "tm": "Туркменистан"
+  },
+  "helpForm": {
+    "title": "Заявка на перенос меню",
+    "subtitle": "Оставьте контакты, менеджер свяжется и подготовит меню",
+    "errSubmit": "Не удалось отправить заявку",
+    "nameLabel": "Ваше имя",
+    "namePlaceholder": "Например: Александр",
+    "phoneLabel": "Номер телефона",
+    "messengerLabel": "Мессенджер для связи",
+    "messengerOptions": {
+      "call": "Телефонный звонок"
+    },
+    "countryLabel": "Страна",
+    "cityLabel": "Город",
+    "cityPlaceholder": "Например: Москва",
+    "restaurantLabel": "Название заведения",
+    "restaurantPlaceholder": "Например: Кафе «Татьяна»",
+    "uploadMenuLabel": "Загрузить меню",
+    "uploadLater": "Загружу меню позже",
+    "btnSubmitting": "Отправляем...",
+    "btnSubmit": "Оставить заявку",
+    "legalNote": "* WhatsApp — мессенджер, принадлежащий компании Meta, признанной экстремистской организацией, деятельность которой запрещена на территории РФ.",
+    "closeAria": "Закрыть форму",
+    "successTitle": "Заявка принята!",
+    "successText": "Мы свяжемся с вами в ближайшее время!",
+    "managerName": "Анна",
+    "managerTitle": "Персональный менеджер",
+    "writeToTelegram": "Написать в Telegram"
+  },
+  "uploadPage": {
+    "profileTitle": "Давайте знакомиться",
+    "profileSubtitle": "Введите базовую информацию о заведении, чтобы мы могли привязать меню к вашему аккаунту.",
+    "restaurantLabel": "Название заведения",
+    "restaurantPlaceholder": "Например: Кафе «Татьяна»",
+    "phoneLabel": "Контактный телефон",
+    "countryLabel": "Страна",
+    "cityLabel": "Город",
+    "cityPlaceholder": "Например: Москва",
+    "stepData": "Данные",
+    "stepMenu": "Меню",
+    "stepProcessing": "Обработка"
+  },
+  "menuImport": {
+    "introTitle": "Загрузите меню",
+    "introDescription": "Загрузите PDF, фотографии или вставьте прямую ссылку на PDF. Создадим backend job, дождемся обработки и покажем результат.",
+    "submitLabel": "Отправить на распознавание",
+    "successTitle": "Черновик меню подготовлен",
+    "successDescription": "Исходники обработаны backend-сервисом, итоговый JSON собран, сохранен как черновик и готов к редактированию.",
+    "successPrimaryLabel": "Открыть редактор меню",
+    "successSecondaryLabel": "Перейти в кабинет"
+  },
+  "menuSource": {
+    "fileTabLabel": "Загрузить файл",
+    "fileTabMobileLabel": "Файл",
+    "linkPlaceholder": "Прямая ссылка на PDF-файл меню",
+    "selectedFilesCount": "Выбрано файлов: {{count}}",
+    "linkTabLabel": "Указать ссылку",
+    "linkTabMobileLabel": "Ссылка",
+    "clickToReplace": "Нажмите, чтобы заменить",
+    "dragAndDropMultiple": "Нажмите или перетащите PDF/Фото",
+    "dragAndDropSingle": "Нажмите или перетащите файл",
+    "multipleFilesNote": "Можно выбрать несколько файлов"
+  },
+  "dashboard": {
+    "periods": {
+      "today": "Сегодня",
+      "yesterday": "Вчера",
+      "7d": "Последние 7 дней",
+      "30d": "Последние 30 дней"
+    },
+    "errors": {
+      "analyticsLoadFailed": "Не удалось загрузить аналитику."
+    },
+    "welcomeUser": "Добро пожаловать, {{name}}!",
+    "analyticsOverview": "Обзор аналитики",
+    "subtitle": "Отслеживайте открытия публичного меню и уникальных гостей по заведению.",
+    "menuViews": "Открытия меню",
+    "uniqueGuests": "Уникальные гости",
+    "chart": {
+      "title": "Динамика просмотров",
+      "subtitle": "Сравнение открытий меню и уникальных гостей",
+      "legendViews": "Просмотры",
+      "legendUnique": "Уникальные"
+    },
+    "actions": {
+      "editMenu": {
+        "title": "Открыть редактор меню",
+        "description": "Изменить категории, позиции и переводы"
+      },
+      "downloadQr": {
+        "title": "Скачать QR-коды",
+        "description": "Для печати и соцсетей"
+      },
+      "openPublic": {
+        "title": "Открыть публичное меню",
+        "description": "Проверить, как меню видят гости"
+      }
+    }
+  },
+  "days": {
+    "Пн": "Пн",
+    "Вт": "Вт",
+    "Ср": "Ср",
+    "Чт": "Чт",
+    "Пт": "Пт",
+    "Сб": "Сб",
+    "Вс": "Вс"
+  },
+  "menuList": {
+    "title": "Ваше меню",
+    "subtitle": "Добавляйте категории и позиции, обновляйте цены и стоп-лист",
+    "createBtn": "Создать меню",
+    "status": {
+      "active": "Активно",
+      "draft": "Черновик"
+    },
+    "dropdown": {
+      "label": "Действия с меню",
+      "edit": "Редактировать",
+      "duplicate": "Дублировать",
+      "viewQr": "Посмотреть QR меню",
+      "delete": "Удалить"
+    },
+    "meta": {
+      "categoriesCount": "{{count}} кат.",
+      "itemsCount": "{{count}} блюд"
+    },
+    "actions": {
+      "updating": "Обновление",
+      "turnOff": "Выкл",
+      "turnOn": "Вкл",
+      "viewQr": "Посмотреть QR",
+      "editor": "Редактор"
+    }
+  },
+  "menuImportPage": {
+    "header": {
+      "title": "Новое меню",
+      "description": "Экран импорта для рабочего кабинета. Отправляем исходники в backend job, сохраняем результат и открываем черновик меню."
+    },
+    "flow": {
+      "introTitle": "Импортируйте меню",
+      "introDescription": "Поддерживаем PDF, фотографии и прямую ссылку на PDF-файл. После обработки сохраним черновик меню и откроем его в редакторе.",
+      "submitLabel": "Создать черновик меню",
+      "successTitle": "Импорт завершен",
+      "successDescription": "Backend job принял исходники, собрал итоговый JSON, сохранил меню и подготовил его к редактированию.",
+      "successPrimaryLabel": "Открыть редактор",
+      "successSecondaryLabel": "Загрузить другой файл"
+    },
+    "sidebar": {
+      "whatItDoes": {
+        "title": "Что делает импорт",
+        "subtitle": "Работает через backend import job и polling.",
+        "item1": "Принимаем PDF, фотографии или прямую ссылку на PDF.",
+        "item2": "Создаем backend job и сохраняем исходники локально.",
+        "item3": "Показываем статусы загрузки, обработки, успеха и ошибки через polling.",
+        "item4": "После успеха создаем черновик меню и открываем редактор."
+      },
+      "nextStage": {
+        "title": "Следующий этап",
+        "subtitle": "Текущий контур уже сохраняет меню и venue на backend.",
+        "description": "Следующим шагом сюда добавим историю импортов, повторные загрузки и выбор целевого заведения прямо перед запуском job."
+      }
+    }
+  },
+  "publicVenueMenu": {
+    "backToHome": "На главную",
+    "errors": {
+      "invalidLink": "Некорректная публичная ссылка.",
+      "loadFailed": "Не удалось загрузить публичное меню.",
+      "unavailableTitle": "Публичное меню недоступно",
+      "unavailableSubtitle": "Не удалось открыть меню по этой ссылке."
+    }
+  },
+  "menuEditor": {
+    "errors": {
+      "loadFailed": "Не удалось загрузить меню",
+      "itemNameRequired": "Пожалуйста, введите название блюда",
+      "normalizeFailed": "Не удалось нормализовать меню"
+    },
+    "btnEdit": "Редактировать",
+    "btnPreview": "Превью",
+    "btnNormalizing": "Нормализация...",
+    "btnNormalize": "Нормализовать",
+    "searchPlaceholder": "Поиск блюда...",
+    "btnAddItem": "Блюдо",
+    "availableHours": "Доступно",
+    "selectCategoryPlaceholder": "Выберите категорию",
+    "categoryModal": {
+      "titleEdit": "Настройки категории",
+      "titleNew": "Новая категория",
+      "nameLabel": "Название",
+      "namePlaceholder": "Например: Десерты",
+      "descriptionLabel": "Описание",
+      "descriptionPlaceholder": "Показывать под заголовком категории...",
+      "imageLabel": "Изображение категории",
+      "hoursStartLabel": "Доступно с",
+      "hoursEndLabel": "Доступно до"
+    },
+    "menuMetaModal": {
+      "title": "Настройки меню",
+      "nameLabel": "Название меню",
+      "namePlaceholder": "Например: Основное меню",
+      "descriptionLabel": "Описание меню",
+      "descriptionPlaceholder": "Краткое описание меню..."
+    },
+    "delete": {
+      "titleCategory": "Удалить категорию?",
+      "titleItem": "Удалить позицию?",
+      "confirmText": "Вы действительно хотите удалить {{name}}?",
+      "categoryWarning": "Все связанные блюда также будут удалены.",
+      "irreversibleNote": "Это действие необратимо.",
+      "btnDelete": "Удалить"
+    },
+    "categoriesHeader": "Категории",
+    "noItems": "В этой категории пока нет блюд",
+    "noDescription": "Без описания",
+    "priceValue": "{{price}} ₽",
+    "differentPrices": "Разные цены",
+    "priceRange": "от {{min}} до {{max}} ₽",
+    "itemModal": {
+      "titleAdd": "Новое блюдо",
+      "titleEdit": "Редактирование блюда",
+      "subtitle": "Изменения применятся после сохранения.",
+      "categoryLabel": "Категория",
+      "nameLabel": "Название",
+      "descriptionLabel": "Описание",
+      "descriptionPlaceholder": "Вкусное описание для гостей...",
+      "imageLabel": "Изображение блюда",
+      "pricingVolumeLabel": "Стоимость и объем",
+      "btnAddOption": "Добавить опцию",
+      "priceLabel": "Цена (₽)",
+      "pricePlaceholder": "Например: 350",
+      "measureValueLabel": "Значение",
+      "measureValuePlaceholder": "Например: 250",
+      "measureUnitLabel": "Ед. изм.",
+      "optionNameLabel": "Название опции",
+      "optionNamePlaceholder": "Например: Гранд",
+      "badgeLabel": "Маркетинговый бейдж",
+      "noBadge": "Без бейджа",
+      "availableFrom": "Доступно с",
+      "availableTo": "Доступно до",
+      "tagsLabel": "Теги и аллергены",
+      "availableInMenu": "Отображать в меню",
+      "availableInMenuDesc": "Выключите, если позиция закончилась (Стоп-лист)",
+      "btnAddItemSubmit": "Добавить блюдо",
+      "btnSaveItemSubmit": "Сохранить изменения"
+    },
+    "badges": {
+      "new": "Новинка",
+      "hit": "Хит",
+      "chefs-choice": "Выбор шефа",
+      "season": "Сезонное"
+    },
+    "dietaryTags": {
+      "vegan": "Веганское",
+      "vegetarian": "Вегетарианское",
+      "gluten-free": "Без глютена",
+      "spicy": "Острое",
+      "contains-nuts": "Содержит орехи",
+      "contains-dairy": "Содержит лактозу",
+      "caffeine-free": "Без кофеина"
+    },
+    "measureUnits": {
+      "notSpecified": "Не указано",
+      "ml": "мл",
+      "l": "л",
+      "g": "г",
+      "kg": "кг",
+      "pcs": "шт",
+      "portion": "порция"
+    }
+  },
+  "venues": {
+    "title": "Заведения",
+    "subtitle": "Выберите заведение, чтобы открыть его профиль, Wi‑Fi и внешний вид меню.",
+    "btnAddVenue": "Добавить заведение",
+    "status": {
+      "active": "Активно"
+    },
+    "menuCountBadge": "Меню",
+    "noPublicLink": "Без ссылки",
+    "btnOpen": "Открыть",
+    "pageTitle": "Заведение",
+    "pageSubtitle": "Управляйте профилем заведения, гостевым Wi‑Fi и внешним видом меню.",
+    "loadingProfileDesc": "Загружаем профиль заведения, Wi‑Fi и публичную ссылку.",
+    "loadingData": "Загружаем данные заведения...",
+    "retryBtn": "Повторить загрузку",
+    "errors": {
+      "loadFailed": "Не удалось загрузить заведение.",
+      "saveProfileFailed": "Не удалось сохранить профиль заведения.",
+      "saveWifiFailed": "Не удалось сохранить Wi‑Fi настройки.",
+      "saveDesignFailed": "Не удалось сохранить внешний вид.",
+      "saveQrFailed": "Не удалось сохранить QR-настройки."
+    },
+    "tabs": {
+      "profile": "Профиль",
+      "profileMobile": "Профиль",
+      "wifi": "Wi-Fi",
+      "wifiMobile": "Wi‑Fi",
+      "design": "Внешний вид",
+      "designMobile": "Вид",
+      "qr": "QR и ссылка",
+      "qrMobile": "QR"
+    },
+    "fields": {
+      "name": "Название заведения",
+      "phone": "Телефон для связи",
+      "description": "Описание",
+      "descriptionPlaceholder": "Расскажите гостям о вашем заведении...",
+      "city": "Город",
+      "currency": "Валюта меню"
+    },
+    "btnSaveProfile": "Сохранить профиль",
+    "wifi": {
+      "title": "Гостевой Wi-Fi",
+      "subtitle": "Данные будут отображаться в меню для быстрого подключения гостей",
+      "ssid": "Название сети (SSID)",
+      "ssidPlaceholder": "Например: Guest_WiFi",
+      "password": "Пароль",
+      "passwordPlaceholder": "Введите пароль",
+      "hint": "При активации этой функции в вашем цифровом меню появится кнопка «Подключиться к Wi-Fi». Гостям не нужно будет вводить пароль вручную — всё произойдет автоматически."
+    },
+    "btnSaveWifi": "Сохранить Wi‑Fi",
+    "design": {
+      "title": "Внешний вид меню",
+      "colorTheme": "Цветовая тема",
+      "themes": {
+        "light": "Светлая",
+        "dark": "Темная",
+        "auto": "Авто",
+        "brand": "Брендовая"
+      },
+      "templateLabel": "Шаблон меню",
+      "templateDesc": "Выберите базовую визуальную подачу меню.",
+      "templates": {
+        "classic": "Классический",
+        "minimal": "Продвинутый",
+        "accent": "Премиум"
+      },
+      "colorLabel": "Акцентный цвет",
+      "colorDesc": "Используется для кнопок, активных состояний и ссылок.",
+      "logoLabel": "Логотип заведения в меню",
+      "logoAlt": "Логотип заведения",
+      "logoUploadTitle": "Загрузите квадратное лого",
+      "logoUploadDesc": "Рекомендуемый размер 512x512px, формат PNG или SVG",
+      "btnSelectFile": "Выбрать файл",
+      "previewLabel": "Предпросмотр",
+      "previewTitle": "Посмотрите, как меню видят гости",
+      "btnOpenMenu": "Открыть меню"
+    },
+    "btnSaveDesign": "Сохранить внешний вид",
+    "qr": {
+      "title": "QR и публичная ссылка",
+      "subtitle": "Для заведения используется один основной QR-код, который ведёт на публичное меню гостей.",
+      "btnSave": "Сохранить QR"
+    }
+  },
+  "qr": {
+    "manager": {
+      "title": "Управление QR-кодами",
+      "subtitle": "Настройте внешний вид QR-кода под стиль вашего заведения и скачайте его в высоком качестве для размещения на тейбл-тентах или наклейках.",
+      "errors": {
+        "copyFailed": "Не удалось скопировать ссылку"
+      }
+    },
+    "design": {
+      "title": "Дизайн кода",
+      "subtitle": "Настройте форму элементов, цвет и логотип в центре.",
+      "shapeLabel": "Форма элементов",
+      "shapes": {
+        "square": "Квадраты",
+        "rounded": "Мягкие",
+        "dots": "Точки"
+      },
+      "colorLabel": "Цвет узора",
+      "logoLabel": "Логотип в центре",
+      "logoAlt": "Логотип",
+      "logoUploaded": "Логотип загружен",
+      "logoHint": "Он появится в центре QR-кода.",
+      "logoUploadTitle": "Загрузите иконку",
+      "logoUploadDesc": "PNG, JPG до 2 МБ"
+    },
+    "frame": {
+      "title": "Рамка и текст",
+      "subtitle": "Добавьте короткий призыв к действию и цвет для печатной версии QR.",
+      "callToAction": "Призыв к действию",
+      "placeholder": "Например: СКАНИРУЙ МЕНЮ",
+      "hint": "Лучше коротко: 1-3 слова, чтобы хорошо читалось на наклейке.",
+      "colorLabel": "Цвет рамки"
+    },
+    "preview": {
+      "title": "Предпросмотр",
+      "defaultFrameText": "СКАНИРУЙ МЕНЮ",
+      "downloadPng": "Скачать PNG"
+    },
+    "directLink": {
+      "title": "Прямая ссылка на меню",
+      "ariaOpen": "Открыть меню в новой вкладке",
+      "ariaCopy": "Скопировать ссылку на меню"
+    }
+  },
+  "navigation": {
+    "mainMenu": "Главное меню",
+    "home": "Обзор",
+    "menu": "Меню",
+    "venue": "Заведение",
+    "account": "Аккаунт",
+    "billing": "Биллинг",
+    "subscription": "Подписка",
+    "needHelp": "Нужна помощь?",
+    "supportDesc": "Напишите нашему менеджеру, мы всегда на связи.",
+    "contactSupport": "Написать в поддержку",
+    "logout": "Выйти",
+    "noVenueSelected": "Заведение не выбрано",
+    "proTariff": "PRO-тариф",
+    "currentVenue": "Текущее заведение",
+    "addVenue": "Добавить заведение"
+  },
+  "account": {
+    "title": "Аккаунт",
+    "subtitle": "Управляйте личными данными и уведомлениями",
+    "loading": "Загружаем настройки аккаунта...",
+    "errors": {
+      "loadFailed": "Не удалось загрузить аккаунт.",
+      "saveFailed": "Не удалось сохранить профиль.",
+      "passwordFailed": "Не удалось обновить пароль."
+    },
+    "profile": {
+      "title": "Профиль владельца",
+      "subtitle": "Контакты для входа, уведомлений и связи с поддержкой.",
+      "name": "Имя и фамилия",
+      "email": "Email",
+      "phone": "Телефон"
+    },
+    "notifications": {
+      "title": "Уведомления",
+      "subtitle": "Выберите, какие письма и системные уведомления вы хотите получать.",
+      "productUpdates": "Новости продукта и новые функции",
+      "paymentAlerts": "Счета, платежи и продление тарифа",
+      "weeklyDigest": "Еженедельная сводка по просмотрам меню"
+    },
+    "password": {
+      "authMethod": "Способ входа",
+      "title": "Пароль",
+      "externalLogin": "Вы входите через {{provider}}. Смена пароля недоступна.",
+      "updateHint": "Обновите пароль для входа в кабинет.",
+      "current": "Текущий пароль",
+      "new": "Новый пароль",
+      "confirm": "Повторите новый пароль",
+      "warningExternal": "Смена пароля недоступна, потому что этот аккаунт использует вход через {{provider}}.",
+      "btnUpdating": "Обновляем...",
+      "btnUpdate": "Обновить пароль",
+      "providers": {
+        "external": "через внешний провайдер",
+        "yandex": "Яндекс",
+        "mailru": "Mail.ru"
+      },
+      "placeholders": {
+        "unavailable": "Недоступно",
+        "unavailableExternal": "Недоступно для внешнего входа",
+        "changeUnavailable": "Смена пароля недоступна",
+        "minChars": "Минимум 8 символов",
+        "repeat": "Повторите пароль"
+      }
+    }
+  },
+  "billing": {
+    "cancelConfirm": "Отключить автопродление подписки?",
+    "title": "Биллинг",
+    "description": "Тариф, автопродление и история списаний по вашему аккаунту.",
+    "subscription": "Подписка",
+    "status": "Статус",
+    "statuses": {
+      "active": "Активен",
+      "trialing": "Пробный период",
+      "past_due": "Ожидает оплаты",
+      "unpaid": "Не оплачен",
+      "canceled": "Отменен"
+    },
+    "autoRenewalDisabled": "автопродление отключено",
+    "perMonth": "/ мес",
+    "period": "Период доступа",
+    "trialEnd": "Trial / следующее окончание",
+    "limitsTitle": "Лимиты и использование",
+    "limits": {
+      "venuesCount": "Заведений: {{count}} из {{max}}",
+      "aiImports": "AI-импортов в этом месяце: {{count}} из {{max}}",
+      "translations": "Переводы: до {{count}} языков",
+      "translationsDisabled": "Переводы: недоступны",
+      "templateTier": "Шаблон: {{tier}}"
+    },
+    "actions": {
+      "update": "Обновить данные",
+      "disableAutoRenewal": "Отключить автопродление"
+    },
+    "unitpay": {
+      "title": "UnitPay",
+      "description": "Привязка карты и последующие списания управляются через UnitPay.",
+      "subscriptionId": "Subscription ID",
+      "notLinked": "Пока не привязана"
+    },
+    "history": {
+      "title": "История платежей",
+      "description": "Последние транзакции и ручная синхронизация статуса.",
+      "syncing": "Синхронизация...",
+      "sync": "Синхронизировать",
+      "empty": "История платежей пока пуста."
+    },
+    "transactionStatus": {
+      "completed": "Завершено",
+      "pending": "В обработке",
+      "failed": "Ошибка"
+    },
+    "transactionKind": {
+      "charge": "Списание",
+      "refund": "Возврат"
+    }
+  },
+  "subscription": {
+    "features": {
+      "venues": "Заведений: {{count}}",
+      "menus": "Меню на заведение: {{count}}",
+      "items": "Блюд на меню: {{count}}",
+      "aiImports": "AI-импортов в месяц: {{count}}",
+      "translations": "Переводы до {{count}} языков",
+      "translationsDisabled": "Без переводов",
+      "template": "Шаблон: {{tier}}"
+    },
+    "checkoutErrorUnitpay": "UnitPay не вернул redirectUrl для оплаты.",
+    "title": "Подписка",
+    "description": "Выберите тариф, который будет применяться ко всему аккаунту и всем вашим заведениям.",
+    "planCurrent": "Текущий",
+    "planSelected": "Выбран",
+    "planSelect": "Выбрать тариф",
+    "howItWorks": {
+      "title": "Как работает оплата",
+      "description": "Первый платеж создаёт и привязывает подписку в UnitPay. Последующие списания выполняются по сохранённому `subscriptionId`.",
+      "warning": "На тестовом проекте UnitPay не отправляет `subscriptionId` в callback. Поэтому полный сценарий автосписаний проверяется на боевом проекте с небольшой суммой."
+    },
+    "checkout": {
+      "title": "Оформление",
+      "selectedPlan": "Выбранный тариф",
+      "btnProceeding": "Переходим к оплате...",
+      "btnProceed": "Перейти к оплате"
+    }
+  },
+  "settings": {
+    "tabs": {
+      "billing": "Тариф и оплата"
+    },
+    "title": "Настройки",
+    "subtitle": "Управляйте информацией о заведении и параметрами меню",
+    "saveChanges": "Сохранить изменения",
+    "billing": {
+      "proTariff": "PRO Тариф",
+      "activeUntil": "Активен до {{date}}",
+      "advantages": "Ваши преимущества:",
+      "features": {
+        "0": "Неограниченное количество блюд и категорий",
+        "1": "Кастомизация дизайна QR-кодов и меню",
+        "2": "Приоритетная поддержка 24/7",
+        "3": "Аналитика просмотров и кликов"
+      },
+      "invoices": "Квитанции и чеки",
+      "cancelSubscription": "Отменить подписку"
+    }
+  }
+}

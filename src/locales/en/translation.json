@@ -1,0 +1,657 @@
+{
+  "welcome": {
+    "title": "How do you want to start?",
+    "description": "Choose your path: start on your own or submit a request and we will help set up your menu and QR code.",
+    "self": "Self-service",
+    "selfDesc": "First create an account, then upload your current menu and start the AI parsing.",
+    "help": "Need help",
+    "helpDesc": "Submit a request, and a manager will help you transfer the menu and prepare a ready-to-use QR code."
+  },
+  "login": {
+    "title": "Welcome back",
+    "subtitle": "Glad to see you again. Enter your details to log in to your account",
+    "orEmail": "or via email",
+    "email": "Email",
+    "emailPlaceholder": "name@example.com",
+    "password": "Password",
+    "passwordPlaceholder": "Enter password",
+    "forgotPassword": "Forgot password?",
+    "btnSubmit": "Log in",
+    "footerLegal": "By continuing, you confirm consent to the terms of service and data processing policy.",
+    "noAccount": "Don't have an account?",
+    "registerLink": "Sign up",
+    "errEmailRequired": "Enter email",
+    "errEmailInvalid": "Enter a valid email",
+    "errPasswordRequired": "Enter password",
+    "errGeneral": "Failed to log in"
+  },
+  "register": {
+    "title": "Create account",
+    "subtitle": "Enter registration details, it takes less than a minute",
+    "orEmail": "or via email",
+    "name": "Your name",
+    "namePlaceholder": "E.g., Alex",
+    "email": "Email",
+    "emailPlaceholder": "name@example.com",
+    "password": "Password",
+    "passwordPlaceholder": "Minimum 8 characters",
+    "confirmPassword": "Confirm password",
+    "confirmPasswordPlaceholder": "Repeat password",
+    "btnSubmit": "Sign up",
+    "footerLegal": "After registering, you can immediately proceed to uploading your first menu and venue details.",
+    "hasAccount": "Already have an account?",
+    "loginLink": "Log in",
+    "errNameRequired": "Enter name",
+    "errNameShort": "Name must be at least 2 characters long",
+    "errEmailRequired": "Enter email",
+    "errEmailInvalid": "Enter a valid email",
+    "errPasswordRequired": "Enter password",
+    "errPasswordShort": "Password must be at least 8 characters long",
+    "errConfirmRequired": "Repeat password",
+    "errPasswordsDontMatch": "Passwords do not match",
+    "errGeneral": "Failed to create account"
+  },
+  "common": {
+    "or": "or",
+    "back": "Back",
+    "next": "Next",
+    "cancel": "Cancel",
+    "save": "Save",
+    "close": "Close",
+    "loading": "Loading...",
+    "error": "Error",
+    "backToChoice": "Back to choice",
+    "phone": "Contact phone",
+    "country": "Country",
+    "saving": "Saving..."
+  },
+  "countries": {
+    "ru": "Russia",
+    "kz": "Kazakhstan",
+    "by": "Belarus",
+    "de": "Germany",
+    "uz": "Uzbekistan",
+    "il": "Israel",
+    "us": "USA",
+    "kg": "Kyrgyzstan",
+    "lv": "Latvia",
+    "md": "Moldova",
+    "ee": "Estonia",
+    "ae": "UAE",
+    "az": "Azerbaijan",
+    "tj": "Tajikistan",
+    "ge": "Georgia",
+    "am": "Armenia",
+    "lt": "Lithuania",
+    "tr": "Turkey",
+    "cy": "Cyprus",
+    "tm": "Turkmenistan"
+  },
+  "helpForm": {
+    "title": "Request for menu transfer",
+    "subtitle": "Leave your details, a manager will contact you and prepare the menu",
+    "errSubmit": "Failed to submit request",
+    "nameLabel": "Your name",
+    "namePlaceholder": "E.g., Alex",
+    "phoneLabel": "Phone number",
+    "messengerLabel": "Messenger for contact",
+    "messengerOptions": {
+      "call": "Phone call"
+    },
+    "countryLabel": "Country",
+    "cityLabel": "City",
+    "cityPlaceholder": "E.g., London",
+    "restaurantLabel": "Venue name",
+    "restaurantPlaceholder": "E.g., Cafe 'Tatyana'",
+    "uploadMenuLabel": "Upload menu",
+    "uploadLater": "I will upload the menu later",
+    "btnSubmitting": "Sending...",
+    "btnSubmit": "Submit request",
+    "legalNote": "* WhatsApp is a messenger owned by Meta, recognized as an extremist organization whose activity is banned in the RF.",
+    "closeAria": "Close form",
+    "successTitle": "Request accepted!",
+    "successText": "We will contact you shortly!",
+    "managerName": "Anna",
+    "managerTitle": "Personal manager",
+    "writeToTelegram": "Message on Telegram"
+  },
+  "uploadPage": {
+    "profileTitle": "Let's get acquainted",
+    "profileSubtitle": "Enter basic information about your venue so we can link the menu to your account.",
+    "restaurantLabel": "Venue name",
+    "restaurantPlaceholder": "E.g., Cafe 'Tatyana'",
+    "phoneLabel": "Contact phone",
+    "countryLabel": "Country",
+    "cityLabel": "City",
+    "cityPlaceholder": "E.g., London",
+    "stepData": "Details",
+    "stepMenu": "Menu",
+    "stepProcessing": "Processing"
+  },
+  "menuImport": {
+    "introTitle": "Upload menu",
+    "introDescription": "Upload PDF, photos or paste a direct link to the PDF. We will create a backend job, wait for processing and show the result.",
+    "submitLabel": "Send for recognition",
+    "successTitle": "Menu draft prepared",
+    "successDescription": "Sources have been processed by the backend service. The final JSON is compiled, saved as a draft and is ready for editing.",
+    "successPrimaryLabel": "Open menu editor",
+    "successSecondaryLabel": "Go to dashboard"
+  },
+  "menuSource": {
+    "fileTabLabel": "Upload file",
+    "fileTabMobileLabel": "File",
+    "linkPlaceholder": "Direct link to menu PDF file",
+    "selectedFilesCount": "Selected files: {{count}}",
+    "linkTabLabel": "Specify link",
+    "linkTabMobileLabel": "Link",
+    "clickToReplace": "Click to replace",
+    "dragAndDropMultiple": "Click or drag & drop PDF/Photo",
+    "dragAndDropSingle": "Click or drag & drop file",
+    "multipleFilesNote": "Multiple files can be selected"
+  },
+  "dashboard": {
+    "periods": {
+      "today": "Today",
+      "yesterday": "Yesterday",
+      "7d": "Last 7 days",
+      "30d": "Last 30 days"
+    },
+    "errors": {
+      "analyticsLoadFailed": "Failed to load analytics data."
+    },
+    "welcomeUser": "Welcome back, {{name}}!",
+    "analyticsOverview": "Analytics Overview",
+    "subtitle": "Track public menu views and unique visitors for the venue.",
+    "menuViews": "Menu Views",
+    "uniqueGuests": "Unique Visitors",
+    "chart": {
+      "title": "Views Dynamics",
+      "subtitle": "Comparison of menu views and unique visitors",
+      "legendViews": "Views",
+      "legendUnique": "Unique"
+    },
+    "actions": {
+      "editMenu": {
+        "title": "Open Menu Editor",
+        "description": "Change categories, items, and translations"
+      },
+      "downloadQr": {
+        "title": "Download QR Codes",
+        "description": "For print and social media"
+      },
+      "openPublic": {
+        "title": "Open Public Menu",
+        "description": "Check how guests see the menu"
+      }
+    }
+  },
+  "days": {
+    "Пн": "Mon",
+    "Вт": "Tue",
+    "Ср": "Wed",
+    "Чт": "Thu",
+    "Пт": "Fri",
+    "Сб": "Sat",
+    "Вс": "Sun"
+  },
+  "menuList": {
+    "title": "Your Menu",
+    "subtitle": "Add categories and items, update prices and stop list",
+    "createBtn": "Create Menu",
+    "status": {
+      "active": "Active",
+      "draft": "Draft"
+    },
+    "dropdown": {
+      "label": "Menu actions",
+      "edit": "Edit",
+      "duplicate": "Duplicate",
+      "viewQr": "View QR Menu",
+      "delete": "Delete"
+    },
+    "meta": {
+      "categoriesCount": "{{count}} cat.",
+      "itemsCount": "{{count}} dishes"
+    },
+    "actions": {
+      "updating": "Updating",
+      "turnOff": "Off",
+      "turnOn": "On",
+      "viewQr": "View QR",
+      "editor": "Editor"
+    }
+  },
+  "menuImportPage": {
+    "header": {
+      "title": "New Menu",
+      "description": "Import screen for the dashboard. Send sources to backend job, save results, and open the menu draft."
+    },
+    "flow": {
+      "introTitle": "Import Menu",
+      "introDescription": "We support PDF, photos, and direct links to a PDF file. Once processed, we'll save a menu draft and open it in the editor.",
+      "submitLabel": "Create Menu Draft",
+      "successTitle": "Import Completed",
+      "successDescription": "The backend job accepted the sources, compiled the final JSON, saved the menu, and prepared it for editing.",
+      "successPrimaryLabel": "Open Editor",
+      "successSecondaryLabel": "Upload Another File"
+    },
+    "sidebar": {
+      "whatItDoes": {
+        "title": "What the Import Does",
+        "subtitle": "Runs via backend import job and polling.",
+        "item1": "Accepts PDF, photos, or a direct link to a PDF.",
+        "item2": "Creates a backend job and saves sources locally.",
+        "item3": "Shows upload, processing, success, and error statuses via polling.",
+        "item4": "Creates a menu draft and opens the editor upon success."
+      },
+      "nextStage": {
+        "title": "Next Stage",
+        "subtitle": "Current pipeline already saves the menu and venue on the backend.",
+        "description": "Next, we will add import history, re-uploads, and venue selection right before starting the job."
+      }
+    }
+  },
+  "publicVenueMenu": {
+    "backToHome": "Back to Home",
+    "errors": {
+      "invalidLink": "Invalid public link.",
+      "loadFailed": "Failed to load public menu.",
+      "unavailableTitle": "Public Menu Unavailable",
+      "unavailableSubtitle": "Failed to open menu via this link."
+    }
+  },
+  "menuEditor": {
+    "errors": {
+      "loadFailed": "Failed to load menu",
+      "itemNameRequired": "Please enter dish name",
+      "normalizeFailed": "Failed to normalize menu"
+    },
+    "btnEdit": "Edit",
+    "btnPreview": "Preview",
+    "btnNormalizing": "Normalizing...",
+    "btnNormalize": "Normalize",
+    "searchPlaceholder": "Search dish...",
+    "btnAddItem": "Dish",
+    "availableHours": "Available",
+    "selectCategoryPlaceholder": "Select a category",
+    "categoryModal": {
+      "titleEdit": "Category Settings",
+      "titleNew": "New Category",
+      "nameLabel": "Name",
+      "namePlaceholder": "E.g., Desserts",
+      "descriptionLabel": "Description",
+      "descriptionPlaceholder": "To display below category title...",
+      "imageLabel": "Category Image",
+      "hoursStartLabel": "Available from",
+      "hoursEndLabel": "Available to"
+    },
+    "menuMetaModal": {
+      "title": "Menu Settings",
+      "nameLabel": "Menu Title",
+      "namePlaceholder": "E.g., Main Menu",
+      "descriptionLabel": "Menu Description",
+      "descriptionPlaceholder": "Brief menu description..."
+    },
+    "delete": {
+      "titleCategory": "Delete category?",
+      "titleItem": "Delete item?",
+      "confirmText": "Are you sure you want to delete {{name}}?",
+      "categoryWarning": "All related dishes will also be deleted.",
+      "irreversibleNote": "This action is irreversible.",
+      "btnDelete": "Delete"
+    },
+    "categoriesHeader": "Categories",
+    "noItems": "No items in this category yet",
+    "noDescription": "No description",
+    "priceValue": "{{price}} ₽",
+    "differentPrices": "Different prices",
+    "priceRange": "from {{min}} to {{max}} ₽",
+    "itemModal": {
+      "titleAdd": "New Dish",
+      "titleEdit": "Edit Dish",
+      "subtitle": "Changes will apply after saving.",
+      "categoryLabel": "Category",
+      "nameLabel": "Name",
+      "descriptionLabel": "Description",
+      "descriptionPlaceholder": "Delicious description for guests...",
+      "imageLabel": "Dish Image",
+      "pricingVolumeLabel": "Pricing & Volume",
+      "btnAddOption": "Add Option",
+      "priceLabel": "Price (₽)",
+      "pricePlaceholder": "E.g., 350",
+      "measureValueLabel": "Value",
+      "measureValuePlaceholder": "E.g., 250",
+      "measureUnitLabel": "Unit",
+      "optionNameLabel": "Option Name",
+      "optionNamePlaceholder": "E.g., Grand",
+      "badgeLabel": "Marketing Badge",
+      "noBadge": "No Badge",
+      "availableFrom": "Available from",
+      "availableTo": "Available to",
+      "tagsLabel": "Tags & Allergens",
+      "availableInMenu": "Display in Menu",
+      "availableInMenuDesc": "Turn off if item is out of stock (Stop list)",
+      "btnAddItemSubmit": "Add Dish",
+      "btnSaveItemSubmit": "Save Changes"
+    },
+    "badges": {
+      "new": "New",
+      "hit": "Hit",
+      "chefs-choice": "Chef's Choice",
+      "season": "Season"
+    },
+    "dietaryTags": {
+      "vegan": "Vegan",
+      "vegetarian": "Vegetarian",
+      "gluten-free": "Gluten Free",
+      "spicy": "Spicy",
+      "contains-nuts": "Contains Nuts",
+      "contains-dairy": "Contains Dairy",
+      "caffeine-free": "Caffeine Free"
+    },
+    "measureUnits": {
+      "notSpecified": "Not specified",
+      "ml": "ml",
+      "l": "l",
+      "g": "g",
+      "kg": "kg",
+      "pcs": "pcs",
+      "portion": "portion"
+    }
+  },
+  "venues": {
+    "title": "Venues",
+    "subtitle": "Select a venue to open its profile, Wi-Fi, and menu layout.",
+    "btnAddVenue": "Add Venue",
+    "status": {
+      "active": "Active"
+    },
+    "menuCountBadge": "Menus",
+    "noPublicLink": "No link",
+    "btnOpen": "Open",
+    "pageTitle": "Venue",
+    "pageSubtitle": "Manage venue profile, guest Wi-Fi, and menu layout.",
+    "loadingProfileDesc": "Loading venue profile, Wi-Fi, and public link.",
+    "loadingData": "Loading venue details...",
+    "retryBtn": "Retry loading",
+    "errors": {
+      "loadFailed": "Failed to load venue details.",
+      "saveProfileFailed": "Failed to save venue profile.",
+      "saveWifiFailed": "Failed to save Wi-Fi settings.",
+      "saveDesignFailed": "Failed to save menu appearance.",
+      "saveQrFailed": "Failed to save QR settings."
+    },
+    "tabs": {
+      "profile": "Profile",
+      "profileMobile": "Profile",
+      "wifi": "Wi-Fi",
+      "wifiMobile": "Wi-Fi",
+      "design": "Appearance",
+      "designMobile": "View",
+      "qr": "QR & Link",
+      "qrMobile": "QR"
+    },
+    "fields": {
+      "name": "Venue name",
+      "phone": "Contact phone",
+      "description": "Description",
+      "descriptionPlaceholder": "Tell guests about your venue...",
+      "city": "City",
+      "currency": "Menu currency"
+    },
+    "btnSaveProfile": "Save profile",
+    "wifi": {
+      "title": "Guest Wi-Fi",
+      "subtitle": "Data will be displayed in the menu for quick guest connection",
+      "ssid": "Network name (SSID)",
+      "ssidPlaceholder": "E.g., Guest_WiFi",
+      "password": "Password",
+      "passwordPlaceholder": "Enter password",
+      "hint": "When this feature is enabled, a 'Connect to Wi-Fi' button will appear in your digital menu. Guests won't have to enter the password manually — everything happens automatically."
+    },
+    "btnSaveWifi": "Save Wi-Fi",
+    "design": {
+      "title": "Menu Appearance",
+      "colorTheme": "Color Theme",
+      "themes": {
+        "light": "Light",
+        "dark": "Dark",
+        "auto": "Auto",
+        "brand": "Brand"
+      },
+      "templateLabel": "Menu Template",
+      "templateDesc": "Choose the baseline visual presentation for the menu.",
+      "templates": {
+        "classic": "Classic",
+        "minimal": "Advanced",
+        "accent": "Premium"
+      },
+      "colorLabel": "Accent color",
+      "colorDesc": "Used for buttons, active states, and links.",
+      "logoLabel": "Venue logo in the menu",
+      "logoAlt": "Venue logo",
+      "logoUploadTitle": "Upload a square logo",
+      "logoUploadDesc": "Recommended size 512x512px, PNG or SVG format",
+      "btnSelectFile": "Select file",
+      "previewLabel": "Preview",
+      "previewTitle": "See how guests view the menu",
+      "btnOpenMenu": "Open menu"
+    },
+    "btnSaveDesign": "Save appearance",
+    "qr": {
+      "title": "QR & Public Link",
+      "subtitle": "A single primary QR code is used for the venue, pointing to the guests' public menu.",
+      "btnSave": "Save QR"
+    }
+  },
+  "qr": {
+    "manager": {
+      "title": "QR Code Management",
+      "subtitle": "Customize the QR code appearance to match your venue's style and download it in high resolution for table tents or stickers.",
+      "errors": {
+        "copyFailed": "Failed to copy link"
+      }
+    },
+    "design": {
+      "title": "Code Design",
+      "subtitle": "Customize the pattern shape, color, and logo in the center.",
+      "shapeLabel": "Pattern shape",
+      "shapes": {
+        "square": "Squares",
+        "rounded": "Smooth",
+        "dots": "Dots"
+      },
+      "colorLabel": "Pattern color",
+      "logoLabel": "Logo in center",
+      "logoAlt": "Logo",
+      "logoUploaded": "Logo uploaded",
+      "logoHint": "It will appear in the center of the QR code.",
+      "logoUploadTitle": "Upload icon",
+      "logoUploadDesc": "PNG, JPG up to 2 MB"
+    },
+    "frame": {
+      "title": "Frame & Text",
+      "subtitle": "Add a brief call to action and a frame color for the printed QR version.",
+      "callToAction": "Call to action",
+      "placeholder": "E.g., SCAN MENU",
+      "hint": "Keep it short: 1-3 words read best on a table sticker.",
+      "colorLabel": "Frame color"
+    },
+    "preview": {
+      "title": "Preview",
+      "defaultFrameText": "SCAN MENU",
+      "downloadPng": "Download PNG"
+    },
+    "directLink": {
+      "title": "Direct menu link",
+      "ariaOpen": "Open menu in a new tab",
+      "ariaCopy": "Copy menu link"
+    }
+  },
+  "navigation": {
+    "mainMenu": "Main Menu",
+    "home": "Overview",
+    "menu": "Menu",
+    "venue": "Venue",
+    "account": "Account",
+    "billing": "Billing",
+    "subscription": "Subscription",
+    "needHelp": "Need help?",
+    "supportDesc": "Write to our manager, we are always here to help.",
+    "contactSupport": "Contact Support",
+    "logout": "Logout",
+    "noVenueSelected": "No venue selected",
+    "proTariff": "PRO Plan",
+    "currentVenue": "Current Venue",
+    "addVenue": "Add Venue"
+  },
+  "account": {
+    "title": "Account",
+    "subtitle": "Manage personal details and notifications",
+    "loading": "Loading account settings...",
+    "errors": {
+      "loadFailed": "Failed to load account.",
+      "saveFailed": "Failed to save profile.",
+      "passwordFailed": "Failed to update password."
+    },
+    "profile": {
+      "title": "Owner Profile",
+      "subtitle": "Contact info for login, notifications, and support.",
+      "name": "First and Last Name",
+      "email": "Email",
+      "phone": "Phone"
+    },
+    "notifications": {
+      "title": "Notifications",
+      "subtitle": "Select which emails and system notifications you would like to receive.",
+      "productUpdates": "Product news and new features",
+      "paymentAlerts": "Invoices, payments, and plan renewals",
+      "weeklyDigest": "Weekly summary of menu views"
+    },
+    "password": {
+      "authMethod": "Sign-in Method",
+      "title": "Password",
+      "externalLogin": "You log in via {{provider}}. Changing password is not available.",
+      "updateHint": "Update password to log in to your account.",
+      "current": "Current Password",
+      "new": "New Password",
+      "confirm": "Confirm New Password",
+      "warningExternal": "Changing password is not available because this account uses sign-in via {{provider}}.",
+      "btnUpdating": "Updating...",
+      "btnUpdate": "Update Password",
+      "providers": {
+        "external": "via external provider",
+        "yandex": "Yandex",
+        "mailru": "Mail.ru"
+      },
+      "placeholders": {
+        "unavailable": "Unavailable",
+        "unavailableExternal": "Unavailable for external login",
+        "changeUnavailable": "Changing password is not available",
+        "minChars": "Minimum 8 characters",
+        "repeat": "Repeat password"
+      }
+    }
+  },
+  "billing": {
+    "cancelConfirm": "Disable subscription auto-renewal?",
+    "title": "Billing",
+    "description": "Plan, auto-renewal, and transaction history for your account.",
+    "subscription": "Subscription",
+    "status": "Status",
+    "statuses": {
+      "active": "Active",
+      "trialing": "Trialing",
+      "past_due": "Past due",
+      "unpaid": "Unpaid",
+      "canceled": "Canceled"
+    },
+    "autoRenewalDisabled": "auto-renewal disabled",
+    "perMonth": "/ mo",
+    "period": "Access period",
+    "trialEnd": "Trial / next renewal date",
+    "limitsTitle": "Limits & Usage",
+    "limits": {
+      "venuesCount": "Venues: {{count}} of {{max}}",
+      "aiImports": "AI imports this month: {{count}} of {{max}}",
+      "translations": "Translations: up to {{count}} languages",
+      "translationsDisabled": "Translations: unavailable",
+      "templateTier": "Template tier: {{tier}}"
+    },
+    "actions": {
+      "update": "Refresh data",
+      "disableAutoRenewal": "Disable auto-renewal"
+    },
+    "unitpay": {
+      "title": "UnitPay",
+      "description": "Card binding and subsequent charges are managed via UnitPay.",
+      "subscriptionId": "Subscription ID",
+      "notLinked": "Not linked yet"
+    },
+    "history": {
+      "title": "Payment History",
+      "description": "Recent transactions and manual status synchronization.",
+      "syncing": "Syncing...",
+      "sync": "Synchronize",
+      "empty": "Payment history is empty."
+    },
+    "transactionStatus": {
+      "completed": "Completed",
+      "pending": "Pending",
+      "failed": "Failed"
+    },
+    "transactionKind": {
+      "charge": "Charge",
+      "refund": "Refund"
+    }
+  },
+  "subscription": {
+    "features": {
+      "venues": "Venues: {{count}}",
+      "menus": "Menus per venue: {{count}}",
+      "items": "Dishes per menu: {{count}}",
+      "aiImports": "AI imports per month: {{count}}",
+      "translations": "Translations up to {{count}} languages",
+      "translationsDisabled": "No translations",
+      "template": "Template: {{tier}}"
+    },
+    "checkoutErrorUnitpay": "UnitPay did not return a redirectUrl for payment.",
+    "title": "Subscription",
+    "description": "Select a plan that will apply to your entire account and all your venues.",
+    "planCurrent": "Current",
+    "planSelected": "Selected",
+    "planSelect": "Choose plan",
+    "howItWorks": {
+      "title": "How payment works",
+      "description": "The first payment creates and binds the subscription in UnitPay. Subsequent charges are made using the saved `subscriptionId`.",
+      "warning": "On the test project, UnitPay does not send the `subscriptionId` in the callback. Therefore, the full auto-billing scenario is verified on a live project with a small amount."
+    },
+    "checkout": {
+      "title": "Checkout",
+      "selectedPlan": "Selected plan",
+      "btnProceeding": "Proceeding to payment...",
+      "btnProceed": "Proceed to payment"
+    }
+  },
+  "settings": {
+    "tabs": {
+      "billing": "Plan & Payment"
+    },
+    "title": "Settings",
+    "subtitle": "Manage venue information and menu settings",
+    "saveChanges": "Save changes",
+    "billing": {
+      "proTariff": "PRO Plan",
+      "activeUntil": "Active until {{date}}",
+      "advantages": "Your advantages:",
+      "features": {
+        "0": "Unlimited dishes and categories",
+        "1": "Menu and QR code design customization",
+        "2": "24/7 priority support",
+        "3": "Views and clicks analytics"
+      },
+      "invoices": "Invoices & Receipts",
+      "cancelSubscription": "Cancel subscription"
+    }
+  }
+}

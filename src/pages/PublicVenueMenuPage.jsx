@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useParams, useSearchParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { AlertCircle, ArrowLeft, Menu as MenuIcon } from 'lucide-react';
 
 import { getPublicVenueMenus } from '../lib/publicMenuApi.js';
@@ -18,6 +19,7 @@ const getStoredTemplateType = (venueId) => {
 };
 
 const PublicVenueMenuPage = () => {
+  const { t } = useTranslation();
   const { venueId } = useParams();
   const [searchParams, setSearchParams] = useSearchParams();
   const [data, setData] = useState(null);
@@ -30,7 +32,7 @@ const PublicVenueMenuPage = () => {
     const requestStartedAt = Date.now();
 
     if (!venueId) {
-      setError('Некорректная публичная ссылка.');
+      setError(t('publicVenueMenu.errors.invalidLink'));
       setIsLoading(false);
       return undefined;
     }
@@ -51,7 +53,7 @@ const PublicVenueMenuPage = () => {
         }
 
         setData(null);
-        setError(nextError.message || 'Не удалось загрузить публичное меню.');
+        setError(nextError.message || t('publicVenueMenu.errors.loadFailed'));
       })
       .finally(() => {
         if (isCancelled) {
@@ -71,7 +73,7 @@ const PublicVenueMenuPage = () => {
     return () => {
       isCancelled = true;
     };
-  }, [venueId]);
+  }, [venueId, t]);
 
   const menus = data?.menus || [];
   const requestedMenuId = searchParams.get('menu');
@@ -130,13 +132,13 @@ const PublicVenueMenuPage = () => {
             <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-destructive/10 text-destructive">
               <AlertCircle size={24} />
             </div>
-            <h1 className="mt-4 text-2xl font-black tracking-tight text-foreground">Публичное меню недоступно</h1>
-            <p className="mt-2 text-sm text-muted-foreground">{error || 'Не удалось открыть меню по этой ссылке.'}</p>
+            <h1 className="mt-4 text-2xl font-black tracking-tight text-foreground">{t('publicVenueMenu.errors.unavailableTitle')}</h1>
+            <p className="mt-2 text-sm text-muted-foreground">{error || t('publicVenueMenu.errors.unavailableSubtitle')}</p>
             <div className="mt-6">
               <Button asChild variant="outline" className="rounded-xl border-border/60 px-4">
                 <Link to="/">
                   <ArrowLeft size={16} className="mr-2" />
-                  На главную
+                  {t('publicVenueMenu.backToHome')}
                 </Link>
               </Button>
             </div>

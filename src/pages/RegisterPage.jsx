@@ -4,6 +4,7 @@ import {Loader2} from "lucide-react";
 import {FcGoogle} from "react-icons/fc";
 import {FaYandex} from "react-icons/fa6";
 import {SiMaildotru} from "react-icons/si";
+import {useTranslation} from "react-i18next";
 import AuthShell from "../components/auth/AuthShell.jsx";
 import SocialProviderButton from "../components/auth/SocialProviderButton.jsx";
 import AuthField from "../components/auth/AuthField.jsx";
@@ -13,6 +14,7 @@ import { primaryActionButtonClasses } from "../lib/uiStyles.js";
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 const RegisterPage = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [form, setForm] = useState({
     name: "",
@@ -28,27 +30,27 @@ const RegisterPage = () => {
     const nextErrors = {};
 
     if (!form.name.trim()) {
-      nextErrors.name = "Введите имя";
+      nextErrors.name = t('register.errNameRequired');
     } else if (form.name.trim().length < 2) {
-      nextErrors.name = "Имя должно быть не короче 2 символов";
+      nextErrors.name = t('register.errNameShort');
     }
 
     if (!form.email.trim()) {
-      nextErrors.email = "Введите email";
+      nextErrors.email = t('register.errEmailRequired');
     } else if (!emailPattern.test(form.email.trim())) {
-      nextErrors.email = "Укажите корректный email";
+      nextErrors.email = t('register.errEmailInvalid');
     }
 
     if (!form.password) {
-      nextErrors.password = "Введите пароль";
+      nextErrors.password = t('register.errPasswordRequired');
     } else if (form.password.length < 8) {
-      nextErrors.password = "Пароль должен быть не короче 8 символов";
+      nextErrors.password = t('register.errPasswordShort');
     }
 
     if (!form.confirmPassword) {
-      nextErrors.confirmPassword = "Повторите пароль";
+      nextErrors.confirmPassword = t('register.errConfirmRequired');
     } else if (form.confirmPassword !== form.password) {
-      nextErrors.confirmPassword = "Пароли не совпадают";
+      nextErrors.confirmPassword = t('register.errPasswordsDontMatch');
     }
 
     setErrors(nextErrors);
@@ -85,7 +87,7 @@ const RegisterPage = () => {
 
       navigate(result?.redirectUrl || getPostRegisterRedirect());
     } catch (error) {
-      setSubmitError(error.message || "Не удалось создать аккаунт");
+      setSubmitError(error.message || t('register.errGeneral'));
     } finally {
       setPending(false);
     }
@@ -93,38 +95,38 @@ const RegisterPage = () => {
 
   return (
     <AuthShell
-      title="Создать аккаунт"
-      subtitle="Введите данные для регистрации в системе, это займет меньше минуты"
+      title={t('register.title')}
+      subtitle={t('register.subtitle')}
     >
       <div className="space-y-6 sm:space-y-8">
         <div className="grid grid-cols-3 gap-3 sm:grid-cols-3">
           <SocialProviderButton icon={FcGoogle} label="Google" onClick={() => handleProviderClick("google")}/>
-          <SocialProviderButton icon={FaYandex} label="Яндекс" iconClassName="text-[#fc3f1d]" onClick={() => handleProviderClick("yandex")}/>
+          <SocialProviderButton icon={FaYandex} label="Yandex" iconClassName="text-[#fc3f1d]" onClick={() => handleProviderClick("yandex")}/>
           <SocialProviderButton icon={SiMaildotru} label="Mail.ru" iconClassName="text-[#005ff9]" onClick={() => handleProviderClick("mailru")}/>
         </div>
 
         <div className="flex items-center gap-4 text-[11px] font-semibold uppercase tracking-[0.22em] text-muted-foreground sm:text-xs">
           <div className="h-px flex-1 bg-border"/>
-          <span>или через почту</span>
+          <span>{t('register.orEmail')}</span>
           <div className="h-px flex-1 bg-border"/>
         </div>
 
         <form className="space-y-5" onSubmit={handleSubmit}>
           <AuthField
-            label="Ваше имя"
+            label={t('register.name')}
             type="text"
             autoComplete="name"
-            placeholder="Например: Александр"
+            placeholder={t('register.namePlaceholder')}
             value={form.name}
             onChange={updateField("name")}
             error={errors.name}
           />
 
           <AuthField
-            label="Email"
+            label={t('register.email')}
             type="email"
             autoComplete="email"
-            placeholder="name@example.com"
+            placeholder={t('register.emailPlaceholder')}
             value={form.email}
             onChange={updateField("email")}
             error={errors.email}
@@ -132,20 +134,20 @@ const RegisterPage = () => {
 
           <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
             <AuthField
-              label="Пароль"
+              label={t('register.password')}
               type="password"
               autoComplete="new-password"
-              placeholder="Минимум 8 символов"
+              placeholder={t('register.passwordPlaceholder')}
               value={form.password}
               onChange={updateField("password")}
               error={errors.password}
             />
 
             <AuthField
-              label="Повторите пароль"
+              label={t('register.confirmPassword')}
               type="password"
               autoComplete="new-password"
-              placeholder="Повторите пароль"
+              placeholder={t('register.confirmPasswordPlaceholder')}
               value={form.confirmPassword}
               onChange={updateField("confirmPassword")}
               error={errors.confirmPassword}
@@ -163,19 +165,19 @@ const RegisterPage = () => {
             disabled={pending}
             className={`w-full ${primaryActionButtonClasses} disabled:translate-y-0 disabled:opacity-60`}
           >
-            {pending ? <Loader2 className="h-5 w-5 animate-spin"/> : "Зарегистрироваться"}
+            {pending ? <Loader2 className="h-5 w-5 animate-spin"/> : t('register.btnSubmit')}
 
           </button>
         </form>
 
         <p className="text-center text-[11px] text-muted-foreground sm:text-sm">
-          После регистрации можно сразу перейти к загрузке первого меню и заполнению данных заведения.
+          {t('register.footerLegal')}
         </p>
 
         <p className="text-center text-[11px] text-muted-foreground sm:text-sm">
-          Уже есть аккаунт?{' '}
+          {t('register.hasAccount')}{' '}
           <Link to="/login" className="font-semibold text-brand-purple transition-colors hover:text-brand-purple/80">
-            Войти
+            {t('register.loginLink')}
           </Link>
         </p>
       </div>

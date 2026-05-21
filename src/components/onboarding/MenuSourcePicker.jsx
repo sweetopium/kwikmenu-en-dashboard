@@ -1,5 +1,6 @@
 import { FileText, Image as ImageIcon, Link as LinkIcon, UploadCloud } from 'lucide-react';
 import { Input } from "../ui/input";
+import { useTranslation } from "react-i18next";
 
 const MenuSourcePicker = ({
   menuSource,
@@ -11,15 +12,20 @@ const MenuSourcePicker = ({
   onMenuLinkChange,
   inputClassName,
   multiple = false,
-  fileTabLabel = 'Загрузить файл',
-  fileTabMobileLabel = 'Файл',
-  linkPlaceholder = 'Прямая ссылка на PDF-файл меню',
+  fileTabLabel,
+  fileTabMobileLabel,
+  linkPlaceholder,
   dropzoneHeight = 'h-24 sm:h-28',
 }) => {
+  const { t } = useTranslation();
+  const displayFileTabLabel = fileTabLabel !== undefined ? fileTabLabel : t('menuSource.fileTabLabel', { defaultValue: 'Загрузить файл' });
+  const displayFileTabMobileLabel = fileTabMobileLabel !== undefined ? fileTabMobileLabel : t('menuSource.fileTabMobileLabel', { defaultValue: 'Файл' });
+  const displayLinkPlaceholder = linkPlaceholder !== undefined ? linkPlaceholder : t('menuSource.linkPlaceholder', { defaultValue: 'Прямая ссылка на PDF-файл меню' });
+
   const selectedFileLabel = multiple
     ? files.length === 1
       ? files[0].name
-      : `Выбрано файлов: ${files.length}`
+      : t('menuSource.selectedFilesCount', { count: files.length, defaultValue: `Выбрано файлов: ${files.length}` })
     : fileName;
   const hasFiles = multiple ? files.length > 0 : Boolean(fileName);
 
@@ -36,8 +42,8 @@ const MenuSourcePicker = ({
           }`}
         >
           <UploadCloud size={14} className="sm:w-[18px] sm:h-[18px]" />
-          <span className="hidden sm:inline">{fileTabLabel}</span>
-          <span className="sm:hidden">{fileTabMobileLabel}</span>
+          <span className="hidden sm:inline">{displayFileTabLabel}</span>
+          <span className="sm:hidden">{displayFileTabMobileLabel}</span>
         </button>
         <button
           type="button"
@@ -49,8 +55,8 @@ const MenuSourcePicker = ({
           }`}
         >
           <LinkIcon size={14} className="sm:w-[18px] sm:h-[18px]" />
-          <span className="hidden sm:inline">Указать ссылку</span>
-          <span className="sm:hidden">Ссылка</span>
+          <span className="hidden sm:inline">{t('menuSource.linkTabLabel', { defaultValue: 'Указать ссылку' })}</span>
+          <span className="sm:hidden">{t('menuSource.linkTabMobileLabel', { defaultValue: 'Ссылка' })}</span>
         </button>
       </div>
 
@@ -76,7 +82,7 @@ const MenuSourcePicker = ({
               </span>
               {multiple && (
                 <span className="text-[10px] sm:text-xs text-muted-foreground group-hover:text-brand-purple/70 transition-colors">
-                  Нажмите, чтобы заменить
+                  {t('menuSource.clickToReplace', { defaultValue: 'Нажмите, чтобы заменить' })}
                 </span>
               )}
             </div>
@@ -84,15 +90,17 @@ const MenuSourcePicker = ({
             <div className="flex flex-col items-center gap-1.5 sm:gap-2 text-muted-foreground group-hover:text-foreground transition-colors px-4 text-center">
               <UploadCloud size={multiple ? 24 : 18} className={multiple ? 'sm:w-7 sm:h-7' : 'sm:w-6 sm:h-6'} />
               <span className="text-[10px] sm:text-sm font-medium">
-                {multiple ? 'Нажмите или перетащите PDF/Фото' : 'Нажмите или перетащите файл'}
+                {multiple
+                  ? t('menuSource.dragAndDropMultiple', { defaultValue: 'Нажмите или перетащите PDF/Фото' })
+                  : t('menuSource.dragAndDropSingle', { defaultValue: 'Нажмите или перетащите файл' })}
               </span>
-              {multiple && <span className="text-[10px] sm:text-xs opacity-70">Можно выбрать несколько файлов</span>}
+              {multiple && <span className="text-[10px] sm:text-xs opacity-70">{t('menuSource.multipleFilesNote', { defaultValue: 'Можно выбрать несколько файлов' })}</span>}
             </div>
           )}
         </div>
       ) : (
         <Input
-          placeholder={linkPlaceholder}
+          placeholder={displayLinkPlaceholder}
           value={menuLink}
           onChange={(e) => onMenuLinkChange(e.target.value)}
           required={menuSource === 'link'}

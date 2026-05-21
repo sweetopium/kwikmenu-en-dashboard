@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { ArrowRight, CheckCircle2, ShieldCheck, Sparkles } from 'lucide-react';
 
 import { Button } from "../components/ui/button";
@@ -6,19 +7,25 @@ import SettingsPageHeader from "../components/settings/SettingsPageHeader";
 import { createBillingCheckout, fetchBillingSummary } from "../lib/billingApi";
 import { primaryActionButtonClasses } from "../lib/uiStyles";
 
-const formatRub = (value, currency = 'RUB') =>
-  new Intl.NumberFormat('ru-RU', { style: 'currency', currency, maximumFractionDigits: 0 }).format(value);
+const formatRub = (value, currency = 'RUB', lng = 'ru') => {
+  const locale = lng === 'ru' ? 'ru-RU' : 'en-US';
+  return new Intl.NumberFormat(locale, { style: 'currency', currency, maximumFractionDigits: 0 }).format(value);
+};
 
-const planFeatures = (plan) => [
-  `${plan.maxVenues} завед.`,
-  `${plan.maxMenusPerVenue} меню / заведение`,
-  `${plan.maxMenuItemsPerMenu} позиций / меню`,
-  `${plan.aiImportsPerMonth} AI-импортов / мес`,
-  plan.translationsEnabled ? `Переводы до ${plan.maxTranslationLanguages} языков` : 'Без переводов',
-  `Шаблон: ${plan.maxTemplateTier}`,
+const planFeatures = (plan, t) => [
+  t('subscription.features.venues', 'Заведений: {{count}}', { count: plan.maxVenues }),
+  t('subscription.features.menus', 'Меню на заведение: {{count}}', { count: plan.maxMenusPerVenue }),
+  t('subscription.features.items', 'Блюд на меню: {{count}}', { count: plan.maxMenuItemsPerMenu }),
+  t('subscription.features.aiImports', 'AI-импортов в месяц: {{count}}', { count: plan.aiImportsPerMonth }),
+  plan.translationsEnabled 
+    ? t('subscription.features.translations', 'Переводы до {{count}} языков', { count: plan.maxTranslationLanguages }) 
+    : t('subscription.features.translationsDisabled', 'Без переводов'),
+  t('subscription.features.template', 'Шаблон: {{tier}}', { tier: plan.maxTemplateTier }),
 ];
 
 const SubscriptionPlansPage = () => {
+  const { t, i18n } = useTranslation();
+  const lng = i18n.language;
   const [data, setData] = useState(null);
   const [selectedPlanId, setSelectedPlanId] = useState('');
   const [error, setError] = useState('');
@@ -50,7 +57,7 @@ const SubscriptionPlansPage = () => {
         window.location.assign(result.redirectUrl);
         return;
       }
-      setError('UnitPay не вернул redirectUrl для оплаты.');
+      setError(t('subscription.checkoutErrorUnitpay', 'UnitPay не вернул redirectUrl для оплаты.'));
     } catch (nextError) {
       setError(nextError.message);
     } finally {
@@ -61,8 +68,8 @@ const SubscriptionPlansPage = () => {
   return (
     <div className="space-y-6 sm:space-y-8">
       <SettingsPageHeader
-        title="Подписка"
-        description="Выберите тариф, который будет применяться ко всему аккаунту и всем вашим заведениям."
+        title={t('subscription.title', 'Подписка')}
+        description={t('subscription.description', 'Выберите тариф, который будет применяться ко всему аккаунту и всем вашим заведениям.')}
         actionLabel={null}
       />
 
@@ -93,20 +100,20 @@ const SubscriptionPlansPage = () => {
                   </div>
                   {isCurrent ? (
                     <div className="rounded-full bg-brand-purple px-2 py-1 text-[10px] font-extrabold uppercase tracking-wide text-white">
-                      Текущий
+                      {t('subscription.planCurrent', 'Текущий')}
                     </div>
                   ) : null}
                 </div>
 
                 <div className="flex items-end gap-2">
                   <span className={`text-4xl font-black ${isFeatured ? 'text-white' : 'text-foreground'}`}>
-                    {formatRub(plan.priceAmount, plan.currency)}
+                    {formatRub(plan.priceAmount, plan.currency, lng)}
                   </span>
-                  <span className={`pb-1 text-sm ${isFeatured ? 'text-white/60' : 'text-muted-foreground'}`}>/ мес</span>
+                  <span className={`pb-1 text-sm ${isFeatured ? 'text-white/60' : 'text-muted-foreground'}`}>{t('billing.perMonth', '/ мес')}</span>
                 </div>
 
                 <ul className="space-y-3">
-                  {planFeatures(plan).map((feature) => (
+                  {planFeatures(plan, t).map((feature) => (
                     <li key={feature} className={`flex items-center gap-2 text-sm ${isFeatured ? 'text-white/85' : 'text-muted-foreground'}`}>
                       <CheckCircle2 size={16} className={isFeatured ? 'text-brand-purple' : 'text-green-600'} />
                       <span>{feature}</span>
@@ -126,7 +133,7 @@ const SubscriptionPlansPage = () => {
                       : 'border-border/60 bg-background hover:bg-secondary'
                 }`}
               >
-                {isSelected ? 'Выбран' : 'Выбрать тариф'}
+                {isSelected ? t('subscription.planSelected', 'Выбран') : t('subscription.planSelect', 'Выбрать тариф')}
               </button>
             </article>
           );
@@ -140,31 +147,31 @@ const SubscriptionPlansPage = () => {
               <ShieldCheck size={20} />
             </div>
             <div>
-              <h2 className="text-lg sm:text-xl font-extrabold text-foreground">Как работает оплата</h2>
+              <h2 className="text-lg sm:text-xl font-extrabold text-foreground">{t('subscription.howItWorks.title', 'Как работает оплата')}</h2>
               <p className="text-xs sm:text-sm text-muted-foreground mt-0.5">
-                Первый платеж создаёт и привязывает подписку в UnitPay. Последующие списания выполняются по сохранённому `subscriptionId`.
+                {t('subscription.howItWorks.description', 'Первый платеж создаёт и привязывает подписку в UnitPay. Последующие списания выполняются по сохранённому `subscriptionId`.')}
               </p>
             </div>
           </div>
 
           <div className="rounded-2xl border border-brand-purple/15 bg-brand-purple/5 p-4 text-sm text-brand-purple/90 leading-relaxed">
-            На тестовом проекте UnitPay не отправляет `subscriptionId` в callback. Поэтому полный сценарий автосписаний проверяется на боевом проекте с небольшой суммой.
+            {t('subscription.howItWorks.warning', 'На тестовом проекте UnitPay не отправляет `subscriptionId` в callback. Поэтому полный сценарий автосписаний проверяется на боевом проекте с небольшой суммой.')}
           </div>
         </div>
 
         <div className="rounded-3xl border border-border/60 bg-card p-5 sm:p-8 shadow-sm space-y-5">
           <div className="flex items-center gap-3">
             <Sparkles size={18} className="text-brand-purple" />
-            <h2 className="text-lg font-extrabold text-foreground">Оформление</h2>
+            <h2 className="text-lg font-extrabold text-foreground">{t('subscription.checkout.title', 'Оформление')}</h2>
           </div>
 
           <div className="rounded-2xl border border-border/60 bg-secondary/15 px-4 py-4">
-            <p className="text-sm font-semibold text-foreground">Выбранный тариф</p>
+            <p className="text-sm font-semibold text-foreground">{t('subscription.checkout.selectedPlan', 'Выбранный тариф')}</p>
             <p className="text-sm text-muted-foreground mt-1">{selectedPlan?.name || '—'}</p>
           </div>
 
           <Button className={`${primaryActionButtonClasses} w-full h-12`} onClick={handleCheckout} disabled={!selectedPlan || isSubmitting}>
-            {isSubmitting ? 'Переходим к оплате...' : 'Перейти к оплате'}
+            {isSubmitting ? t('subscription.checkout.btnProceeding', 'Переходим к оплате...') : t('subscription.checkout.btnProceed', 'Перейти к оплате')}
             <ArrowRight size={18} className="ml-2" />
           </Button>
         </div>

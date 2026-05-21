@@ -360,7 +360,7 @@ const ExtendedPublicMenuTemplate = ({
     const item = openSheet.item;
     const itemName = getLocalizedField(item, 'name', language, defaultLanguage) || item.name;
     const itemDescription = getLocalizedField(item, 'description', language, defaultLanguage);
-    const itemMeasure = formatMeasure(item.measureValue, item.measureUnit);
+    const itemMeasure = formatMeasure(item.measureValue, item.measureUnit, language);
     const itemPrice = formatCurrency(item.price, currencyCode);
     const visibleVariants = (item.variants || []).filter((variant) => variant.isAvailable !== false);
     const metaParts = [itemMeasure, getScheduleLabel(item.availableHours)].filter(isFilled);
@@ -411,7 +411,7 @@ const ExtendedPublicMenuTemplate = ({
               <div className="space-y-0">
                 {visibleVariants.map((variant, index) => {
                   const variantLabel = getLocalizedField(variant, 'label', language, defaultLanguage) || variant.label;
-                  const variantMeasure = formatMeasure(variant.measureValue, variant.measureUnit);
+                  const variantMeasure = formatMeasure(variant.measureValue, variant.measureUnit, language);
                   const variantPrice = formatCurrency(variant.price, currencyCode);
 
                   return (

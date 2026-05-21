@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import {
   Plus, Utensils, Wine, Coffee,
   MoreHorizontal, Calendar, LayoutGrid, ArrowRight, FolderOpen,
@@ -26,6 +27,7 @@ const MENU_ICON_META = {
 };
 
 const MenuListPage = () => {
+  const { t, i18n } = useTranslation();
   const [menus, setMenus] = useState([]);
   const [busyMenuId, setBusyMenuId] = useState(null);
 
@@ -52,7 +54,7 @@ const MenuListPage = () => {
         )
       );
     } catch (error) {
-      console.error('Не удалось обновить статус меню', error);
+      console.error('Failed to update menu status', error);
     } finally {
       setBusyMenuId(null);
     }
@@ -66,10 +68,10 @@ const MenuListPage = () => {
           <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-5">
             <div className="min-w-0">
               <h1 className="text-2xl sm:text-3xl font-extrabold text-foreground tracking-tight">
-                Ваше меню
+                {t('menuList.title')}
               </h1>
               <p className="text-sm text-muted-foreground mt-2 max-w-2xl leading-relaxed">
-                Добавляйте категории и позиции, обновляйте цены и стоп-лист
+                {t('menuList.subtitle')}
               </p>
             </div>
 
@@ -82,7 +84,7 @@ const MenuListPage = () => {
                   })}
                 >
                   <Plus size={18} className="mr-2" />
-                  Создать меню
+                  {t('menuList.createBtn')}
                 </Link>
               </Button>
             </div>
@@ -110,11 +112,11 @@ const MenuListPage = () => {
 
                   {menu.status === 'active' ? (
                     <div className="px-2.5 py-1 bg-green-500/10 text-green-600 text-[11px] font-bold uppercase tracking-wider rounded-md border border-green-500/20">
-                      Активно
+                      {t('menuList.status.active')}
                     </div>
                   ) : (
                     <div className="px-2.5 py-1 bg-secondary text-muted-foreground text-[11px] font-bold uppercase tracking-wider rounded-md border border-border/50">
-                      Черновик
+                      {t('menuList.status.draft')}
                     </div>
                   )}
                 </div>
@@ -127,7 +129,7 @@ const MenuListPage = () => {
                   </DropdownMenuTrigger>
 
                   <DropdownMenuContent align="end">
-                    <DropdownMenuLabel>Действия с меню</DropdownMenuLabel>
+                    <DropdownMenuLabel>{t('menuList.dropdown.label')}</DropdownMenuLabel>
                     <DropdownMenuItem asChild>
                       <Link
                         to={`/dashboard/menu/${menu.id}`}
@@ -138,12 +140,12 @@ const MenuListPage = () => {
                         })}
                       >
                         <Pencil size={16} className="mr-2" />
-                        Редактировать
+                        {t('menuList.dropdown.edit')}
                       </Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem>
                       <Copy size={16} className="mr-2" />
-                      Дублировать
+                      {t('menuList.dropdown.duplicate')}
                     </DropdownMenuItem>
                     {menu.venueId ? (
                       <DropdownMenuItem asChild>
@@ -155,7 +157,7 @@ const MenuListPage = () => {
                           })}
                         >
                           <QrCode size={16} className="mr-2" />
-                          Посмотреть QR меню
+                          {t('menuList.dropdown.viewQr')}
                         </Link>
                       </DropdownMenuItem>
                     ) : null}
@@ -163,7 +165,7 @@ const MenuListPage = () => {
                     <DropdownMenuSeparator />
                     <DropdownMenuItem variant="destructive">
                       <Trash2 size={16} className="mr-2" />
-                      Удалить
+                      {t('menuList.dropdown.delete')}
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
@@ -185,15 +187,17 @@ const MenuListPage = () => {
               <div className="flex flex-wrap items-center gap-x-4 gap-y-2 mb-5 text-sm text-muted-foreground border-b border-border/50 pb-5">
                 <div className="flex items-center gap-1.5">
                   <Calendar size={14} />
-                  <span className="text-[12px] font-medium">{new Date(menu.updatedAt).toLocaleString('ru-RU')}</span>
+                  <span className="text-[12px] font-medium">
+                    {new Date(menu.updatedAt).toLocaleString(i18n.language === 'ru' ? 'ru-RU' : 'en-US')}
+                  </span>
                 </div>
                 <div className="flex items-center gap-1.5">
                   <LayoutGrid size={14} />
-                  <span className="text-[12px] font-medium">{menu.categoriesCount} кат.</span>
+                  <span className="text-[12px] font-medium">{t('menuList.meta.categoriesCount', { count: menu.categoriesCount })}</span>
                 </div>
                 <div className="flex items-center gap-1.5">
                   <FolderOpen size={14} />
-                  <span className="text-[12px] font-medium">{menu.itemsCount} блюд</span>
+                  <span className="text-[12px] font-medium">{t('menuList.meta.itemsCount', { count: menu.itemsCount })}</span>
                 </div>
               </div>
 
@@ -219,7 +223,13 @@ const MenuListPage = () => {
                   }`}
                 >
                   {menu.status === 'active' ? <ToggleLeft size={16} className="shrink-0" /> : <ToggleRight size={16} className="shrink-0" />}
-                  <span className="truncate">{busyMenuId === menu.id ? 'Обновление' : menu.status === 'active' ? 'Выкл' : 'Вкл'}</span>
+                  <span className="truncate">
+                    {busyMenuId === menu.id
+                      ? t('menuList.actions.updating')
+                      : menu.status === 'active'
+                      ? t('menuList.actions.turnOff')
+                      : t('menuList.actions.turnOn')}
+                  </span>
                 </button>
 
                 <Link
@@ -232,7 +242,7 @@ const MenuListPage = () => {
                   })}
                   className="flex-1 h-10 sm:h-12 px-2 sm:px-3 rounded-lg bg-foreground hover:bg-foreground/90 text-background font-bold text-xs sm:text-xs flex items-center justify-center gap-1.5 sm:gap-2 transition-all cursor-pointer"
                 >
-                  <span className="truncate">Посмотреть QR</span>
+                  <span className="truncate">{t('menuList.actions.viewQr')}</span>
                 </Link>
 
                 <Link
@@ -244,7 +254,7 @@ const MenuListPage = () => {
                   })}
                   className="flex-1 h-10 sm:h-12 px-2 sm:px-3 rounded-lg bg-foreground hover:bg-foreground/90 text-background font-bold text-xs sm:text-xs flex items-center justify-center gap-1.5 sm:gap-2 transition-all cursor-pointer"
                 >
-                  <span className="truncate">Редактор</span>
+                  <span className="truncate">{t('menuList.actions.editor')}</span>
                 </Link>
               </div>
             </div>

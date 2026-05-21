@@ -1,10 +1,20 @@
 const UNIT_LABELS = {
-  ml: 'мл',
-  l: 'л',
-  g: 'г',
-  kg: 'кг',
-  pcs: 'шт',
-  portion: 'порция',
+  ru: {
+    ml: 'мл',
+    l: 'л',
+    g: 'г',
+    kg: 'кг',
+    pcs: 'шт',
+    portion: 'порция',
+  },
+  en: {
+    ml: 'ml',
+    l: 'l',
+    g: 'g',
+    kg: 'kg',
+    pcs: 'pcs',
+    portion: 'portion',
+  },
 };
 
 const CURRENCY_SYMBOLS = {
@@ -80,13 +90,15 @@ export const getLocalizedField = (entity, field, language, fallbackLanguage) => 
   return entity[field] || '';
 };
 
-export const formatMeasure = (value, unitCode) => {
+export const formatMeasure = (value, unitCode, language = 'ru') => {
   if (!isFilled(value)) {
     return '';
   }
 
   const normalizedUnit = unitCode ? String(unitCode).toLowerCase() : '';
-  const unitLabel = UNIT_LABELS[normalizedUnit];
+  const lang = String(language || 'ru').toLowerCase().split('-')[0];
+  const labels = UNIT_LABELS[lang] || UNIT_LABELS.ru;
+  const unitLabel = labels[normalizedUnit];
 
   return unitLabel ? `${value} ${unitLabel}` : `${value}`;
 };

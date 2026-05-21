@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { CreditCard, Receipt, ShieldCheck } from 'lucide-react';
 
 import { Button } from "../components/ui/button";
@@ -6,17 +7,22 @@ import SettingsPageHeader from "../components/settings/SettingsPageHeader";
 import { cancelBillingSubscription, fetchBillingSummary, syncBillingTransaction } from "../lib/billingApi";
 import { secondaryActionButtonClasses } from "../lib/uiStyles";
 
-const formatDate = (value) => {
+const formatDate = (value, lng = 'ru') => {
   if (!value) {
     return '—';
   }
-  return new Date(value).toLocaleDateString('ru-RU');
+  const locale = lng === 'ru' ? 'ru-RU' : 'en-US';
+  return new Date(value).toLocaleDateString(locale);
 };
 
-const formatAmount = (value, currency = 'RUB') =>
-  new Intl.NumberFormat('ru-RU', { style: 'currency', currency, maximumFractionDigits: 0 }).format(value);
+const formatAmount = (value, currency = 'RUB', lng = 'ru') => {
+  const locale = lng === 'ru' ? 'ru-RU' : 'en-US';
+  return new Intl.NumberFormat(locale, { style: 'currency', currency, maximumFractionDigits: 0 }).format(value);
+};
 
 const BillingPage = () => {
+  const { t, i18n } = useTranslation();
+  const lng = i18n.language;
   const [data, setData] = useState(null);
   const [error, setError] = useState('');
   const [isCancelling, setIsCancelling] = useState(false);
@@ -32,7 +38,7 @@ const BillingPage = () => {
   }, []);
 
   const handleCancel = async () => {
-    if (!window.confirm('Отключить автопродление подписки?')) {
+    if (!window.confirm(t('billing.cancelConfirm', 'Отключить автопродление подписки?'))) {
       return;
     }
     setIsCancelling(true);
@@ -66,8 +72,8 @@ const BillingPage = () => {
   return (
     <div className="mx-auto space-y-6 sm:space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700 ease-out">
       <SettingsPageHeader
-        title="Биллинг"
-        description="Тариф, автопродление и история списаний по вашему аккаунту."
+        title={t('billing.title', 'Биллинг')}
+        description={t('billing.description', 'Тариф, автопродление и история списаний по вашему аккаунту.')}
         actionLabel={null}
       />
 
@@ -81,17 +87,17 @@ const BillingPage = () => {
                 <ShieldCheck size={24} />
               </div>
               <div>
-                <h2 className="text-lg font-extrabold text-foreground">{subscription?.plan?.name || 'Подписка'}</h2>
+                <h2 className="text-lg font-extrabold text-foreground">{subscription?.plan?.name || t('billing.subscription', 'Подписка')}</h2>
                 <p className="text-sm text-brand-purple font-bold">
-                  Статус: {subscription?.status || 'loading'}
-                  {subscription?.cancelAtPeriodEnd ? ' · автопродление отключено' : ''}
+                  {t('billing.status', 'Статус')}: {subscription?.status ? t(`billing.statuses.${subscription.status}`, subscription.status) : t('common.loading', 'Загрузка...')}
+                  {subscription?.cancelAtPeriodEnd ? ` · ${t('billing.autoRenewalDisabled', 'автопродление отключено')}` : ''}
                 </p>
               </div>
             </div>
             <div className="text-left sm:text-right">
               <p className="text-2xl font-black text-foreground">
-                {subscription?.plan ? formatAmount(subscription.plan.priceAmount, subscription.plan.currency) : '—'}
-                <span className="text-sm text-muted-foreground font-medium"> / мес</span>
+                {subscription?.plan ? formatAmount(subscription.plan.priceAmount, subscription.plan.currency, lng) : '—'}
+                <span className="text-sm text-muted-foreground font-medium"> {t('billing.perMonth', '/ мес')}</span>
               </p>
             </div>
           </div>
@@ -99,25 +105,27 @@ const BillingPage = () => {
           <div className="p-6 sm:p-8 space-y-6">
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="rounded-2xl border border-border/60 bg-secondary/15 px-4 py-4">
-                <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Период доступа</p>
+                <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">{t('billing.period', 'Период доступа')}</p>
                 <p className="mt-1 text-sm font-semibold text-foreground">
-                  {formatDate(subscription?.currentPeriodStart)} - {formatDate(subscription?.currentPeriodEnd)}
+                  {formatDate(subscription?.currentPeriodStart, lng)} - {formatDate(subscription?.currentPeriodEnd, lng)}
                 </p>
               </div>
               <div className="rounded-2xl border border-border/60 bg-secondary/15 px-4 py-4">
-                <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Trial / следующее окончание</p>
-                <p className="mt-1 text-sm font-semibold text-foreground">{formatDate(subscription?.trialEndsAt || subscription?.currentPeriodEnd)}</p>
+                <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">{t('billing.trialEnd', 'Trial / следующее окончание')}</p>
+                <p className="mt-1 text-sm font-semibold text-foreground">{formatDate(subscription?.trialEndsAt || subscription?.currentPeriodEnd, lng)}</p>
               </div>
             </div>
 
             <div className="space-y-4">
-              <h3 className="text-sm font-bold text-foreground">Лимиты и использование</h3>
+              <h3 className="text-sm font-bold text-foreground">{t('billing.limitsTitle', 'Лимиты и использование')}</h3>
               <ul className="space-y-3">
                 {[
-                  `Заведений: ${usage?.venuesCount ?? 0} из ${usage?.maxVenues ?? '—'}`,
-                  `AI-импортов в этом месяце: ${usage?.aiImportsUsedThisMonth ?? 0} из ${usage?.aiImportsPerMonth ?? '—'}`,
-                  `Переводы: ${usage?.translationsEnabled ? `до ${usage.maxTranslationLanguages} языков` : 'недоступны'}`,
-                  `Шаблон: ${subscription?.plan?.maxTemplateTier || '—'}`,
+                  t('billing.limits.venuesCount', 'Заведений: {{count}} из {{max}}', { count: usage?.venuesCount ?? 0, max: usage?.maxVenues ?? '—' }),
+                  t('billing.limits.aiImports', 'AI-импортов в этом месяце: {{count}} из {{max}}', { count: usage?.aiImportsUsedThisMonth ?? 0, max: usage?.aiImportsPerMonth ?? '—' }),
+                  usage?.translationsEnabled 
+                    ? t('billing.limits.translations', 'Переводы: до {{count}} языков', { count: usage.maxTranslationLanguages }) 
+                    : t('billing.limits.translationsDisabled', 'Переводы: недоступны'),
+                  t('billing.limits.templateTier', 'Шаблон: {{tier}}', { tier: subscription?.plan?.maxTemplateTier || '—' }),
                 ].map((feature) => (
                   <li key={feature} className="flex items-center gap-3 text-sm text-muted-foreground font-medium">
                     <div className="w-1.5 h-1.5 rounded-full bg-green-500" />
@@ -129,7 +137,7 @@ const BillingPage = () => {
 
             <div className="pt-6 border-t border-border/50 flex flex-col sm:flex-row gap-3">
               <Button variant="outline" className={`flex-1 ${secondaryActionButtonClasses} p-4`} onClick={load}>
-                Обновить данные
+                {t('billing.actions.update', 'Обновить данные')}
               </Button>
               <Button
                 variant="destructive"
@@ -137,7 +145,7 @@ const BillingPage = () => {
                 onClick={handleCancel}
                 disabled={isCancelling}
               >
-                Отключить автопродление
+                {t('billing.actions.disableAutoRenewal', 'Отключить автопродление')}
               </Button>
             </div>
           </div>
@@ -150,14 +158,14 @@ const BillingPage = () => {
                 <CreditCard size={20} />
               </div>
               <div>
-                <h2 className="text-lg font-bold text-foreground">UnitPay</h2>
-                <p className="text-sm text-muted-foreground">Привязка карты и последующие списания управляются через UnitPay.</p>
+                <h2 className="text-lg font-bold text-foreground">{t('billing.unitpay.title', 'UnitPay')}</h2>
+                <p className="text-sm text-muted-foreground">{t('billing.unitpay.description', 'Привязка карты и последующие списания управляются через UnitPay.')}</p>
               </div>
             </div>
 
             <div className="rounded-2xl border border-border/60 bg-secondary/15 px-4 py-4">
-              <p className="text-sm font-semibold text-foreground">Subscription ID</p>
-              <p className="text-sm text-muted-foreground mt-1">{subscription?.unitpaySubscriptionId || 'Пока не привязана'}</p>
+              <p className="text-sm font-semibold text-foreground">{t('billing.unitpay.subscriptionId', 'Subscription ID')}</p>
+              <p className="text-sm text-muted-foreground mt-1">{subscription?.unitpaySubscriptionId || t('billing.unitpay.notLinked', 'Пока не привязана')}</p>
             </div>
           </section>
 
@@ -167,8 +175,8 @@ const BillingPage = () => {
                 <Receipt size={20} />
               </div>
               <div>
-                <h2 className="text-lg font-bold text-foreground">История платежей</h2>
-                <p className="text-sm text-muted-foreground">Последние транзакции и ручная синхронизация статуса.</p>
+                <h2 className="text-lg font-bold text-foreground">{t('billing.history.title', 'История платежей')}</h2>
+                <p className="text-sm text-muted-foreground">{t('billing.history.description', 'Последние транзакции и ручная синхронизация статуса.')}</p>
               </div>
             </div>
 
@@ -179,9 +187,9 @@ const BillingPage = () => {
                     <div>
                       <p className="text-sm font-semibold text-foreground">{transaction.planName}</p>
                       <p className="text-xs text-muted-foreground mt-1">
-                        {transaction.status} · {transaction.kind} · {formatDate(transaction.createdAt)}
+                        {t(`billing.transactionStatus.${transaction.status}`, transaction.status)} · {t(`billing.transactionKind.${transaction.kind}`, transaction.kind)} · {formatDate(transaction.createdAt, lng)}
                       </p>
-                      <p className="text-xs text-muted-foreground mt-1">{formatAmount(transaction.amount, transaction.currency)}</p>
+                      <p className="text-xs text-muted-foreground mt-1">{formatAmount(transaction.amount, transaction.currency, lng)}</p>
                     </div>
                     {transaction.status === 'pending' ? (
                       <Button
@@ -190,7 +198,7 @@ const BillingPage = () => {
                         onClick={() => handleSync(transaction.id)}
                         disabled={syncingId === transaction.id}
                       >
-                        {syncingId === transaction.id ? 'Синхронизация...' : 'Синхронизировать'}
+                        {syncingId === transaction.id ? t('billing.history.syncing', 'Синхронизация...') : t('billing.history.sync', 'Синхронизировать')}
                       </Button>
                     ) : null}
                   </div>
@@ -198,7 +206,7 @@ const BillingPage = () => {
               ))}
               {!data?.recentTransactions?.length ? (
                 <div className="rounded-2xl border border-dashed border-border/60 px-4 py-6 text-sm text-muted-foreground">
-                  История платежей пока пуста.
+                  {t('billing.history.empty', 'История платежей пока пуста.')}
                 </div>
               ) : null}
             </div>

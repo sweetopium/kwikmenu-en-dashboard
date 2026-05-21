@@ -4,6 +4,7 @@ import QrFrameControls from "../qr/QrFrameControls";
 import QrPreview from "../qr/QrPreview";
 import { Button } from "../ui/button";
 import { Save } from "lucide-react";
+import { useTranslation } from 'react-i18next';
 import { primaryActionButtonClasses } from "../../lib/uiStyles";
 
 const PRESET_COLORS = ['#08060d', '#863bff', '#ef4444', '#f97316', '#22c55e', '#3b82f6'];
@@ -17,6 +18,7 @@ const fileToDataUrl = (file) =>
   });
 
 const VenueQrSection = ({ value, onChange, onSave, onDownload, onOpenPublicLink, isSaving = false }) => {
+  const { t } = useTranslation();
   const qrValue = value.publicUrl || '';
   const qrDisplayValue = qrValue.replace(/^https?:\/\//, '');
 
@@ -65,9 +67,9 @@ const VenueQrSection = ({ value, onChange, onSave, onDownload, onOpenPublicLink,
     <div className="space-y-6">
       <div className="bg-card border border-border/60 rounded-3xl shadow-sm overflow-hidden">
         <div className="p-6 sm:p-8 border-b border-border/50">
-          <h3 className="text-lg font-bold text-foreground">QR и публичная ссылка</h3>
+          <h3 className="text-lg font-bold text-foreground">{t('venues.qr.title', 'QR и публичная ссылка')}</h3>
           <p className="text-sm text-muted-foreground mt-1 max-w-2xl">
-            Для заведения используется один основной QR-код, который ведёт на публичное меню гостей.
+            {t('venues.qr.subtitle', 'Для заведения используется один основной QR-код, который ведёт на публичное меню гостей.')}
           </p>
         </div>
 
@@ -113,7 +115,7 @@ const VenueQrSection = ({ value, onChange, onSave, onDownload, onOpenPublicLink,
                   className={`${primaryActionButtonClasses} px-5`}
                 >
                   <Save size={18} className="mr-2" />
-                  {isSaving ? 'Сохраняем...' : 'Сохранить QR'}
+                  {isSaving ? t('common.saving', 'Сохраняем...') : t('venues.qr.btnSave', 'Сохранить QR')}
                 </Button>
               </div>
             </div>

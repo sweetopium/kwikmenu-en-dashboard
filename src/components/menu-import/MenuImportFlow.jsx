@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { AlertCircle, ArrowRight, CheckCircle2, LoaderCircle, RefreshCw, Sparkles, WandSparkles } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 import MenuSourcePicker from "../onboarding/MenuSourcePicker";
 import { Button } from "../ui/button";
@@ -14,16 +15,16 @@ import { saveImportedMenuToStorage } from "../../lib/importedMenuStorage";
 import { pollMenuImportStatus, submitMenuImport } from "../../lib/menuImport";
 import { trackProductEvent } from "../../lib/productAnalytics";
 
-const STATUS_META = {
+const getStatusMeta = (t) => ({
   uploading: {
-    title: 'Загружаем исходники',
-    description: 'Создаем import job и отправляем файлы в backend.',
+    title: t('menuImport.statusUploadingTitle', { defaultValue: 'Загружаем исходники' }),
+    description: t('menuImport.statusUploadingDesc', { defaultValue: 'Создаем import job и отправляем файлы в backend.' }),
   },
   processing: {
-    title: 'Распознаем структуру меню',
-    description: 'Бэк обрабатывает документы, вызывает parser и валидирует итоговую схему.',
+    title: t('menuImport.statusProcessingTitle', { defaultValue: 'Распознаем структуру меню' }),
+    description: t('menuImport.statusProcessingDesc', { defaultValue: 'Бэк обрабатывает документы, вызывает parser и валидирует итоговую схему.' }),
   },
-};
+});
 
 const POLL_INTERVAL_MS = 1500;
 const IMPORT_POLL_TIMEOUT_MS = 60_000;
@@ -49,31 +50,26 @@ const delayWithAbort = (ms, signal) =>
     signal?.addEventListener('abort', handleAbort, { once: true });
   });
 
-const DEFAULT_IMPORT_ACTIONS = [
-  'Проверьте, что PDF или фотографии четкие, не обрезаны и не повернуты.',
-  'Если меню большое, загрузите его частями: например, напитки и еду отдельно.',
-  'Попробуйте загрузить более легкий PDF или вставить прямую ссылку на PDF-файл меню.',
-  'Если ошибка повторяется, отправьте исходный файл в поддержку и опишите, что именно не удалось разобрать.',
-];
+const buildImportIssue = (t, { kind, message }) => {
+  const defaultActions = [
+    t('menuImport.errors.action1', { defaultValue: 'Проверьте, что PDF или фотографии четкие, не обрезаны и не повернуты.' }),
+    t('menuImport.errors.action2', { defaultValue: 'Если меню большое, загрузите его частями: например, напитки и еду отдельно.' }),
+    t('menuImport.errors.action3', { defaultValue: 'Попробуйте загрузить более легкий PDF или вставить прямую ссылку на PDF-файл меню.' }),
+    t('menuImport.errors.action4', { defaultValue: 'Если ошибка повторяется, отправьте исходный файл в поддержку и опишите, что именно не удалось разобрать.' }),
+  ];
 
-const LONG_RUNNING_META = {
-  title: 'Импорт занимает больше обычного',
-  description: 'Мы продолжаем разбор меню на сервере. Можно перейти в кабинет и проверить результат позже, либо снова начать ожидание здесь.',
-};
-
-const buildImportIssue = ({ kind, message }) => {
   if (kind === 'timed_out') {
     return {
-      title: 'Импорт остановлен по таймауту',
-      message: message || 'Backend остановил обработку меню по лимиту времени.',
-      actions: DEFAULT_IMPORT_ACTIONS,
+      title: t('menuImport.errors.timeoutTitle', { defaultValue: 'Импорт остановлен по таймауту' }),
+      message: message || t('menuImport.errors.timeoutMessage', { defaultValue: 'Backend остановил обработку меню по лимиту времени.' }),
+      actions: defaultActions,
     };
   }
 
   return {
-    title: 'Возникла проблема с импортом меню',
-    message: message || 'Мы не смогли обработать исходный файл и не создали черновик меню.',
-    actions: DEFAULT_IMPORT_ACTIONS,
+    title: t('menuImport.errors.generalTitle', { defaultValue: 'Возникла проблема с импортом меню' }),
+    message: message || t('menuImport.errors.generalMessage', { defaultValue: 'Мы не смогли обработать исходный файл и не создали черновик меню.' }),
+    actions: defaultActions,
   };
 };
 
@@ -108,16 +104,27 @@ const MenuImportFlow = ({
   context = {},
   introTitle,
   introDescription,
-  submitLabel = 'Распознать меню',
-  successTitle = 'Меню распознано',
-  successDescription = 'Проверьте результат и переходите к редактированию.',
-  successPrimaryLabel = 'Открыть редактор',
+  submitLabel,
+  successTitle,
+  successDescription,
+  successPrimaryLabel,
   successPrimaryTo = '/dashboard/menu/main',
-  successSecondaryLabel = 'Загрузить еще одно меню',
+  successSecondaryLabel,
   successSecondaryTo,
   onStageChange,
   venueId = null,
 }) => {
+  const { t } = useTranslation();
+  const displayIntroTitle = introTitle !== undefined ? introTitle : t('menuImport.introTitle', { defaultValue: 'Загрузите меню' });
+  const displayIntroDescription = introDescription !== undefined ? introDescription : t('menuImport.introDescription', { defaultValue: 'Загрузите PDF, фотографии или вставьте прямую ссылку на PDF. Создадим backend job, дождемся обработки и покажем результат.' });
+  const displaySubmitLabel = submitLabel !== undefined ? submitLabel : t('menuImport.submitLabel', { defaultValue: 'Распознать меню' });
+  const displaySuccessTitle = successTitle !== undefined ? successTitle : t('menuImport.successTitle', { defaultValue: 'Меню распознано' });
+  const displaySuccessDescription = successDescription !== undefined ? successDescription : t('menuImport.successDescription', { defaultValue: 'Проверьте результат и переходите к редактированию.' });
+  const displaySuccessPrimaryLabel = successPrimaryLabel !== undefined ? successPrimaryLabel : t('menuImport.successPrimaryLabel', { defaultValue: 'Открыть редактор' });
+  const displaySuccessSecondaryLabel = successSecondaryLabel !== undefined ? successSecondaryLabel : t('menuImport.successSecondaryLabel', { defaultValue: 'Загрузить еще одно меню' });
+
+  const statusMeta = getStatusMeta(t);
+
   const [stage, setStage] = useState('idle');
   const [menuSource, setMenuSource] = useState('file');
   const [files, setFiles] = useState([]);
@@ -166,15 +173,15 @@ const MenuImportFlow = ({
         properties: { job_id: jobId },
       });
       setBackgroundJobId(jobId);
-      setBackgroundStatusMessage('Продолжаем следить за статусом импорта в фоне.');
+      setBackgroundStatusMessage(t('menuImport.bgStatusMonitoring', { defaultValue: 'Продолжаем следить за статусом импорта в фоне.' }));
       setStage('background');
       return;
     }
 
     const finalJob = completion.job;
     if (finalJob.status === 'failed' || finalJob.status === 'timed_out') {
-      const importError = new Error(finalJob.error || 'Не удалось обработать меню.');
-      importError.importIssue = buildImportIssue({
+      const importError = new Error(finalJob.error || t('menuImport.errors.failedToProcess', { defaultValue: 'Не удалось обработать меню.' }));
+      importError.importIssue = buildImportIssue(t, {
         kind: finalJob.status === 'timed_out' ? 'timed_out' : 'failed',
         message: finalJob.error,
       });
@@ -189,7 +196,7 @@ const MenuImportFlow = ({
       menuId: result.menuId,
       sourceLabel: result.sourceSummary.length > 0
         ? result.sourceSummary.map((source) => source.name).join(', ')
-        : (menuSource === 'link' ? menuLink.trim() : 'Без названия'),
+        : (menuSource === 'link' ? menuLink.trim() : t('menuImport.untitled', { defaultValue: 'Без названия' })),
       detectedCategories: result.categoryCount,
       detectedItems: result.itemCount,
       documentCount: result.documentCount,
@@ -216,13 +223,13 @@ const MenuImportFlow = ({
     event.preventDefault();
 
     if (menuSource === 'file' && files.length === 0) {
-      setErrorMessage('Добавьте хотя бы один PDF или набор фотографий меню.');
+      setErrorMessage(t('menuImport.errors.addFile', { defaultValue: 'Добавьте хотя бы один PDF или набор фотографий меню.' }));
       setStage('error');
       return;
     }
 
     if (menuSource === 'link' && !menuLink.trim()) {
-      setErrorMessage('Укажите прямую ссылку на PDF-файл меню, чтобы отправить его в обработку.');
+      setErrorMessage(t('menuImport.errors.addLink', { defaultValue: 'Укажите прямую ссылку на PDF-файл меню, чтобы отправить его в обработку.' }));
       setStage('error');
       return;
     }
@@ -265,9 +272,9 @@ const MenuImportFlow = ({
         return;
       }
 
-      const issue = error?.importIssue || buildImportIssue({ kind: 'failed', message: error instanceof Error ? error.message : '' });
+      const issue = error?.importIssue || buildImportIssue(t, { kind: 'failed', message: error instanceof Error ? error.message : '' });
       setImportIssue(issue);
-      setErrorMessage(error instanceof Error ? error.message : 'Не удалось отправить меню в обработку. Попробуйте еще раз.');
+      setErrorMessage(error instanceof Error ? error.message : t('menuImport.errors.failedToSubmit', { defaultValue: 'Не удалось отправить меню в обработку. Попробуйте еще раз.' }));
       setStage('error');
     } finally {
       activeRequestRef.current = null;
@@ -293,7 +300,7 @@ const MenuImportFlow = ({
         if (job.status === 'completed') {
           const result = job.result;
           if (!result) {
-            throw new Error('Импорт завершился без результата меню.');
+            throw new Error(t('menuImport.errors.noResult', { defaultValue: 'Импорт завершился без результата меню.' }));
           }
 
           if (!result.menuId) {
@@ -304,7 +311,7 @@ const MenuImportFlow = ({
             menuId: result.menuId,
             sourceLabel: result.sourceSummary.length > 0
               ? result.sourceSummary.map((source) => source.name).join(', ')
-              : (menuSource === 'link' ? menuLink.trim() : 'Без названия'),
+              : (menuSource === 'link' ? menuLink.trim() : t('menuImport.untitled', { defaultValue: 'Без названия' })),
             detectedCategories: result.categoryCount,
             detectedItems: result.itemCount,
             documentCount: result.documentCount,
@@ -329,26 +336,26 @@ const MenuImportFlow = ({
         }
 
         if (job.status === 'failed' || job.status === 'timed_out') {
-          const issue = buildImportIssue({
+          const issue = buildImportIssue(t, {
             kind: job.status === 'timed_out' ? 'timed_out' : 'failed',
             message: job.error,
           });
           setImportIssue(issue);
-          setErrorMessage(job.error || 'Не удалось обработать меню.');
+          setErrorMessage(job.error || t('menuImport.errors.failedToProcess', { defaultValue: 'Не удалось обработать меню.' }));
           setStage('error');
           setBackgroundJobId(null);
           setBackgroundStatusMessage('');
           return;
         }
 
-        setBackgroundStatusMessage('Импорт всё ещё выполняется. Как только backend завершит job, экран обновится автоматически.');
+        setBackgroundStatusMessage(t('menuImport.bgStatusRunning', { defaultValue: 'Импорт всё ещё выполняется. Как только backend завершит job, экран обновится автоматически.' }));
         timeoutId = window.setTimeout(pollInBackground, BACKGROUND_POLL_INTERVAL_MS);
       } catch (error) {
         if (cancelled || error?.name === 'AbortError') {
           return;
         }
 
-        setBackgroundStatusMessage('Не удалось обновить статус прямо сейчас. Повторим проверку автоматически.');
+        setBackgroundStatusMessage(t('menuImport.bgStatusUpdateFailed', { defaultValue: 'Не удалось обновить статус прямо сейчас. Повторим проверку автоматически.' }));
         timeoutId = window.setTimeout(pollInBackground, BACKGROUND_POLL_INTERVAL_MS);
       }
     };
@@ -392,9 +399,9 @@ const MenuImportFlow = ({
         return;
       }
 
-      const issue = error?.importIssue || buildImportIssue({ kind: 'failed', message: error instanceof Error ? error.message : '' });
+      const issue = error?.importIssue || buildImportIssue(t, { kind: 'failed', message: error instanceof Error ? error.message : '' });
       setImportIssue(issue);
-      setErrorMessage(error instanceof Error ? error.message : 'Не удалось получить статус импорта. Попробуйте еще раз.');
+      setErrorMessage(error instanceof Error ? error.message : t('menuImport.errors.failedToGetStatus', { defaultValue: 'Не удалось получить статус импорта. Попробуйте еще раз.' }));
       setStage('error');
     } finally {
       activeRequestRef.current = null;
@@ -413,24 +420,24 @@ const MenuImportFlow = ({
         </div>
 
         <h3 className="text-xl sm:text-2xl font-extrabold tracking-tight text-foreground text-center">
-          {STATUS_META[stage].title}
+          {statusMeta[stage].title}
         </h3>
         <p className="mt-2 max-w-md text-center text-sm sm:text-base leading-relaxed text-muted-foreground">
-          {STATUS_META[stage].description}
+          {statusMeta[stage].description}
         </p>
 
         <div className="mt-8 grid w-full max-w-2xl gap-3">
           <StageItem
             isActive={stage === 'uploading'}
             isDone={stage === 'processing'}
-            title={STATUS_META.uploading.title}
-            description={STATUS_META.uploading.description}
+            title={statusMeta.uploading.title}
+            description={statusMeta.uploading.description}
           />
           <StageItem
             isActive={stage === 'processing'}
             isDone={false}
-            title={STATUS_META.processing.title}
-            description={STATUS_META.processing.description}
+            title={statusMeta.processing.title}
+            description={statusMeta.processing.description}
           />
         </div>
       </div>
@@ -447,24 +454,24 @@ const MenuImportFlow = ({
             <CheckCircle2 size={32} />
           </div>
           <h3 className="text-xl sm:text-3xl font-extrabold tracking-tight text-foreground">
-            {successTitle}
+            {displaySuccessTitle}
           </h3>
           <p className="mt-2 max-w-xl text-sm sm:text-base leading-relaxed text-muted-foreground">
-            {successDescription}
+            {displaySuccessDescription}
           </p>
         </div>
 
         <div className="grid gap-4 sm:grid-cols-3">
           <div className="rounded-2xl border border-border/60 bg-secondary/15 p-4">
-            <p className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">Источник</p>
+            <p className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">{t('menuImport.results.source', { defaultValue: 'Источник' })}</p>
             <p className="mt-2 text-sm font-semibold text-foreground break-words">{resultPreview.sourceLabel}</p>
           </div>
           <div className="rounded-2xl border border-border/60 bg-secondary/15 p-4">
-            <p className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">Категории</p>
+            <p className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">{t('menuImport.results.categories', { defaultValue: 'Категории' })}</p>
             <p className="mt-2 text-2xl font-black text-foreground">{resultPreview.detectedCategories}</p>
           </div>
           <div className="rounded-2xl border border-border/60 bg-secondary/15 p-4">
-            <p className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">Позиции</p>
+            <p className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">{t('menuImport.results.items', { defaultValue: 'Позиции' })}</p>
             <p className="mt-2 text-2xl font-black text-foreground">{resultPreview.detectedItems}</p>
           </div>
         </div>
@@ -473,18 +480,18 @@ const MenuImportFlow = ({
           <div className="flex items-start gap-3">
             <Sparkles size={18} className="mt-0.5 shrink-0 text-brand-purple" />
             <p className="text-sm leading-relaxed text-brand-purple/90">
-              Импорт завершен через backend job. Результат сохранен как черновик меню и готов к открытию в редакторе.
+              {t('menuImport.results.successNote', { defaultValue: 'Импорт завершен через backend job. Результат сохранен как черновик меню и готов к открытию в редакторе.' })}
             </p>
           </div>
         </div>
 
         <div className="grid gap-3">
           <div className="rounded-2xl border border-border/60 bg-secondary/15 p-4 text-sm text-muted-foreground">
-            Документов обработано: <span className="font-bold text-foreground">{resultPreview.documentCount}</span>
+            {t('menuImport.results.documentsProcessed', { defaultValue: 'Документов обработано:' })} <span className="font-bold text-foreground">{resultPreview.documentCount}</span>
           </div>
           {resultPreview.usedFallback && (
             <div className="rounded-2xl border border-amber-500/20 bg-amber-500/5 p-4 text-sm text-amber-700">
-              OpenRouter key не настроен, поэтому backend вернул schema-valid scaffold вместо LLM-парсинга.
+              {t('menuImport.results.fallbackWarning', { defaultValue: 'OpenRouter key не настроен, поэтому backend вернул schema-valid scaffold вместо LLM-парсинга.' })}
             </div>
           )}
           {resultPreview.warnings?.length > 0 && (
@@ -499,7 +506,7 @@ const MenuImportFlow = ({
             to={resultPreview.menuId ? `/dashboard/menu/${resultPreview.menuId}` : successPrimaryTo}
             className={`${primaryActionButtonClasses} flex h-11 sm:h-12 w-full items-center justify-center gap-2 px-5`}
           >
-            {successPrimaryLabel}
+            {displaySuccessPrimaryLabel}
             <ArrowRight size={16} />
           </Link>
 
@@ -507,7 +514,7 @@ const MenuImportFlow = ({
             {...(successSecondaryTo ? { to: successSecondaryTo } : { type: 'button', onClick: resetFlow })}
             className={`${secondaryActionButtonClasses} flex h-11 sm:h-12 w-full items-center justify-center px-5`}
           >
-            {successSecondaryLabel}
+            {displaySuccessSecondaryLabel}
           </SecondaryActionTag>
         </div>
       </div>
@@ -524,19 +531,19 @@ const MenuImportFlow = ({
             <LoaderCircle size={32} className="animate-spin" />
           </div>
           <h3 className="text-xl sm:text-3xl font-extrabold tracking-tight text-foreground">
-            {LONG_RUNNING_META.title}
+            {t('menuImport.longRunningTitle', { defaultValue: 'Импорт занимает больше обычного' })}
           </h3>
           <p className="mt-2 max-w-xl text-sm sm:text-base leading-relaxed text-muted-foreground">
-            {LONG_RUNNING_META.description}
+            {t('menuImport.longRunningDesc', { defaultValue: 'Мы продолжаем разбор меню на сервере. Можно перейти в кабинет и проверить результат позже, либо снова начать ожидание здесь.' })}
           </p>
         </div>
 
         <div className="rounded-2xl border border-brand-purple/20 bg-brand-purple/5 p-4 sm:p-5 text-sm leading-relaxed text-brand-purple/90">
-          Импорт не остановлен: backend job все еще обрабатывает документ. Ошибку покажем только если сервер вернет статус `failed` или `timed_out`.
+          {t('menuImport.bgWarningNote', { defaultValue: 'Импорт не остановлен: backend job все еще обрабатывает документ. Ошибку покажем только если сервер вернет статус failed или timed_out.' })}
         </div>
 
         <div className="rounded-2xl border border-border/60 bg-secondary/15 p-4 text-sm text-muted-foreground">
-          {backgroundStatusMessage || 'Проверяем статус импорта в фоне...'}
+          {backgroundStatusMessage || t('menuImport.bgStatusChecking', { defaultValue: 'Проверяем статус импорта в фоне...' })}
         </div>
 
         <div className="flex flex-col sm:flex-row gap-3">
@@ -548,7 +555,7 @@ const MenuImportFlow = ({
           >
             <span className="flex items-center gap-2">
               <RefreshCw size={16} className={isResumingWait ? 'animate-spin' : ''} />
-              {isResumingWait ? 'Проверяем статус...' : 'Продолжить ожидание'}
+              {isResumingWait ? t('menuImport.checkingStatus', { defaultValue: 'Проверяем статус...' }) : t('menuImport.resumeWaiting', { defaultValue: 'Продолжить ожидание' })}
             </span>
           </Button>
 
@@ -556,7 +563,7 @@ const MenuImportFlow = ({
             {...(successSecondaryTo ? { to: successSecondaryTo } : { type: 'button', onClick: resetFlow })}
             className={`${secondaryActionButtonClasses} flex h-11 sm:h-12 w-full sm:w-auto items-center justify-center px-5`}
           >
-            {successSecondaryTo ? successSecondaryLabel : 'Закрыть'}
+            {successSecondaryTo ? displaySuccessSecondaryLabel : t('common.close', { defaultValue: 'Закрыть' })}
           </SecondaryActionTag>
         </div>
       </div>
@@ -567,17 +574,17 @@ const MenuImportFlow = ({
     <div className="space-y-6">
       <div className="space-y-2">
         <h3 className="text-xl sm:text-3xl font-extrabold tracking-tight text-foreground">
-          {introTitle}
+          {displayIntroTitle}
         </h3>
         <p className="text-xs sm:text-base leading-relaxed text-muted-foreground">
-          {introDescription}
+          {displayIntroDescription}
         </p>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="space-y-3">
           <Label className="text-foreground font-medium ml-1 text-[11px] sm:text-sm">
-            Исходник меню <span className="text-red-500">*</span>
+            {t('menuImport.sourceLabel', { defaultValue: 'Исходник меню' })} <span className="text-red-500">*</span>
           </Label>
 
           <MenuSourcePicker
@@ -595,9 +602,9 @@ const MenuImportFlow = ({
             onMenuLinkChange={setMenuLink}
             inputClassName={formFieldClasses}
             multiple
-            fileTabLabel="Загрузить файлы"
-            fileTabMobileLabel="Файлы"
-            linkPlaceholder="Прямая ссылка на PDF-файл меню"
+            fileTabLabel={t('menuSource.fileTabLabelMultiple', { defaultValue: 'Загрузить файлы' })}
+            fileTabMobileLabel={t('menuSource.fileTabMobileLabelMultiple', { defaultValue: 'Файлы' })}
+            linkPlaceholder={t('menuSource.linkPlaceholder', { defaultValue: 'Прямая ссылка на PDF-файл меню' })}
             dropzoneHeight="h-36 sm:h-40"
           />
         </div>
@@ -608,7 +615,7 @@ const MenuImportFlow = ({
               <AlertCircle size={18} className="mt-0.5 shrink-0" />
               <div className="space-y-3">
                 <div>
-                  <p className="font-bold text-red-700">{importIssue?.title || 'Импорт не завершен'}</p>
+                  <p className="font-bold text-red-700">{importIssue?.title || t('menuImport.errors.importFailed', { defaultValue: 'Импорт не завершен' })}</p>
                   <p className="leading-relaxed">{importIssue?.message || errorMessage}</p>
                 </div>
                 {importIssue?.actions?.length ? (
@@ -630,7 +637,7 @@ const MenuImportFlow = ({
           >
             <span className="flex items-center gap-2">
               <Sparkles size={16} />
-              {submitLabel}
+              {displaySubmitLabel}
             </span>
           </Button>
 
@@ -642,7 +649,7 @@ const MenuImportFlow = ({
               className={`w-full sm:w-auto ${secondaryActionButtonClasses}`}
             >
               <RefreshCw size={16} className="mr-2" />
-              Сбросить
+              {t('menuImport.reset', { defaultValue: 'Сбросить' })}
             </Button>
           )}
         </div>

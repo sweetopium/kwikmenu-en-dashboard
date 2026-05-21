@@ -1,8 +1,10 @@
+import { useTranslation } from 'react-i18next';
 import { Trash2 } from 'lucide-react';
 import { Button } from "../ui/button";
 import { secondaryActionButtonClasses } from "../../lib/uiStyles";
 
 const DeleteConfirmModal = ({ deleteConfirm, onCancel, onConfirm }) => {
+  const { t } = useTranslation();
   if (!deleteConfirm) return null;
 
   return (
@@ -17,14 +19,13 @@ const DeleteConfirmModal = ({ deleteConfirm, onCancel, onConfirm }) => {
           </div>
 
           <h2 className="text-xl font-bold text-foreground">
-            {deleteConfirm.type === 'category' ? 'Удалить категорию?' : 'Удалить блюдо?'}
+            {deleteConfirm.type === 'category' ? t('menuEditor.delete.titleCategory') : t('menuEditor.delete.titleItem')}
           </h2>
 
           <p className="text-sm text-muted-foreground leading-relaxed px-2">
-            Вы уверены, что хотите удалить{' '}
-            <span className="font-bold text-foreground">«{deleteConfirm.name}»</span>?
-            {deleteConfirm.type === 'category' && ' Все блюда внутри этой категории также будут навсегда удалены.'}{' '}
-            Это действие нельзя отменить.
+            {t('menuEditor.delete.confirmText', { name: deleteConfirm.name })}{' '}
+            {deleteConfirm.type === 'category' && t('menuEditor.delete.categoryWarning')}{' '}
+            {t('menuEditor.delete.irreversibleNote')}
           </p>
         </div>
 
@@ -34,14 +35,14 @@ const DeleteConfirmModal = ({ deleteConfirm, onCancel, onConfirm }) => {
             onClick={onCancel}
             className={`w-full sm:w-auto ${secondaryActionButtonClasses}`}
           >
-            Отмена
+            {t('common.cancel')}
           </Button>
 
           <Button
             onClick={onConfirm}
             className="w-full sm:w-auto h-10 sm:h-12 rounded-lg bg-destructive hover:bg-destructive/90 text-white font-semibold shadow-md px-6"
           >
-            Удалить
+            {t('menuEditor.delete.btnDelete')}
           </Button>
         </div>
       </div>

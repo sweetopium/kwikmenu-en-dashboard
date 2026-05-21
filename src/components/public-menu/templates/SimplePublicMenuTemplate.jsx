@@ -347,7 +347,7 @@ const SimplePublicMenuTemplate = ({
                   {visibleItems.map((item, index) => {
                     const itemName = getLocalizedField(item, 'name', language, defaultLanguage) || item.name;
                     const itemDescription = getLocalizedField(item, 'description', language, defaultLanguage);
-                    const itemMeasure = formatMeasure(item.measureValue, item.measureUnit);
+                    const itemMeasure = formatMeasure(item.measureValue, item.measureUnit, language);
                     const itemPrice = formatCurrency(item.price, currencyCode);
                     const visibleVariants = (item.variants || []).filter((variant) => variant.isAvailable !== false);
 
@@ -382,7 +382,7 @@ const SimplePublicMenuTemplate = ({
                             <div className="space-y-1.5">
                               {visibleVariants.map((variant) => {
                                 const variantLabel = getLocalizedField(variant, 'label', language, defaultLanguage) || variant.label;
-                                const variantMeasure = formatMeasure(variant.measureValue, variant.measureUnit);
+                                const variantMeasure = formatMeasure(variant.measureValue, variant.measureUnit, language);
                                 const variantMeta = variantMeasure && variantMeasure !== variantLabel ? variantMeasure : '';
 
                                 return (
@@ -421,9 +421,13 @@ const SimplePublicMenuTemplate = ({
               <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-secondary/60 text-muted-foreground">
                 <MenuIcon size={24} />
               </div>
-              <h2 className="mt-4 text-xl font-bold text-foreground">Меню пока пустое</h2>
+              <h2 className="mt-4 text-xl font-bold text-foreground">
+                {language === 'en' ? 'Menu is empty' : 'Меню пока пустое'}
+              </h2>
               <p className="mt-2 text-sm text-muted-foreground">
-                Для этого заведения еще не опубликованы активные разделы.
+                {language === 'en'
+                  ? 'No active categories have been published for this venue yet.'
+                  : 'Для этого заведения еще не опубликованы активные разделы.'}
               </p>
             </div>
           )}
@@ -447,22 +451,26 @@ const SimplePublicMenuTemplate = ({
                     <Wifi size={16} />
                   </div>
                   <h2 className="text-[1rem] font-bold tracking-[-0.02em] text-foreground sm:text-[1.08rem]">
-                    Гостевой Wi‑Fi
+                    {language === 'en' ? 'Guest Wi‑Fi' : 'Гостевой Wi‑Fi'}
                   </h2>
                 </div>
                 <p className="mt-2 text-[0.84rem] leading-[1.45] text-muted-foreground">
-                  Подключение доступно прямо из цифрового меню.
+                  {language === 'en' ? 'Connection is available directly from the digital menu.' : 'Подключение доступно прямо из цифрового меню.'}
                 </p>
               </div>
             </div>
 
             <div className="mt-4 space-y-3 border-t pt-4" style={{ borderColor: 'rgba(18, 54, 47, 0.1)' }}>
               <div className="flex items-start justify-between gap-4">
-                <span className="text-[0.8rem] uppercase tracking-[0.12em] text-muted-foreground">Сеть</span>
+                <span className="text-[0.8rem] uppercase tracking-[0.12em] text-muted-foreground">
+                  {language === 'en' ? 'Network' : 'Сеть'}
+                </span>
                 <span className="text-right text-[0.96rem] font-medium text-foreground">{venue.wifi.ssid}</span>
               </div>
               <div className="flex items-start justify-between gap-4">
-                <span className="text-[0.8rem] uppercase tracking-[0.12em] text-muted-foreground">Пароль</span>
+                <span className="text-[0.8rem] uppercase tracking-[0.12em] text-muted-foreground">
+                  {language === 'en' ? 'Password' : 'Пароль'}
+                </span>
                 <button
                   type="button"
                   onClick={handleCopyWifiPassword}

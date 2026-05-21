@@ -1,11 +1,13 @@
+import { useTranslation } from 'react-i18next';
 import { GripVertical, Image as ImageIcon, Edit2, Trash2 } from 'lucide-react';
 import { Switch } from "../ui/switch";
 import { formatMeasure, getItemPriceDisplay } from "./menuEditorUtils";
 
 const MenuItemCard = ({ item, language, defaultLanguage, onEdit, onDelete }) => {
+  const { t } = useTranslation();
   const name = language !== defaultLanguage && item.translations?.[language]?.name ? item.translations[language].name : item.name;
   const desc = language !== defaultLanguage && item.translations?.[language]?.description ? item.translations[language].description : item.description;
-  const priceDisplay = getItemPriceDisplay(item);
+  const priceDisplay = getItemPriceDisplay(item, t);
 
   return (
     <div className="group flex flex-col sm:flex-row sm:items-center bg-card border border-border/60 rounded-2xl shadow-sm hover:shadow-md hover:border-brand-purple/30 transition-all min-w-0 max-w-full overflow-hidden">
@@ -46,8 +48,8 @@ const MenuItemCard = ({ item, language, defaultLanguage, onEdit, onDelete }) => 
           {/* Описание */}
           {/* Убрали line-clamp-2, текст теперь выводится полностью */}
           <p className="text-[11px] sm:text-xs text-muted-foreground mt-0.5 break-words leading-relaxed">
-            {desc || "Описания нет"}
-            {item.measureValue && ` • ${formatMeasure(item.measureValue, item.measureUnit)}`}
+            {desc || t('menuEditor.noDescription')}
+            {item.measureValue && ` • ${formatMeasure(item.measureValue, item.measureUnit, t)}`}
           </p>
 
           {/* Варианты (Чипсы) */}
@@ -58,7 +60,7 @@ const MenuItemCard = ({ item, language, defaultLanguage, onEdit, onDelete }) => 
                   key={v.id}
                   className="text-[9px] sm:text-[10px] font-medium bg-brand-purple/10 text-brand-purple px-1.5 py-0.5 rounded-md border border-brand-purple/20"
                 >
-                  {v.label || formatMeasure(v.measureValue, v.measureUnit)}:{' '}
+                  {v.label || formatMeasure(v.measureValue, v.measureUnit, t)}:{' '}
                   <span className="font-bold">{v.price}</span>
                 </div>
               ))}
