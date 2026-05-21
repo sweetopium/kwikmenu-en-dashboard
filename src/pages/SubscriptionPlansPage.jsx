@@ -1,6 +1,6 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ArrowRight, CheckCircle2, ShieldCheck, Sparkles } from 'lucide-react';
+import { ArrowRight, CheckCircle2, ShieldCheck, Sparkles, Lock } from 'lucide-react';
 
 import { Button } from "../components/ui/button";
 import SettingsPageHeader from "../components/settings/SettingsPageHeader";
@@ -20,7 +20,7 @@ const planFeatures = (plan, t) => [
   plan.translationsEnabled 
     ? t('subscription.features.translations', 'Переводы до {{count}} языков', { count: plan.maxTranslationLanguages }) 
     : t('subscription.features.translationsDisabled', 'Без переводов'),
-  t('subscription.features.template', 'Шаблон: {{tier}}', { tier: plan.maxTemplateTier }),
+  t('subscription.features.template', 'Шаблон: {{tier}}', { tier: t(`subscription.templateTiers.${plan.maxTemplateTier}`, plan.maxTemplateTier) }),
 ];
 
 const SubscriptionPlansPage = () => {
@@ -31,6 +31,14 @@ const SubscriptionPlansPage = () => {
   const [error, setError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // Compliance checkboxes
+  const [agreeOffer, setAgreeOffer] = useState(false);
+  const [agreeRecurring, setAgreeRecurring] = useState(false);
+
+  // Refs for scroll guides
+  const checkoutSectionRef = useRef(null);
+  const featuredCardRef = useRef(null);
+
   useEffect(() => {
     fetchBillingSummary()
       .then((result) => {
@@ -40,13 +48,47 @@ const SubscriptionPlansPage = () => {
       .catch((nextError) => setError(nextError.message));
   }, []);
 
+  // Center scroll on featured recommended plan card on load
+  useEffect(() => {
+    if (data && typeof window !== 'undefined' && window.innerWidth < 1024) {
+      const timer = setTimeout(() => {
+        featuredCardRef.current?.scrollIntoView({ behavior: 'auto', block: 'nearest', inline: 'center' });
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [data]);
+
   const selectedPlan = useMemo(
     () => data?.plans?.find((plan) => plan.id === selectedPlanId) || data?.plans?.[0],
     [data, selectedPlanId]
   );
 
+  const isCurrentSelected = useMemo(
+    () => data?.subscription?.plan?.id === selectedPlanId,
+    [data, selectedPlanId]
+  );
+
+  const handleSelectPlan = (planId) => {
+    setSelectedPlanId(planId);
+    setAgreeOffer(false);
+    setAgreeRecurring(false);
+
+    // Smooth scroll down to checkout compliance form on mobile
+    if (typeof window !== 'undefined' && window.innerWidth < 1024) {
+      setTimeout(() => {
+        checkoutSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 100);
+    }
+  };
+
   const handleCheckout = async () => {
     if (!selectedPlan) {
+      return;
+    }
+    if (isCurrentSelected) {
+      return;
+    }
+    if (!agreeOffer || !agreeRecurring) {
       return;
     }
     setIsSubmitting(true);
@@ -57,7 +99,7 @@ const SubscriptionPlansPage = () => {
         window.location.assign(result.redirectUrl);
         return;
       }
-      setError(t('subscription.checkoutErrorUnitpay', 'UnitPay не вернул redirectUrl для оплаты.'));
+      setError(t('subscription.checkoutErrorUnitpay', 'Не удалось запустить платежную сессию. Пожалуйста, попробуйте позже или свяжитесь с поддержкой.'));
     } catch (nextError) {
       setError(nextError.message);
     } finally {
@@ -75,7 +117,8 @@ const SubscriptionPlansPage = () => {
 
       {error ? <div className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-bold text-red-700">{error}</div> : null}
 
-      <section className="grid gap-4 lg:grid-cols-3">
+      {/* Swipeable pricing row on mobile with vertical padding to prevent clipping of top badges/shadows */}
+      <section className="flex lg:grid gap-6 lg:grid-cols-3 overflow-x-auto lg:overflow-x-visible py-5 lg:py-0 snap-x snap-mandatory scrollbar-none -mx-4 px-4 sm:-mx-8 sm:px-8">
         {(data?.plans || []).map((plan) => {
           const isSelected = selectedPlanId === plan.id;
           const isCurrent = data?.subscription?.plan?.id === plan.id;
@@ -84,38 +127,48 @@ const SubscriptionPlansPage = () => {
           return (
             <article
               key={plan.id}
-              className={`relative flex flex-col rounded-3xl border p-5 transition-all ${
+              ref={isFeatured ? featuredCardRef : null}
+              className={`relative flex flex-col rounded-3xl border p-6 transition-all duration-300 snap-center shrink-0 w-[290px] xs:w-[320px] lg:w-auto hover:-translate-y-1.5 hover:shadow-xl ${
                 isFeatured
-                  ? 'border-[#2a1e44] bg-[#171126] text-white shadow-[0_24px_70px_-36px_rgba(117,90,255,0.65)]'
+                  ? 'border-brand-purple/60 bg-gradient-to-b from-[#1c1430] to-[#0f0a1c] text-white shadow-[0_24px_60px_-20px_rgba(117,90,255,0.4)]'
                   : isSelected
                     ? 'border-brand-purple/40 bg-card shadow-[0_20px_50px_-38px_rgba(109,103,235,0.42)]'
-                    : 'border-border/60 bg-card shadow-[0_18px_60px_-42px_rgba(109,103,235,0.1)]'
+                    : 'border-border/60 bg-card hover:border-brand-purple/25 shadow-[0_18px_60px_-42px_rgba(109,103,235,0.05)]'
               }`}
             >
+              {isFeatured && (
+                <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 rounded-full bg-gradient-to-r from-brand-purple to-[#8b5cf6] px-4 py-1 text-[10px] font-black uppercase tracking-wider text-white shadow-md shadow-brand-purple/35 whitespace-nowrap">
+                  {t('subscription.recommended', 'Рекомендуем')}
+                </div>
+              )}
+
               <div className="space-y-4 flex-1">
                 <div className="flex items-start justify-between gap-3">
                   <div>
-                    <h2 className={`text-2xl font-black tracking-tight ${isFeatured ? 'text-white' : 'text-foreground'}`}>{plan.name}</h2>
-                    <p className={`text-sm mt-1 ${isFeatured ? 'text-white/70' : 'text-muted-foreground'}`}>{plan.description}</p>
+                    <div className="flex items-center gap-1.5">
+                      <h2 className={`text-2xl font-black tracking-tight ${isFeatured ? 'text-white' : 'text-foreground'}`}>{plan.name}</h2>
+                      {isFeatured && <Sparkles size={18} className="text-brand-purple shrink-0 animate-pulse" />}
+                    </div>
+                    <p className={`text-xs sm:text-sm mt-1 ${isFeatured ? 'text-white/70' : 'text-muted-foreground'}`}>{plan.description}</p>
                   </div>
                   {isCurrent ? (
-                    <div className="rounded-full bg-brand-purple px-2 py-1 text-[10px] font-extrabold uppercase tracking-wide text-white">
+                    <div className="rounded-full bg-brand-purple/20 border border-brand-purple/30 px-2.5 py-0.5 text-[9px] sm:text-[10px] font-black uppercase tracking-wide text-brand-purple">
                       {t('subscription.planCurrent', 'Текущий')}
                     </div>
                   ) : null}
                 </div>
 
-                <div className="flex items-end gap-2">
+                <div className="flex items-end gap-2 border-b pb-4 border-border/10">
                   <span className={`text-4xl font-black ${isFeatured ? 'text-white' : 'text-foreground'}`}>
                     {formatRub(plan.priceAmount, plan.currency, lng)}
                   </span>
-                  <span className={`pb-1 text-sm ${isFeatured ? 'text-white/60' : 'text-muted-foreground'}`}>{t('billing.perMonth', '/ мес')}</span>
+                  <span className={`pb-1 text-xs font-semibold ${isFeatured ? 'text-white/60' : 'text-muted-foreground'}`}>{t('billing.perMonth', '/ мес')}</span>
                 </div>
 
-                <ul className="space-y-3">
+                <ul className="space-y-3 pt-2">
                   {planFeatures(plan, t).map((feature) => (
-                    <li key={feature} className={`flex items-center gap-2 text-sm ${isFeatured ? 'text-white/85' : 'text-muted-foreground'}`}>
-                      <CheckCircle2 size={16} className={isFeatured ? 'text-brand-purple' : 'text-green-600'} />
+                    <li key={feature} className={`flex items-center gap-2.5 text-xs sm:text-sm ${isFeatured ? 'text-white/90' : 'text-muted-foreground'}`}>
+                      <CheckCircle2 size={16} className={`shrink-0 ${isFeatured ? 'text-brand-purple' : 'text-emerald-500'}`} />
                       <span>{feature}</span>
                     </li>
                   ))}
@@ -124,13 +177,13 @@ const SubscriptionPlansPage = () => {
 
               <button
                 type="button"
-                onClick={() => setSelectedPlanId(plan.id)}
-                className={`mt-6 rounded-2xl border px-4 py-3 text-sm font-black transition-all ${
+                onClick={() => handleSelectPlan(plan.id)}
+                className={`mt-6 rounded-lg border px-4 py-3 text-xs sm:text-sm font-black transition-all cursor-pointer ${
                   isSelected
-                    ? 'border-brand-purple bg-brand-purple text-white'
+                    ? 'border-brand-purple bg-brand-purple text-white shadow-md shadow-brand-purple/25 hover:opacity-95'
                     : isFeatured
-                      ? 'border-white/15 bg-white/5 text-white hover:bg-white/10'
-                      : 'border-border/60 bg-background hover:bg-secondary'
+                      ? 'border-brand-purple/20 bg-brand-purple/10 text-white hover:bg-brand-purple/20'
+                      : 'border-border/60 bg-background hover:bg-secondary text-foreground'
                 }`}
               >
                 {isSelected ? t('subscription.planSelected', 'Выбран') : t('subscription.planSelect', 'Выбрать тариф')}
@@ -140,40 +193,122 @@ const SubscriptionPlansPage = () => {
         })}
       </section>
 
-      <section className="grid gap-6 lg:grid-cols-[minmax(0,1.1fr)_minmax(300px,0.9fr)]">
-        <div className="rounded-3xl border border-border/60 bg-card p-5 sm:p-8 shadow-sm space-y-6">
-          <div className="flex items-start gap-3">
-            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-brand-purple/10 text-brand-purple">
-              <ShieldCheck size={20} />
+      <section className="grid gap-6 lg:grid-cols-[minmax(0,1.15fr)_minmax(320px,0.85fr)]">
+        <div className="rounded-3xl border border-border/60 bg-card p-6 sm:p-8 shadow-sm space-y-6 flex flex-col justify-between">
+          <div className="space-y-4">
+            <div className="flex items-start gap-4">
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-brand-purple/10 text-brand-purple shadow-sm">
+                <ShieldCheck size={24} />
+              </div>
+              <div className="space-y-1">
+                <h2 className="text-lg sm:text-xl font-black text-foreground">{t('subscription.howItWorks.title', 'Безопасные платежи')}</h2>
+                <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
+                  {t('subscription.howItWorks.description', 'Оплата обрабатывается сертифицированным провайдером. Все транзакции надежно защищены SSL-шифрованием и соответствуют международным стандартам безопасности PCI DSS.')}
+                </p>
+              </div>
             </div>
-            <div>
-              <h2 className="text-lg sm:text-xl font-extrabold text-foreground">{t('subscription.howItWorks.title', 'Как работает оплата')}</h2>
-              <p className="text-xs sm:text-sm text-muted-foreground mt-0.5">
-                {t('subscription.howItWorks.description', 'Первый платеж создаёт и привязывает подписку в UnitPay. Последующие списания выполняются по сохранённому `subscriptionId`.')}
-              </p>
+
+            <div className="rounded-2xl border border-brand-purple/10 bg-brand-purple/5 p-4 text-xs sm:text-sm text-brand-purple leading-relaxed">
+              {t('subscription.howItWorks.warning', 'Подписка продлевается автоматически каждые 30 дней. Вы можете изменить тарифный план или отменить автопродление в любой момент без каких-либо комиссий в настройках кабинета.')}
             </div>
           </div>
 
-          <div className="rounded-2xl border border-brand-purple/15 bg-brand-purple/5 p-4 text-sm text-brand-purple/90 leading-relaxed">
-            {t('subscription.howItWorks.warning', 'На тестовом проекте UnitPay не отправляет `subscriptionId` в callback. Поэтому полный сценарий автосписаний проверяется на боевом проекте с небольшой суммой.')}
+          <div className="flex flex-wrap items-center gap-4 pt-4 border-t border-border/40 text-muted-foreground/60">
+            <div className="flex items-center gap-1.5 text-xs font-semibold">
+              <Lock size={14} className="text-emerald-500" />
+              <span>SSL Secured 256-bit</span>
+            </div>
+            <div className="flex items-center gap-1.5 text-xs font-semibold">
+              <ShieldCheck size={14} className="text-emerald-500" />
+              <span>PCI DSS Compliant</span>
+            </div>
           </div>
         </div>
 
-        <div className="rounded-3xl border border-border/60 bg-card p-5 sm:p-8 shadow-sm space-y-5">
-          <div className="flex items-center gap-3">
-            <Sparkles size={18} className="text-brand-purple" />
-            <h2 className="text-lg font-extrabold text-foreground">{t('subscription.checkout.title', 'Оформление')}</h2>
+        <div ref={checkoutSectionRef} className="rounded-3xl border border-border/60 bg-card p-6 sm:p-8 shadow-sm space-y-6 flex flex-col justify-between">
+          <div className="space-y-5">
+            <div className="flex items-center gap-3">
+              <Sparkles size={18} className="text-brand-purple" />
+              <h2 className="text-lg font-black text-foreground">{t('subscription.checkout.title', 'Оформление')}</h2>
+            </div>
+
+            <div className="rounded-2xl border border-border/60 bg-secondary/20 px-4 py-4 space-y-1">
+              <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">{t('subscription.checkout.selectedPlan', 'Выбранный тариф')}</p>
+              <div className="flex items-center justify-between">
+                <p className="text-base font-extrabold text-foreground">{selectedPlan?.name || '—'}</p>
+                <p className="text-base font-black text-brand-purple">
+                  {selectedPlan ? formatRub(selectedPlan.priceAmount, selectedPlan.currency, lng) : '—'}
+                </p>
+              </div>
+            </div>
+
+            {!isCurrentSelected && selectedPlan ? (
+              <div className="space-y-4 pt-2">
+                <label className="flex items-start gap-3 cursor-pointer select-none">
+                  <input
+                    type="checkbox"
+                    checked={agreeOffer}
+                    onChange={(e) => setAgreeOffer(e.target.checked)}
+                    className="mt-1 h-4 w-4 shrink-0 rounded border-border text-brand-purple focus:ring-brand-purple/30 accent-brand-purple"
+                  />
+                  <span className="text-xs sm:text-sm text-muted-foreground leading-normal">
+                    {t('subscription.checkout.agreeOffer')}{' '}
+                    <a
+                      href="https://kwikmenu.ru/terms"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-brand-purple font-bold hover:underline"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      {t('subscription.checkout.agreeOfferLink')}
+                    </a>
+                  </span>
+                </label>
+
+                <label className="flex items-start gap-3 cursor-pointer select-none">
+                  <input
+                    type="checkbox"
+                    checked={agreeRecurring}
+                    onChange={(e) => setAgreeRecurring(e.target.checked)}
+                    className="mt-1 h-4 w-4 shrink-0 rounded border-border text-brand-purple focus:ring-brand-purple/30 accent-brand-purple"
+                  />
+                  <span className="text-xs sm:text-sm text-muted-foreground leading-normal">
+                    {t('subscription.checkout.agreeRecurring', {
+                      price: formatRub(selectedPlan.priceAmount, selectedPlan.currency, lng),
+                    })}
+                  </span>
+                </label>
+              </div>
+            ) : null}
           </div>
 
-          <div className="rounded-2xl border border-border/60 bg-secondary/15 px-4 py-4">
-            <p className="text-sm font-semibold text-foreground">{t('subscription.checkout.selectedPlan', 'Выбранный тариф')}</p>
-            <p className="text-sm text-muted-foreground mt-1">{selectedPlan?.name || '—'}</p>
-          </div>
+          <div className="space-y-3">
+            {isCurrentSelected ? (
+              <Button className="w-full h-12 rounded-lg text-sm font-black bg-secondary text-muted-foreground border border-border/50 cursor-not-allowed" disabled>
+                {t('subscription.checkout.btnActive', 'Текущий тариф активен')}
+              </Button>
+            ) : (
+              <Button
+                className={`${primaryActionButtonClasses} w-full h-12 rounded-lg`}
+                onClick={handleCheckout}
+                disabled={!selectedPlan || isSubmitting || !agreeOffer || !agreeRecurring}
+              >
+                {isSubmitting ? (
+                  t('subscription.checkout.btnProceeding', 'Переходим к оплате...')
+                ) : (
+                  <>
+                    <Lock size={16} className="mr-2" />
+                    {t('subscription.checkout.btnProceed', 'Перейти к оплате')}
+                    <ArrowRight size={16} className="ml-2" />
+                  </>
+                )}
+              </Button>
+            )}
 
-          <Button className={`${primaryActionButtonClasses} w-full h-12`} onClick={handleCheckout} disabled={!selectedPlan || isSubmitting}>
-            {isSubmitting ? t('subscription.checkout.btnProceeding', 'Переходим к оплате...') : t('subscription.checkout.btnProceed', 'Перейти к оплате')}
-            <ArrowRight size={18} className="ml-2" />
-          </Button>
+            <div className="flex items-center justify-center gap-2 text-muted-foreground/60 text-[10px] font-extrabold uppercase tracking-widest text-center">
+              <span>{t('subscription.checkout.securePaymentNotice', 'Безопасное соединение SSL · PCI DSS')}</span>
+            </div>
+          </div>
         </div>
       </section>
     </div>

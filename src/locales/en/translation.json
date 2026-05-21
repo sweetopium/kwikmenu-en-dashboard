@@ -653,22 +653,33 @@
       "translationsDisabled": "No translations",
       "template": "Template: {{tier}}"
     },
-    "checkoutErrorUnitpay": "UnitPay did not return a redirectUrl for payment.",
+    "templateTiers": {
+      "basic": "basic",
+      "extended": "extended",
+      "premium": "premium"
+    },
+    "checkoutErrorUnitpay": "Failed to launch payment session. Please try again later or contact support.",
     "title": "Subscription",
     "description": "Select a plan that will apply to your entire account and all your venues.",
     "planCurrent": "Current",
     "planSelected": "Selected",
     "planSelect": "Choose plan",
+    "recommended": "Recommended",
     "howItWorks": {
-      "title": "How payment works",
-      "description": "The first payment creates and binds the subscription in UnitPay. Subsequent charges are made using the saved `subscriptionId`.",
-      "warning": "On the test project, UnitPay does not send the `subscriptionId` in the callback. Therefore, the full auto-billing scenario is verified on a live project with a small amount."
+      "title": "Secure Payments",
+      "description": "Payment is processed via a certified provider. All transactions are securely protected by SSL encryption and comply with PCI DSS international security standards.",
+      "warning": "The subscription renews automatically every 30 days. You can change your plan or cancel the auto-renewal at any time without any fees in your dashboard settings."
     },
     "checkout": {
       "title": "Checkout",
       "selectedPlan": "Selected plan",
       "btnProceeding": "Proceeding to payment...",
-      "btnProceed": "Proceed to payment"
+      "btnProceed": "Proceed to payment",
+      "btnActive": "Current plan active",
+      "agreeOffer": "I agree to the terms of the",
+      "agreeOfferLink": "public offer",
+      "agreeRecurring": "I agree to automatic recurring charges of {{price}} once a month for the subscription",
+      "securePaymentNotice": "Secure SSL Connection · PCI DSS compliant"
     }
   },
   "settings": {
