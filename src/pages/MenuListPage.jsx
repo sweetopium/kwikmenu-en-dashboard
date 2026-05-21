@@ -22,8 +22,8 @@ import {
 
 const MENU_ICON_META = {
   default: { icon: Utensils, color: 'text-brand-purple', bgColor: 'bg-brand-purple/10' },
-  draft: { icon: Coffee, color: 'text-orange-500', bgColor: 'bg-orange-500/10' },
-  active: { icon: Wine, color: 'text-blue-500', bgColor: 'bg-blue-500/10' },
+  draft: { icon: Utensils, color: 'text-brand-purple', bgColor: 'bg-brand-purple/10' },
+  active: { icon: Utensils, color: 'text-brand-purple', bgColor: 'bg-brand-purple/10' },
 };
 
 const MenuListPage = () => {
@@ -101,21 +101,23 @@ const MenuListPage = () => {
           return (
             <div
               key={menu.id}
-              className="bg-card border border-border/60 rounded-3xl p-5 sm:p-6 shadow-sm flex flex-col group hover:border-brand-purple/30 hover:shadow-md transition-all"
+              className="bg-card border border-border/60 rounded-3xl p-5 sm:p-6 shadow-sm flex flex-col group hover:shadow-xl hover:-translate-y-1 hover:border-brand-purple/30 transition-all duration-300"
             >
               {/* Шапка карточки: Иконка, Статус и Меню (...) */}
               <div className="flex justify-between items-start mb-4">
                 <div className="flex items-center gap-3">
-                  <div className={`w-11 h-11 rounded-xl flex items-center justify-center ${iconMeta.bgColor} ${iconMeta.color} shrink-0`}>
+                  <div className={`w-11 h-11 rounded-xl flex items-center justify-center ${iconMeta.bgColor} ${iconMeta.color} shrink-0 border border-brand-purple/15`}>
                     <Icon size={18} />
                   </div>
 
                   {menu.status === 'active' ? (
-                    <div className="px-2.5 py-1 bg-green-500/10 text-green-600 text-[11px] font-bold uppercase tracking-wider rounded-md border border-green-500/20">
+                    <div className="flex items-center gap-1.5 px-2.5 py-1 bg-secondary/80 text-foreground text-[11px] font-bold uppercase tracking-wider rounded-lg border border-border/40 shadow-sm">
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse shrink-0" />
                       {t('menuList.status.active')}
                     </div>
                   ) : (
-                    <div className="px-2.5 py-1 bg-secondary text-muted-foreground text-[11px] font-bold uppercase tracking-wider rounded-md border border-border/50">
+                    <div className="flex items-center gap-1.5 px-2.5 py-1 bg-secondary/40 text-muted-foreground text-[11px] font-bold uppercase tracking-wider rounded-lg border border-border/20">
+                      <span className="w-1.5 h-1.5 rounded-full bg-muted-foreground/50 shrink-0" />
                       {t('menuList.status.draft')}
                     </div>
                   )}
@@ -216,13 +218,13 @@ const MenuListPage = () => {
                     handlePublishToggle(menu);
                   }}
                   disabled={busyMenuId === menu.id}
-                  className={`flex-1 h-10 sm:h-12 px-2 sm:px-3 rounded-lg border font-bold text-xs sm:text-xs flex items-center justify-center gap-1.5 sm:gap-2 transition-all disabled:opacity-60 disabled:cursor-not-allowed ${
-                    menu.status === 'active'
-                      ? 'border-orange-500/20 bg-orange-500/10 text-orange-600'
-                      : 'border-green-500/20 bg-green-500/10 text-green-600'
-                  }`}
+                  className="flex-1 h-10 sm:h-12 px-1 sm:px-2 rounded-lg border border-border/60 bg-transparent hover:bg-secondary/40 text-muted-foreground hover:text-foreground font-bold text-[10px] sm:text-[11px] flex items-center justify-center gap-1 sm:gap-1.5 transition-all disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer"
                 >
-                  {menu.status === 'active' ? <ToggleLeft size={16} className="shrink-0" /> : <ToggleRight size={16} className="shrink-0" />}
+                  {menu.status === 'active' ? (
+                    <ToggleRight size={14} className="text-brand-purple shrink-0" />
+                  ) : (
+                    <ToggleLeft size={14} className="text-muted-foreground/60 shrink-0" />
+                  )}
                   <span className="truncate">
                     {busyMenuId === menu.id
                       ? t('menuList.actions.updating')
@@ -240,8 +242,9 @@ const MenuListPage = () => {
                     menuId: menu.id,
                     properties: { source: 'menu_card_button' },
                   })}
-                  className="flex-1 h-10 sm:h-12 px-2 sm:px-3 rounded-lg bg-foreground hover:bg-foreground/90 text-background font-bold text-xs sm:text-xs flex items-center justify-center gap-1.5 sm:gap-2 transition-all cursor-pointer"
+                  className="flex-1 h-10 sm:h-12 px-1 sm:px-2 rounded-lg border border-border/60 bg-transparent hover:bg-secondary/40 text-foreground font-bold text-[10px] sm:text-[11px] flex items-center justify-center gap-1 sm:gap-1.5 transition-all cursor-pointer"
                 >
+                  <QrCode size={14} className="shrink-0 text-muted-foreground group-hover:text-foreground transition-colors" />
                   <span className="truncate">{t('menuList.actions.viewQr')}</span>
                 </Link>
 
@@ -252,8 +255,9 @@ const MenuListPage = () => {
                     menuId: menu.id,
                     properties: { source: 'menu_card_button' },
                   })}
-                  className="flex-1 h-10 sm:h-12 px-2 sm:px-3 rounded-lg bg-foreground hover:bg-foreground/90 text-background font-bold text-xs sm:text-xs flex items-center justify-center gap-1.5 sm:gap-2 transition-all cursor-pointer"
+                  className="flex-1 h-10 sm:h-12 px-1 sm:px-2 rounded-lg bg-brand-purple hover:bg-brand-purple/90 text-white font-bold text-[10px] sm:text-[11px] flex items-center justify-center gap-1 sm:gap-1.5 transition-all cursor-pointer shadow-sm hover:shadow-brand-purple/20"
                 >
+                  <Pencil size={14} className="shrink-0 text-white/80" />
                   <span className="truncate">{t('menuList.actions.editor')}</span>
                 </Link>
               </div>
