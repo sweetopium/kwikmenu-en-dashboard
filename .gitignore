@@ -26,3 +26,4 @@ backend/.venv
 backend/.data
 backend/__pycache__
 backend/.env
+admin/.env
