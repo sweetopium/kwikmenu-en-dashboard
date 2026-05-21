@@ -43,15 +43,20 @@ const MenuImportPage = () => {
               </div>
             </div>
 
-            <div className="space-y-3">
+            <div className="space-y-5 relative before:absolute before:left-[18px] before:top-3 before:bottom-3 before:w-[2px] before:bg-border/60">
               {[
                 t('menuImportPage.sidebar.whatItDoes.item1'),
                 t('menuImportPage.sidebar.whatItDoes.item2'),
                 t('menuImportPage.sidebar.whatItDoes.item3'),
                 t('menuImportPage.sidebar.whatItDoes.item4'),
               ].map((item, idx) => (
-                <div key={idx} className="rounded-2xl border border-border/60 bg-secondary/15 px-4 py-4 text-sm leading-relaxed text-muted-foreground">
-                  {item}
+                <div key={idx} className="flex gap-3.5 items-start relative z-10">
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-card border border-border/70 text-brand-purple text-sm font-bold shadow-sm">
+                    {idx + 1}
+                  </div>
+                  <div className="pt-1.5 text-sm leading-relaxed text-muted-foreground">
+                    {item}
+                  </div>
                 </div>
               ))}
             </div>

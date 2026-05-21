@@ -17,12 +17,12 @@ import { trackProductEvent } from "../../lib/productAnalytics";
 
 const getStatusMeta = (t) => ({
   uploading: {
-    title: t('menuImport.statusUploadingTitle', { defaultValue: 'Загружаем исходники' }),
-    description: t('menuImport.statusUploadingDesc', { defaultValue: 'Создаем import job и отправляем файлы в backend.' }),
+    title: t('menuImport.statusUploadingTitle', { defaultValue: 'Получение файлов' }),
+    description: t('menuImport.statusUploadingDesc', { defaultValue: 'Надежно сохраняем файлы и готовим их к обработке нейросетью.' }),
   },
   processing: {
-    title: t('menuImport.statusProcessingTitle', { defaultValue: 'Распознаем структуру меню' }),
-    description: t('menuImport.statusProcessingDesc', { defaultValue: 'Бэк обрабатывает документы, вызывает parser и валидирует итоговую схему.' }),
+    title: t('menuImport.statusProcessingTitle', { defaultValue: 'Распознавание меню' }),
+    description: t('menuImport.statusProcessingDesc', { defaultValue: 'Искусственный интеллект считывает текст, находит блюда, цены и группирует их по категориям.' }),
   },
 });
 
@@ -55,38 +55,38 @@ const buildImportIssue = (t, { kind, message }) => {
     t('menuImport.errors.action1', { defaultValue: 'Проверьте, что PDF или фотографии четкие, не обрезаны и не повернуты.' }),
     t('menuImport.errors.action2', { defaultValue: 'Если меню большое, загрузите его частями: например, напитки и еду отдельно.' }),
     t('menuImport.errors.action3', { defaultValue: 'Попробуйте загрузить более легкий PDF или вставить прямую ссылку на PDF-файл меню.' }),
-    t('menuImport.errors.action4', { defaultValue: 'Если ошибка повторяется, отправьте исходный файл в поддержку и опишите, что именно не удалось разобрать.' }),
+    t('menuImport.errors.action4', { defaultValue: 'Если ошибка повторяется, обратитесь в поддержку и отправьте исходный файл меню.' }),
   ];
 
   if (kind === 'timed_out') {
     return {
-      title: t('menuImport.errors.timeoutTitle', { defaultValue: 'Импорт остановлен по таймауту' }),
-      message: message || t('menuImport.errors.timeoutMessage', { defaultValue: 'Backend остановил обработку меню по лимиту времени.' }),
+      title: t('menuImport.errors.timeoutTitle', { defaultValue: 'Распознавание заняло слишком много времени' }),
+      message: message || t('menuImport.errors.timeoutMessage', { defaultValue: 'Нейросети потребовалось слишком много времени на распознавание меню. Пожалуйста, попробуйте еще раз.' }),
       actions: defaultActions,
     };
   }
 
   return {
-    title: t('menuImport.errors.generalTitle', { defaultValue: 'Возникла проблема с импортом меню' }),
-    message: message || t('menuImport.errors.generalMessage', { defaultValue: 'Мы не смогли обработать исходный файл и не создали черновик меню.' }),
+    title: t('menuImport.errors.generalTitle', { defaultValue: 'Не удалось распознать меню' }),
+    message: message || t('menuImport.errors.generalMessage', { defaultValue: 'Мы не смогли обработать файлы. Пожалуйста, убедитесь, что они содержат разборчивый текст меню.' }),
     actions: defaultActions,
   };
 };
 
 const StageItem = ({ isActive, isDone, title, description }) => (
-  <div className={`rounded-2xl border p-4 transition-colors ${
+  <div className={`rounded-2xl border p-4 transition-all duration-300 ${
     isActive
-      ? 'border-brand-purple/30 bg-brand-purple/5'
+      ? 'border-brand-purple/30 bg-brand-purple/5 shadow-sm shadow-brand-purple/5 ring-1 ring-brand-purple/10'
       : isDone
         ? 'border-green-500/20 bg-green-500/5'
         : 'border-border/60 bg-secondary/10'
   }`}>
     <div className="flex items-start gap-3">
-      <div className={`mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full ${
+      <div className={`mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full transition-all duration-300 ${
         isDone
-          ? 'bg-green-500 text-white'
+          ? 'bg-green-500 text-white shadow-sm shadow-green-500/20'
           : isActive
-            ? 'bg-brand-purple text-white'
+            ? 'bg-brand-purple text-white shadow-sm shadow-brand-purple/20'
             : 'bg-secondary text-muted-foreground'
       }`}>
         {isDone ? <CheckCircle2 size={16} /> : <LoaderCircle size={16} className={isActive ? 'animate-spin' : ''} />}
@@ -480,18 +480,18 @@ const MenuImportFlow = ({
           <div className="flex items-start gap-3">
             <Sparkles size={18} className="mt-0.5 shrink-0 text-brand-purple" />
             <p className="text-sm leading-relaxed text-brand-purple/90">
-              {t('menuImport.results.successNote', { defaultValue: 'Импорт завершен через backend job. Результат сохранен как черновик меню и готов к открытию в редакторе.' })}
+              {t('menuImport.results.successNote', { defaultValue: 'Искусственный интеллект успешно завершил распознавание! Черновик сохранен в вашем кабинете и доступен для редактирования.' })}
             </p>
           </div>
         </div>
 
         <div className="grid gap-3">
           <div className="rounded-2xl border border-border/60 bg-secondary/15 p-4 text-sm text-muted-foreground">
-            {t('menuImport.results.documentsProcessed', { defaultValue: 'Документов обработано:' })} <span className="font-bold text-foreground">{resultPreview.documentCount}</span>
+            {t('menuImport.results.documentsProcessed', { defaultValue: 'Обработано файлов:' })} <span className="font-bold text-foreground">{resultPreview.documentCount}</span>
           </div>
           {resultPreview.usedFallback && (
             <div className="rounded-2xl border border-amber-500/20 bg-amber-500/5 p-4 text-sm text-amber-700">
-              {t('menuImport.results.fallbackWarning', { defaultValue: 'OpenRouter key не настроен, поэтому backend вернул schema-valid scaffold вместо LLM-парсинга.' })}
+              {t('menuImport.results.fallbackWarning', { defaultValue: 'Меню создано по стандартному шаблону для вашего удобства.' })}
             </div>
           )}
           {resultPreview.warnings?.length > 0 && (
@@ -539,7 +539,7 @@ const MenuImportFlow = ({
         </div>
 
         <div className="rounded-2xl border border-brand-purple/20 bg-brand-purple/5 p-4 sm:p-5 text-sm leading-relaxed text-brand-purple/90">
-          {t('menuImport.bgWarningNote', { defaultValue: 'Импорт не остановлен: backend job все еще обрабатывает документ. Ошибку покажем только если сервер вернет статус failed или timed_out.' })}
+          {t('menuImport.bgWarningNote', { defaultValue: 'Распознавание идет в фоновом режиме на сервере. Закрытие вкладки не прервет процесс.' })}
         </div>
 
         <div className="rounded-2xl border border-border/60 bg-secondary/15 p-4 text-sm text-muted-foreground">

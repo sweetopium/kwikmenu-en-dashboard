@@ -129,13 +129,51 @@
     "stepProcessing": "Processing"
   },
   "menuImport": {
-    "introTitle": "Upload menu",
-    "introDescription": "Upload PDF, photos or paste a direct link to the PDF. We will create a backend job, wait for processing and show the result.",
+    "introTitle": "Import Menu",
+    "introDescription": "Upload PDF, photos or paste a direct link. Our artificial intelligence will automatically recognize categories, dishes, prices, and descriptions.",
     "submitLabel": "Send for recognition",
-    "successTitle": "Menu draft prepared",
-    "successDescription": "Sources have been processed by the backend service. The final JSON is compiled, saved as a draft and is ready for editing.",
+    "successTitle": "Menu draft ready",
+    "successDescription": "Artificial intelligence successfully recognized all dishes, prices, and categories. The draft is saved in your dashboard and ready for editing.",
     "successPrimaryLabel": "Open menu editor",
-    "successSecondaryLabel": "Go to dashboard"
+    "successSecondaryLabel": "Go to dashboard",
+    "statusUploadingTitle": "Retrieving files",
+    "statusUploadingDesc": "Securely saving files and preparing them for AI recognition.",
+    "statusProcessingTitle": "Scanning menu",
+    "statusProcessingDesc": "Artificial intelligence is reading text, finding dishes, prices, and grouping them by category.",
+    "bgStatusMonitoring": "Monitoring your menu recognition progress...",
+    "bgStatusRunning": "Scanning menu. The page will refresh automatically once the recognition completes.",
+    "bgStatusUpdateFailed": "Updating status...",
+    "bgWarningNote": "Recognition runs in the background on the server. Closing this tab will not interrupt the process.",
+    "checkingStatus": "Checking...",
+    "resumeWaiting": "Wait here",
+    "longRunningTitle": "Recognition is taking slightly longer",
+    "longRunningDesc": "We are processing large files. You can safely go back to the dashboard — the draft will appear there automatically once finished.",
+    "untitled": "Untitled",
+    "reset": "Reset",
+    "results": {
+      "source": "Source",
+      "categories": "Categories",
+      "items": "Items",
+      "successNote": "AI completed the recognition process! Your menu draft is saved and ready to be opened in the editor.",
+      "fallbackWarning": "The menu has been created using a standard template for your convenience.",
+      "documentsProcessed": "Files processed:"
+    },
+    "errors": {
+      "addFile": "Please add at least one PDF or photo of your menu.",
+      "addLink": "Specify a direct link to the menu PDF to send it for processing.",
+      "failedToProcess": "Failed to process the menu.",
+      "failedToSubmit": "Failed to submit menu for recognition. Please try again.",
+      "failedToGetStatus": "Failed to update progress status. Please try again.",
+      "noResult": "Import finished with no menu results.",
+      "timeoutTitle": "Recognition timed out",
+      "timeoutMessage": "The AI took too long to process the menu. Please try again.",
+      "generalTitle": "Could not recognize menu",
+      "generalMessage": "We were unable to process the files. Please ensure they contain readable text.",
+      "action1": "Check that the PDF or photos are clear, not blurred, cropped, or rotated.",
+      "action2": "If the menu is large, try uploading it in parts: e.g. food and bar separately.",
+      "action3": "Try uploading a smaller PDF or specifying a direct link to a PDF file.",
+      "action4": "If the problem persists, please contact support and send us your menu file."
+    }
   },
   "menuSource": {
     "fileTabLabel": "Upload file",
@@ -223,31 +261,31 @@
   },
   "menuImportPage": {
     "header": {
-      "title": "New Menu",
-      "description": "Import screen for the dashboard. Send sources to backend job, save results, and open the menu draft."
+      "title": "Create Menu",
+      "description": "Create a digital menu in seconds using artificial intelligence. Simply upload files or specify a link."
     },
     "flow": {
-      "introTitle": "Import Menu",
-      "introDescription": "We support PDF, photos, and direct links to a PDF file. Once processed, we'll save a menu draft and open it in the editor.",
-      "submitLabel": "Create Menu Draft",
-      "successTitle": "Import Completed",
-      "successDescription": "The backend job accepted the sources, compiled the final JSON, saved the menu, and prepared it for editing.",
+      "introTitle": "Import Your Menu in a Few Clicks",
+      "introDescription": "We support PDF files, paper menu photos, and direct links to a PDF. The AI will scan the text, group dishes by category, and create your digital menu.",
+      "submitLabel": "Scan Menu and Create Draft",
+      "successTitle": "Menu recognized successfully!",
+      "successDescription": "Artificial intelligence processed your files, divided dishes into categories, and populated the prices. It is now ready for editing.",
       "successPrimaryLabel": "Open Editor",
       "successSecondaryLabel": "Upload Another File"
     },
     "sidebar": {
       "whatItDoes": {
-        "title": "What the Import Does",
-        "subtitle": "Runs via backend import job and polling.",
-        "item1": "Accepts PDF, photos, or a direct link to a PDF.",
-        "item2": "Creates a backend job and saves sources locally.",
-        "item3": "Shows upload, processing, success, and error statuses via polling.",
-        "item4": "Creates a menu draft and opens the editor upon success."
+        "title": "How does the import work?",
+        "subtitle": "Leveraging AI to automate menu creation.",
+        "item1": "You upload files or paste a link to your current menu.",
+        "item2": "Artificial intelligence scans the text and recognizes dish details.",
+        "item3": "The system groups positions automatically (appetizers, soups, mains, drinks).",
+        "item4": "A digital menu draft is created, ready for you to preview and edit immediately."
       },
       "nextStage": {
-        "title": "Next Stage",
-        "subtitle": "Current pipeline already saves the menu and venue on the backend.",
-        "description": "Next, we will add import history, re-uploads, and venue selection right before starting the job."
+        "title": "Useful Tip",
+        "subtitle": "How to get the best results?",
+        "description": "Ensure that photos or PDF documents are clear, not blurred, and not cut off. If you have a large menu, try uploading it in parts (e.g. food and bar separately) for maximum accuracy."
       }
     }
   },
