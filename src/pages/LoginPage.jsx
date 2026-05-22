@@ -132,10 +132,9 @@ const LoginPage = () => {
           <button
             type="submit"
             disabled={pending}
-            className={`w-full ${primaryActionButtonClasses} disabled:translate-y-0 disabled:opacity-60`}
+            className={`w-full flex items-center justify-center ${primaryActionButtonClasses} disabled:translate-y-0 disabled:opacity-60`}
           >
             {pending ? <Loader2 className="h-5 w-5 animate-spin"/> : t('login.btnSubmit')}
-
           </button>
         </form>
 

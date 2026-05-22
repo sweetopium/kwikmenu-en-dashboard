@@ -22,6 +22,7 @@ const RegisterPage = () => {
     password: "",
     confirmPassword: "",
   });
+  const [agreeLegal, setAgreeLegal] = useState(false);
   const [errors, setErrors] = useState({});
   const [submitError, setSubmitError] = useState("");
   const [pending, setPending] = useState(false);
@@ -73,6 +74,9 @@ const RegisterPage = () => {
     if (!validate()) {
       return;
     }
+    if (!agreeLegal) {
+      return;
+    }
 
     setPending(true);
     setSubmitError("");
@@ -100,9 +104,9 @@ const RegisterPage = () => {
     >
       <div className="space-y-6 sm:space-y-8">
         <div className="grid grid-cols-3 gap-3 sm:grid-cols-3">
-          <SocialProviderButton icon={FcGoogle} label="Google" onClick={() => handleProviderClick("google")}/>
-          <SocialProviderButton icon={FaYandex} label="Yandex" iconClassName="text-[#fc3f1d]" onClick={() => handleProviderClick("yandex")}/>
-          <SocialProviderButton icon={SiMaildotru} label="Mail.ru" iconClassName="text-[#005ff9]" onClick={() => handleProviderClick("mailru")}/>
+          <SocialProviderButton icon={FcGoogle} label="Google" disabled={!agreeLegal} onClick={() => handleProviderClick("google")}/>
+          <SocialProviderButton icon={FaYandex} label="Yandex" iconClassName="text-[#fc3f1d]" disabled={!agreeLegal} onClick={() => handleProviderClick("yandex")}/>
+          <SocialProviderButton icon={SiMaildotru} label="Mail.ru" iconClassName="text-[#005ff9]" disabled={!agreeLegal} onClick={() => handleProviderClick("mailru")}/>
         </div>
 
         <div className="flex items-center gap-4 text-[11px] font-semibold uppercase tracking-[0.22em] text-muted-foreground sm:text-xs">
@@ -113,6 +117,7 @@ const RegisterPage = () => {
 
         <form className="space-y-5" onSubmit={handleSubmit}>
           <AuthField
+            id="register-name"
             label={t('register.name')}
             type="text"
             autoComplete="name"
@@ -123,6 +128,7 @@ const RegisterPage = () => {
           />
 
           <AuthField
+            id="register-email"
             label={t('register.email')}
             type="email"
             autoComplete="email"
@@ -134,6 +140,7 @@ const RegisterPage = () => {
 
           <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
             <AuthField
+              id="register-password"
               label={t('register.password')}
               type="password"
               autoComplete="new-password"
@@ -144,6 +151,7 @@ const RegisterPage = () => {
             />
 
             <AuthField
+              id="register-confirm-password"
               label={t('register.confirmPassword')}
               type="password"
               autoComplete="new-password"
@@ -154,6 +162,36 @@ const RegisterPage = () => {
             />
           </div>
 
+          <div className="flex items-start gap-3 mt-1 select-none">
+            <input
+              id="agree-legal"
+              type="checkbox"
+              checked={agreeLegal}
+              onChange={(e) => setAgreeLegal(e.target.checked)}
+              className="mt-1 h-4 w-4 shrink-0 rounded border-border text-brand-purple focus:ring-brand-purple/30 accent-brand-purple cursor-pointer"
+            />
+            <label htmlFor="agree-legal" className="text-xs text-muted-foreground leading-normal cursor-pointer text-left mt-[4px]">
+              {t('register.agreeLabel')}{' '}
+              <a
+                href="https://kwikmenu.ru/terms"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-brand-purple font-semibold hover:underline"
+              >
+                {t('register.termsLink')}
+              </a>{' '}
+              {t('register.andWord')}{' '}
+              <a
+                href="https://kwikmenu.ru/privacy"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-brand-purple font-semibold hover:underline"
+              >
+                {t('register.privacyLink')}
+              </a>
+            </label>
+          </div>
+
           {submitError ? (
             <div className="rounded-2xl border border-destructive/15 bg-destructive/8 px-4 py-3 text-sm text-destructive">
               {submitError}
@@ -162,17 +200,12 @@ const RegisterPage = () => {
 
           <button
             type="submit"
-            disabled={pending}
-            className={`w-full ${primaryActionButtonClasses} disabled:translate-y-0 disabled:opacity-60`}
+            disabled={pending || !agreeLegal}
+            className={`w-full flex items-center justify-center ${primaryActionButtonClasses} disabled:translate-y-0 disabled:opacity-60`}
           >
             {pending ? <Loader2 className="h-5 w-5 animate-spin"/> : t('register.btnSubmit')}
-
           </button>
         </form>
-
-        <p className="text-center text-[11px] text-muted-foreground sm:text-sm">
-          {t('register.footerLegal')}
-        </p>
 
         <p className="text-center text-[11px] text-muted-foreground sm:text-sm">
           {t('register.hasAccount')}{' '}

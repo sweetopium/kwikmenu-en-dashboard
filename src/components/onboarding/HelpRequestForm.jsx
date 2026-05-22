@@ -126,6 +126,8 @@ const HelpRequestForm = ({ onClose = null }) => {
             <DialPhoneField
               phone={phone}
               selectedDial={selectedDial}
+              selectedCountryId={selectedCountry}
+              onCountryChange={handleCountryChange}
               onPhoneChange={setPhone}
               onDialChange={setSelectedDial}
               label={t('helpForm.phoneLabel')}

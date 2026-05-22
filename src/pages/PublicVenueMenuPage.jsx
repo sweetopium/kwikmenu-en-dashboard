@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useParams, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { AlertCircle, ArrowLeft, Menu as MenuIcon } from 'lucide-react';
+import { AlertCircle, ArrowLeft } from 'lucide-react';
 
 import { getPublicVenueMenus } from '../lib/publicMenuApi.js';
 import PublicMenuTemplateRenderer from '../components/public-menu/PublicMenuTemplateRenderer.jsx';
@@ -9,7 +9,6 @@ import PublicMenuSkeletonRenderer from '../components/public-menu/PublicMenuSkel
 import { Button } from '../components/ui/button.jsx';
 import { normalizeTemplateType } from '../lib/publicMenuUtils.js';
 
-const MIN_PUBLIC_MENU_LOADING_MS = 3000;
 const getStoredTemplateType = (venueId) => {
   if (!venueId || typeof window === 'undefined') {
     return 'simple';
@@ -29,7 +28,6 @@ const PublicVenueMenuPage = () => {
 
   useEffect(() => {
     let isCancelled = false;
-    const requestStartedAt = Date.now();
 
     if (!venueId) {
       setError(t('publicVenueMenu.errors.invalidLink'));
@@ -56,18 +54,9 @@ const PublicVenueMenuPage = () => {
         setError(nextError.message || t('publicVenueMenu.errors.loadFailed'));
       })
       .finally(() => {
-        if (isCancelled) {
-          return;
+        if (!isCancelled) {
+          setIsLoading(false);
         }
-
-        const elapsedMs = Date.now() - requestStartedAt;
-        const remainingMs = Math.max(MIN_PUBLIC_MENU_LOADING_MS - elapsedMs, 0);
-
-        window.setTimeout(() => {
-          if (!isCancelled) {
-            setIsLoading(false);
-          }
-        }, remainingMs);
       });
 
     return () => {

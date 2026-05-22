@@ -175,6 +175,8 @@ const UploadPage = () => {
               <DialPhoneField
                 phone={phone}
                 selectedDial={selectedDial}
+                selectedCountryId={selectedCountry}
+                onCountryChange={handleCountryChange}
                 onPhoneChange={setPhone}
                 onDialChange={setSelectedDial}
                 label={t('uploadPage.phoneLabel')}
