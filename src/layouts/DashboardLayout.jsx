@@ -95,9 +95,14 @@ const SidebarContent = ({ pathname, navItems, onNavigate, onLogout }) => {
             {t('navigation.supportDesc', 'Напишите нашему менеджеру, мы всегда на связи.')}
           </p>
 
-          <button className="w-full h-11 text-xs font-bold bg-background border border-border hover:bg-secondary transition-colors rounded-lg text-foreground">
+          <a
+            href="https://t.me/kwikmenu_support"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center justify-center w-full h-11 text-xs font-bold bg-background border border-border hover:bg-secondary transition-colors rounded-lg text-foreground"
+          >
             {t('navigation.contactSupport', 'Написать в поддержку')}
-          </button>
+          </a>
         </div>
 
         <button onClick={onLogout} className="flex items-center gap-3 px-3 h-11 w-full text-sm font-semibold text-muted-foreground hover:bg-destructive/10 hover:text-destructive rounded-lg transition-colors group min-w-0">
