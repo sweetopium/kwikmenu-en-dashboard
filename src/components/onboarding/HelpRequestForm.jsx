@@ -201,8 +201,22 @@ const HelpRequestForm = ({ onClose = null }) => {
                   fileName={fileName}
                   onFileChange={(e) => {
                     const nextFile = e.target.files?.[0] || null;
+                    if (nextFile) {
+                      const ext = '.' + nextFile.name.split('.').pop().toLowerCase();
+                      const allowedExtensions = ['.pdf', '.jpg', '.jpeg', '.png', '.webp'];
+                      if (!allowedExtensions.includes(ext)) {
+                        setSubmitError(t('helpForm.errInvalidFormat', { defaultValue: 'Поддерживаются только файлы PDF и изображения' }));
+                        setMenuFile(null);
+                        setFileName('');
+                        e.target.value = '';
+                        return;
+                      }
+                    }
                     setMenuFile(nextFile);
                     setFileName(nextFile?.name || '');
+                    if (submitError === t('helpForm.errInvalidFormat')) {
+                      setSubmitError('');
+                    }
                   }}
                   menuLink={menuLink}
                   onMenuLinkChange={setMenuLink}

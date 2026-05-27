@@ -66,6 +66,10 @@ const RegisterPage = () => {
   };
 
   const handleProviderClick = (provider) => {
+    if (!agreeLegal) {
+      setSubmitError(t('register.errAgreeRequired'));
+      return;
+    }
     window.location.assign(getProviderAuthUrl(provider));
   };
 
@@ -104,9 +108,9 @@ const RegisterPage = () => {
     >
       <div className="space-y-6 sm:space-y-8">
         <div className="grid grid-cols-3 gap-3 sm:grid-cols-3">
-          <SocialProviderButton icon={FcGoogle} label="Google" disabled={!agreeLegal} onClick={() => handleProviderClick("google")}/>
-          <SocialProviderButton icon={FaYandex} label="Yandex" iconClassName="text-[#fc3f1d]" disabled={!agreeLegal} onClick={() => handleProviderClick("yandex")}/>
-          <SocialProviderButton icon={SiMaildotru} label="Mail.ru" iconClassName="text-[#005ff9]" disabled={!agreeLegal} onClick={() => handleProviderClick("mailru")}/>
+          <SocialProviderButton icon={FcGoogle} label="Google" onClick={() => handleProviderClick("google")}/>
+          <SocialProviderButton icon={FaYandex} label="Yandex" iconClassName="text-[#fc3f1d]" onClick={() => handleProviderClick("yandex")}/>
+          <SocialProviderButton icon={SiMaildotru} label="Mail.ru" iconClassName="text-[#005ff9]" onClick={() => handleProviderClick("mailru")}/>
         </div>
 
         <div className="flex items-center gap-4 text-[11px] font-semibold uppercase tracking-[0.22em] text-muted-foreground sm:text-xs">

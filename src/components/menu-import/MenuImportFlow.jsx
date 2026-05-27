@@ -597,7 +597,30 @@ const MenuImportFlow = ({
               });
             }}
             files={files}
-            onFileChange={(event) => setFiles(Array.from(event.target.files || []))}
+            onFileChange={(event) => {
+              const selectedFiles = Array.from(event.target.files || []);
+              const allowedExtensions = ['.pdf', '.jpg', '.jpeg', '.png', '.webp'];
+              const hasInvalidFile = selectedFiles.some((file) => {
+                const ext = '.' + file.name.split('.').pop().toLowerCase();
+                return !allowedExtensions.includes(ext);
+              });
+
+              if (hasInvalidFile) {
+                setErrorMessage(t('menuImport.errors.invalidFormat', { defaultValue: 'Поддерживаются только файлы PDF и изображения' }));
+                setStage('error');
+                setImportIssue(null);
+                setFiles([]);
+                event.target.value = '';
+                return;
+              }
+
+              setFiles(selectedFiles);
+              if (stage === 'error') {
+                setStage('idle');
+                setErrorMessage('');
+                setImportIssue(null);
+              }
+            }}
             menuLink={menuLink}
             onMenuLinkChange={setMenuLink}
             inputClassName={formFieldClasses}

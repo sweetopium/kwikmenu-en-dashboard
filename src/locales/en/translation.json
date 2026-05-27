@@ -45,6 +45,7 @@
     "privacyLink": "Privacy Policy",
     "hasAccount": "Already have an account?",
     "loginLink": "Log in",
+    "errAgreeRequired": "You must agree to the terms of use and privacy policy",
     "errNameRequired": "Enter name",
     "errNameShort": "Name must be at least 2 characters long",
     "errEmailRequired": "Enter email",
@@ -95,6 +96,7 @@
     "title": "Request for menu transfer",
     "subtitle": "Leave your details, a manager will contact you and prepare the menu",
     "errSubmit": "Failed to submit request",
+    "errInvalidFormat": "Only PDF files and images are supported",
     "nameLabel": "Your name",
     "namePlaceholder": "E.g., Alex",
     "phoneLabel": "Phone number",
@@ -163,6 +165,7 @@
       "documentsProcessed": "Files processed:"
     },
     "errors": {
+      "invalidFormat": "Only PDF files and images are supported",
       "addFile": "Please add at least one PDF or photo of your menu.",
       "addLink": "Specify a direct link to the menu PDF to send it for processing.",
       "failedToProcess": "Failed to process the menu.",

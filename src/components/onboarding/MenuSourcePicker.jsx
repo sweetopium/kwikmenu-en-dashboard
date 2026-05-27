@@ -65,7 +65,7 @@ const MenuSourcePicker = ({
           <input
             type="file"
             multiple={multiple}
-            accept=".pdf,.jpg,.jpeg,.png,.webp,.doc,.docx,.xls,.xlsx"
+            accept=".pdf,.jpg,.jpeg,.png,.webp"
             onChange={onFileChange}
             className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
           />
