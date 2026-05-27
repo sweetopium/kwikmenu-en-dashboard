@@ -162,7 +162,9 @@
       "items": "Items",
       "successNote": "AI completed the recognition process! Your menu draft is saved and ready to be opened in the editor.",
       "fallbackWarning": "The menu has been created using a standard template for your convenience.",
-      "documentsProcessed": "Files processed:"
+      "documentsProcessed": "Files processed:",
+      "timeSaved": "Time saved",
+      "timeSavedValue": "~{{minutes}} min"
     },
     "errors": {
       "invalidFormat": "Only PDF files and images are supported",

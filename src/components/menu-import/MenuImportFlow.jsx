@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { AlertCircle, ArrowRight, CheckCircle2, LoaderCircle, RefreshCw, Sparkles, WandSparkles } from 'lucide-react';
+import { AlertCircle, ArrowRight, CheckCircle2, LoaderCircle, RefreshCw, Sparkles, WandSparkles, Clock, Layers, UtensilsCrossed } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 
@@ -99,6 +99,38 @@ const StageItem = ({ isActive, isDone, title, description }) => (
     </div>
   </div>
 );
+
+const AnimatedCounter = ({ value, duration = 800 }) => {
+  const [count, setCount] = useState(0);
+
+  useEffect(() => {
+    let startTimestamp = null;
+    let animationFrameId;
+
+    const step = (timestamp) => {
+      if (!startTimestamp) startTimestamp = timestamp;
+      const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+      // Ease out quad
+      const easeProgress = progress * (2 - progress);
+      setCount(Math.floor(easeProgress * value));
+
+      if (progress < 1) {
+        animationFrameId = window.requestAnimationFrame(step);
+      } else {
+        setCount(value);
+      }
+    };
+
+    animationFrameId = window.requestAnimationFrame(step);
+    return () => {
+      if (animationFrameId) {
+        window.cancelAnimationFrame(animationFrameId);
+      }
+    };
+  }, [value, duration]);
+
+  return <>{count}</>;
+};
 
 const MenuImportFlow = ({
   context = {},
@@ -461,21 +493,61 @@ const MenuImportFlow = ({
           </p>
         </div>
 
+        {/* Metric Cards Grid */}
         <div className="grid gap-4 sm:grid-cols-3">
-          <div className="rounded-2xl border border-border/60 bg-secondary/15 p-4">
-            <p className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">{t('menuImport.results.source', { defaultValue: 'Источник' })}</p>
-            <p className="mt-2 text-sm font-semibold text-foreground break-words">{resultPreview.sourceLabel}</p>
+          {/* Card 1: Time Saved */}
+          <div className="group relative overflow-hidden rounded-2xl border border-border/60 bg-gradient-to-br from-background to-secondary/15 p-5 transition-all duration-300 hover:scale-[1.02] hover:shadow-lg hover:shadow-black/5 hover:border-brand-purple/35">
+            <div className="flex items-start justify-between">
+              <div>
+                <p className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
+                  {t('menuImport.results.timeSaved', { defaultValue: 'Сэкономлено времени' })}
+                </p>
+                <p className="mt-2 text-2xl font-black text-foreground">
+                  ~<AnimatedCounter value={Math.max(Math.round(resultPreview.detectedItems * 0.5), 5)} /> {t('menuImport.results.minutesSuffix', { defaultValue: 'мин' })}
+                </p>
+              </div>
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-brand-purple/10 text-brand-purple transition-transform duration-300 group-hover:scale-110">
+                <Clock size={20} />
+              </div>
+            </div>
           </div>
-          <div className="rounded-2xl border border-border/60 bg-secondary/15 p-4">
-            <p className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">{t('menuImport.results.categories', { defaultValue: 'Категории' })}</p>
-            <p className="mt-2 text-2xl font-black text-foreground">{resultPreview.detectedCategories}</p>
+
+          {/* Card 2: Categories */}
+          <div className="group relative overflow-hidden rounded-2xl border border-border/60 bg-gradient-to-br from-background to-secondary/15 p-5 transition-all duration-300 hover:scale-[1.02] hover:shadow-lg hover:shadow-black/5 hover:border-blue-500/35">
+            <div className="flex items-start justify-between">
+              <div>
+                <p className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
+                  {t('menuImport.results.categories', { defaultValue: 'Категории' })}
+                </p>
+                <p className="mt-2 text-2xl font-black text-foreground">
+                  <AnimatedCounter value={resultPreview.detectedCategories} />
+                </p>
+              </div>
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-500/10 text-blue-500 transition-transform duration-300 group-hover:scale-110">
+                <Layers size={20} />
+              </div>
+            </div>
           </div>
-          <div className="rounded-2xl border border-border/60 bg-secondary/15 p-4">
-            <p className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">{t('menuImport.results.items', { defaultValue: 'Позиции' })}</p>
-            <p className="mt-2 text-2xl font-black text-foreground">{resultPreview.detectedItems}</p>
+
+          {/* Card 3: Items */}
+          <div className="group relative overflow-hidden rounded-2xl border border-border/60 bg-gradient-to-br from-background to-secondary/15 p-5 transition-all duration-300 hover:scale-[1.02] hover:shadow-lg hover:shadow-black/5 hover:border-green-500/35">
+            <div className="flex items-start justify-between">
+              <div>
+                <p className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
+                  {t('menuImport.results.items', { defaultValue: 'Позиции' })}
+                </p>
+                <p className="mt-2 text-2xl font-black text-foreground">
+                  <AnimatedCounter value={resultPreview.detectedItems} />
+                </p>
+              </div>
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-green-500/10 text-green-500 transition-transform duration-300 group-hover:scale-110">
+                <UtensilsCrossed size={20} />
+              </div>
+            </div>
           </div>
         </div>
 
+        {/* AI Success Note Banner */}
         <div className="rounded-2xl border border-brand-purple/20 bg-brand-purple/5 p-4 sm:p-5">
           <div className="flex items-start gap-3">
             <Sparkles size={18} className="mt-0.5 shrink-0 text-brand-purple" />
@@ -485,10 +557,8 @@ const MenuImportFlow = ({
           </div>
         </div>
 
-        <div className="grid gap-3">
-          <div className="rounded-2xl border border-border/60 bg-secondary/15 p-4 text-sm text-muted-foreground">
-            {t('menuImport.results.documentsProcessed', { defaultValue: 'Обработано файлов:' })} <span className="font-bold text-foreground">{resultPreview.documentCount}</span>
-          </div>
+        {/* Dynamic Warning Banners (if any) & Source Metadata Footer */}
+        <div className="space-y-4">
           {resultPreview.usedFallback && (
             <div className="rounded-2xl border border-amber-500/20 bg-amber-500/5 p-4 text-sm text-amber-700">
               {t('menuImport.results.fallbackWarning', { defaultValue: 'Меню создано по стандартному шаблону для вашего удобства.' })}
@@ -499,6 +569,22 @@ const MenuImportFlow = ({
               {resultPreview.warnings.join(' ')}
             </div>
           )}
+
+          {/* Subtle metadata row */}
+          <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1.5 px-1 text-xs text-muted-foreground/75 border-t border-border/40 pt-4">
+            <div className="flex items-center gap-1.5">
+              <span>{t('menuImport.results.documentsProcessed', { defaultValue: 'Обработано файлов:' })}</span>
+              <span className="font-bold text-foreground">{resultPreview.documentCount}</span>
+            </div>
+            {resultPreview.sourceLabel && (
+              <div className="flex items-center gap-1.5 max-w-[280px] sm:max-w-md truncate">
+                <span>{t('menuImport.results.source', { defaultValue: 'Источник' })}:</span>
+                <span className="font-semibold text-muted-foreground truncate" title={resultPreview.sourceLabel}>
+                  {resultPreview.sourceLabel}
+                </span>
+              </div>
+            )}
+          </div>
         </div>
 
         <div className="flex flex-col sm:flex-row gap-3">

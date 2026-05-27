@@ -271,9 +271,58 @@ const MenuEditor = () => {
   };
 
   const handleSaveItem = () => {
-    if (!editingItem.name.trim()) {
+    const defaultLang = menu.defaultLanguage || 'ru';
+    const localizedName = getLocalizedField(editingItem, 'name', defaultLang, defaultLang) || 
+                          getLocalizedField(editingItem, 'name', editorLanguage, defaultLang);
+    if (!localizedName || !localizedName.trim()) {
       alert(t('menuEditor.errors.itemNameRequired', 'Пожалуйста, введите название блюда'));
       return;
+    }
+
+    // Deep copy and clean up extra/empty properties to comply with Pydantic schemas (extra="forbid" and numeric type coersions)
+    const cleanedItem = JSON.parse(JSON.stringify(editingItem));
+    
+    // Remove UI-only helper keys that filteredItems injects
+    delete cleanedItem.categoryId;
+    delete cleanedItem.categoryName;
+
+    // Normalize empty strings to null or parsed values to meet backend validation expectations
+    if (cleanedItem.price === '') {
+      cleanedItem.price = null;
+    }
+    
+    if (cleanedItem.measureValue === '') {
+      cleanedItem.measureValue = null;
+    } else if (cleanedItem.measureValue !== null && cleanedItem.measureValue !== undefined) {
+      cleanedItem.measureValue = Number(cleanedItem.measureValue);
+    }
+
+    if (
+      cleanedItem.availableHours &&
+      (!cleanedItem.availableHours.start?.trim() && !cleanedItem.availableHours.end?.trim())
+    ) {
+      cleanedItem.availableHours = null;
+    }
+
+    // Clean up variants if any
+    if (Array.isArray(cleanedItem.variants)) {
+      cleanedItem.variants = cleanedItem.variants.map((variant) => {
+        const cleanedVariant = { ...variant };
+        delete cleanedVariant.categoryId;
+        delete cleanedVariant.categoryName;
+        
+        if (cleanedVariant.price === '') {
+          cleanedVariant.price = null;
+        }
+        
+        if (cleanedVariant.measureValue === '') {
+          cleanedVariant.measureValue = null;
+        } else if (cleanedVariant.measureValue !== null && cleanedVariant.measureValue !== undefined) {
+          cleanedVariant.measureValue = Number(cleanedVariant.measureValue);
+        }
+        
+        return cleanedVariant;
+      });
     }
 
     let newCategories = [...menu.categories];
@@ -281,7 +330,7 @@ const MenuEditor = () => {
     if (modalMode === 'add') {
       newCategories = newCategories.map((category) => {
         if (category.id === targetCategoryId) {
-          return { ...category, items: [...(category.items || []), editingItem] };
+          return { ...category, items: [...(category.items || []), cleanedItem] };
         }
         return category;
       });
@@ -290,7 +339,7 @@ const MenuEditor = () => {
         if (category.id === originalCategoryId) {
           return {
             ...category,
-            items: category.items.map((item) => item.id === editingItem.id ? editingItem : item),
+            items: category.items.map((item) => item.id === cleanedItem.id ? cleanedItem : item),
           };
         }
         return category;
@@ -300,14 +349,14 @@ const MenuEditor = () => {
         if (category.id === originalCategoryId) {
           return {
             ...category,
-            items: category.items.filter((item) => item.id !== editingItem.id),
+            items: category.items.filter((item) => item.id !== cleanedItem.id),
           };
         }
 
         if (category.id === targetCategoryId) {
           return {
             ...category,
-            items: [...(category.items || []), editingItem],
+            items: [...(category.items || []), cleanedItem],
           };
         }
 

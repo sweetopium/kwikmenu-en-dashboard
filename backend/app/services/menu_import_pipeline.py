@@ -98,7 +98,7 @@ class MenuImportPipeline:
             sourceSummary=sources,
             categoryCount=len(validated_menu.categories),
             itemCount=sum(len(category.items) for category in validated_menu.categories),
-            documentCount=len(pages),
+            documentCount=len(sources),
             usedFallback=used_fallback,
             warnings=warnings,
         )
