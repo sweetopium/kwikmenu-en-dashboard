@@ -316,7 +316,7 @@ const SimplePublicMenuTemplate = ({
           {visibleCategories.length ? visibleCategories.map((category) => {
             const categoryName = getLocalizedField(category, 'name', language, defaultLanguage) || category.name;
             const categoryDescription = getLocalizedField(category, 'description', language, defaultLanguage);
-            const visibleItems = (category.items || []).filter((item) => item.isAvailable !== false);
+            const visibleItems = category.items || [];
 
             return (
               <div
@@ -342,7 +342,7 @@ const SimplePublicMenuTemplate = ({
                     <p className="max-w-3xl text-[0.92rem] leading-7 text-muted-foreground">{categoryDescription}</p>
                   ) : null}
                 </div>
-
+ 
                 <div className="space-y-0">
                   {visibleItems.map((item, index) => {
                     const itemName = getLocalizedField(item, 'name', language, defaultLanguage) || item.name;
@@ -350,15 +350,21 @@ const SimplePublicMenuTemplate = ({
                     const itemMeasure = formatMeasure(item.measureValue, item.measureUnit, language);
                     const itemPrice = formatCurrency(item.price, currencyCode);
                     const visibleVariants = (item.variants || []).filter((variant) => variant.isAvailable !== false);
-
+                    const isItemAvailable = item.isAvailable !== false;
+ 
                     return (
                       <article
                         key={item.id}
-                        className={`${index > 0 ? 'border-t' : ''} py-5`}
+                        className={`${index > 0 ? 'border-t' : ''} py-5 ${!isItemAvailable ? 'opacity-50 grayscale-[40%]' : ''}`}
                         style={{ borderColor: 'rgba(18, 54, 47, 0.1)' }}
                       >
                         <div className="flex items-start justify-between gap-4">
                           <div className="min-w-0 flex-1 space-y-2">
+                            {!isItemAvailable && (
+                              <span className="text-[10px] font-bold text-red-500 uppercase block mb-1">
+                                {language === 'ru' ? 'Нет в наличии' : 'Out of stock'}
+                              </span>
+                            )}
                             <h3 className="text-[1.02rem] font-medium tracking-[-0.01em] text-foreground sm:text-[1.12rem]">{itemName}</h3>
 
                             {isFilled(itemDescription) ? (

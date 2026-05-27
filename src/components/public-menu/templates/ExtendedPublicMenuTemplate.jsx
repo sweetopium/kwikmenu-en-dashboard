@@ -210,7 +210,7 @@ const ExtendedPublicMenuTemplate = ({
   const publicFontFamily = '"Avenir Next", "Manrope", Inter, "Helvetica Neue", Arial, sans-serif';
 
   const visibleCategories = useMemo(
-    () => (payload?.categories || []).filter((category) => !category.isHidden && (category.items || []).some((item) => item.isAvailable !== false)),
+    () => (payload?.categories || []).filter((category) => !category.isHidden && (category.items || []).length > 0),
     [payload?.categories]
   );
   const visibleLanguages = useMemo(
@@ -640,7 +640,7 @@ const ExtendedPublicMenuTemplate = ({
           {visibleCategories.map((category) => {
             const categoryName = getLocalizedField(category, 'name', language, defaultLanguage) || category.name;
             const schedule = getScheduleLabel(category.availableHours);
-            const visibleItems = (category.items || []).filter((item) => item.isAvailable !== false);
+            const visibleItems = category.items || [];
 
             return (
               <section
@@ -666,14 +666,16 @@ const ExtendedPublicMenuTemplate = ({
                   {visibleItems.map((item, itemIndex) => {
                     const itemName = getLocalizedField(item, 'name', language, defaultLanguage) || item.name;
                     const cardPrice = getCardPrice(item, currencyCode);
+                    const isItemAvailable = item.isAvailable !== false;
 
                     return (
                       <button
                         key={item.id}
                         type="button"
-                        onClick={() => setOpenSheet({ type: 'item', item })}
-                        className="overflow-hidden rounded-[1.35rem] border text-left shadow-[0_12px_28px_rgba(55,48,41,0.05)] transition hover:border-black/15 hover:shadow-[0_14px_32px_rgba(55,48,41,0.08)]"
+                        onClick={isItemAvailable ? () => setOpenSheet({ type: 'item', item }) : undefined}
+                        className={`overflow-hidden rounded-[1.35rem] border text-left shadow-[0_12px_28px_rgba(55,48,41,0.05)] transition ${isItemAvailable ? 'hover:border-black/15 hover:shadow-[0_14px_32px_rgba(55,48,41,0.08)]' : 'opacity-50 grayscale-[30%] cursor-default'}`}
                         style={{ backgroundColor: SURFACE_BG, borderColor: 'rgba(162,142,121,0.16)' }}
+                        disabled={!isItemAvailable}
                       >
                         <MenuImage
                           src={payload?.settings?.showItemImages === false ? null : item.imageUrl}
@@ -689,6 +691,11 @@ const ExtendedPublicMenuTemplate = ({
                           }}
                         >
                           <div className="text-[0.84rem] font-medium leading-[1.2] tracking-[-0.01em] text-foreground [display:-webkit-box] overflow-hidden [-webkit-box-orient:vertical] [-webkit-line-clamp:4]">
+                            {!isItemAvailable && (
+                              <span className="text-[9px] font-bold text-red-500 uppercase block mb-1">
+                                {language === 'ru' ? 'Нет в наличии' : 'Out of stock'}
+                              </span>
+                            )}
                             {itemName}
                           </div>
                           {isFilled(cardPrice.amount) ? (

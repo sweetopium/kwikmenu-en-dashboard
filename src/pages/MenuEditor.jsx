@@ -323,6 +323,22 @@ const MenuEditor = () => {
     }
   };
 
+  const handleToggleItemAvailability = (itemId, isAvailable) => {
+    const newCategories = menu.categories.map((category) => {
+      const hasItem = (category.items || []).some((item) => item.id === itemId);
+      if (hasItem) {
+        return {
+          ...category,
+          items: category.items.map((item) =>
+            item.id === itemId ? { ...item, isAvailable } : item
+          ),
+        };
+      }
+      return category;
+    });
+    setMenu({ ...menu, categories: newCategories });
+  };
+
   const handleVariantChange = (index, field, value, language = menu.defaultLanguage) => {
     const updatedVariants = [...editingItem.variants];
     updatedVariants[index] = field === 'label'
@@ -599,6 +615,7 @@ const MenuEditor = () => {
           defaultLanguage={menu.defaultLanguage}
           onEditItem={handleEditItemClick}
           onDeleteItem={handleDeleteItemClick}
+          onToggleItemAvailability={handleToggleItemAvailability}
         />
       </div>
 

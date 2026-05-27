@@ -3,7 +3,7 @@ import { GripVertical, Image as ImageIcon, Edit2, Trash2 } from 'lucide-react';
 import { Switch } from "../ui/switch";
 import { formatMeasure, getItemPriceDisplay } from "./menuEditorUtils";
 
-const MenuItemCard = ({ item, language, defaultLanguage, onEdit, onDelete }) => {
+const MenuItemCard = ({ item, language, defaultLanguage, onEdit, onDelete, onToggleAvailability }) => {
   const { t } = useTranslation();
   const name = language !== defaultLanguage && item.translations?.[language]?.name ? item.translations[language].name : item.name;
   const desc = language !== defaultLanguage && item.translations?.[language]?.description ? item.translations[language].description : item.description;
@@ -89,7 +89,8 @@ const MenuItemCard = ({ item, language, defaultLanguage, onEdit, onDelete }) => 
         {/* Свитч */}
         <div className="flex items-center h-full">
           <Switch
-            defaultChecked={item.isAvailable !== false}
+            checked={item.isAvailable !== false}
+            onCheckedChange={onToggleAvailability}
             className="data-[state=checked]:bg-green-500"
           />
         </div>
