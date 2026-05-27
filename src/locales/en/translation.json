@@ -549,6 +549,8 @@
     "logout": "Logout",
     "noVenueSelected": "No venue selected",
     "proTariff": "PRO Plan",
+    "trialLabel": "TRIAL",
+    "tariffLabel": "PLAN",
     "currentVenue": "Current Venue",
     "addVenue": "Add Venue"
   },
@@ -601,6 +603,8 @@
     }
   },
   "billing": {
+    "trialBannerText": "You have an active free trial of the {{planName}} plan until {{date}}.",
+    "trialBannerCTA": "Choose Plan",
     "cancelConfirm": "Disable subscription auto-renewal?",
     "title": "Billing",
     "description": "Plan, auto-renewal, and transaction history for your account.",

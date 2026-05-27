@@ -61,7 +61,7 @@ class Settings(BaseSettings):
     currency: str = "RUB"
     billing_trial_days: int = 14
     billing_grace_period_days: int = 3
-    billing_default_plan_code: str = "starter"
+    billing_default_plan_code: str = "business"
 
     unitpay_base_url: str = "https://unitpay.ru"
     unitpay_api_url: str = "https://unitpay.ru/api"

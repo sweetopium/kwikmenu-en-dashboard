@@ -29,6 +29,7 @@ import {
 import { listVenues } from "../lib/venuesApi";
 import { logoutSession } from "../lib/sessionApi";
 import LanguageSwitcher from "../components/LanguageSwitcher";
+import { fetchBillingSummary } from "../lib/billingApi";
 
 const SidebarContent = ({ pathname, navItems, onNavigate, onLogout }) => {
   const { t } = useTranslation();
@@ -114,10 +115,20 @@ const SidebarContent = ({ pathname, navItems, onNavigate, onLogout }) => {
   );
 };
 
+const formatDate = (value, lng = 'ru') => {
+  if (!value) {
+    return '—';
+  }
+  const locale = lng === 'ru' ? 'ru-RU' : 'en-US';
+  return new Date(value).toLocaleDateString(locale);
+};
+
 const DashboardLayout = ({ children }) => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const lng = i18n.language;
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [venues, setVenues] = useState([]);
+  const [billingSummary, setBillingSummary] = useState(null);
   const location = useLocation();
   const navigate = useNavigate();
   const [activeVenueId, setActiveVenueId] = useState(() => {
@@ -142,6 +153,12 @@ const DashboardLayout = ({ children }) => {
       .catch(() => {
         setVenues([]);
       });
+  }, []);
+
+  useEffect(() => {
+    fetchBillingSummary()
+      .then(setBillingSummary)
+      .catch(() => {});
   }, []);
 
   const activeVenue = venues.find((venue) => venue.id === activeVenueId) || venues[0] || null;
@@ -225,10 +242,23 @@ const DashboardLayout = ({ children }) => {
                     </p>
 
                     <div className="flex items-center justify-start sm:justify-end gap-1.5 mt-0.5">
-                      <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse shrink-0" />
-                      <p className="text-[10px] font-bold tracking-wider uppercase text-brand-purple truncate">
-                        {t('navigation.proTariff', 'PRO-тариф')}
-                      </p>
+                      {billingSummary?.subscription?.status === 'trialing' ? (
+                        <>
+                          <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse shrink-0" />
+                          <p className="text-[10px] font-bold tracking-wider uppercase text-amber-600 truncate">
+                            {`${billingSummary.subscription.plan.name.toUpperCase()} (${t('navigation.trialLabel', 'ТРИАЛ')})`}
+                          </p>
+                        </>
+                      ) : (
+                        <>
+                          <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse shrink-0" />
+                          <p className="text-[10px] font-bold tracking-wider uppercase text-brand-purple truncate">
+                            {billingSummary?.subscription?.plan?.name
+                              ? `${billingSummary.subscription.plan.name.toUpperCase()}-${t('navigation.tariffLabel', 'ТАРИФ')}`
+                              : t('navigation.proTariff', 'PRO-тариф')}
+                          </p>
+                        </>
+                      )}
                     </div>
                   </div>
                   <ChevronDown size={16} className="text-muted-foreground shrink-0" />
@@ -258,6 +288,26 @@ const DashboardLayout = ({ children }) => {
             </DropdownMenu>
           </div>
         </header>
+
+        {billingSummary?.subscription?.status === 'trialing' && (
+          <div className="bg-gradient-to-r from-brand-purple via-indigo-600 to-violet-600 text-white px-4 py-3 sm:px-8 flex flex-col sm:flex-row items-center justify-between gap-3 shadow-md shrink-0 animate-in fade-in slide-in-from-top duration-300">
+            <div className="flex items-center gap-2.5 text-sm font-semibold animate-pulse">
+              <Sparkles size={16} className="text-amber-300 shrink-0" />
+              <span>
+                {t('billing.trialBannerText', 'У вас активен бесплатный пробный период тарифа {{planName}} до {{date}}.', {
+                  planName: billingSummary.subscription.plan.name,
+                  date: formatDate(billingSummary.subscription.trialEndsAt || billingSummary.subscription.currentPeriodEnd, lng)
+                })}
+              </span>
+            </div>
+            <Link
+              to="/dashboard/subscription"
+              className="px-4 py-1.5 bg-white text-brand-purple hover:bg-brand-purple/10 hover:text-white border border-transparent hover:border-white text-xs font-bold rounded-xl shadow-sm transition-all shrink-0"
+            >
+              {t('billing.trialBannerCTA', 'Выбрать тариф')}
+            </Link>
+          </div>
+        )}
 
         <div className="flex-1 p-4 sm:p-8 animate-in fade-in slide-in-from-bottom-2 duration-500 w-full max-w-full min-w-0 overflow-x-hidden">
           {children}

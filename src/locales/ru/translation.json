@@ -549,6 +549,8 @@
     "logout": "Выйти",
     "noVenueSelected": "Заведение не выбрано",
     "proTariff": "PRO-тариф",
+    "trialLabel": "ТРИАЛ",
+    "tariffLabel": "ТАРИФ",
     "currentVenue": "Текущее заведение",
     "addVenue": "Добавить заведение"
   },
@@ -601,6 +603,8 @@
     }
   },
   "billing": {
+    "trialBannerText": "У вас активен бесплатный пробный период тарифа {{planName}} до {{date}}.",
+    "trialBannerCTA": "Выбрать тариф",
     "cancelConfirm": "Отключить автопродление подписки?",
     "title": "Биллинг",
     "description": "Тариф, автопродление и история списаний по вашему аккаунту.",
