@@ -328,6 +328,11 @@ def assert_can_create_menu_for_venue(db: Session, subscription: UserSubscription
 
 
 def assert_template_allowed(subscription: UserSubscription, template_name: str) -> None:
+    template_names = {
+        "classic": "Классический",
+        "minimal": "Продвинутый",
+        "accent": "Премиум",
+    }
     normalized_template = (template_name or "basic").strip().lower()
     template_tier = "basic"
     if normalized_template in {"extended", "minimal"}:
@@ -338,9 +343,10 @@ def assert_template_allowed(subscription: UserSubscription, template_name: str) 
     allowed_order = TEMPLATE_TIER_ORDER.get(subscription.plan.max_template_tier, 1)
     template_order = TEMPLATE_TIER_ORDER.get(template_tier, 1)
     if template_order > allowed_order:
+        readable_name = template_names.get(normalized_template, template_name)
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail=f"Шаблон {template_name} недоступен на тарифе {subscription.plan.name}.",
+            detail=f"Шаблон «{readable_name}» недоступен на тарифе {subscription.plan.name}.",
         )
 
 

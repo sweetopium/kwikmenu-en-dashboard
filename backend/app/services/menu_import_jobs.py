@@ -80,7 +80,7 @@ def process_menu_import_job(job_id: str) -> None:
             name=result.menu.menuMeta.name,
             slug=slugify(result.menu.menuMeta.slug or result.menu.menuMeta.name, fallback=f"menu-{job.id}"),
             description=result.menu.menuMeta.description,
-            status="draft",
+            status="active",
             payload=result.menu.model_dump(mode="json"),
         )
         db.add(menu)

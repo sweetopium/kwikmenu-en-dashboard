@@ -14,7 +14,8 @@ import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import { loadImportedMenuFromStorage, saveImportedMenuToStorage } from "../lib/importedMenuStorage";
 import { normalizeMenu } from "../lib/menuNormalization";
-import { getMenu, updateMenu } from "../lib/menusApi";
+import { getMenu, updateMenu, publishMenu, unpublishMenu } from "../lib/menusApi";
+import { Switch } from "../components/ui/switch";
 import { TOP_MENU_LANGUAGES } from "../lib/languageMeta";
 import { trackProductEvent } from "../lib/productAnalytics";
 import {
@@ -60,6 +61,7 @@ const MenuEditor = () => {
   const [remoteMenuError, setRemoteMenuError] = useState('');
   const [remoteVenueId, setRemoteVenueId] = useState(null);
   const hasLoadedRemoteMenuRef = useRef(false);
+  const [menuStatus, setMenuStatus] = useState('draft');
 
   const activeCategory = menu.categories.find((category) => category.id === activeCategoryId);
   const filteredItems = searchQuery
@@ -103,6 +105,7 @@ const MenuEditor = () => {
             },
           });
           setMenu(nextMenu);
+          setMenuStatus(response.status || 'draft');
           setActiveCategoryId(nextMenu.categories[0]?.id || null);
           setEditorLanguage(nextMenu.defaultLanguage || 'ru');
           setSearchQuery('');
@@ -129,6 +132,7 @@ const MenuEditor = () => {
       properties: { mode: isImportedMenu ? 'imported_local' : 'mock' },
     });
     setMenu(nextMenu);
+    setMenuStatus('active');
     setActiveCategoryId(nextMenu.categories[0]?.id || null);
     setEditorLanguage(nextMenu.defaultLanguage || 'ru');
     setSearchQuery('');
@@ -388,6 +392,31 @@ const MenuEditor = () => {
     setMenu({ ...menu, categories: newCategories });
   };
 
+  const handleToggleMenuStatus = async () => {
+    if (!isRemoteMenu) return;
+    const nextStatus = menuStatus === 'active' ? 'draft' : 'active';
+    const prevStatus = menuStatus;
+    setMenuStatus(nextStatus);
+    try {
+      if (nextStatus === 'active') {
+        await publishMenu(id);
+        trackProductEvent('menu_published_from_editor', {
+          venueId: remoteVenueId,
+          menuId: id,
+        });
+      } else {
+        await unpublishMenu(id);
+        trackProductEvent('menu_unpublished_from_editor', {
+          venueId: remoteVenueId,
+          menuId: id,
+        });
+      }
+    } catch (error) {
+      alert(t('menuEditor.errors.toggleStatusFailed', 'Не удалось изменить статус меню. Попробуйте еще раз.'));
+      setMenuStatus(prevStatus);
+    }
+  };
+
   const handleVariantChange = (index, field, value, language = menu.defaultLanguage) => {
     const updatedVariants = [...editingItem.variants];
     updatedVariants[index] = field === 'label'
@@ -557,6 +586,21 @@ const MenuEditor = () => {
                       {t('menuEditor.btnPreview', 'Превью')}
                     </a>
                   </Button>
+                )}
+
+                {isRemoteMenu && (
+                  <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl border border-border/60 bg-secondary/10 sm:h-10 h-10 shrink-0 select-none">
+                    <span className="text-xs font-semibold text-muted-foreground">
+                      {menuStatus === 'active' 
+                        ? t('menuEditor.statusActive', 'Активно') 
+                        : t('menuEditor.statusDraft', 'Черновик')}
+                    </span>
+                    <Switch
+                      checked={menuStatus === 'active'}
+                      onCheckedChange={handleToggleMenuStatus}
+                      className="scale-90 data-[state=checked]:bg-green-500"
+                    />
+                  </div>
                 )}
 
                 {isImportedMenu && (
