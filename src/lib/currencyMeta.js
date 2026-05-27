@@ -7,6 +7,11 @@ export const TOP_CURRENCIES = [
   { code: 'TRY', flag: '🇹🇷', label: 'Турецкая лира', symbol: '₺' },
   { code: 'KZT', flag: '🇰🇿', label: 'Казахстанский тенге', symbol: '₸' },
   { code: 'UZS', flag: '🇺🇿', label: 'Узбекский сум', symbol: "so'm" },
+  { code: 'BYN', flag: '🇧🇾', label: 'Белорусский рубль', symbol: 'Br' },
+  { code: 'GEL', flag: '🇬🇪', label: 'Грузинский лари', symbol: '₾' },
+  { code: 'AMD', flag: '🇦🇲', label: 'Армянский драм', symbol: '֏' },
+  { code: 'KGS', flag: '🇰🇬', label: 'Киргизский сом', symbol: 'сом' },
+  { code: 'AZN', flag: '🇦🇿', label: 'Азербайджанский манат', symbol: '₼' },
   { code: 'CNY', flag: '🇨🇳', label: 'Китайский юань', symbol: '¥' },
   { code: 'JPY', flag: '🇯🇵', label: 'Японская иена', symbol: '¥' },
 ];

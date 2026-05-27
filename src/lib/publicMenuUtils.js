@@ -26,6 +26,11 @@ const CURRENCY_SYMBOLS = {
   TRY: '₺',
   KZT: '₸',
   UZS: "so'm",
+  BYN: 'Br',
+  GEL: '₾',
+  AMD: '֏',
+  KGS: 'сом',
+  AZN: '₼',
   CNY: '¥',
   JPY: '¥',
 };
@@ -217,11 +222,13 @@ export const formatCurrency = (price, currencyCode = 'RUB') => {
 
   const rawPrice = String(price).trim();
   const configuredSymbol = getCurrencySymbol(currencyCode);
-  const symbolMatch = rawPrice.match(/[₽$€£¥₺]|so'm|DH/iu);
+  const symbolMatch = rawPrice.match(/[₽$€£¥₺₾֏₼]|so'm|DH|Br|сом/iu);
   const amount = rawPrice
-    .replace(/[₽$€£¥₺]/g, '')
+    .replace(/[₽$€£¥₺₾֏₼]/g, '')
     .replace(/so'm/giu, '')
     .replace(/DH/giu, '')
+    .replace(/Br/giu, '')
+    .replace(/сом/giu, '')
     .trim();
 
   return {
