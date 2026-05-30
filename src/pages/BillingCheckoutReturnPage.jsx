@@ -178,13 +178,13 @@ const BillingCheckoutReturnPage = ({ mode = 'success' }) => {
           <div className="flex flex-col gap-3 sm:flex-row">
             {mode === 'success' && state.synced && state.subscriptionStatus === 'active' ? (
               <Link to={managementHref} className="sm:flex-1">
-                <Button className="w-full">
+                <Button className="w-full h-10 sm:h-12">
                   Управлять заведением
                 </Button>
               </Link>
             ) : (
               <Link to="/dashboard/billing" className="sm:flex-1">
-                <Button className="w-full">
+                <Button className="w-full h-10 sm:h-12">
                   Перейти в биллинг
                 </Button>
               </Link>
