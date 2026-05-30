@@ -77,7 +77,7 @@ class MenuLanguage(StrictModel):
 
 class MenuSettings(StrictModel):
     templateType: str = "simple-menu"
-    showItemImages: bool = False
+    showItemImages: bool = True
     theme: str = "imported"
     showLocalSubcategoryNav: bool = False
     variantsLayout: str = "rows"

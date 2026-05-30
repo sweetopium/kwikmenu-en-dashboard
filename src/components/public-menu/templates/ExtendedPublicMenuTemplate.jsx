@@ -678,7 +678,7 @@ const ExtendedPublicMenuTemplate = ({
                         disabled={!isItemAvailable}
                       >
                         <MenuImage
-                          src={payload?.settings?.showItemImages === false ? null : item.imageUrl}
+                          src={item.imageUrl}
                           alt={itemName}
                           placeholderLabel={venueName}
                           eager={itemIndex < 6}

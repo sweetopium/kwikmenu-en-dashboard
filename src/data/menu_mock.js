@@ -4,7 +4,7 @@ export const simpleMenuPayload = {
     "currency": "RUB",
     "settings": {
         "templateType": "simple-menu",
-        "showItemImages": false,
+        "showItemImages": true,
         "theme": "skuratov",
         "showLocalSubcategoryNav": false,
         "variantsLayout": "rows",
