@@ -22,11 +22,15 @@ export const getCroppedImageBlob = async (
 
   const cropWidth = Math.round(pixelCrop.width);
   const cropHeight = Math.round(pixelCrop.height);
-  const scale = Math.min(1, maxSize / Math.max(cropWidth, cropHeight));
+  
+  // Calculate scale to normalize the largest crop dimension to maxSize,
+  // ensuring even zoomed-in crops are sharp on Retina screens.
+  const scale = maxSize / Math.max(cropWidth, cropHeight);
 
   canvas.width = Math.max(1, Math.round(cropWidth * scale));
   canvas.height = Math.max(1, Math.round(cropHeight * scale));
 
+  ctx.imageSmoothingEnabled = true;
   ctx.imageSmoothingQuality = 'high';
   ctx.drawImage(
     image,

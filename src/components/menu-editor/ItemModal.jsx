@@ -97,7 +97,7 @@ const ItemModal = ({
       const croppedBlob = await getCroppedImageBlob(cropSource, croppedAreaPixels, {
         maxSize: 1600,
         type: 'image/webp',
-        quality: 0.86,
+        quality: 0.92,
       });
       const uploadFile = new File(
         [croppedBlob],

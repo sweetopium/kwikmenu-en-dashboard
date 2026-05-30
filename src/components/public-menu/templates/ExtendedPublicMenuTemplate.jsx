@@ -436,7 +436,7 @@ const ExtendedPublicMenuTemplate = ({
             <div className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-3">
               <h2 className="text-[1.35rem] font-semibold tracking-[-0.04em] text-foreground">{itemName}</h2>
               {isFilled(itemPrice.amount) ? (
-                <div className="whitespace-nowrap text-[1rem] font-semibold text-foreground">
+                <div className="whitespace-nowrap text-[1.1rem] font-bold" style={{ color: accentColor }}>
                   {itemPrice.amount}{itemPrice.symbol ? ` ${itemPrice.symbol}` : ''}
                 </div>
               ) : null}
@@ -482,7 +482,7 @@ const ExtendedPublicMenuTemplate = ({
                           <div className="text-[0.8rem] text-muted-foreground">{variantMeasure}</div>
                         ) : null}
                       </div>
-                      <div className="whitespace-nowrap text-[0.92rem] font-medium text-foreground">
+                      <div className="whitespace-nowrap text-[0.92rem] font-semibold" style={{ color: accentColor }}>
                         {variantPrice.amount}{variantPrice.symbol ? ` ${variantPrice.symbol}` : ''}
                       </div>
                     </div>
@@ -588,10 +588,10 @@ const ExtendedPublicMenuTemplate = ({
                           key={menuLanguage.code}
                           type="button"
                           onClick={() => setLanguage(menuLanguage.code)}
-                          className="rounded-full px-3 py-1.5 text-[0.68rem] font-medium transition"
+                          className="rounded-full px-3 py-1.5 text-[0.68rem] font-medium transition-colors duration-200"
                           style={{
-                            backgroundColor: isSelected ? accentSoft : 'transparent',
-                            color: isSelected ? '#252a2d' : '#82796f',
+                            backgroundColor: isSelected ? accentColor : 'transparent',
+                            color: isSelected ? accentText : '#82796f',
                           }}
                         >
                           {getLanguagePillLabel(menuLanguage)}
@@ -607,7 +607,7 @@ const ExtendedPublicMenuTemplate = ({
                   className="inline-flex h-9 items-center gap-1.5 rounded-full border px-3.5 text-[0.76rem] font-bold text-muted-foreground transition hover:border-black/15 hover:bg-black/5 hover:text-foreground"
                   style={{ borderColor: 'rgba(95,81,67,0.18)', backgroundColor: 'rgba(255,255,255,0.42)' }}
                 >
-                  <Info size={14} />
+                  <Info size={14} style={{ color: accentColor }} />
                   <span>{language === 'en' ? 'About' : 'О заведении'}</span>
                 </button>
               </div>
@@ -636,9 +636,9 @@ const ExtendedPublicMenuTemplate = ({
                   onClick={() => onMenuChange(menuOption.id)}
                   className="shrink-0 rounded-full border px-4 py-2 text-[0.82rem] font-medium transition"
                   style={isSelected ? {
-                    backgroundColor: accentSoft,
-                    borderColor: accentStrong,
-                    color: '#252a2d',
+                    backgroundColor: accentColor,
+                    borderColor: 'transparent',
+                    color: accentText,
                   } : {
                     backgroundColor: 'rgba(255,253,248,0.72)',
                     borderColor: 'rgba(162,142,121,0.16)',
@@ -687,14 +687,14 @@ const ExtendedPublicMenuTemplate = ({
                     onClick={() => scrollToCategory(category.id)}
                     className="relative shrink-0 rounded-full px-3.5 py-2.5 text-[0.78rem] font-medium transition-colors duration-250 select-none"
                     style={{
-                      color: isSelected ? '#252a2d' : '#82796f',
+                      color: isSelected ? accentText : '#82796f',
                     }}
                   >
                     {isSelected && (
                       <motion.span
                         layoutId="activeCategoryBg"
-                        className="absolute inset-0 rounded-full z-0"
-                        style={{ backgroundColor: accentSoft }}
+                        className="absolute inset-0 rounded-full z-0 shadow-[0_2px_8px_-1px_rgba(0,0,0,0.08)]"
+                        style={{ backgroundColor: accentColor }}
                         transition={{ type: 'spring', stiffness: 350, damping: 28 }}
                       />
                     )}
@@ -789,7 +789,7 @@ const ExtendedPublicMenuTemplate = ({
                             </div>
                           </div>
                           {isFilled(cardPrice.amount) ? (
-                            <div className="text-[0.9rem] font-medium leading-none tracking-[-0.02em] text-foreground">
+                            <div className="text-[0.9rem] font-semibold leading-none tracking-[-0.02em]" style={{ color: accentColor }}>
                               {cardPrice.amount}{cardPrice.symbol ? ` ${cardPrice.symbol}` : ''}
                             </div>
                           ) : null}

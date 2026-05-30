@@ -37,7 +37,7 @@ const ImageCropModal = ({ imageSrc, onCancel, onConfirm, isSubmitting = false })
               image={imageSrc}
               crop={crop}
               zoom={zoom}
-              aspect={1}
+              aspect={4 / 3}
               cropShape="rect"
               showGrid={false}
               objectFit="contain"
