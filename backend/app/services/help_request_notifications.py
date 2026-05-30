@@ -64,7 +64,8 @@ def _send_telegram_html_message(text: str, *, disable_web_page_preview: bool = F
     if not settings.help_requests_telegram_bot_token or not settings.help_requests_telegram_chat_id:
         return False, None, "Telegram bot token or chat id is not configured."
 
-    endpoint = f"https://api.telegram.org/bot{settings.help_requests_telegram_bot_token}/sendMessage"
+    telegram_api_base_url = settings.telegram_api_base_url.rstrip("/")
+    endpoint = f"{telegram_api_base_url}/bot{settings.help_requests_telegram_bot_token}/sendMessage"
     payload = {
         "chat_id": settings.help_requests_telegram_chat_id,
         "text": text,

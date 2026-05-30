@@ -57,6 +57,7 @@ class Settings(BaseSettings):
 
     help_requests_telegram_bot_token: str | None = None
     help_requests_telegram_chat_id: str | None = None
+    telegram_api_base_url: str = "https://api.telegram.org"
 
     currency: str = "RUB"
     billing_trial_days: int = 14
