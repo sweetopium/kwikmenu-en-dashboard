@@ -86,7 +86,10 @@ class ObjectStorageClient:
             region_name=self.settings.media_storage_region,
             aws_access_key_id=self.settings.media_storage_access_key_id,
             aws_secret_access_key=self.settings.media_storage_secret_access_key,
-            config=Config(signature_version="s3v4"),
+            config=Config(
+                signature_version="s3v4",
+                s3={"addressing_style": "virtual"},
+            ),
         )
 
     def _build_public_url(self, object_key: str) -> str:
