@@ -23,9 +23,9 @@ export const getCroppedImageBlob = async (
   const cropWidth = Math.round(pixelCrop.width);
   const cropHeight = Math.round(pixelCrop.height);
   
-  // Calculate scale to normalize the largest crop dimension to maxSize,
-  // ensuring even zoomed-in crops are sharp on Retina screens.
-  const scale = maxSize / Math.max(cropWidth, cropHeight);
+  // Only downscale large images to target maxSize (e.g., 1000px),
+  // never upscale small crops to prevent bloating file sizes.
+  const scale = Math.min(1, maxSize / Math.max(cropWidth, cropHeight));
 
   canvas.width = Math.max(1, Math.round(cropWidth * scale));
   canvas.height = Math.max(1, Math.round(cropHeight * scale));
