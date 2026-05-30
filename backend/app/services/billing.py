@@ -15,6 +15,7 @@ from app.schemas.billing import (
     BillingTransactionResponse,
     BillingUsageResponse,
 )
+from app.schemas.public_api import PublicBillingPlanFeatureResponse, PublicBillingPlanResponse
 from app.services.unitpay import UnitPayClient
 from app.schemas.menu import MenuPayload
 
@@ -129,6 +130,101 @@ def build_plan_response(plan: SubscriptionPlan) -> BillingPlanResponse:
         menuDesignCustomizationEnabled=plan.menu_design_customization_enabled,
         maxTemplateTier=plan.max_template_tier,
         prioritySupportEnabled=plan.priority_support_enabled,
+    )
+
+
+def build_public_plan_feature_flags(plan: SubscriptionPlan) -> list[PublicBillingPlanFeatureResponse]:
+    template_tier_labels = {
+        "basic": "Базовый шаблон",
+        "extended": "Расширенный шаблон",
+        "premium": "Premium-шаблон",
+    }
+    return [
+        PublicBillingPlanFeatureResponse(key="max_venues", label="Лимит заведений", enabled=True, value=plan.max_venues),
+        PublicBillingPlanFeatureResponse(key="max_menus_per_venue", label="Меню на заведение", enabled=True, value=plan.max_menus_per_venue),
+        PublicBillingPlanFeatureResponse(key="max_menu_items_per_menu", label="Позиций в меню", enabled=True, value=plan.max_menu_items_per_menu),
+        PublicBillingPlanFeatureResponse(key="ai_imports_per_month", label="AI-импортов в месяц", enabled=True, value=plan.ai_imports_per_month),
+        PublicBillingPlanFeatureResponse(key="public_menu_enabled", label="Публичное меню", enabled=plan.public_menu_enabled, value=plan.public_menu_enabled),
+        PublicBillingPlanFeatureResponse(key="translations_enabled", label="Переводы", enabled=plan.translations_enabled, value=plan.max_translation_languages),
+        PublicBillingPlanFeatureResponse(key="analytics_enabled", label="Аналитика", enabled=plan.analytics_enabled, value=plan.analytics_enabled),
+        PublicBillingPlanFeatureResponse(key="qr_customization_enabled", label="Кастомизация QR", enabled=plan.qr_customization_enabled, value=plan.qr_customization_enabled),
+        PublicBillingPlanFeatureResponse(
+            key="menu_design_customization_enabled",
+            label="Кастомизация дизайна меню",
+            enabled=plan.menu_design_customization_enabled,
+            value=plan.menu_design_customization_enabled,
+        ),
+        PublicBillingPlanFeatureResponse(
+            key="max_template_tier",
+            label="Доступный шаблон",
+            enabled=True,
+            value=template_tier_labels.get(plan.max_template_tier, plan.max_template_tier),
+        ),
+        PublicBillingPlanFeatureResponse(
+            key="priority_support_enabled",
+            label="Приоритетная поддержка",
+            enabled=plan.priority_support_enabled,
+            value=plan.priority_support_enabled,
+        ),
+    ]
+
+
+def build_public_plan_marketing_features(plan: SubscriptionPlan) -> list[str]:
+    features = [
+        f"До {plan.max_venues} заведений" if plan.max_venues > 1 else "1 заведение",
+        f"До {plan.max_menus_per_venue} меню на заведение",
+        f"До {plan.max_menu_items_per_menu} позиций в меню",
+        f"{plan.ai_imports_per_month} AI-импортов в месяц",
+    ]
+    if plan.public_menu_enabled:
+        features.append("Публичное меню")
+    if plan.translations_enabled:
+        features.append(f"Переводы до {plan.max_translation_languages} языков")
+    else:
+        features.append("Без переводов")
+    if plan.analytics_enabled:
+        features.append("Аналитика")
+    if plan.qr_customization_enabled:
+        features.append("Кастомизация QR")
+    if plan.menu_design_customization_enabled:
+        features.append("Кастомизация дизайна меню")
+    template_tier_labels = {
+        "basic": "Базовый шаблон",
+        "extended": "Расширенный шаблон",
+        "premium": "Premium-шаблон",
+    }
+    features.append(template_tier_labels.get(plan.max_template_tier, plan.max_template_tier))
+    if plan.priority_support_enabled:
+        features.append("Приоритетная поддержка")
+    return features
+
+
+def build_public_plan_response(plan: SubscriptionPlan) -> PublicBillingPlanResponse:
+    return PublicBillingPlanResponse(
+        id=plan.id,
+        code=plan.code,
+        name=plan.name,
+        description=plan.description,
+        priceAmount=decimal_to_float(plan.price_amount),
+        annualPriceAmount=round(decimal_to_float(plan.price_amount) * 12, 2),
+        currency=plan.currency,
+        billingPeriod=plan.billing_period,
+        sortOrder=plan.sort_order,
+        isFeatured=plan.code == "business",
+        maxVenues=plan.max_venues,
+        maxMenusPerVenue=plan.max_menus_per_venue,
+        maxMenuItemsPerMenu=plan.max_menu_items_per_menu,
+        aiImportsPerMonth=plan.ai_imports_per_month,
+        publicMenuEnabled=plan.public_menu_enabled,
+        translationsEnabled=plan.translations_enabled,
+        maxTranslationLanguages=plan.max_translation_languages,
+        analyticsEnabled=plan.analytics_enabled,
+        qrCustomizationEnabled=plan.qr_customization_enabled,
+        menuDesignCustomizationEnabled=plan.menu_design_customization_enabled,
+        maxTemplateTier=plan.max_template_tier,
+        prioritySupportEnabled=plan.priority_support_enabled,
+        marketingFeatures=build_public_plan_marketing_features(plan),
+        featureFlags=build_public_plan_feature_flags(plan),
     )
 
 

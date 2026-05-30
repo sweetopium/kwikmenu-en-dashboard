@@ -54,3 +54,37 @@ class PublicMenuResponse(StrictModel):
 class PublicVenueMenusResponse(StrictModel):
     venue: PublicVenueResponse
     menus: list[PublicMenuResponse]
+
+
+class PublicBillingPlanFeatureResponse(StrictModel):
+    key: str
+    label: str
+    enabled: bool
+    value: str | int | float | bool | None = None
+
+
+class PublicBillingPlanResponse(StrictModel):
+    id: str
+    code: str
+    name: str
+    description: str | None = None
+    priceAmount: float
+    annualPriceAmount: float
+    currency: str
+    billingPeriod: str
+    sortOrder: int
+    isFeatured: bool = False
+    maxVenues: int
+    maxMenusPerVenue: int
+    maxMenuItemsPerMenu: int
+    aiImportsPerMonth: int
+    publicMenuEnabled: bool
+    translationsEnabled: bool
+    maxTranslationLanguages: int
+    analyticsEnabled: bool
+    qrCustomizationEnabled: bool
+    menuDesignCustomizationEnabled: bool
+    maxTemplateTier: str
+    prioritySupportEnabled: bool
+    marketingFeatures: list[str]
+    featureFlags: list[PublicBillingPlanFeatureResponse]

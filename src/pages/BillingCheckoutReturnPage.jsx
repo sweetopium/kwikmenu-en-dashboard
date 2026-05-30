@@ -6,14 +6,15 @@ import SettingsPageHeader from "../components/settings/SettingsPageHeader";
 import { Button } from "../components/ui/button";
 import { fetchBillingSummary, syncBillingTransactionByUnitPayId } from "../lib/billingApi";
 import { secondaryActionButtonClasses } from "../lib/uiStyles";
+import { listVenues } from "../lib/venuesApi";
 
 const STATUS_COPY = {
   success: {
     icon: CheckCircle2,
     iconClassName: 'text-emerald-600',
     badgeClassName: 'border-emerald-200 bg-emerald-50 text-emerald-700',
-    title: 'Подписка оформляется',
-    description: 'Мы проверяем результат платежа и обновляем статус подписки в вашем кабинете.',
+    title: 'Подписка оформлена',
+    description: 'Платеж подтвержден, а статус подписки обновлен в вашем кабинете.',
   },
   fail: {
     icon: XCircle,
@@ -33,10 +34,15 @@ const BillingCheckoutReturnPage = ({ mode = 'success' }) => {
     subscriptionStatus: '',
     planName: '',
     currentPeriodEnd: '',
+    primaryVenueId: '',
   });
 
   const unitpayPaymentId = searchParams.get('paymentId') || '';
   const account = searchParams.get('account') || '';
+  const statusLabel = state.subscriptionStatus === 'active'
+    ? 'Активна'
+    : state.subscriptionStatus || 'Активна';
+  const managementHref = state.primaryVenueId ? `/dashboard/venues/${state.primaryVenueId}` : '/dashboard/venues';
 
   const copy = useMemo(() => STATUS_COPY[mode] || STATUS_COPY.success, [mode]);
   const Icon = copy.icon;
@@ -57,6 +63,7 @@ const BillingCheckoutReturnPage = ({ mode = 'success' }) => {
           subscriptionStatus: '',
           planName: '',
           currentPeriodEnd: '',
+          primaryVenueId: '',
         });
         return;
       }
@@ -64,6 +71,7 @@ const BillingCheckoutReturnPage = ({ mode = 'success' }) => {
       try {
         const syncResult = await syncBillingTransactionByUnitPayId(unitpayPaymentId);
         const billingSummary = await fetchBillingSummary();
+        const venues = await listVenues();
         if (cancelled) {
           return;
         }
@@ -74,6 +82,7 @@ const BillingCheckoutReturnPage = ({ mode = 'success' }) => {
           subscriptionStatus: syncResult.subscription?.status || billingSummary.subscription?.status || '',
           planName: billingSummary.subscription?.plan?.name || '',
           currentPeriodEnd: billingSummary.subscription?.currentPeriodEnd || '',
+          primaryVenueId: venues?.[0]?.id || '',
         });
       } catch (error) {
         if (cancelled) {
@@ -86,6 +95,7 @@ const BillingCheckoutReturnPage = ({ mode = 'success' }) => {
           subscriptionStatus: '',
           planName: '',
           currentPeriodEnd: '',
+          primaryVenueId: '',
         });
       }
     };
@@ -139,7 +149,7 @@ const BillingCheckoutReturnPage = ({ mode = 'success' }) => {
               ) : (
                 <div className="space-y-3 text-sm">
                   <p className="font-semibold text-foreground">
-                    Платеж синхронизирован. Текущий статус подписки: <span className="text-brand-purple">{state.subscriptionStatus || 'active'}</span>
+                    Платеж синхронизирован. Текущий статус подписки: <span className="text-brand-purple">{statusLabel}</span>
                   </p>
                   {state.planName ? (
                     <p className="text-muted-foreground">Текущий тариф: {state.planName}</p>
@@ -166,11 +176,19 @@ const BillingCheckoutReturnPage = ({ mode = 'success' }) => {
           ) : null}
 
           <div className="flex flex-col gap-3 sm:flex-row">
-            <Link to="/dashboard/billing" className="sm:flex-1">
-              <Button className="w-full">
-                Перейти в биллинг
-              </Button>
-            </Link>
+            {mode === 'success' && state.synced && state.subscriptionStatus === 'active' ? (
+              <Link to={managementHref} className="sm:flex-1">
+                <Button className="w-full">
+                  Управлять заведением
+                </Button>
+              </Link>
+            ) : (
+              <Link to="/dashboard/billing" className="sm:flex-1">
+                <Button className="w-full">
+                  Перейти в биллинг
+                </Button>
+              </Link>
+            )}
             <Link to="/dashboard/subscription" className="sm:flex-1">
               <Button variant="outline" className={`w-full ${secondaryActionButtonClasses}`}>
                 Вернуться к тарифам

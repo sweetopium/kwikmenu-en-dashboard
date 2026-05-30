@@ -9,6 +9,7 @@ from app.api.routes.venues import build_public_path, build_public_url, get_or_cr
 from app.models import Menu, Venue
 from app.schemas.menu import MenuPayload
 from app.schemas.public_api import (
+    PublicBillingPlanResponse,
     PublicMenuResponse,
     PublicVenueDesignResponse,
     PublicVenueMenusResponse,
@@ -16,11 +17,21 @@ from app.schemas.public_api import (
     PublicVenueResponse,
     PublicVenueWifiResponse,
 )
+from app.services.billing import build_public_plan_response, get_public_plans
 
 
 router = APIRouter(prefix="/api/public", tags=["public"])
 
 PUBLIC_MENU_STATUSES = {"active", "published"}
+
+
+@router.get("/billing/plans", response_model=list[PublicBillingPlanResponse])
+def get_public_billing_plans(
+    db: Session = Depends(get_db),
+) -> list[PublicBillingPlanResponse]:
+    plans = get_public_plans(db)
+    active_public_plans = [plan for plan in plans if plan.is_active]
+    return [build_public_plan_response(plan) for plan in active_public_plans]
 
 
 @router.get("/m/{venue_id}", response_model=PublicVenueMenusResponse)
