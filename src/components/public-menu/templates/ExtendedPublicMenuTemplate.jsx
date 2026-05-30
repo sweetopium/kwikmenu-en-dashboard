@@ -20,7 +20,7 @@ const FALLBACK_IMAGE_BG = '#efe7dc';
 const DEFAULT_PLACEHOLDER_LABEL = 'MENU';
 const DEFAULT_EMPTY_ITEM_IMAGE_URL = 'https://storage.yandexcloud.net/kwikmenu-ru/empty_item.webp';
 const SHEET_BACKDROP_TRANSITION = { duration: 0.2, ease: 'easeOut' };
-const SHEET_PANEL_TRANSITION = { duration: 0.28, ease: [0.22, 1, 0.36, 1] };
+const SHEET_PANEL_TRANSITION = { type: 'spring', damping: 26, stiffness: 210 };
 const PUBLIC_DESKTOP_BG = '#d9d9d9';
 
 const getScheduleLabel = (availableHours) => {
@@ -29,6 +29,52 @@ const getScheduleLabel = (availableHours) => {
   }
 
   return `${availableHours.start} - ${availableHours.end}`;
+};
+
+const getItemBadge = (item, language) => {
+  if (!item?.tags?.length) {
+    return null;
+  }
+  const isEn = language === 'en';
+  for (const tag of item.tags) {
+    const lower = tag.toLowerCase().trim();
+    if (lower === 'хит' || lower === 'hit' || lower === 'popular' || lower === 'популярное') {
+      return {
+        text: isEn ? 'HIT' : 'ХИТ',
+        bgClass: 'bg-gradient-to-r from-amber-500 to-orange-500 text-white border-white/10',
+        glowClass: 'shadow-[0_2px_8px_rgba(245,158,11,0.4)]',
+      };
+    }
+    if (lower === 'new' || lower === 'новинка') {
+      return {
+        text: isEn ? 'NEW' : 'NEW',
+        bgClass: 'bg-gradient-to-r from-emerald-500 to-teal-500 text-white border-white/10',
+        glowClass: 'shadow-[0_2px_8px_rgba(16,185,129,0.4)]',
+      };
+    }
+    if (lower === 'острое' || lower === 'spicy' || lower === 'hot' || lower === 'острый') {
+      return {
+        text: isEn ? 'SPICY' : 'ОСТРОЕ',
+        bgClass: 'bg-gradient-to-r from-rose-500 to-red-500 text-white border-white/10',
+        glowClass: 'shadow-[0_2px_8px_rgba(244,63,94,0.4)]',
+      };
+    }
+    if (lower === 'vegan' || lower === 'веган' || lower === 'постное' || lower === 'вегетарианское') {
+      return {
+        text: isEn ? 'VEGAN' : 'ВЕГАН',
+        bgClass: 'bg-gradient-to-r from-green-500 to-emerald-500 text-white border-white/10',
+        glowClass: 'shadow-[0_2px_8px_rgba(34,197,94,0.4)]',
+      };
+    }
+    if (lower === 'шеф' || lower === 'chef' || lower === 'рекомендуем' || lower === 'recommend') {
+      return {
+        text: isEn ? 'CHEF' : 'ШЕФ',
+        bgClass: 'bg-gradient-to-r from-indigo-500 to-purple-500 text-white border-white/10',
+        glowClass: 'shadow-[0_2px_8px_rgba(99,102,241,0.4)]',
+      };
+    }
+  }
+  return null;
 };
 
 const getCardPrice = (item, currencyCode) => {
@@ -289,7 +335,12 @@ const ExtendedPublicMenuTemplate = ({
     if (openSheet.type === 'about') {
       return (
         <div className="max-h-[78vh] overflow-y-auto px-4 pb-8 pt-5">
-          <div className="space-y-5">
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.08, duration: 0.24, ease: 'easeOut' }}
+            className="space-y-5"
+          >
             <div className="space-y-3">
               <div className="space-y-1.5">
                 <div className="font-serif text-[1.7rem] font-medium tracking-[0.18em] text-foreground">{venueName.toUpperCase()}</div>
@@ -352,7 +403,7 @@ const ExtendedPublicMenuTemplate = ({
                 );
               })}
             </div>
-          </div>
+          </motion.div>
         </div>
       );
     }
@@ -367,7 +418,12 @@ const ExtendedPublicMenuTemplate = ({
 
     return (
       <div className="max-h-[76vh] overflow-y-auto px-4 pb-8 pt-4">
-        <div className="space-y-4">
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.08, duration: 0.24, ease: 'easeOut' }}
+          className="space-y-4"
+        >
           <MenuImage
             src={item.imageUrl}
             alt={itemName}
@@ -452,7 +508,7 @@ const ExtendedPublicMenuTemplate = ({
               </div>
             </section>
           ) : null}
-        </div>
+        </motion.div>
       </div>
     );
   };
@@ -501,7 +557,10 @@ const ExtendedPublicMenuTemplate = ({
     <div className="min-h-screen" style={{ backgroundColor: PUBLIC_DESKTOP_BG, fontFamily: publicFontFamily }}>
       <div className="mx-auto w-full max-w-[430px]">
         <div className="flex min-h-screen w-full flex-col gap-4 px-4 py-4 sm:px-4 sm:py-4" style={{ backgroundColor: PAGE_BG }}>
-        <section
+        <motion.section
+          initial={{ opacity: 0, y: 15 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.45, ease: 'easeOut' }}
           className="rounded-[2rem] border px-4 py-4 shadow-[0_16px_42px_rgba(55,48,41,0.05)] sm:px-5 sm:py-5"
           style={{
             background: `linear-gradient(145deg, rgba(255,253,248,0.96), rgba(248,243,235,0.88)), radial-gradient(circle at 16% 0%, ${hexToRgba(accentColor, 0.08)}, transparent 36%)`,
@@ -564,7 +623,7 @@ const ExtendedPublicMenuTemplate = ({
               ) : null}
             </div>
           </div>
-        </section>
+        </motion.section>
 
         {availableMenus.length > 1 ? (
           <div className="flex gap-2 overflow-x-auto pb-1 [&::-webkit-scrollbar]:hidden" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
@@ -594,7 +653,10 @@ const ExtendedPublicMenuTemplate = ({
         ) : null}
 
         {visibleCategories.length ? (
-          <section
+          <motion.section
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4, delay: 0.05 }}
             className="sticky top-3 z-20 overflow-hidden rounded-full border px-2 py-2 shadow-[0_12px_28px_rgba(55,48,41,0.04)]"
             style={{
               backgroundColor: 'rgba(255,253,248,0.72)',
@@ -604,7 +666,7 @@ const ExtendedPublicMenuTemplate = ({
           >
             <div
               ref={categoryNavRef}
-              className="flex gap-[3px] overflow-x-auto [&::-webkit-scrollbar]:hidden"
+              className="flex gap-[3px] overflow-x-auto px-1 [&::-webkit-scrollbar]:hidden"
               style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
             >
               {visibleCategories.map((category) => {
@@ -623,26 +685,33 @@ const ExtendedPublicMenuTemplate = ({
                     }}
                     type="button"
                     onClick={() => scrollToCategory(category.id)}
-                    className="shrink-0 rounded-full border px-3 py-2.5 text-[0.78rem] font-medium transition"
-                    style={isSelected ? {
-                      backgroundColor: accentSoft,
-                      borderColor: 'transparent',
-                      color: '#252a2d',
-                    } : {
-                      backgroundColor: 'transparent',
-                      borderColor: 'transparent',
-                      color: '#82796f',
+                    className="relative shrink-0 rounded-full px-3.5 py-2.5 text-[0.78rem] font-medium transition-colors duration-250 select-none"
+                    style={{
+                      color: isSelected ? '#252a2d' : '#82796f',
                     }}
                   >
-                    {categoryName}
+                    {isSelected && (
+                      <motion.span
+                        layoutId="activeCategoryBg"
+                        className="absolute inset-0 rounded-full z-0"
+                        style={{ backgroundColor: accentSoft }}
+                        transition={{ type: 'spring', stiffness: 350, damping: 28 }}
+                      />
+                    )}
+                    <span className="relative z-10">{categoryName}</span>
                   </button>
                 );
               })}
             </div>
-          </section>
+          </motion.section>
         ) : null}
 
-        <section className="space-y-8 pt-1">
+        <motion.section
+          initial={{ opacity: 0, y: 15 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.1, ease: 'easeOut' }}
+          className="space-y-8 pt-1"
+        >
           {visibleCategories.map((category) => {
             const categoryName = getLocalizedField(category, 'name', language, defaultLanguage) || category.name;
             const schedule = getScheduleLabel(category.availableHours);
@@ -673,23 +742,41 @@ const ExtendedPublicMenuTemplate = ({
                     const itemName = getLocalizedField(item, 'name', language, defaultLanguage) || item.name;
                     const cardPrice = getCardPrice(item, currencyCode);
                     const isItemAvailable = item.isAvailable !== false;
+                    const badge = getItemBadge(item, language);
 
                     return (
-                      <button
+                      <motion.button
                         key={item.id}
                         type="button"
                         onClick={isItemAvailable ? () => setOpenSheet({ type: 'item', item }) : undefined}
-                        className={`flex flex-col h-full overflow-hidden rounded-[1.35rem] border text-left shadow-[0_12px_28px_rgba(55,48,41,0.05)] transition ${isItemAvailable ? 'hover:border-black/15 hover:shadow-[0_14px_32px_rgba(55,48,41,0.08)]' : 'opacity-50 grayscale-[30%] cursor-default'}`}
+                        whileHover={isItemAvailable ? { y: -3 } : undefined}
+                        whileTap={isItemAvailable ? { scale: 0.97 } : undefined}
+                        transition={{ duration: 0.2, ease: 'easeInOut' }}
+                        className={`flex flex-col h-full overflow-hidden rounded-[1.35rem] border text-left shadow-[0_12px_28px_rgba(55,48,41,0.05)] transition-all ${isItemAvailable ? 'hover:border-black/15 hover:shadow-[0_14px_32px_rgba(55,48,41,0.08)]' : 'opacity-60 grayscale-[15%] cursor-default'}`}
                         style={{ backgroundColor: SURFACE_BG, borderColor: 'rgba(162,142,121,0.16)' }}
                         disabled={!isItemAvailable}
                       >
-                        <MenuImage
-                          src={item.imageUrl}
-                          alt={itemName}
-                          placeholderLabel={venueName}
-                          eager={itemIndex < 6}
-                          className="aspect-[4/3] w-full overflow-hidden shrink-0"
-                        />
+                        <div className="relative aspect-[4/3] w-full overflow-hidden shrink-0">
+                          <MenuImage
+                            src={item.imageUrl}
+                            alt={itemName}
+                            placeholderLabel={venueName}
+                            eager={itemIndex < 6}
+                            className="h-full w-full"
+                          />
+                          {isItemAvailable && badge && (
+                            <div className={`absolute left-2.5 top-2.5 z-10 rounded-full px-2 py-0.5 text-[8px] font-bold tracking-wider uppercase border border-white/20 shadow-sm ${badge.bgClass} ${badge.glowClass}`}>
+                              {badge.text}
+                            </div>
+                          )}
+                          {!isItemAvailable && (
+                            <div className="absolute inset-0 z-10 flex items-center justify-center bg-black/40 backdrop-blur-[2.5px]">
+                              <span className="rounded-full bg-white/95 px-2.5 py-1 text-[9px] font-extrabold uppercase tracking-widest text-[#252a2d] shadow-md border border-white/10">
+                                {language === 'ru' ? 'Закончилось' : 'Sold Out'}
+                              </span>
+                            </div>
+                          )}
+                        </div>
                         <div
                           className="relative z-10 -mt-[14px] flex-grow flex-1 grid min-h-[96px] grid-rows-[1fr_auto] gap-2 rounded-b-[1.35rem] px-3 pb-3.5 pt-3.5"
                           style={{
@@ -697,11 +784,6 @@ const ExtendedPublicMenuTemplate = ({
                           }}
                         >
                           <div className="text-[0.84rem] font-medium leading-[1.2] tracking-[-0.01em] text-foreground flex flex-col gap-1 min-w-0">
-                            {!isItemAvailable && (
-                              <span className="text-[9px] font-bold text-red-500 uppercase block">
-                                {language === 'ru' ? 'Нет в наличии' : 'Out of stock'}
-                              </span>
-                            )}
                             <div className="[display:-webkit-box] overflow-hidden [-webkit-box-orient:vertical] [-webkit-line-clamp:2] break-words">
                               {itemName}
                             </div>
@@ -712,14 +794,14 @@ const ExtendedPublicMenuTemplate = ({
                             </div>
                           ) : null}
                         </div>
-                      </button>
+                      </motion.button>
                     );
                   })}
                 </div>
               </section>
             );
           })}
-        </section>
+        </motion.section>
 
           {renderSheet()}
         </div>
