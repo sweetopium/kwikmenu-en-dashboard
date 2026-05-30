@@ -586,12 +586,12 @@ const MenuImportFlow = ({
             <ArrowRight size={16} />
           </Link>
 
-          <SecondaryActionTag
-            {...(successSecondaryTo ? { to: successSecondaryTo } : { type: 'button', onClick: resetFlow })}
-            className={`${secondaryActionButtonClasses} flex h-11 sm:h-12 w-full items-center justify-center px-5`}
-          >
-            {displaySuccessSecondaryLabel}
-          </SecondaryActionTag>
+          {/*<SecondaryActionTag*/}
+          {/*  {...(successSecondaryTo ? { to: successSecondaryTo } : { type: 'button', onClick: resetFlow })}*/}
+          {/*  className={`${secondaryActionButtonClasses} flex h-11 sm:h-12 w-full items-center justify-center px-5`}*/}
+          {/*>*/}
+          {/*  {displaySuccessSecondaryLabel}*/}
+          {/*</SecondaryActionTag>*/}
         </div>
       </div>
     );
