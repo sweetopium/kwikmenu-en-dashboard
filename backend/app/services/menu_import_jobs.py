@@ -17,6 +17,10 @@ from app.schemas.menu_import import (
 )
 from app.services.menu_import_pipeline import MenuImportPipeline
 from app.services.billing import assert_can_create_menu_for_venue, assert_menu_within_plan_limits, get_effective_subscription
+from app.services.help_request_notifications import (
+    send_menu_import_failure_to_telegram,
+    send_menu_import_success_to_telegram,
+)
 from app.services.product_analytics import record_product_event
 
 
@@ -116,6 +120,23 @@ def process_menu_import_job(job_id: str) -> None:
         )
         db.add(job)
         db.commit()
+        delivered, message_id, telegram_error = send_menu_import_success_to_telegram(
+            job=job,
+            user=user,
+            venue=venue,
+        )
+        if not delivered:
+            logger.warning(
+                "Menu import success Telegram notification failed job_id=%s error=%s",
+                job.id,
+                telegram_error,
+            )
+        else:
+            logger.info(
+                "Menu import success Telegram notification sent job_id=%s message_id=%s",
+                job.id,
+                message_id,
+            )
         logger.info(
             "Completed menu import job job_id=%s menu_id=%s categories=%s items=%s warnings=%s used_fallback=%s",
             job.id,
@@ -204,6 +225,7 @@ def _mark_job_failed(
     job.completed_at = datetime.now(timezone.utc)
     job.error = error_message
     user = db.query(User).filter(User.id == job.user_id).first()
+    venue = db.query(Venue).filter(Venue.id == job.venue_id).first() if job.venue_id else None
     record_product_event(
         db,
         event_name="menu_import_failed",
@@ -220,6 +242,24 @@ def _mark_job_failed(
     )
     db.add(job)
     db.commit()
+    delivered, message_id, telegram_error = send_menu_import_failure_to_telegram(
+        job=job,
+        user=user,
+        venue=venue,
+        error_message=error_message,
+    )
+    if not delivered:
+        logger.warning(
+            "Menu import failure Telegram notification failed job_id=%s error=%s",
+            job.id,
+            telegram_error,
+        )
+    else:
+        logger.info(
+            "Menu import failure Telegram notification sent job_id=%s message_id=%s",
+            job.id,
+            message_id,
+        )
 
 
 def _ensure_job_venue(db, *, job: MenuImportJob, result: MenuImportResult) -> Venue:

@@ -4,7 +4,7 @@ import json
 from urllib import error, request
 
 from app.core.config import get_settings
-from app.models import HelpRequest
+from app.models import HelpRequest, MenuImportJob, User, Venue
 
 
 MESSENGER_LABELS = {
@@ -59,7 +59,7 @@ def build_help_request_telegram_message(help_request: HelpRequest) -> str:
     return "\n".join(parts)
 
 
-def send_help_request_to_telegram(help_request: HelpRequest) -> tuple[bool, int | None, str | None]:
+def _send_telegram_html_message(text: str, *, disable_web_page_preview: bool = False) -> tuple[bool, int | None, str | None]:
     settings = get_settings()
     if not settings.help_requests_telegram_bot_token or not settings.help_requests_telegram_chat_id:
         return False, None, "Telegram bot token or chat id is not configured."
@@ -67,9 +67,9 @@ def send_help_request_to_telegram(help_request: HelpRequest) -> tuple[bool, int 
     endpoint = f"https://api.telegram.org/bot{settings.help_requests_telegram_bot_token}/sendMessage"
     payload = {
         "chat_id": settings.help_requests_telegram_chat_id,
-        "text": build_help_request_telegram_message(help_request),
+        "text": text,
         "parse_mode": "HTML",
-        "disable_web_page_preview": False,
+        "disable_web_page_preview": disable_web_page_preview,
     }
     data = json.dumps(payload).encode("utf-8")
     req = request.Request(endpoint, data=data, headers={"Content-Type": "application/json"}, method="POST")
@@ -88,3 +88,93 @@ def send_help_request_to_telegram(help_request: HelpRequest) -> tuple[bool, int 
 
     message_id = parsed.get("result", {}).get("message_id")
     return True, message_id, None
+
+
+def send_help_request_to_telegram(help_request: HelpRequest) -> tuple[bool, int | None, str | None]:
+    return _send_telegram_html_message(
+        build_help_request_telegram_message(help_request),
+        disable_web_page_preview=False,
+    )
+
+
+def build_menu_import_success_telegram_message(
+    *,
+    job: MenuImportJob,
+    user: User | None,
+    venue: Venue | None,
+) -> str:
+    source_names = ", ".join(_escape(source.name) for source in job.sources[:4])
+    if len(job.sources) > 4:
+        source_names = f"{source_names} и еще {len(job.sources) - 4}"
+    flow = _escape((job.context or {}).get("flow") or "unknown")
+    parts = [
+        "🟢 <b>Меню успешно распознано</b>",
+        "",
+        f"🏪 <b>Заведение:</b> {_escape((venue.name if venue else None) or (job.context or {}).get('restaurant_name') or '—')}",
+        f"👤 <b>Пользователь:</b> {_escape(user.email if user else None)}",
+        f"🆔 <b>Job ID:</b> <code>{_escape(job.id)}</code>",
+        f"📋 <b>Источник:</b> {_escape(job.menu_source)}",
+        f"📁 <b>Файлы:</b> <b>{job.document_count or len(job.sources)}</b>",
+        f"🧩 <b>Категории:</b> <b>{job.category_count or 0}</b>",
+        f"🍽 <b>Позиции:</b> <b>{job.item_count or 0}</b>",
+        f"🧭 <b>Flow:</b> {_escape(flow)}",
+    ]
+    if source_names:
+        parts.append(f"📎 <b>Имена файлов:</b> {_escape(source_names)}")
+    if job.used_fallback:
+        parts.append("⚠️ <b>Использован fallback-шаблон</b>")
+    if job.warnings:
+        parts.append(f"⚠️ <b>Warnings:</b> {_escape(' '.join(str(item) for item in job.warnings[:3]))}")
+    return "\n".join(parts)
+
+
+def build_menu_import_failure_telegram_message(
+    *,
+    job: MenuImportJob,
+    user: User | None,
+    venue: Venue | None,
+    error_message: str,
+) -> str:
+    flow = _escape((job.context or {}).get("flow") or "unknown")
+    source_names = ", ".join(_escape(source.name) for source in job.sources[:4])
+    if len(job.sources) > 4:
+        source_names = f"{source_names} и еще {len(job.sources) - 4}"
+    parts = [
+        "🔴 <b>Ошибка распознавания меню</b>",
+        "",
+        f"🏪 <b>Заведение:</b> {_escape((venue.name if venue else None) or (job.context or {}).get('restaurant_name') or '—')}",
+        f"👤 <b>Пользователь:</b> {_escape(user.email if user else None)}",
+        f"🆔 <b>Job ID:</b> <code>{_escape(job.id)}</code>",
+        f"📋 <b>Источник:</b> {_escape(job.menu_source)}",
+        f"📁 <b>Файлы:</b> <b>{job.document_count or len(job.sources)}</b>",
+        f"🧭 <b>Flow:</b> {_escape(flow)}",
+        f"❌ <b>Ошибка:</b> {_escape(error_message)}",
+    ]
+    if source_names:
+        parts.append(f"📎 <b>Имена файлов:</b> {_escape(source_names)}")
+    return "\n".join(parts)
+
+
+def send_menu_import_success_to_telegram(
+    *,
+    job: MenuImportJob,
+    user: User | None,
+    venue: Venue | None,
+) -> tuple[bool, int | None, str | None]:
+    return _send_telegram_html_message(
+        build_menu_import_success_telegram_message(job=job, user=user, venue=venue),
+        disable_web_page_preview=True,
+    )
+
+
+def send_menu_import_failure_to_telegram(
+    *,
+    job: MenuImportJob,
+    user: User | None,
+    venue: Venue | None,
+    error_message: str,
+) -> tuple[bool, int | None, str | None]:
+    return _send_telegram_html_message(
+        build_menu_import_failure_telegram_message(job=job, user=user, venue=venue, error_message=error_message),
+        disable_web_page_preview=True,
+    )
