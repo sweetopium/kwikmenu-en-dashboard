@@ -2,6 +2,10 @@ FROM node:22-slim AS build
 
 WORKDIR /workspace
 
+COPY package*.json ./
+
+RUN npm ci --no-audit --no-fund --registry=https://registry.npmjs.org/
+
 COPY admin/package*.json ./admin/
 
 WORKDIR /workspace/admin
