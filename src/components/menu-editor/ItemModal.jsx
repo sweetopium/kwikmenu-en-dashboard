@@ -1,9 +1,13 @@
+import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ChevronDown, Plus, X } from 'lucide-react';
+import { ChevronDown, Image as ImageIcon, Plus, Trash2, Upload, X } from 'lucide-react';
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
 import { Switch } from "../ui/switch";
+import ImageCropModal from "../media/ImageCropModal";
+import { getCroppedImageBlob } from "../../lib/imageCrop";
+import { createMenuItemImageUploadUrl, uploadFileToPresignedUrl } from "../../lib/mediaApi";
 import {
   formFieldClasses,
   formSelectClasses,
@@ -35,13 +39,102 @@ const ItemModal = ({
   onSave,
 }) => {
   const { t } = useTranslation();
+  const [cropSource, setCropSource] = useState(null);
+  const [pendingFileName, setPendingFileName] = useState('menu-item.webp');
+  const [imageError, setImageError] = useState('');
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
+  const fileInputRef = useRef(null);
   if (!item) return null;
 
   const localizedName = getLocalizedField(item, 'name', language, defaultLanguage);
   const localizedDescription = getLocalizedField(item, 'description', language, defaultLanguage);
 
+  useEffect(() => {
+    return () => {
+      if (cropSource) {
+        URL.revokeObjectURL(cropSource);
+      }
+    };
+  }, [cropSource]);
+
+  const handleSelectImageFile = (event) => {
+    const nextFile = event.target.files?.[0] || null;
+    if (!nextFile) {
+      return;
+    }
+
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
+    if (!allowedTypes.includes(nextFile.type)) {
+      setImageError('Поддерживаются только JPG, PNG и WEBP.');
+      event.target.value = '';
+      return;
+    }
+
+    if (nextFile.size > 10 * 1024 * 1024) {
+      setImageError('Файл слишком большой. Максимум 10 МБ.');
+      event.target.value = '';
+      return;
+    }
+
+    if (cropSource) {
+      URL.revokeObjectURL(cropSource);
+    }
+    setImageError('');
+    setPendingFileName(nextFile.name || 'menu-item.webp');
+    setCropSource(URL.createObjectURL(nextFile));
+    event.target.value = '';
+  };
+
+  const handleUploadCroppedImage = async (croppedAreaPixels) => {
+    if (!cropSource) {
+      return;
+    }
+
+    setIsUploadingImage(true);
+    setImageError('');
+    try {
+      const croppedBlob = await getCroppedImageBlob(cropSource, croppedAreaPixels, {
+        maxSize: 1600,
+        type: 'image/webp',
+        quality: 0.86,
+      });
+      const uploadFile = new File(
+        [croppedBlob],
+        `${pendingFileName.replace(/\.[^.]+$/, '') || 'menu-item'}.webp`,
+        { type: 'image/webp' },
+      );
+      const uploadTarget = await createMenuItemImageUploadUrl({
+        filename: uploadFile.name,
+        contentType: uploadFile.type,
+      });
+      await uploadFileToPresignedUrl({
+        uploadUrl: uploadTarget.uploadUrl,
+        headers: uploadTarget.headers,
+        file: uploadFile,
+      });
+      onChange({ ...item, imageUrl: uploadTarget.publicUrl });
+      URL.revokeObjectURL(cropSource);
+      setCropSource(null);
+    } catch (error) {
+      setImageError(error instanceof Error ? error.message : 'Не удалось загрузить изображение блюда.');
+    } finally {
+      setIsUploadingImage(false);
+    }
+  };
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-black/40 backdrop-blur-sm animate-in fade-in duration-200">
+      <ImageCropModal
+        imageSrc={cropSource}
+        onCancel={() => {
+          if (cropSource) {
+            URL.revokeObjectURL(cropSource);
+          }
+          setCropSource(null);
+        }}
+        onConfirm={handleUploadCroppedImage}
+        isSubmitting={isUploadingImage}
+      />
       <div
         className="bg-card w-full max-w-2xl rounded-[2rem] shadow-2xl flex flex-col max-h-[90vh] overflow-hidden border border-border/50 animate-in zoom-in-95 duration-200"
         onClick={(event) => event.stopPropagation()}
@@ -120,12 +213,74 @@ const ItemModal = ({
               {t('menuEditor.itemModal.imageLabel', 'Изображение блюда')}
             </Label>
 
-            <Input
-              value={item.imageUrl || ''}
-              onChange={(event) => onChange({ ...item, imageUrl: event.target.value || null })}
-              className={formFieldClasses}
-              placeholder="https://..."
-            />
+            <div className="space-y-4 rounded-2xl border border-border/60 bg-secondary/15 p-4">
+              <div className="flex items-start gap-4">
+                <div className="flex h-24 w-24 shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-border/60 bg-background">
+                  {item.imageUrl ? (
+                    <img src={item.imageUrl} alt={localizedName || 'dish'} className="h-full w-full object-cover" />
+                  ) : (
+                    <ImageIcon size={22} className="text-muted-foreground" />
+                  )}
+                </div>
+
+                <div className="flex-1 space-y-3">
+                  <div className="flex flex-col gap-2 sm:flex-row">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      className="sm:flex-1"
+                      onClick={() => fileInputRef.current?.click()}
+                      disabled={isUploadingImage}
+                    >
+                      <Upload size={16} className="mr-2" />
+                      {item.imageUrl ? 'Заменить фото' : 'Загрузить фото'}
+                    </Button>
+                    {item.imageUrl ? (
+                      <Button
+                        type="button"
+                        variant="destructive"
+                        className="sm:flex-1"
+                        onClick={() => onChange({ ...item, imageUrl: null })}
+                        disabled={isUploadingImage}
+                      >
+                        <Trash2 size={16} className="mr-2" />
+                        Удалить фото
+                      </Button>
+                    ) : null}
+                  </div>
+
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/jpeg,image/png,image/webp"
+                    className="hidden"
+                    onChange={handleSelectImageFile}
+                  />
+
+                  <p className="text-xs text-muted-foreground">
+                    JPG, PNG или WEBP до 10 МБ. Перед загрузкой можно подрезать кадр.
+                  </p>
+                </div>
+              </div>
+
+              {imageError ? (
+                <div className="rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-xs font-medium text-red-700">
+                  {imageError}
+                </div>
+              ) : null}
+
+              <div className="space-y-2">
+                <Label className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+                  Или вставьте ссылку вручную
+                </Label>
+                <Input
+                  value={item.imageUrl || ''}
+                  onChange={(event) => onChange({ ...item, imageUrl: event.target.value || null })}
+                  className={formFieldClasses}
+                  placeholder="https://..."
+                />
+              </div>
+            </div>
           </div>
 
           <div className="bg-secondary/20 p-4 sm:p-5 rounded-2xl border border-border/50 space-y-4">

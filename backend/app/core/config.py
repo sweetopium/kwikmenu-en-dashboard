@@ -80,6 +80,13 @@ class Settings(BaseSettings):
     unitpay_fail_url: str | None = None
     unitpay_allowed_ips: str = ""
 
+    media_storage_endpoint_url: str | None = None
+    media_storage_bucket: str | None = None
+    media_storage_access_key_id: str | None = None
+    media_storage_secret_access_key: str | None = None
+    media_storage_region: str = "ru-central1"
+    media_storage_public_base_url: str | None = None
+
 
 @lru_cache(maxsize=1)
 def get_settings() -> Settings:
