@@ -44,10 +44,6 @@ const ItemModal = ({
   const [imageError, setImageError] = useState('');
   const [isUploadingImage, setIsUploadingImage] = useState(false);
   const fileInputRef = useRef(null);
-  if (!item) return null;
-
-  const localizedName = getLocalizedField(item, 'name', language, defaultLanguage);
-  const localizedDescription = getLocalizedField(item, 'description', language, defaultLanguage);
 
   useEffect(() => {
     return () => {
@@ -56,6 +52,11 @@ const ItemModal = ({
       }
     };
   }, [cropSource]);
+
+  if (!item) return null;
+
+  const localizedName = getLocalizedField(item, 'name', language, defaultLanguage);
+  const localizedDescription = getLocalizedField(item, 'description', language, defaultLanguage);
 
   const handleSelectImageFile = (event) => {
     const nextFile = event.target.files?.[0] || null;
