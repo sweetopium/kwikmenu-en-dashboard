@@ -508,54 +508,60 @@ const ExtendedPublicMenuTemplate = ({
             borderColor: heroBorder,
           }}
         >
-          <div className="grid grid-cols-[auto_minmax(0,1fr)] gap-4 sm:grid-cols-[auto_minmax(0,1fr)_auto]">
-            {venueLogoUrl ? (
-              <img src={venueLogoUrl} alt={venueName} className="h-auto max-h-16 w-auto shrink-0 object-contain sm:max-h-[72px]" />
-            ) : (
-              <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-[1rem] border border-black/8 bg-white/30 font-serif text-[2rem] font-medium leading-none tracking-[0.2em] text-foreground sm:h-[72px] sm:w-[72px] sm:text-[2.2rem]">
-                {venueName.slice(0, 1).toUpperCase()}
-              </div>
-            )}
+          <div className="flex flex-col gap-4">
+            {/* Top row: Logo on the left, buttons (language + info) on the right */}
+            <div className="flex items-center justify-between gap-4">
+              {venueLogoUrl ? (
+                <img src={venueLogoUrl} alt={venueName} className="h-14 w-14 shrink-0 rounded-2xl border border-black/8 bg-white/50 object-contain shadow-sm" />
+              ) : (
+                <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl border border-black/8 bg-white/30 font-serif text-[1.8rem] font-bold tracking-[0.05em] text-foreground shadow-sm">
+                  {venueName.slice(0, 1).toUpperCase()}
+                </div>
+              )}
 
-            <div className="min-w-0 space-y-2 self-start sm:pr-2">
-              <div className="font-serif text-[1.8rem] font-medium leading-[0.96] tracking-[0.01em] text-foreground sm:text-[2.2rem]">{venueName}</div>
-              {isFilled(venueDescription) ? (
-                <p className="max-w-[23rem] text-[0.94rem] leading-[1.42] text-muted-foreground">{venueDescription}</p>
-              ) : null}
+              <div className="flex items-center gap-2">
+                {visibleLanguages.length > 1 ? (
+                  <div className="flex rounded-full border border-black/10 bg-white/55 p-1 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.24)]">
+                    {visibleLanguages.map((menuLanguage) => {
+                      const isSelected = menuLanguage.code === language;
+                      return (
+                        <button
+                          key={menuLanguage.code}
+                          type="button"
+                          onClick={() => setLanguage(menuLanguage.code)}
+                          className="rounded-full px-3 py-1.5 text-[0.68rem] font-medium transition"
+                          style={{
+                            backgroundColor: isSelected ? accentSoft : 'transparent',
+                            color: isSelected ? '#252a2d' : '#82796f',
+                          }}
+                        >
+                          {getLanguagePillLabel(menuLanguage)}
+                        </button>
+                      );
+                    })}
+                  </div>
+                ) : null}
+
+                <button
+                  type="button"
+                  onClick={() => setOpenSheet({ type: 'about' })}
+                  className="inline-flex h-9 items-center gap-1.5 rounded-full border px-3.5 text-[0.76rem] font-bold text-muted-foreground transition hover:border-black/15 hover:bg-black/5 hover:text-foreground"
+                  style={{ borderColor: 'rgba(95,81,67,0.18)', backgroundColor: 'rgba(255,255,255,0.42)' }}
+                >
+                  <Info size={14} />
+                  <span>{language === 'en' ? 'About' : 'О заведении'}</span>
+                </button>
+              </div>
             </div>
 
-            <div className="col-span-2 flex items-start justify-between gap-2 sm:col-span-1 sm:flex-col sm:items-end">
-              {visibleLanguages.length > 1 ? (
-                <div className="flex rounded-full border border-black/10 bg-white/55 p-1 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.24)]">
-                  {visibleLanguages.map((menuLanguage) => {
-                    const isSelected = menuLanguage.code === language;
-                    return (
-                      <button
-                        key={menuLanguage.code}
-                        type="button"
-                        onClick={() => setLanguage(menuLanguage.code)}
-                        className="rounded-full px-3 py-1.5 text-[0.68rem] font-medium transition"
-                        style={{
-                          backgroundColor: isSelected ? accentSoft : 'transparent',
-                          color: isSelected ? '#252a2d' : '#82796f',
-                        }}
-                      >
-                        {getLanguagePillLabel(menuLanguage)}
-                      </button>
-                    );
-                  })}
-                </div>
+            {/* Bottom row: Name & Description (Full Width) */}
+            <div className="space-y-1.5 min-w-0">
+              <h1 className="font-serif text-[1.62rem] font-semibold leading-tight tracking-[0.01em] text-foreground break-words sm:text-[1.8rem]">
+                {venueName}
+              </h1>
+              {isFilled(venueDescription) ? (
+                <p className="text-[0.9rem] leading-relaxed text-muted-foreground break-words">{venueDescription}</p>
               ) : null}
-
-              <button
-                type="button"
-                onClick={() => setOpenSheet({ type: 'about' })}
-                className="inline-flex h-9 items-center gap-1 rounded-full border px-3 text-[0.76rem] font-medium text-muted-foreground transition hover:border-black/15 hover:bg-black/5 hover:text-foreground"
-                style={{ borderColor: 'rgba(95,81,67,0.18)', backgroundColor: 'rgba(255,255,255,0.42)' }}
-              >
-                <Info size={14} />
-                <span>{language === 'en' ? 'About' : 'О заведении'}</span>
-              </button>
             </div>
           </div>
         </section>
