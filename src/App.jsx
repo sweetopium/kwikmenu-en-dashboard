@@ -11,6 +11,7 @@ import MenuImportPage from "./pages/MenuImportPage.jsx";
 import VenuePage from "./pages/VenuePage.jsx";
 import AccountPage from "./pages/AccountPage.jsx";
 import BillingPage from "./pages/BillingPage.jsx";
+import BillingCheckoutReturnPage from "./pages/BillingCheckoutReturnPage.jsx";
 import VenueListPage from "./pages/VenueListPage.jsx";
 import SubscriptionPlansPage from "./pages/SubscriptionPlansPage.jsx";
 import LoginPage from "./pages/LoginPage.jsx";
@@ -43,6 +44,8 @@ function App() {
                 <Route path="/dashboard/venue" element={<Navigate to="/dashboard/venues" replace/>}/>
                 <Route path="/dashboard/account" element={<ProtectedRoute><DashboardLayout><AccountPage/></DashboardLayout></ProtectedRoute>}/>
                 <Route path="/dashboard/billing" element={<ProtectedRoute><DashboardLayout><BillingPage/></DashboardLayout></ProtectedRoute>}/>
+                <Route path="/dashboard/billing/success" element={<ProtectedRoute><DashboardLayout><BillingCheckoutReturnPage mode="success" /></DashboardLayout></ProtectedRoute>}/>
+                <Route path="/dashboard/billing/fail" element={<ProtectedRoute><DashboardLayout><BillingCheckoutReturnPage mode="fail" /></DashboardLayout></ProtectedRoute>}/>
                 <Route path="/dashboard/subscription" element={<ProtectedRoute><DashboardLayout><SubscriptionPlansPage/></DashboardLayout></ProtectedRoute>}/>
                 <Route path="/dashboard/settings" element={<Navigate to="/dashboard/account" replace/>}/>
 

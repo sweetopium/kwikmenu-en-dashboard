@@ -49,3 +49,8 @@ export const syncBillingTransaction = (paymentId) =>
   billingFetch(`/transactions/${paymentId}/sync`, {
     method: 'POST',
   });
+
+export const syncBillingTransactionByUnitPayId = (unitpayPaymentId) =>
+  billingFetch(`/transactions/unitpay/${unitpayPaymentId}/sync`, {
+    method: 'POST',
+  });

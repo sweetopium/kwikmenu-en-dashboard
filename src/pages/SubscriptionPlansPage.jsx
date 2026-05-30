@@ -68,6 +68,11 @@ const SubscriptionPlansPage = () => {
     [data, selectedPlanId]
   );
 
+  const canPurchaseSelectedPlan = useMemo(
+    () => Boolean(selectedPlan) && (!isCurrentSelected || Boolean(data?.subscription?.cancelAtPeriodEnd)),
+    [data, isCurrentSelected, selectedPlan]
+  );
+
   const handleSelectPlan = (planId) => {
     setSelectedPlanId(planId);
     setAgreeOffer(false);
@@ -85,7 +90,7 @@ const SubscriptionPlansPage = () => {
     if (!selectedPlan) {
       return;
     }
-    if (isCurrentSelected) {
+    if (!canPurchaseSelectedPlan) {
       return;
     }
     if (!agreeOffer || !agreeRecurring) {
@@ -242,7 +247,7 @@ const SubscriptionPlansPage = () => {
               </div>
             </div>
 
-            {!isCurrentSelected && selectedPlan ? (
+            {canPurchaseSelectedPlan && selectedPlan ? (
               <div className="space-y-4 pt-2">
                 <label className="flex items-start gap-3 cursor-pointer select-none">
                   <input
@@ -283,7 +288,7 @@ const SubscriptionPlansPage = () => {
           </div>
 
           <div className="space-y-3">
-            {isCurrentSelected ? (
+            {!canPurchaseSelectedPlan ? (
               <Button className="w-full h-12 rounded-lg text-sm font-black bg-secondary text-muted-foreground border border-border/50 cursor-not-allowed" disabled>
                 {t('subscription.checkout.btnActive', 'Текущий тариф активен')}
               </Button>
@@ -298,7 +303,9 @@ const SubscriptionPlansPage = () => {
                 ) : (
                   <>
                     <Lock size={16} className="mr-2" />
-                    {t('subscription.checkout.btnProceed', 'Перейти к оплате')}
+                    {isCurrentSelected && data?.subscription?.cancelAtPeriodEnd
+                      ? 'Оформить подписку заново'
+                      : t('subscription.checkout.btnProceed', 'Перейти к оплате')}
                     <ArrowRight size={16} className="ml-2" />
                   </>
                 )}

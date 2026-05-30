@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { CreditCard, Receipt, ShieldCheck } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 import { Button } from "../components/ui/button";
 import SettingsPageHeader from "../components/settings/SettingsPageHeader";
@@ -68,6 +69,7 @@ const BillingPage = () => {
 
   const subscription = data?.subscription;
   const usage = data?.usage;
+  const canRestartSubscription = Boolean(subscription?.cancelAtPeriodEnd);
 
   return (
     <div className="mx-auto space-y-6 sm:space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700 ease-out">
@@ -139,14 +141,22 @@ const BillingPage = () => {
               <Button variant="outline" className={`flex-1 ${secondaryActionButtonClasses} p-4`} onClick={load}>
                 {t('billing.actions.update', 'Обновить данные')}
               </Button>
-              <Button
-                variant="destructive"
-                className="flex-1 p-3 sm:h-12 rounded-lg font-bold bg-red-500/10 text-red-500 border-none hover:bg-red-500/20"
-                onClick={handleCancel}
-                disabled={isCancelling}
-              >
-                {t('billing.actions.disableAutoRenewal', 'Отключить автопродление')}
-              </Button>
+              {canRestartSubscription ? (
+                <Link to="/dashboard/subscription" className="flex-1">
+                  <Button className="w-full p-3 sm:h-12 rounded-lg font-bold">
+                    Оформить подписку заново
+                  </Button>
+                </Link>
+              ) : (
+                <Button
+                  variant="destructive"
+                  className="flex-1 p-3 sm:h-12 rounded-lg font-bold bg-red-500/10 text-red-500 border-none hover:bg-red-500/20"
+                  onClick={handleCancel}
+                  disabled={isCancelling}
+                >
+                  {t('billing.actions.disableAutoRenewal', 'Отключить автопродление')}
+                </Button>
+              )}
             </div>
           </div>
         </section>

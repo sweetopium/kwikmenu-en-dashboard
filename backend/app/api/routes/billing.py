@@ -54,6 +54,71 @@ def _get_transaction_for_user(db: Session, current_user: User, payment_id: str) 
     )
 
 
+def _get_transaction_for_user_by_unitpay_id(
+    db: Session,
+    current_user: User,
+    unitpay_payment_id: str,
+) -> PaymentTransaction | None:
+    return (
+        db.query(PaymentTransaction)
+        .filter(
+            PaymentTransaction.unitpay_payment_id == unitpay_payment_id,
+            PaymentTransaction.user_id == current_user.id,
+        )
+        .first()
+    )
+
+
+def _sync_transaction_record(
+    *,
+    transaction: PaymentTransaction,
+    current_user: User,
+    db: Session,
+) -> BillingSyncResponse:
+    subscription = ensure_default_subscription(db, current_user)
+    unitpay = UnitPayClient()
+    if not transaction.unitpay_payment_id:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Платеж не содержит UnitPay ID.")
+
+    payment_payload = unitpay.get_payment(payment_id=transaction.unitpay_payment_id)
+    payment_result = payment_payload.get("result") or {}
+    remote_status = str(payment_result.get("status") or "wait")
+    transaction.raw_response = payment_payload
+    transaction.processed_at = datetime.now(timezone.utc)
+    transaction.receipt_url = payment_result.get("receiptUrl") or transaction.receipt_url
+    transaction.error_message = payment_result.get("errorMessage")
+
+    if remote_status == "success":
+        transaction.status = "success"
+        apply_successful_payment(
+            subscription,
+            transaction,
+            unitpay_subscription_id=transaction.unitpay_subscription_id,
+            payment_time=transaction.processed_at,
+        )
+    elif remote_status in {"error", "error_pay", "error_check"}:
+        transaction.status = "error"
+        mark_payment_failed(subscription, error_message=transaction.error_message)
+    else:
+        transaction.status = "pending"
+        subscription.last_synced_at = datetime.now(timezone.utc)
+
+    log_billing_event(
+        db,
+        source="api",
+        event_type="payment_synced",
+        user_id=current_user.id,
+        subscription_id=subscription.id,
+        payment_id=transaction.id,
+        payload={"remoteStatus": remote_status},
+    )
+    db.add(transaction)
+    db.add(subscription)
+    db.commit()
+    db.refresh(subscription)
+    return BillingSyncResponse(subscription=build_subscription_response(subscription), syncedAt=datetime.now(timezone.utc))
+
+
 @router.get("/me", response_model=BillingSummaryResponse)
 def get_my_billing(
     current_user: User = Depends(get_current_user),
@@ -263,49 +328,19 @@ def sync_transaction(
     transaction = _get_transaction_for_user(db, current_user, payment_id)
     if transaction is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Платеж не найден.")
+    return _sync_transaction_record(transaction=transaction, current_user=current_user, db=db)
 
-    subscription = ensure_default_subscription(db, current_user)
-    unitpay = UnitPayClient()
-    if not transaction.unitpay_payment_id:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Платеж не содержит UnitPay ID.")
 
-    payment_payload = unitpay.get_payment(payment_id=transaction.unitpay_payment_id)
-    payment_result = payment_payload.get("result") or {}
-    remote_status = str(payment_result.get("status") or "wait")
-    transaction.raw_response = payment_payload
-    transaction.processed_at = datetime.now(timezone.utc)
-    transaction.receipt_url = payment_result.get("receiptUrl") or transaction.receipt_url
-    transaction.error_message = payment_result.get("errorMessage")
-
-    if remote_status == "success":
-        transaction.status = "success"
-        apply_successful_payment(
-            subscription,
-            transaction,
-            unitpay_subscription_id=transaction.unitpay_subscription_id,
-            payment_time=transaction.processed_at,
-        )
-    elif remote_status in {"error", "error_pay", "error_check"}:
-        transaction.status = "error"
-        mark_payment_failed(subscription, error_message=transaction.error_message)
-    else:
-        transaction.status = "pending"
-        subscription.last_synced_at = datetime.now(timezone.utc)
-
-    log_billing_event(
-        db,
-        source="api",
-        event_type="payment_synced",
-        user_id=current_user.id,
-        subscription_id=subscription.id,
-        payment_id=transaction.id,
-        payload={"remoteStatus": remote_status},
-    )
-    db.add(transaction)
-    db.add(subscription)
-    db.commit()
-    db.refresh(subscription)
-    return BillingSyncResponse(subscription=build_subscription_response(subscription), syncedAt=datetime.now(timezone.utc))
+@router.post("/transactions/unitpay/{unitpay_payment_id}/sync", response_model=BillingSyncResponse)
+def sync_transaction_by_unitpay_payment_id(
+    unitpay_payment_id: str,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+) -> BillingSyncResponse:
+    transaction = _get_transaction_for_user_by_unitpay_id(db, current_user, unitpay_payment_id)
+    if transaction is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Платеж не найден.")
+    return _sync_transaction_record(transaction=transaction, current_user=current_user, db=db)
 
 
 @router.get("/unitpay/callback")
