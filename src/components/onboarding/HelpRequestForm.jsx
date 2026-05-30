@@ -6,10 +6,8 @@ import { useTranslation } from 'react-i18next';
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
-import { Switch } from "../ui/switch";
 import { CountryField, DialPhoneField } from "./CountryDialFields";
 import { COUNTRIES, inputBaseClasses } from "./countries";
-import MenuSourcePicker from "./MenuSourcePicker";
 import { submitHelpRequest } from "../../lib/helpRequestsApi";
 
 const SelectChevron = () => (
@@ -25,16 +23,11 @@ const HelpRequestForm = ({ onClose = null }) => {
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState('');
-  const [menuSource, setMenuSource] = useState('file');
-  const [menuFile, setMenuFile] = useState(null);
-  const [fileName, setFileName] = useState('');
-  const [uploadLater, setUploadLater] = useState(false);
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
   const [messenger, setMessenger] = useState('telegram');
   const [city, setCity] = useState('');
   const [restaurant, setRestaurant] = useState('');
-  const [menuLink, setMenuLink] = useState('');
   const [selectedCountry, setSelectedCountry] = useState('ru');
   const [selectedDial, setSelectedDial] = useState('+7');
 
@@ -54,10 +47,6 @@ const HelpRequestForm = ({ onClose = null }) => {
         countryName: country?.name || selectedCountry,
         city,
         restaurantName: restaurant,
-        uploadLater,
-        menuSource,
-        menuLink,
-        menuFile,
       });
       setIsSubmitted(true);
     } catch (error) {
@@ -189,51 +178,8 @@ const HelpRequestForm = ({ onClose = null }) => {
               />
             </div>
 
-            <div className="space-y-2 sm:space-y-3 pt-1 sm:pt-2">
-              <Label className="text-foreground font-medium ml-1 text-[11px] sm:text-xs sm:text-sm">
-                {t('helpForm.uploadMenuLabel')} <RequiredAsterisk />
-              </Label>
-
-              {!uploadLater && (
-                <MenuSourcePicker
-                  menuSource={menuSource}
-                  onMenuSourceChange={setMenuSource}
-                  fileName={fileName}
-                  onFileChange={(e) => {
-                    const nextFile = e.target.files?.[0] || null;
-                    if (nextFile) {
-                      const ext = '.' + nextFile.name.split('.').pop().toLowerCase();
-                      const allowedExtensions = ['.pdf', '.jpg', '.jpeg', '.png', '.webp'];
-                      if (!allowedExtensions.includes(ext)) {
-                        setSubmitError(t('helpForm.errInvalidFormat', { defaultValue: 'Поддерживаются только файлы PDF и изображения' }));
-                        setMenuFile(null);
-                        setFileName('');
-                        e.target.value = '';
-                        return;
-                      }
-                    }
-                    setMenuFile(nextFile);
-                    setFileName(nextFile?.name || '');
-                    if (submitError === t('helpForm.errInvalidFormat')) {
-                      setSubmitError('');
-                    }
-                  }}
-                  menuLink={menuLink}
-                  onMenuLinkChange={setMenuLink}
-                  inputClassName={inputBaseClasses}
-                />
-              )}
-
-              <div className="flex items-center space-x-2.5 pt-1.5 sm:pt-2">
-                <Switch
-                  id="upload-later"
-                  checked={uploadLater}
-                  onCheckedChange={setUploadLater}
-                />
-                <Label htmlFor="upload-later" className="text-xs sm:text-sm font-medium cursor-pointer text-foreground select-none">
-                  {t('helpForm.uploadLater')}
-                </Label>
-              </div>
+            <div className="rounded-2xl border border-brand-purple/10 bg-brand-purple/5 p-4 text-xs sm:text-sm text-muted-foreground leading-relaxed">
+              {t('helpForm.menuHandledByManager', 'Меню на этом этапе прикладывать не нужно. После заявки менеджер свяжется с вами и отдельно запросит материалы для переноса.')}
             </div>
 
             <div className="pt-3 sm:pt-4">

@@ -138,23 +138,20 @@ const BillingPage = () => {
             </div>
 
             <div className="pt-6 border-t border-border/50 flex flex-col sm:flex-row gap-3">
-              <Button variant="outline" className={`flex-1 ${secondaryActionButtonClasses} p-4`} onClick={load}>
-                {t('billing.actions.update', 'Обновить данные')}
-              </Button>
               {canRestartSubscription ? (
-                <Link to="/dashboard/subscription" className="flex-1">
+                <Link to="/dashboard/subscription" className="sm:flex-1">
                   <Button className="w-full p-3 sm:h-12 rounded-lg font-bold">
-                    Оформить подписку заново
+                    Возобновить подписку
                   </Button>
                 </Link>
               ) : (
                 <Button
                   variant="destructive"
-                  className="flex-1 p-3 sm:h-12 rounded-lg font-bold bg-red-500/10 text-red-500 border-none hover:bg-red-500/20"
+                  className="sm:flex-1 p-3 sm:h-12 rounded-lg font-bold bg-red-500/10 text-red-500 border-none hover:bg-red-500/20"
                   onClick={handleCancel}
                   disabled={isCancelling}
                 >
-                  {t('billing.actions.disableAutoRenewal', 'Отключить автопродление')}
+                  Отменить подписку
                 </Button>
               )}
             </div>

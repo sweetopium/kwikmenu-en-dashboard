@@ -10,10 +10,6 @@ export const submitHelpRequest = async ({
   countryName,
   city,
   restaurantName,
-  uploadLater,
-  menuSource,
-  menuLink = '',
-  menuFile = null,
   signal,
 }) => {
   const formData = new FormData();
@@ -24,16 +20,8 @@ export const submitHelpRequest = async ({
   formData.append('country_name', trimString(countryName));
   formData.append('city', trimString(city));
   formData.append('restaurant_name', trimString(restaurantName));
-  formData.append('upload_later', uploadLater ? 'true' : 'false');
-  formData.append('menu_source', trimString(menuSource));
-
-  if (!uploadLater && menuSource === 'link') {
-    formData.append('menu_link', trimString(menuLink));
-  }
-
-  if (!uploadLater && menuSource === 'file' && menuFile) {
-    formData.append('menu_file', menuFile, menuFile.name);
-  }
+  formData.append('upload_later', 'true');
+  formData.append('menu_source', 'file');
 
   const response = await fetch(HELP_REQUESTS_API_URL, {
     method: 'POST',

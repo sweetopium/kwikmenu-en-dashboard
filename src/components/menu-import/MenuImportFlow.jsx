@@ -547,16 +547,6 @@ const MenuImportFlow = ({
           </div>
         </div>
 
-        {/* AI Success Note Banner */}
-        <div className="rounded-2xl border border-brand-purple/20 bg-brand-purple/5 p-4 sm:p-5">
-          <div className="flex items-start gap-3">
-            <Sparkles size={18} className="mt-0.5 shrink-0 text-brand-purple" />
-            <p className="text-sm leading-relaxed text-brand-purple/90">
-              {t('menuImport.results.successNote', { defaultValue: 'Искусственный интеллект успешно завершил распознавание! Черновик сохранен в вашем кабинете и доступен для редактирования.' })}
-            </p>
-          </div>
-        </div>
-
         {/* Dynamic Warning Banners (if any) & Source Metadata Footer */}
         <div className="space-y-4">
           {resultPreview.usedFallback && (

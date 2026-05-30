@@ -25,10 +25,21 @@ router = APIRouter(prefix="/api/public", tags=["public"])
 PUBLIC_MENU_STATUSES = {"active", "published"}
 
 
+@router.options("/billing/plans", include_in_schema=False)
+def options_public_billing_plans(response: Response) -> Response:
+    response.headers["Access-Control-Allow-Origin"] = "*"
+    response.headers["Access-Control-Allow-Methods"] = "GET, OPTIONS"
+    response.headers["Access-Control-Allow-Headers"] = "*"
+    response.headers["Access-Control-Max-Age"] = "86400"
+    return response
+
+
 @router.get("/billing/plans", response_model=list[PublicBillingPlanResponse])
 def get_public_billing_plans(
+    response: Response,
     db: Session = Depends(get_db),
 ) -> list[PublicBillingPlanResponse]:
+    response.headers["Access-Control-Allow-Origin"] = "*"
     plans = get_public_plans(db)
     active_public_plans = [plan for plan in plans if plan.is_active]
     return [build_public_plan_response(plan) for plan in active_public_plans]
