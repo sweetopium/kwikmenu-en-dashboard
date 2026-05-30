@@ -582,7 +582,7 @@ const VenuePage = () => {
                 <div className="w-10 h-10 rounded-full bg-brand-purple/10 flex items-center justify-center shrink-0 text-brand-purple">
                   <Wifi size={20} />
                 </div>
-                <p className="text-xs text-brand-purple/80 leading-relaxed">
+                <p className="text-xs text-brand-purple/80 leading-relaxed mt-3">
                   {t('venues.wifi.hint', 'При активации этой функции в меню появится кнопка «Подключиться к Wi‑Fi». Гостям не придётся вводить пароль вручную.')}
                 </p>
               </div>

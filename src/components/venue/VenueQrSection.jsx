@@ -108,7 +108,7 @@ const VenueQrSection = ({ value, onChange, onSave, onDownload, onOpenPublicLink,
 
               <div className="border-t border-border/50" />
 
-              <div className="flex justify-end">
+              <div className="flex justify-start">
                 <Button
                   onClick={onSave}
                   disabled={isSaving}
