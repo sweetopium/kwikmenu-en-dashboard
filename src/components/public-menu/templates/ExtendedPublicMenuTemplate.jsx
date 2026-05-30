@@ -673,7 +673,7 @@ const ExtendedPublicMenuTemplate = ({
                         key={item.id}
                         type="button"
                         onClick={isItemAvailable ? () => setOpenSheet({ type: 'item', item }) : undefined}
-                        className={`overflow-hidden rounded-[1.35rem] border text-left shadow-[0_12px_28px_rgba(55,48,41,0.05)] transition ${isItemAvailable ? 'hover:border-black/15 hover:shadow-[0_14px_32px_rgba(55,48,41,0.08)]' : 'opacity-50 grayscale-[30%] cursor-default'}`}
+                        className={`flex flex-col h-full overflow-hidden rounded-[1.35rem] border text-left shadow-[0_12px_28px_rgba(55,48,41,0.05)] transition ${isItemAvailable ? 'hover:border-black/15 hover:shadow-[0_14px_32px_rgba(55,48,41,0.08)]' : 'opacity-50 grayscale-[30%] cursor-default'}`}
                         style={{ backgroundColor: SURFACE_BG, borderColor: 'rgba(162,142,121,0.16)' }}
                         disabled={!isItemAvailable}
                       >
@@ -682,21 +682,23 @@ const ExtendedPublicMenuTemplate = ({
                           alt={itemName}
                           placeholderLabel={venueName}
                           eager={itemIndex < 6}
-                          className="aspect-[4/3] overflow-hidden"
+                          className="aspect-[4/3] w-full overflow-hidden shrink-0"
                         />
                         <div
-                          className="relative z-10 -mt-[14px] grid min-h-[96px] grid-rows-[1fr_auto] gap-2 rounded-b-[1.35rem] px-3 pb-3.5 pt-3.5"
+                          className="relative z-10 -mt-[14px] flex-grow flex-1 grid min-h-[96px] grid-rows-[1fr_auto] gap-2 rounded-b-[1.35rem] px-3 pb-3.5 pt-3.5"
                           style={{
                             backgroundColor: SURFACE_BG
                           }}
                         >
-                          <div className="text-[0.84rem] font-medium leading-[1.2] tracking-[-0.01em] text-foreground [display:-webkit-box] overflow-hidden [-webkit-box-orient:vertical] [-webkit-line-clamp:4]">
+                          <div className="text-[0.84rem] font-medium leading-[1.2] tracking-[-0.01em] text-foreground flex flex-col gap-1 min-w-0">
                             {!isItemAvailable && (
-                              <span className="text-[9px] font-bold text-red-500 uppercase block mb-1">
+                              <span className="text-[9px] font-bold text-red-500 uppercase block">
                                 {language === 'ru' ? 'Нет в наличии' : 'Out of stock'}
                               </span>
                             )}
-                            {itemName}
+                            <div className="[display:-webkit-box] overflow-hidden [-webkit-box-orient:vertical] [-webkit-line-clamp:2] break-words">
+                              {itemName}
+                            </div>
                           </div>
                           {isFilled(cardPrice.amount) ? (
                             <div className="text-[0.9rem] font-medium leading-none tracking-[-0.02em] text-foreground">
