@@ -5,6 +5,29 @@ import { Button } from '../components/ui/Button';
 import { fetchBillingPlans, fetchBillingSubscriptions, processBillingRenewals, updateBillingPlan } from '../lib/adminApi';
 import { formatDateTime } from '../lib/formatters';
 
+const toPlanUpdatePayload = (plan) => ({
+  name: plan.name,
+  description: plan.description,
+  priceAmount: plan.priceAmount,
+  currency: plan.currency,
+  billingPeriod: plan.billingPeriod,
+  isActive: plan.isActive,
+  isPublic: plan.isPublic,
+  sortOrder: plan.sortOrder,
+  maxVenues: plan.maxVenues,
+  maxMenusPerVenue: plan.maxMenusPerVenue,
+  maxMenuItemsPerMenu: plan.maxMenuItemsPerMenu,
+  aiImportsPerMonth: plan.aiImportsPerMonth,
+  publicMenuEnabled: plan.publicMenuEnabled,
+  translationsEnabled: plan.translationsEnabled,
+  maxTranslationLanguages: plan.maxTranslationLanguages,
+  analyticsEnabled: plan.analyticsEnabled,
+  qrCustomizationEnabled: plan.qrCustomizationEnabled,
+  menuDesignCustomizationEnabled: plan.menuDesignCustomizationEnabled,
+  maxTemplateTier: plan.maxTemplateTier,
+  prioritySupportEnabled: plan.prioritySupportEnabled,
+});
+
 const BillingPage = () => {
   const [plans, setPlans] = useState([]);
   const [subscriptions, setSubscriptions] = useState([]);
@@ -34,7 +57,7 @@ const BillingPage = () => {
     setSavingPlanId(plan.id);
     setError('');
     try {
-      await updateBillingPlan(plan.id, plan);
+      await updateBillingPlan(plan.id, toPlanUpdatePayload(plan));
       load();
     } catch (nextError) {
       setError(nextError.message);

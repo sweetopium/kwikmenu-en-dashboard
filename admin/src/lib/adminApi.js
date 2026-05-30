@@ -26,6 +26,34 @@ const parseApiError = async (response) => {
 
   try {
     const payload = JSON.parse(text);
+    if (Array.isArray(payload)) {
+      const message = payload
+        .map((item) => {
+          if (!item || typeof item !== 'object') {
+            return String(item);
+          }
+          const location = Array.isArray(item.loc) ? item.loc.join('.') : '';
+          const prefix = location ? `${location}: ` : '';
+          return `${prefix}${item.msg || JSON.stringify(item)}`;
+        })
+        .join('; ');
+      throw new Error(message || text);
+    }
+
+    if (Array.isArray(payload.detail)) {
+      const message = payload.detail
+        .map((item) => {
+          if (!item || typeof item !== 'object') {
+            return String(item);
+          }
+          const location = Array.isArray(item.loc) ? item.loc.join('.') : '';
+          const prefix = location ? `${location}: ` : '';
+          return `${prefix}${item.msg || JSON.stringify(item)}`;
+        })
+        .join('; ');
+      throw new Error(message || text);
+    }
+
     throw new Error(payload.detail || payload.message || text);
   } catch (error) {
     if (error instanceof SyntaxError) {
