@@ -95,7 +95,7 @@ def create_checkout(
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Тариф не найден.")
 
     unitpay = UnitPayClient()
-    description = f"KwikMenu {plan.name} ({current_user.email})"
+    description = f"Подписка на сервис KwikMenu тариф: {plan.name}"
     amount = float(plan.price_amount)
     result = unitpay.init_subscription_payment(
         account=current_user.id,
@@ -170,7 +170,7 @@ def create_test_subscription_charge(
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Тариф не найден.")
         plan = requested_plan
 
-    description = f"KwikMenu {plan.name} test recurring ({current_user.email})"
+    description = f"Подписка на сервис KwikMenu тариф: {plan.name}"
     amount = float(plan.price_amount)
     result = unitpay.init_subscription_payment(
         account=current_user.id,
