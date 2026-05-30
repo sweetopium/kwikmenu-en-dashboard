@@ -745,16 +745,22 @@ const ExtendedPublicMenuTemplate = ({
                     const badge = getItemBadge(item, language);
 
                     return (
-                      <motion.button
+                      <motion.div
                         key={item.id}
-                        type="button"
+                        role="button"
+                        tabIndex={isItemAvailable ? 0 : -1}
                         onClick={isItemAvailable ? () => setOpenSheet({ type: 'item', item }) : undefined}
+                        onKeyDown={(event) => {
+                          if (isItemAvailable && (event.key === 'Enter' || event.key === ' ')) {
+                            event.preventDefault();
+                            setOpenSheet({ type: 'item', item });
+                          }
+                        }}
                         whileHover={isItemAvailable ? { y: -3 } : undefined}
                         whileTap={isItemAvailable ? { scale: 0.97 } : undefined}
                         transition={{ duration: 0.2, ease: 'easeInOut' }}
-                        className={`flex flex-col h-full overflow-hidden rounded-[1.35rem] border text-left shadow-[0_12px_28px_rgba(55,48,41,0.05)] transition-all ${isItemAvailable ? 'hover:border-black/15 hover:shadow-[0_14px_32px_rgba(55,48,41,0.08)]' : 'opacity-60 grayscale-[15%] cursor-default'}`}
+                        className={`flex flex-col h-full overflow-hidden rounded-[1.35rem] border text-left shadow-[0_12px_28px_rgba(55,48,41,0.05)] transition-all ${isItemAvailable ? 'cursor-pointer hover:border-black/15 hover:shadow-[0_14px_32px_rgba(55,48,41,0.08)]' : 'opacity-60 grayscale-[15%] cursor-default'}`}
                         style={{ backgroundColor: SURFACE_BG, borderColor: 'rgba(162,142,121,0.16)' }}
-                        disabled={!isItemAvailable}
                       >
                         <div className="relative aspect-[4/3] w-full overflow-hidden shrink-0">
                           <MenuImage
@@ -794,7 +800,7 @@ const ExtendedPublicMenuTemplate = ({
                             </div>
                           ) : null}
                         </div>
-                      </motion.button>
+                      </motion.div>
                     );
                   })}
                 </div>
