@@ -4,7 +4,7 @@ WORKDIR /app
 
 COPY admin/package*.json ./
 
-RUN npm ci --no-audit --no-fund --registry=https://registry.npmjs.org/
+RUN npm install --no-audit --no-fund --registry=https://registry.npmjs.org/
 
 COPY admin/ ./
 
