@@ -13,6 +13,7 @@ from app.schemas.billing import (
     BillingSummaryResponse,
     BillingSubscriptionResponse,
     BillingSyncResponse,
+    BillingTestSubscriptionChargeRequest,
 )
 from app.services.billing import (
     apply_successful_payment,
@@ -135,6 +136,86 @@ def create_checkout(
         subscription_id=subscription.id,
         payment_id=transaction.id,
         payload={"planCode": plan.code, "unitpayPaymentId": transaction.unitpay_payment_id},
+    )
+    db.commit()
+    db.refresh(transaction)
+    return BillingCheckoutResponse(
+        transaction=build_transaction_response(transaction),
+        redirectUrl=result.redirect_url,
+    )
+
+
+@router.post("/test/subscription-charge", response_model=BillingCheckoutResponse)
+def create_test_subscription_charge(
+    payload: BillingTestSubscriptionChargeRequest,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+) -> BillingCheckoutResponse:
+    unitpay = UnitPayClient()
+    if not unitpay.settings.unitpay_test_mode:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Тестовое списание по subscriptionId доступно только при UNITPAY_TEST_MODE=true.",
+        )
+
+    subscription = ensure_default_subscription(db, current_user)
+    plan = subscription.plan
+    if payload.planCode:
+        requested_plan = (
+            db.query(SubscriptionPlan)
+            .filter(SubscriptionPlan.code == payload.planCode, SubscriptionPlan.is_active.is_(True))
+            .first()
+        )
+        if requested_plan is None:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Тариф не найден.")
+        plan = requested_plan
+
+    description = f"KwikMenu {plan.name} test recurring ({current_user.email})"
+    amount = float(plan.price_amount)
+    result = unitpay.init_subscription_payment(
+        account=current_user.id,
+        sum_amount=amount,
+        description=description,
+        subscription_id=str(payload.subscriptionId),
+    )
+
+    transaction = PaymentTransaction(
+        user_id=current_user.id,
+        subscription_id=subscription.id,
+        plan_id=plan.id,
+        kind="recurring_test",
+        status="pending",
+        unitpay_payment_id=result.payment_id,
+        unitpay_subscription_id=str(payload.subscriptionId),
+        amount=amount,
+        currency=plan.currency,
+        description=description,
+        checkout_url=result.redirect_url,
+        receipt_url=result.receipt_url,
+        status_url=result.status_url,
+        is_test=True,
+        raw_request={
+            "account": current_user.id,
+            "description": description,
+            "planCode": plan.code,
+            "subscriptionId": str(payload.subscriptionId),
+        },
+        raw_response=result.payload,
+    )
+    db.add(transaction)
+    db.flush()
+    log_billing_event(
+        db,
+        source="api",
+        event_type="test_recurring_checkout_created",
+        user_id=current_user.id,
+        subscription_id=subscription.id,
+        payment_id=transaction.id,
+        payload={
+            "planCode": plan.code,
+            "unitpayPaymentId": transaction.unitpay_payment_id,
+            "subscriptionId": str(payload.subscriptionId),
+        },
     )
     db.commit()
     db.refresh(transaction)

@@ -68,6 +68,8 @@ class Settings(BaseSettings):
     unitpay_public_key: str | None = None
     unitpay_project_id: int | None = None
     unitpay_secret_key: str | None = None
+    unitpay_project_secret_key: str | None = None
+    unitpay_test_secret_key: str | None = None
     unitpay_login: str | None = None
     unitpay_test_mode: bool = False
     unitpay_payment_type: str = "card"

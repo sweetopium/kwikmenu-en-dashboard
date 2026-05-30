@@ -115,3 +115,8 @@ class BillingCheckoutResponse(StrictModel):
 class BillingSyncResponse(StrictModel):
     subscription: BillingSubscriptionResponse
     syncedAt: datetime
+
+
+class BillingTestSubscriptionChargeRequest(StrictModel):
+    subscriptionId: int = Field(ge=1, le=5)
+    planCode: str | None = Field(default=None, min_length=1, max_length=32)

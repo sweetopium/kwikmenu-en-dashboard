@@ -27,7 +27,7 @@ class UnitPayClient:
 
     @property
     def enabled(self) -> bool:
-        return bool(self.settings.unitpay_secret_key and self.settings.unitpay_project_id)
+        return bool(self._api_secret_key() and self.settings.unitpay_project_id)
 
     def ensure_configured(self) -> None:
         if self.enabled:
@@ -52,7 +52,7 @@ class UnitPayClient:
             "sum": f"{sum_amount:.2f}",
             "desc": description,
             "projectId": self.settings.unitpay_project_id,
-            "secretKey": self.settings.unitpay_secret_key,
+            "secretKey": self._api_secret_key(),
             "currency": self.settings.currency,
             "locale": "ru",
         }
@@ -84,21 +84,30 @@ class UnitPayClient:
     def list_subscriptions(self, *, all_statuses: bool = False) -> dict[str, Any]:
         params: dict[str, Any] = {
             "projectId": self.settings.unitpay_project_id,
-            "secretKey": self.settings.unitpay_secret_key,
+            "secretKey": self._api_secret_key(),
         }
         if all_statuses:
             params["all"] = 1
         return self._api_get("listSubscriptions", params)
 
+    def get_subscription(self, *, subscription_id: str) -> dict[str, Any]:
+        params: dict[str, Any] = {
+            "subscriptionId": subscription_id,
+            "projectId": self.settings.unitpay_project_id,
+            "secretKey": self._api_secret_key(),
+        }
+        return self._api_get("getSubscription", params)
+
     def get_payment(self, *, payment_id: str) -> dict[str, Any]:
-        return self._api_get(
-            "getPayment",
-            {
-                "paymentId": payment_id,
-                "secretKey": self.settings.unitpay_secret_key,
-                **({"test": 1} if self.settings.unitpay_test_mode else {}),
-            },
-        )
+        params: dict[str, Any] = {
+            "paymentId": payment_id,
+            "secretKey": self._api_secret_key(),
+        }
+        if self.settings.unitpay_test_mode:
+            params["test"] = 1
+            if self.settings.unitpay_login:
+                params["login"] = self.settings.unitpay_login
+        return self._api_get("getPayment", params)
 
     def close_subscription(self, *, subscription_id: str) -> dict[str, Any]:
         return self._api_get(
@@ -106,7 +115,7 @@ class UnitPayClient:
             {
                 "subscriptionId": subscription_id,
                 "projectId": self.settings.unitpay_project_id,
-                "secretKey": self.settings.unitpay_secret_key,
+                "secretKey": self._api_secret_key(),
                 **({"test": 1} if self.settings.unitpay_test_mode else {}),
             },
         )
@@ -114,7 +123,7 @@ class UnitPayClient:
     def refund_payment(self, *, payment_id: str, sum_amount: float | None = None) -> dict[str, Any]:
         params: dict[str, Any] = {
             "paymentId": payment_id,
-            "secretKey": self.settings.unitpay_secret_key,
+            "secretKey": self._api_secret_key(),
         }
         if sum_amount is not None:
             params["sum"] = f"{sum_amount:.2f}"
@@ -124,7 +133,7 @@ class UnitPayClient:
         if not signature:
             return False
         sorted_values = [str(params[key]) for key in sorted(params) if key != "signature"]
-        payload = "{up}".join([method, *sorted_values, self.settings.unitpay_secret_key or ""])
+        payload = "{up}".join([method, *sorted_values, self._signature_secret_key()])
         expected = hashlib.sha256(payload.encode("utf-8")).hexdigest()
         return expected == signature
 
@@ -139,6 +148,26 @@ class UnitPayClient:
     def build_checkout_link(self, *, public_key: str, payment_type: str, query_params: dict[str, Any]) -> str:
         encoded = urlencode(query_params)
         return f"{self.settings.unitpay_base_url.rstrip('/')}/pay/{public_key}/{payment_type}?{encoded}"
+
+    def _project_secret_key(self) -> str:
+        return (
+            self.settings.unitpay_project_secret_key
+            or self.settings.unitpay_secret_key
+            or ""
+        )
+
+    def _test_secret_key(self) -> str:
+        return (
+            self.settings.unitpay_test_secret_key
+            or self.settings.unitpay_secret_key
+            or ""
+        )
+
+    def _api_secret_key(self) -> str:
+        return self._test_secret_key() if self.settings.unitpay_test_mode else self._project_secret_key()
+
+    def _signature_secret_key(self) -> str:
+        return self._project_secret_key()
 
     def _api_get(self, method: str, params: dict[str, Any]) -> dict[str, Any]:
         self.ensure_configured()
