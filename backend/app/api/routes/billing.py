@@ -18,6 +18,7 @@ from app.schemas.billing import (
 from app.services.billing import (
     apply_successful_payment,
     build_plan_response,
+    build_subscription_receipt_items,
     build_subscription_response,
     build_transaction_response,
     build_usage_response,
@@ -162,10 +163,18 @@ def create_checkout(
     unitpay = UnitPayClient()
     description = f"KwikMenu {plan.name} subscription"
     amount = float(plan.price_amount)
+    receipt_items = build_subscription_receipt_items(
+        name=description,
+        amount=plan.price_amount,
+        currency=plan.currency,
+    )
     result = unitpay.init_subscription_payment(
         account=current_user.id,
         sum_amount=amount,
         description=description,
+        customer_email=current_user.email,
+        customer_phone=current_user.phone,
+        receipt_items=receipt_items,
         subscription=True,
     )
 
@@ -188,6 +197,8 @@ def create_checkout(
             "description": description,
             "planCode": plan.code,
             "subscription": True,
+            "customerEmail": current_user.email,
+            "receiptItems": receipt_items,
         },
         raw_response=result.payload,
     )
@@ -237,10 +248,18 @@ def create_test_subscription_charge(
 
     description = f"KwikMenu {plan.name} subscription"
     amount = float(plan.price_amount)
+    receipt_items = build_subscription_receipt_items(
+        name=description,
+        amount=plan.price_amount,
+        currency=plan.currency,
+    )
     result = unitpay.init_subscription_payment(
         account=current_user.id,
         sum_amount=amount,
         description=description,
+        customer_email=current_user.email,
+        customer_phone=current_user.phone,
+        receipt_items=receipt_items,
         subscription_id=str(payload.subscriptionId),
     )
 
@@ -264,6 +283,8 @@ def create_test_subscription_charge(
             "description": description,
             "planCode": plan.code,
             "subscriptionId": str(payload.subscriptionId),
+            "customerEmail": current_user.email,
+            "receiptItems": receipt_items,
         },
         raw_response=result.payload,
     )

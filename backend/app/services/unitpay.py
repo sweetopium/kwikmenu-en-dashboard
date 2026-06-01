@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import base64
 from dataclasses import dataclass
 from typing import Any
 from urllib.parse import urlencode
@@ -44,6 +45,9 @@ class UnitPayClient:
         account: str,
         sum_amount: float,
         description: str,
+        customer_email: str | None = None,
+        customer_phone: str | None = None,
+        receipt_items: list[dict[str, Any]] | None = None,
         subscription: bool = False,
         subscription_id: str | None = None,
     ) -> UnitPayInitPaymentResult:
@@ -67,6 +71,12 @@ class UnitPayClient:
             params["successUrl"] = self.settings.unitpay_success_url
         if self.settings.unitpay_fail_url:
             params["failUrl"] = self.settings.unitpay_fail_url
+        if customer_email:
+            params["customerEmail"] = customer_email
+        if customer_phone:
+            params["customerPhone"] = self._normalize_phone(customer_phone)
+        if receipt_items:
+            params["cashItems"] = self._encode_cash_items(receipt_items)
         if subscription:
             params["subscription"] = "true"
         if subscription_id:
@@ -121,13 +131,21 @@ class UnitPayClient:
             },
         )
 
-    def refund_payment(self, *, payment_id: str, sum_amount: float | None = None) -> dict[str, Any]:
+    def refund_payment(
+        self,
+        *,
+        payment_id: str,
+        sum_amount: float | None = None,
+        receipt_items: list[dict[str, Any]] | None = None,
+    ) -> dict[str, Any]:
         params: dict[str, Any] = {
             "paymentId": payment_id,
             "secretKey": self._api_secret_key(),
         }
         if sum_amount is not None:
             params["sum"] = f"{sum_amount:.2f}"
+        if receipt_items:
+            params["cashItems"] = self._encode_cash_items(receipt_items)
         return self._api_get("refundPayment", params)
 
     def verify_callback_signature(self, *, method: str, params: dict[str, Any], signature: str | None) -> bool:
@@ -169,6 +187,13 @@ class UnitPayClient:
 
     def _signature_secret_key(self) -> str:
         return self._project_secret_key()
+
+    def _encode_cash_items(self, cash_items: list[dict[str, Any]]) -> str:
+        encoded = json.dumps(cash_items, ensure_ascii=False, separators=(",", ":")).encode("utf-8")
+        return base64.b64encode(encoded).decode("ascii")
+
+    def _normalize_phone(self, phone: str) -> str:
+        return "".join(char for char in phone if char.isdigit())
 
     def _api_get(self, method: str, params: dict[str, Any]) -> dict[str, Any]:
         self.ensure_configured()

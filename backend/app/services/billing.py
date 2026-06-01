@@ -47,6 +47,26 @@ def decimal_to_float(value: Decimal | float | int) -> float:
     return float(value)
 
 
+def build_subscription_receipt_items(
+    *,
+    name: str,
+    amount: Decimal | float | int,
+    currency: str,
+) -> list[dict[str, object]]:
+    settings = get_settings()
+    return [
+        {
+            "name": name[:128],
+            "count": 1,
+            "price": round(decimal_to_float(amount), 2),
+            "currency": currency,
+            "nds": settings.unitpay_receipt_nds,
+            "type": settings.unitpay_receipt_item_type,
+            "paymentMethod": settings.unitpay_receipt_payment_method,
+        }
+    ]
+
+
 def get_plan_by_code(db: Session, code: str) -> SubscriptionPlan | None:
     return db.query(SubscriptionPlan).filter(SubscriptionPlan.code == code).first()
 
@@ -529,14 +549,22 @@ def renew_due_subscriptions(db: Session, *, limit: int = 100) -> dict[str, int]:
             continue
 
         plan = subscription.plan
-        description = f"KwikMenu {plan.name} renewal ({subscription.user.email})"
+        description = f"KwikMenu {plan.name} renewal"
         amount = float(plan.price_amount)
+        receipt_items = build_subscription_receipt_items(
+            name=description,
+            amount=plan.price_amount,
+            currency=plan.currency,
+        )
 
         try:
             result = unitpay.init_subscription_payment(
                 account=subscription.user_id,
                 sum_amount=amount,
                 description=description,
+                customer_email=subscription.user.email,
+                customer_phone=subscription.user.phone,
+                receipt_items=receipt_items,
                 subscription_id=subscription.unitpay_subscription_id,
             )
             transaction = PaymentTransaction(
@@ -554,7 +582,12 @@ def renew_due_subscriptions(db: Session, *, limit: int = 100) -> dict[str, int]:
                 receipt_url=result.receipt_url,
                 status_url=result.status_url,
                 is_test=unitpay.settings.unitpay_test_mode,
-                raw_request={"subscriptionId": subscription.unitpay_subscription_id, "planCode": plan.code},
+                raw_request={
+                    "subscriptionId": subscription.unitpay_subscription_id,
+                    "planCode": plan.code,
+                    "customerEmail": subscription.user.email,
+                    "receiptItems": receipt_items,
+                },
                 raw_response=result.payload,
             )
             subscription.last_payment_status = "pending"

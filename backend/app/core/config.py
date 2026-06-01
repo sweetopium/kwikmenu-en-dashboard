@@ -79,6 +79,9 @@ class Settings(BaseSettings):
     unitpay_success_url: str | None = None
     unitpay_fail_url: str | None = None
     unitpay_allowed_ips: str = ""
+    unitpay_receipt_nds: str = "none"
+    unitpay_receipt_item_type: str = "service"
+    unitpay_receipt_payment_method: str = "full_payment"
 
     media_storage_endpoint_url: str | None = None
     media_storage_bucket: str | None = None
