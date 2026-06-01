@@ -1,5 +1,5 @@
-import { useEffect, useRef, useState } from 'react';
-import { ChevronDown, Edit2, ExternalLink, Plus, Search, Sparkles, Trash2 } from 'lucide-react';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { Check, ChevronDown, Edit2, ExternalLink, Plus, Search, Sparkles, Trash2 } from 'lucide-react';
 import { useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 
@@ -17,6 +17,7 @@ import { normalizeMenu } from "../lib/menuNormalization";
 import { getMenu, updateMenu, publishMenu, unpublishMenu, translateMenu } from "../lib/menusApi";
 import { Switch } from "../components/ui/switch";
 import { TOP_MENU_LANGUAGES } from "../lib/languageMeta";
+import { getVisibleMenuLanguages } from "../lib/publicMenuUtils";
 import { trackProductEvent } from "../lib/productAnalytics";
 import {
   formFieldClasses,
@@ -63,6 +64,33 @@ const MenuEditor = () => {
   const [remoteVenueId, setRemoteVenueId] = useState(null);
   const hasLoadedRemoteMenuRef = useRef(false);
   const [menuStatus, setMenuStatus] = useState('draft');
+  const [isLangDropdownOpen, setIsLangDropdownOpen] = useState(false);
+  const langDropdownRef = useRef(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (langDropdownRef.current && !langDropdownRef.current.contains(event.target)) {
+        setIsLangDropdownOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
+  const translatedLanguages = useMemo(() => {
+    return getVisibleMenuLanguages(menu, menu.defaultLanguage || 'ru');
+  }, [menu]);
+
+  const translatedCodes = useMemo(() => {
+    return new Set(translatedLanguages.map((lang) => lang.code));
+  }, [translatedLanguages]);
+
+  const currentLanguageMeta = useMemo(() => {
+    return TOP_MENU_LANGUAGES.find((lang) => lang.code === editorLanguage);
+  }, [editorLanguage]);
+
 
   const activeCategory = menu.categories.find((category) => category.id === activeCategoryId);
   const filteredItems = searchQuery
@@ -567,22 +595,50 @@ const MenuEditor = () => {
           <div className="p-3 sm:p-5 lg:p-3 border-b border-border/60 flex flex-col gap-3 bg-card z-10 sticky top-0 min-w-0 max-w-full overflow-hidden">
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 w-full min-w-0 sm:justify-end md:ml-auto md:w-auto md:max-w-full md:rounded-xl md:border md:border-border/70 md:bg-secondary/35 md:px-2.5 md:py-2.5 mb-0 md:mb-3">
               <div className="grid grid-cols-2 gap-2.5 w-full sm:w-auto sm:flex sm:flex-row shrink-0">
-                <div className="relative w-fit min-w-0">
-                  <select
-                    value={editorLanguage}
-                    onChange={(event) => handleEditorLanguageChange(event.target.value)}
-                    className={`${formSelectClasses} !w-auto h-10 sm:h-10 text-xs sm:text-sm !pl-2.5 !pr-8`}
+                <div className="relative w-fit min-w-0" ref={langDropdownRef}>
+                  <button
+                    type="button"
+                    onClick={() => setIsLangDropdownOpen(!isLangDropdownOpen)}
+                    className={`${formSelectClasses} !w-auto h-10 sm:h-10 text-xs sm:text-sm pl-3.5 pr-8 flex items-center gap-2 select-none relative cursor-pointer`}
                   >
-                    {TOP_MENU_LANGUAGES.map((language) => (
-                      <option key={language.code} value={language.code}>
-                        {language.flag} {language.shortLabel}
-                      </option>
-                    ))}
-                  </select>
+                    <span>{currentLanguageMeta?.flag} {currentLanguageMeta?.shortLabel}</span>
+                    <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
+                  </button>
 
-                  <div className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none">
-                    <ChevronDown size={14} />
-                  </div>
+                  {isLangDropdownOpen && (
+                    <div className="absolute left-0 sm:right-0 sm:left-auto top-full mt-1.5 w-48 max-h-72 overflow-y-auto rounded-2xl border border-border bg-card p-1 shadow-lg z-50 animate-in fade-in slide-in-from-top-1 duration-150">
+                      {TOP_MENU_LANGUAGES.map((lang) => {
+                        const hasTranslation = lang.code === menu.defaultLanguage || translatedCodes.has(lang.code);
+                        const isSelected = lang.code === editorLanguage;
+                        return (
+                          <button
+                            key={lang.code}
+                            type="button"
+                            onClick={() => {
+                              handleEditorLanguageChange(lang.code);
+                              setIsLangDropdownOpen(false);
+                            }}
+                            className={`w-full text-left px-3 py-2 rounded-xl text-xs sm:text-sm flex items-center justify-between transition-all cursor-pointer ${
+                              isSelected
+                                ? 'bg-violet-50 text-violet-700 font-semibold'
+                                : 'hover:bg-secondary/50 text-foreground'
+                            } ${!hasTranslation && !isSelected ? 'text-muted-foreground/60' : ''}`}
+                          >
+                            <span className="flex items-center gap-2">
+                              <span>{lang.flag}</span>
+                              <span>{lang.shortLabel}</span>
+                              {!hasTranslation && (
+                                <span className="text-[10px] text-violet-500 font-medium px-1 bg-violet-50 border border-violet-100 rounded">AI</span>
+                              )}
+                            </span>
+                            {isSelected && (
+                              <Check size={14} className="text-violet-600 shrink-0" />
+                            )}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  )}
                 </div>
 
                 {editorLanguage !== menu.defaultLanguage && (
