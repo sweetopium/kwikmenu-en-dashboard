@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { Check, ChevronDown, Edit2, ExternalLink, Plus, Search, Sparkles, Trash2 } from 'lucide-react';
+import { AlertCircle, Check, ChevronDown, Edit2, ExternalLink, Plus, Search, Sparkles, Trash2 } from 'lucide-react';
 import { useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 
@@ -58,7 +58,8 @@ const MenuEditor = () => {
   const [targetCategoryId, setTargetCategoryId] = useState(null);
   const [deleteConfirm, setDeleteConfirm] = useState(null);
   const [isNormalizing, setIsNormalizing] = useState(false);
-  const [isTranslating, setIsTranslating] = useState(false);
+  const [translationStatus, setTranslationStatus] = useState('idle');
+  const [translationError, setTranslationError] = useState('');
   const [isLoadingRemoteMenu, setIsLoadingRemoteMenu] = useState(false);
   const [remoteMenuError, setRemoteMenuError] = useState('');
   const [remoteVenueId, setRemoteVenueId] = useState(null);
@@ -559,7 +560,8 @@ const MenuEditor = () => {
       return;
     }
 
-    setIsTranslating(true);
+    setTranslationStatus('translating');
+    setTranslationError('');
     trackProductEvent('menu_translate_clicked', {
       venueId: remoteVenueId,
       menuId: id,
@@ -569,13 +571,13 @@ const MenuEditor = () => {
     try {
       const response = await translateMenu(id, editorLanguage);
       setMenu(response.payload);
-      alert(t('menuEditor.success.translateSuccess', 'Меню успешно переведено с помощью ИИ!'));
+      setTranslationStatus('success');
     } catch (error) {
-      alert(error?.message || t('menuEditor.errors.translateFailed', 'Не удалось перевести меню'));
-    } finally {
-      setIsTranslating(false);
+      setTranslationError(error?.message || t('menuEditor.errors.translateFailed', 'Не удалось перевести меню'));
+      setTranslationStatus('error');
     }
   };
+
 
 
   return (
@@ -647,11 +649,11 @@ const MenuEditor = () => {
                   <Button
                     variant="outline"
                     onClick={handleTranslateMenu}
-                    disabled={isTranslating}
+                    disabled={translationStatus === 'translating'}
                     className="sm:h-10 h-10 px-3 bg-violet-50 hover:bg-violet-100 border-violet-200/80 text-violet-700 font-medium text-xs sm:text-sm shrink-0 flex items-center justify-center gap-1.5 shadow-sm w-full sm:w-auto"
                   >
-                    <Sparkles size={14} className={isTranslating ? "animate-spin" : ""} />
-                    {isTranslating ? t('menuEditor.translating', 'Перевод...') : t('menuEditor.translateBtn', 'Перевести ИИ')}
+                    <Sparkles size={14} className={translationStatus === 'translating' ? "animate-spin" : ""} />
+                    {translationStatus === 'translating' ? t('menuEditor.translating', 'Перевод...') : t('menuEditor.translateBtn', 'Перевести ИИ')}
                   </Button>
                 )}
 
@@ -847,6 +849,70 @@ const MenuEditor = () => {
         onCancel={() => setEditingItem(null)}
         onSave={handleSaveItem}
       />
+
+      {/* Translation Status Modal Overlay */}
+      {translationStatus !== 'idle' && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-md flex items-center justify-center z-[9999] p-4 animate-in fade-in duration-200">
+          <div className="bg-card border border-border/85 w-full max-w-sm rounded-3xl p-6 shadow-2xl flex flex-col items-center text-center gap-4 animate-in zoom-in-95 duration-200">
+            {translationStatus === 'translating' && (
+              <>
+                <div className="w-16 h-16 rounded-full bg-violet-50 border border-violet-100 flex items-center justify-center relative shadow-[0_0_20px_rgba(139,92,246,0.15)]">
+                  <Sparkles size={32} className="text-violet-600 animate-spin duration-[3000ms]" />
+                  <div className="absolute inset-0 rounded-full border-2 border-violet-400/20 border-t-violet-600 animate-spin" />
+                </div>
+                <h3 className="text-base font-bold text-foreground">
+                  {t('menuEditor.translatingTitle', 'Перевод меню...')}
+                </h3>
+                <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
+                  {t('menuEditor.translatingDesc', 'Это может занять пару минут. Пожалуйста, не закрывайте и не обновляйте эту вкладку.')}
+                </p>
+              </>
+            )}
+
+            {translationStatus === 'success' && (
+              <>
+                <div className="w-16 h-16 rounded-full bg-emerald-50 border border-emerald-100 flex items-center justify-center shadow-[0_0_20px_rgba(16,185,129,0.15)] relative">
+                  <div className="absolute inset-0 rounded-full bg-emerald-500/10 animate-ping duration-1000 scale-110" />
+                  <Check size={32} className="text-emerald-600 stroke-[3]" />
+                </div>
+                <h3 className="text-base font-bold text-foreground">
+                  {t('menuEditor.translateSuccessTitle', 'Перевод готов!')}
+                </h3>
+                <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
+                  {t('menuEditor.translateSuccessDesc', 'Меню было успешно переведено и сохранено на сервере.')}
+                </p>
+                <Button
+                  onClick={() => setTranslationStatus('idle')}
+                  className="w-full mt-2 h-11 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-semibold shadow-md shadow-emerald-600/20 transition-all cursor-pointer flex items-center justify-center"
+                >
+                  {t('menuEditor.btnClose', 'Закрыть')}
+                </Button>
+              </>
+            )}
+
+            {translationStatus === 'error' && (
+              <>
+                <div className="w-16 h-16 rounded-full bg-rose-50 border border-rose-100 flex items-center justify-center shadow-[0_0_20px_rgba(239,68,68,0.15)]">
+                  <AlertCircle size={32} className="text-rose-600" />
+                </div>
+                <h3 className="text-base font-bold text-foreground">
+                  {t('menuEditor.translateErrorTitle', 'Ошибка перевода')}
+                </h3>
+                <p className="text-xs sm:text-sm text-rose-600 bg-rose-50/50 border border-rose-100 rounded-xl p-3 w-full leading-relaxed break-words text-left">
+                  {translationError}
+                </p>
+                <Button
+                  variant="outline"
+                  onClick={() => setTranslationStatus('idle')}
+                  className="w-full mt-2 h-11 rounded-xl border border-border/80 text-foreground font-semibold hover:bg-secondary transition-all cursor-pointer flex items-center justify-center"
+                >
+                  {t('menuEditor.btnClose', 'Закрыть')}
+                </Button>
+              </>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 };
