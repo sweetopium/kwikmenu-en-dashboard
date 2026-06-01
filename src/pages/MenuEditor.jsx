@@ -592,17 +592,17 @@ const MenuEditor = () => {
 
       <div className="flex-1 flex flex-col bg-background relative min-w-0 w-full max-w-full overflow-hidden">
         {activeCategory ? (
-          <div className="p-3 sm:p-5 lg:p-3 border-b border-border/60 flex flex-col gap-3 bg-card z-10 sticky top-0 min-w-0 max-w-full overflow-hidden">
+          <div className="p-3 sm:p-5 lg:p-3 border-b border-border/60 flex flex-col gap-3 bg-card z-20 sticky top-0 min-w-0 max-w-full">
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 w-full min-w-0 sm:justify-end md:ml-auto md:w-auto md:max-w-full md:rounded-xl md:border md:border-border/70 md:bg-secondary/35 md:px-2.5 md:py-2.5 mb-0 md:mb-3">
               <div className="grid grid-cols-2 gap-2.5 w-full sm:w-auto sm:flex sm:flex-row shrink-0">
                 <div className="relative w-fit min-w-0" ref={langDropdownRef}>
                   <button
                     type="button"
                     onClick={() => setIsLangDropdownOpen(!isLangDropdownOpen)}
-                    className={`${formSelectClasses} !w-auto h-10 sm:h-10 text-xs sm:text-sm pl-3.5 pr-8 flex items-center gap-2 select-none relative cursor-pointer`}
+                    className={`${formSelectClasses} !w-auto h-10 sm:h-10 text-xs sm:text-sm pl-3.5 pr-10 flex items-center gap-2 select-none relative cursor-pointer`}
                   >
                     <span>{currentLanguageMeta?.flag} {currentLanguageMeta?.shortLabel}</span>
-                    <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
+                    <ChevronDown size={14} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
                   </button>
 
                   {isLangDropdownOpen && (
@@ -627,8 +627,10 @@ const MenuEditor = () => {
                             <span className="flex items-center gap-2">
                               <span>{lang.flag}</span>
                               <span>{lang.shortLabel}</span>
-                              {!hasTranslation && (
-                                <span className="text-[10px] text-violet-500 font-medium px-1 bg-violet-50 border border-violet-100 rounded">AI</span>
+                              {hasTranslation && (
+                                <span className="text-[10px] text-emerald-600 bg-emerald-50 border border-emerald-200/60 rounded px-1 py-0.5 flex items-center justify-center font-bold shadow-sm">
+                                  <Check size={9} className="stroke-[3.5]" />
+                                </span>
                               )}
                             </span>
                             {isSelected && (
