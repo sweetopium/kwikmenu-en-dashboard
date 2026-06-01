@@ -568,59 +568,64 @@ const ExtendedPublicMenuTemplate = ({
           }}
         >
           <div className="flex flex-col gap-4">
-            {/* Top row: Logo on the left, buttons (language + info) on the right */}
+            {/* Top row: Logo + Name on the left (80%), Language switcher on the right */}
             <div className="flex items-center justify-between gap-4">
-              {venueLogoUrl ? (
-                <img src={venueLogoUrl} alt={venueName} className="h-14 w-14 shrink-0 rounded-2xl border border-black/8 bg-white/50 object-contain shadow-sm" />
-              ) : (
-                <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl border border-black/8 bg-white/30 font-serif text-[1.8rem] font-bold tracking-[0.05em] text-foreground shadow-sm">
-                  {venueName.slice(0, 1).toUpperCase()}
+              {/* Logo + Name */}
+              <div className="flex items-center gap-3 min-w-0 max-w-[80%]">
+                {venueLogoUrl ? (
+                  <img src={venueLogoUrl} alt={venueName} className="h-12 w-12 shrink-0 rounded-2xl border border-black/8 bg-white/50 object-contain shadow-sm" />
+                ) : (
+                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-black/8 bg-white/30 font-serif text-[1.4rem] font-bold tracking-[0.05em] text-foreground shadow-sm">
+                    {venueName.slice(0, 1).toUpperCase()}
+                  </div>
+                )}
+                <h1 className="font-serif text-[1.12rem] font-semibold leading-tight tracking-[0.02em] text-foreground uppercase truncate sm:text-[1.3rem]">
+                  {venueName}
+                </h1>
+              </div>
+
+              {/* Language Switcher Dropdown */}
+              {visibleLanguages.length > 1 && (
+                <div className="relative shrink-0 select-none">
+                  <select
+                    value={language}
+                    onChange={(event) => setLanguage(event.target.value)}
+                    className="appearance-none rounded-full border border-black/10 bg-white/55 pl-3.5 pr-8 py-1.5 text-[0.7rem] font-bold text-[#82796f] outline-none cursor-pointer shadow-[inset_0_0_0_1px_rgba(255,255,255,0.24)] transition-all hover:bg-white/70"
+                    style={{
+                      backgroundImage: `url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%2382796f' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'></polyline></svg>")`,
+                      backgroundRepeat: 'no-repeat',
+                      backgroundPosition: 'right 10px center',
+                      backgroundSize: '10px',
+                    }}
+                  >
+                    {visibleLanguages.map((menuLanguage) => (
+                      <option key={menuLanguage.code} value={menuLanguage.code} className="text-foreground bg-[#fffdf8]">
+                        {menuLanguage.code === 'ru' ? 'РУ' : String(menuLanguage.code).toUpperCase()}
+                      </option>
+                    ))}
+                  </select>
                 </div>
               )}
+            </div>
 
-              <div className="flex items-center gap-2">
-                {visibleLanguages.length > 1 ? (
-                  <div className="flex rounded-full border border-black/10 bg-white/55 p-1 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.24)]">
-                    {visibleLanguages.map((menuLanguage) => {
-                      const isSelected = menuLanguage.code === language;
-                      return (
-                        <button
-                          key={menuLanguage.code}
-                          type="button"
-                          onClick={() => setLanguage(menuLanguage.code)}
-                          className="rounded-full px-3 py-1.5 text-[0.68rem] font-medium transition-colors duration-200"
-                          style={{
-                            backgroundColor: isSelected ? accentColor : 'transparent',
-                            color: isSelected ? accentText : '#82796f',
-                          }}
-                        >
-                          {getLanguagePillLabel(menuLanguage)}
-                        </button>
-                      );
-                    })}
-                  </div>
+            {/* Bottom row: Description on the left, About link on the right */}
+            <div className="flex items-end justify-between gap-4 pt-1">
+              <div className="min-w-0 flex-1">
+                {isFilled(venueDescription) ? (
+                  <p className="text-[0.88rem] leading-[1.4] text-[#82796f] break-words">
+                    {venueDescription}
+                  </p>
                 ) : null}
-
+              </div>
+              <div className="shrink-0 pb-0.5">
                 <button
                   type="button"
                   onClick={() => setOpenSheet({ type: 'about' })}
-                  className="inline-flex h-9 items-center gap-1.5 rounded-full border px-3.5 text-[0.76rem] font-bold text-muted-foreground transition hover:border-black/15 hover:bg-black/5 hover:text-foreground"
-                  style={{ borderColor: 'rgba(95,81,67,0.18)', backgroundColor: 'rgba(255,255,255,0.42)' }}
+                  className="text-[0.82rem] font-medium text-[#82796f] border-b border-dashed border-[#82796f]/60 pb-0.5 hover:text-foreground hover:border-foreground/80 transition-colors duration-200"
                 >
-                  <Info size={14} style={{ color: accentColor }} />
-                  <span>{language === 'en' ? 'About' : 'О заведении'}</span>
+                  {language === 'en' ? 'About' : 'О заведении'}
                 </button>
               </div>
-            </div>
-
-            {/* Bottom row: Name & Description (Full Width) */}
-            <div className="space-y-1.5 min-w-0">
-              <h1 className="font-serif text-[1.62rem] font-semibold leading-tight tracking-[0.01em] text-foreground break-words sm:text-[1.8rem]">
-                {venueName}
-              </h1>
-              {isFilled(venueDescription) ? (
-                <p className="text-[0.9rem] leading-relaxed text-muted-foreground break-words">{venueDescription}</p>
-              ) : null}
             </div>
           </div>
         </motion.section>

@@ -116,7 +116,9 @@ const SimplePublicMenuTemplate = ({
     [payload, defaultLanguage]
   );
 
-  const venueDescription = venue?.description || '';
+  const venueName = venue?.name || payload?.venue?.name || 'Menu';
+  const venueDescription = venue?.description || payload?.venue?.description || '';
+  const venueLogoUrl = venue?.design?.logoUrl || payload?.venue?.logoUrl || null;
   const showWifiCard = Boolean(venue?.wifi?.enabled && venue?.wifi?.ssid && venue?.wifi?.password);
   const currencyCode = venue?.currency || payload?.currency || 'RUB';
 
@@ -192,55 +194,38 @@ const SimplePublicMenuTemplate = ({
             color: heroTextColor,
           }}
         >
-          <div className="flex gap-3">
-            <div
-              className="flex h-[64px] w-[64px] shrink-0 items-center justify-center overflow-hidden rounded-[1rem] border text-[2rem] font-extrabold tracking-[-0.04em] sm:h-[72px] sm:w-[72px] sm:text-[2.2rem]"
-              style={{ borderColor: hexToRgba(heroTextColor, 0.72) }}
-            >
-              {venue?.design?.logoUrl ? (
-                <img src={venue.design.logoUrl} alt={venue.name} className="h-full w-full object-contain p-2.5" />
-              ) : (
-                <span>{String(venue?.name || 'M').slice(0, 1)}</span>
-              )}
-            </div>
-
-            <div className="min-w-0 flex-1 pt-0.5">
-              <h1 className="text-[1.5rem] font-extrabold leading-none tracking-[-0.045em] sm:text-[1.9rem]">
-                {venue?.name || 'Menu'}
-              </h1>
-
-              {visibleLanguages.length > 1 ? (
-                <div className="mt-2 flex flex-wrap gap-1.5">
-                  {visibleLanguages.map((menuLanguage) => {
-                    const isSelected = menuLanguage.code === language;
-                    return (
-                      <button
-                        key={menuLanguage.code}
-                        type="button"
-                        onClick={() => setLanguage(menuLanguage.code)}
-                        className="inline-flex h-8 min-w-[3.35rem] items-center justify-center rounded-[0.5rem] border px-2.5 text-[0.76rem] font-medium transition-all"
-                        style={{
-                          borderColor: isSelected ? hexToRgba(heroTextColor, 0.28) : hexToRgba(heroTextColor, 0.18),
-                          backgroundColor: isSelected ? heroControlSelectedFill : heroControlFill,
-                          color: heroTextColor,
-                        }}
-                      >
-                        {getLanguagePillLabel(menuLanguage)}
-                      </button>
-                    );
-                  })}
-                </div>
-              ) : null}
-            </div>
+          {/* Top row: Logo + Name */}
+          <div className="flex items-center gap-3 min-w-0">
+            {venueLogoUrl ? (
+              <img
+                src={venueLogoUrl}
+                alt={venueName}
+                className="h-12 w-12 shrink-0 rounded-2xl border bg-white/50 object-contain shadow-sm"
+                style={{ borderColor: hexToRgba(heroTextColor, 0.08) }}
+              />
+            ) : (
+              <div
+                className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border font-serif text-[1.4rem] font-bold tracking-[0.05em] shadow-sm bg-white/20"
+                style={{ borderColor: hexToRgba(heroTextColor, 0.08) }}
+              >
+                {venueName.slice(0, 1).toUpperCase()}
+              </div>
+            )}
+            <h1 className="font-serif text-[1.12rem] font-semibold leading-tight tracking-[0.02em] uppercase truncate sm:text-[1.3rem]">
+              {venueName}
+            </h1>
           </div>
 
+          {/* Bottom row: Description */}
           {isFilled(venueDescription) ? (
-            <p
-              className="mt-3 max-w-[92%] text-[0.84rem] font-normal leading-[1.5] tracking-[-0.01em] sm:text-[0.95rem]"
-              style={{ color: heroMutedColor }}
-            >
-              {venueDescription}
-            </p>
+            <div className="pt-1">
+              <p
+                className="text-[0.88rem] leading-[1.4] break-words"
+                style={{ color: heroMutedColor }}
+              >
+                {venueDescription}
+              </p>
+            </div>
           ) : null}
         </section>
 
