@@ -14,7 +14,7 @@ import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import { loadImportedMenuFromStorage, saveImportedMenuToStorage } from "../lib/importedMenuStorage";
 import { normalizeMenu } from "../lib/menuNormalization";
-import { getMenu, updateMenu, publishMenu, unpublishMenu } from "../lib/menusApi";
+import { getMenu, updateMenu, publishMenu, unpublishMenu, translateMenu } from "../lib/menusApi";
 import { Switch } from "../components/ui/switch";
 import { TOP_MENU_LANGUAGES } from "../lib/languageMeta";
 import { trackProductEvent } from "../lib/productAnalytics";
@@ -57,6 +57,7 @@ const MenuEditor = () => {
   const [targetCategoryId, setTargetCategoryId] = useState(null);
   const [deleteConfirm, setDeleteConfirm] = useState(null);
   const [isNormalizing, setIsNormalizing] = useState(false);
+  const [isTranslating, setIsTranslating] = useState(false);
   const [isLoadingRemoteMenu, setIsLoadingRemoteMenu] = useState(false);
   const [remoteMenuError, setRemoteMenuError] = useState('');
   const [remoteVenueId, setRemoteVenueId] = useState(null);
@@ -524,6 +525,31 @@ const MenuEditor = () => {
     }
   };
 
+  const handleTranslateMenu = async () => {
+    if (!isRemoteMenu) {
+      alert(t('menuEditor.errors.remoteOnly', 'Функционал автоперевода доступен только для сохраненных на сервере меню.'));
+      return;
+    }
+
+    setIsTranslating(true);
+    trackProductEvent('menu_translate_clicked', {
+      venueId: remoteVenueId,
+      menuId: id,
+      properties: { targetLang: editorLanguage },
+    });
+
+    try {
+      const response = await translateMenu(id, editorLanguage);
+      setMenu(response.payload);
+      alert(t('menuEditor.success.translateSuccess', 'Меню успешно переведено с помощью ИИ!'));
+    } catch (error) {
+      alert(error?.message || t('menuEditor.errors.translateFailed', 'Не удалось перевести меню'));
+    } finally {
+      setIsTranslating(false);
+    }
+  };
+
+
   return (
     <div className="bg-card border border-border/60 rounded-3xl shadow-sm flex flex-col md:flex-row overflow-hidden min-h-[calc(100vh-8rem)] relative w-full max-w-full min-w-0">
       <CategorySidebar
@@ -558,6 +584,18 @@ const MenuEditor = () => {
                     <ChevronDown size={14} />
                   </div>
                 </div>
+
+                {editorLanguage !== menu.defaultLanguage && (
+                  <Button
+                    variant="outline"
+                    onClick={handleTranslateMenu}
+                    disabled={isTranslating}
+                    className="sm:h-10 h-10 px-3 bg-violet-50 hover:bg-violet-100 border-violet-200/80 text-violet-700 font-medium text-xs sm:text-sm shrink-0 flex items-center justify-center gap-1.5 shadow-sm w-full sm:w-auto"
+                  >
+                    <Sparkles size={14} className={isTranslating ? "animate-spin" : ""} />
+                    {isTranslating ? t('menuEditor.translating', 'Перевод...') : t('menuEditor.translateBtn', 'Перевести ИИ')}
+                  </Button>
+                )}
 
                 <Button
                   variant="outline"

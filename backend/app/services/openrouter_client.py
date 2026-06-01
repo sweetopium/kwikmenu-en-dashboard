@@ -15,6 +15,7 @@ import certifi
 from app.core.config import get_settings
 from app.schemas.menu import MenuPayload
 from app.schemas.menu_extract import ExtractedPage
+from app.schemas.menu_translation import TranslatableMenu
 
 
 logger = logging.getLogger(__name__)
@@ -302,6 +303,67 @@ class OpenRouterClient:
         raw_content = response_payload["choices"][0]["message"]["content"]
         structured = self._decode_structured_content(raw_content, operation="menu normalization")
         return MenuPayload.model_validate(structured)
+
+    def translate_menu(self, menu_data: TranslatableMenu, target_lang: str) -> TranslatableMenu:
+        if not self.enabled:
+            raise RuntimeError("OPENROUTER_API_KEY is not configured")
+
+        lang_names = {
+            "ru": "Russian",
+            "en": "English",
+            "ar": "Arabic",
+            "kk": "Kazakh",
+            "tr": "Turkish",
+            "de": "German",
+            "fr": "French",
+            "es": "Spanish",
+            "zh": "Chinese",
+            "he": "Hebrew",
+        }
+        lang_name = lang_names.get(target_lang.lower(), target_lang.upper())
+
+        payload: dict[str, Any] = {
+            "model": self.settings.menu_import_model,
+            "temperature": 0,
+            "max_completion_tokens": self.settings.menu_normalization_max_completion_tokens,
+            "messages": [
+                {
+                    "role": "system",
+                    "content": (
+                        "You are a professional chef and translator specializing in culinary terms, restaurant menus, dish names, ingredients, and descriptions.\n"
+                        f"Translate all restaurant menu text in the provided JSON payload into {lang_name}.\n"
+                        "Return only structured data following the provided JSON schema."
+                    ),
+                },
+                {
+                    "role": "user",
+                    "content": [
+                        {
+                            "type": "text",
+                            "text": (
+                                f"Translate this restaurant menu JSON payload into {lang_name} professionally. Translate dish names, descriptions, category names, and variant labels accurately. Keep IDs unchanged.\n"
+                                f"JSON Payload:\n{json.dumps(menu_data.model_dump(), ensure_ascii=False)}"
+                            ),
+                        }
+                    ],
+                },
+            ],
+            "response_format": {
+                "type": "json_schema",
+                "json_schema": {
+                    "name": "kwikmenu_menu_translation",
+                    "strict": True,
+                    "schema": TranslatableMenu.model_json_schema(),
+                },
+            },
+            "stream": False,
+        }
+
+        response_payload = self._post_json(payload)
+        raw_content = response_payload["choices"][0]["message"]["content"]
+        structured = self._decode_structured_content(raw_content, operation="menu translation")
+        return TranslatableMenu.model_validate(structured)
+
 
     def _decode_structured_content(self, raw_content: Any, *, operation: str) -> Any:
         if isinstance(raw_content, list):

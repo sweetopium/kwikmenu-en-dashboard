@@ -175,3 +175,80 @@ def unpublish_menu(
     db.commit()
     db.refresh(menu)
     return serialize_menu(menu)
+
+
+@router.post("/{menu_id}/translate", response_model=MenuResponse)
+def translate_menu(
+    menu_id: str,
+    target_lang: str = Query(..., description="Target language code (e.g. en, ar, etc.)"),
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+) -> MenuResponse:
+    menu = get_owned_menu(db, menu_id=menu_id, user_id=current_user.id)
+    if menu is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Menu not found.")
+
+    payload = MenuPayload.model_validate(menu.payload)
+
+    subscription = get_effective_subscription(db, current_user)
+    if not subscription.plan.translations_enabled:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail=f"Переводы недоступны на тарифе {subscription.plan.name}."
+        )
+
+    target_lang = target_lang.strip().lower()
+    valid_codes = {"ru", "en", "ar", "kk", "tr", "de", "fr", "es", "zh", "he"}
+    if target_lang not in valid_codes:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Недопустимый код языка: {target_lang}."
+        )
+
+    active_langs = set()
+    for l_code, loc in payload.menuMeta.translations.items():
+        if l_code != payload.defaultLanguage and (loc.name or loc.description):
+            active_langs.add(l_code)
+    for cat in payload.categories:
+        for l_code, loc in cat.translations.items():
+            if l_code != payload.defaultLanguage and (loc.name or loc.description):
+                active_langs.add(l_code)
+        for item in cat.items:
+            for l_code, loc in item.translations.items():
+                if l_code != payload.defaultLanguage and (loc.name or loc.description):
+                    active_langs.add(l_code)
+            for var in item.variants:
+                for l_code, loc in var.translations.items():
+                    if l_code != payload.defaultLanguage and loc.label:
+                        active_langs.add(l_code)
+
+    if target_lang != payload.defaultLanguage and target_lang not in active_langs:
+        if len(active_langs) >= subscription.plan.max_translation_languages:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail=f"Превышен лимит языков перевода для тарифа {subscription.plan.name} (макс. {subscription.plan.max_translation_languages})."
+            )
+
+    from app.schemas.menu_translation import extract_translatable, merge_translations
+    from app.services.openrouter_client import OpenRouterClient
+
+    translatable = extract_translatable(payload)
+    openrouter = OpenRouterClient()
+
+    try:
+        translated = openrouter.translate_menu(translatable, target_lang)
+    except Exception as exc:
+        raise HTTPException(
+            status_code=status.HTTP_502_BAD_GATEWAY,
+            detail=f"Ошибка перевода через AI: {str(exc)}"
+        )
+
+    merge_translations(payload, translated, target_lang)
+
+    menu.payload = payload.model_dump(mode="json")
+    db.add(menu)
+    db.commit()
+    db.refresh(menu)
+
+    return serialize_menu(menu)
+
