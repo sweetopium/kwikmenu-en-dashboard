@@ -401,7 +401,7 @@ const SimplePublicMenuTemplate = ({
                                       ) : null}
                                     </div>
                                     {menu?.payload?.settings?.showVariantPrices !== false ? (
-                                      <div className="shrink-0 text-right text-[1.02rem] font-medium text-foreground">
+                                      <div className="shrink-0 text-right text-[1.02rem] font-bold tracking-[-0.01em] text-foreground">
                                         {(() => {
                                           const variantPrice = formatCurrency(variant.price, currencyCode);
                                           return `${variantPrice.amount}${variantPrice.symbol ? ` ${variantPrice.symbol}` : ''}`;
