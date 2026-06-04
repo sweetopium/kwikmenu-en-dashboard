@@ -1,11 +1,19 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import { Trash2 } from 'lucide-react';
+import { Trash2, KeyRound, CheckCircle, RefreshCw } from 'lucide-react';
 import { DataTable } from '../components/admin/DataTable';
 import { PageHeader } from '../components/admin/PageHeader';
 import { StatusBadge } from '../components/admin/StatusBadge';
 import { Button } from '../components/ui/Button';
-import { deleteUser, fetchUserDetail, fetchBillingPlans, updateUserSubscription } from '../lib/adminApi';
+import {
+  deleteUser,
+  fetchUserDetail,
+  fetchBillingPlans,
+  updateUserSubscription,
+  impersonateVirtualClient,
+  resetVirtualClient,
+  activateVirtualClient,
+} from '../lib/adminApi';
 import { formatDateTime } from '../lib/formatters';
 
 const formatDatetimeForInput = (isoString) => {
@@ -35,12 +43,21 @@ const UserDetailPage = () => {
   const [isSavingSub, setIsSavingSub] = useState(false);
   const [subSuccess, setSubSuccess] = useState('');
 
+  // Virtual Client States
+  const [isResetting, setIsResetting] = useState(false);
+  const [showActivateModal, setShowActivateModal] = useState(false);
+  const [activateEmail, setActivateEmail] = useState('');
+  const [activatePassword, setActivatePassword] = useState('');
+  const [activateName, setActivateName] = useState('');
+  const [isActivating, setIsActivating] = useState(false);
+
   useEffect(() => {
     fetchUserDetail(id).then(setData).catch((nextError) => setError(nextError.message));
     fetchBillingPlans().then(setPlans).catch(() => {});
   }, [id]);
 
   const user = data?.user;
+  const isVirtual = user?.email?.endsWith('@virtual.kwikmenu.ru');
 
   useEffect(() => {
     if (user?.subscription) {
@@ -96,6 +113,70 @@ const UserDetailPage = () => {
     }
   };
 
+  const getClientDashboardUrl = () => {
+    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+      return 'http://localhost:5173/dashboard';
+    }
+    return 'https://kwik.blockranker.co/dashboard';
+  };
+
+  const handleImpersonate = async () => {
+    setError('');
+    try {
+      await impersonateVirtualClient(id);
+      const dashboardUrl = getClientDashboardUrl();
+      window.open(dashboardUrl, '_blank');
+    } catch (err) {
+      setError(err.message);
+    }
+  };
+
+  const handleResetSlot = async () => {
+    const confirmed = window.confirm(
+      'Вы уверены, что хотите сбросить этот слот? Все меню, импорты и настройки заведения будут удалены, а его данные будут сброшены до базовых. Сам слот останется активным.'
+    );
+    if (!confirmed) return;
+
+    setIsResetting(true);
+    setError('');
+    try {
+      await resetVirtualClient(id);
+      const refreshed = await fetchUserDetail(id);
+      setData(refreshed);
+      alert('Слот успешно очищен и сброшен!');
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setIsResetting(false);
+    }
+  };
+
+  const handleActivateSubmit = async (e) => {
+    e.preventDefault();
+    if (!activateEmail || !activatePassword) return;
+
+    setIsActivating(true);
+    setError('');
+    try {
+      await activateVirtualClient(id, {
+        email: activateEmail,
+        password: activatePassword,
+        name: activateName || undefined,
+      });
+      setShowActivateModal(false);
+      setActivateEmail('');
+      setActivatePassword('');
+      setActivateName('');
+      const refreshed = await fetchUserDetail(id);
+      setData(refreshed);
+      alert('Клиент успешно активирован!');
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setIsActivating(false);
+    }
+  };
+
   return (
     <>
       <PageHeader
@@ -108,12 +189,36 @@ const UserDetailPage = () => {
         <div className="grid gap-4 lg:grid-cols-3">
           <div className="space-y-4">
             <div className="rounded-2xl border border-border/70 bg-card p-5 shadow-sm">
-              <h2 className="text-lg font-black">Профиль</h2>
+              <h2 className="text-lg font-black flex items-center justify-between">
+                Профиль
+                {isVirtual && (
+                  <span className="rounded-md bg-purple-50 dark:bg-purple-950/30 px-1.5 py-0.5 text-[10px] font-bold text-purple-700 dark:text-purple-400 border border-purple-200 dark:border-purple-800/50">
+                    Виртуальный
+                  </span>
+                )}
+              </h2>
               <div className="mt-4 space-y-3 text-sm">
                 <div><p className="text-muted-foreground">Email</p><p className="font-bold">{user.email}</p></div>
                 <div><p className="text-muted-foreground">Телефон</p><p className="font-bold">{user.phone || '—'}</p></div>
                 <div><p className="text-muted-foreground">Статус</p><StatusBadge value={user.isActive ? 'active' : 'inactive'} /></div>
               </div>
+
+              {isVirtual && (
+                <div className="mt-5 pt-4 border-t border-border/70 space-y-2">
+                  <Button variant="outline" className="w-full flex items-center justify-center gap-1.5" onClick={handleImpersonate}>
+                    <KeyRound size={14} />
+                    Войти в кабинет (Impersonate)
+                  </Button>
+                  <Button variant="outline" className="w-full flex items-center justify-center gap-1.5" onClick={() => setShowActivateModal(true)}>
+                    <CheckCircle size={14} />
+                    Активировать клиента
+                  </Button>
+                  <Button variant="ghost" className="w-full flex items-center justify-center gap-1.5 text-zinc-500 hover:text-red-600" onClick={handleResetSlot} disabled={isResetting}>
+                    <RefreshCw size={14} className={isResetting ? 'animate-spin' : ''} />
+                    Сбросить заведение и меню
+                  </Button>
+                </div>
+              )}
             </div>
 
             <div className="rounded-2xl border border-border/70 bg-card p-5 shadow-sm space-y-4">
@@ -210,6 +315,58 @@ const UserDetailPage = () => {
           </div>
         </div>
       ) : null}
+
+      {/* Activation Modal */}
+      {showActivateModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 animate-in fade-in duration-200">
+          <div className="w-full max-w-md rounded-3xl bg-white dark:bg-zinc-900 p-6 shadow-2xl border border-zinc-100 dark:border-zinc-800">
+            <h3 className="text-lg font-black text-foreground mb-4">Активировать клиента</h3>
+            <form onSubmit={handleActivateSubmit} className="space-y-4">
+              <div>
+                <label className="block text-xs font-bold text-muted-foreground uppercase tracking-wider mb-1.5">Реальный Email клиента</label>
+                <input
+                  type="email"
+                  required
+                  value={activateEmail}
+                  onChange={(e) => setActivateEmail(e.target.value)}
+                  placeholder="client@example.com"
+                  className="w-full px-3.5 py-2 border border-zinc-200 dark:border-zinc-800 rounded-xl bg-transparent text-sm focus:outline-none focus:ring-2 focus:ring-brand-purple/50 focus:border-brand-purple text-foreground"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-muted-foreground uppercase tracking-wider mb-1.5">Новый Пароль</label>
+                <input
+                  type="password"
+                  required
+                  minLength={6}
+                  value={activatePassword}
+                  onChange={(e) => setActivatePassword(e.target.value)}
+                  placeholder="••••••••"
+                  className="w-full px-3.5 py-2 border border-zinc-200 dark:border-zinc-800 rounded-xl bg-transparent text-sm focus:outline-none focus:ring-2 focus:ring-brand-purple/50 focus:border-brand-purple text-foreground"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-muted-foreground uppercase tracking-wider mb-1.5">Имя / Название (Необязательно)</label>
+                <input
+                  type="text"
+                  value={activateName}
+                  onChange={(e) => setActivateName(e.target.value)}
+                  placeholder="Иван Петров"
+                  className="w-full px-3.5 py-2 border border-zinc-200 dark:border-zinc-800 rounded-xl bg-transparent text-sm focus:outline-none focus:ring-2 focus:ring-brand-purple/50 focus:border-brand-purple text-foreground"
+                />
+              </div>
+              <div className="flex justify-end gap-2 pt-3 border-t border-zinc-100 dark:border-zinc-800/80">
+                <Button type="button" variant="ghost" onClick={() => setShowActivateModal(false)}>
+                  Отмена
+                </Button>
+                <Button type="submit" disabled={isActivating || !activateEmail || !activatePassword}>
+                  {isActivating ? 'Активация...' : 'Активировать'}
+                </Button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </>
   );
 };

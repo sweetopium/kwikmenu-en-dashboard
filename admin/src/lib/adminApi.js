@@ -120,3 +120,22 @@ export const updateUserSubscription = (userId, payload) => adminFetch(`/users/${
   body: JSON.stringify(payload),
 });
 
+export const createVirtualClient = (payload) => adminFetch('/virtual-clients', {
+  method: 'POST',
+  body: JSON.stringify(payload),
+});
+
+export const impersonateVirtualClient = (clientId) => adminFetch(`/virtual-clients/${clientId}/impersonate`, {
+  method: 'POST',
+});
+
+export const resetVirtualClient = (clientId) => adminFetch(`/virtual-clients/${clientId}/reset`, {
+  method: 'POST',
+});
+
+export const activateVirtualClient = (clientId, payload) => adminFetch(`/virtual-clients/${clientId}/activate`, {
+  method: 'POST',
+  body: JSON.stringify(payload),
+});
+
+
