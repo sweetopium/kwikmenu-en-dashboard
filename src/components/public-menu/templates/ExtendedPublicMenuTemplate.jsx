@@ -161,6 +161,7 @@ const ExtendedPublicMenuTemplate = ({
   const [language, setLanguage] = useState(defaultLanguage);
   const [activeCategoryId, setActiveCategoryId] = useState(payload?.categories?.[0]?.id || '');
   const [openSheet, setOpenSheet] = useState(null);
+  const [isDescExpanded, setIsDescExpanded] = useState(false);
   const sectionRefs = useRef(new Map());
   const categoryChipRefs = useRef(new Map());
   const categoryNavRef = useRef(null);
@@ -172,6 +173,7 @@ const ExtendedPublicMenuTemplate = ({
     setLanguage(payload?.defaultLanguage || 'ru');
     setActiveCategoryId(payload?.categories?.[0]?.id || '');
     setOpenSheet(null);
+    setIsDescExpanded(false);
   }, [payload?.defaultLanguage, payload?.categories, activeMenuId]);
 
   useEffect(() => {
@@ -612,9 +614,26 @@ const ExtendedPublicMenuTemplate = ({
             <div className="flex items-end justify-between gap-4 pt-1">
               <div className="min-w-0 flex-1">
                 {isFilled(venueDescription) ? (
-                  <p className="text-[0.88rem] leading-[1.4] text-[#82796f] break-words">
-                    {venueDescription}
-                  </p>
+                  <>
+                    <p
+                      className={`text-[0.88rem] leading-[1.4] text-[#82796f] break-words transition-all duration-200 ${
+                        isDescExpanded ? '' : 'line-clamp-3'
+                      }`}
+                    >
+                      {venueDescription}
+                    </p>
+                    {venueDescription.length > 150 && (
+                      <button
+                        type="button"
+                        onClick={() => setIsDescExpanded(!isDescExpanded)}
+                        className="mt-1 text-[0.82rem] font-bold underline cursor-pointer hover:opacity-85 block focus:outline-none text-[#82796f]"
+                      >
+                        {isDescExpanded 
+                          ? (language === 'en' ? 'hide' : 'скрыть') 
+                          : (language === 'en' ? 'show details' : 'подробнее')}
+                      </button>
+                    )}
+                  </>
                 ) : null}
               </div>
               <div className="shrink-0 pb-0.5">
