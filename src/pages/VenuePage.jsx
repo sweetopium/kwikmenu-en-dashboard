@@ -143,9 +143,21 @@ const VenuePage = () => {
 
   const templateOptions = useMemo(
     () => [
-      { id: 'classic', label: t('venues.design.templates.classic', 'Классический') },
-      { id: 'minimal', label: t('venues.design.templates.minimal', 'Продвинутый') },
-      { id: 'accent', label: t('venues.design.templates.accent', 'Премиум') },
+      {
+        id: 'classic',
+        label: t('venues.design.templates.classic', 'Классический'),
+        demoUrl: 'https://app.kwikmenu.ru/m/f17458fc-6895-4772-b6d0-800a2ad44527',
+      },
+      {
+        id: 'minimal',
+        label: t('venues.design.templates.minimal', 'Продвинутый'),
+        demoUrl: 'https://app.kwikmenu.ru/m/497cea1f-62b6-4426-8372-1948fc67ed33',
+      },
+      {
+        id: 'accent',
+        label: t('venues.design.templates.accent', 'Премиум'),
+        demoUrl: null,
+      },
     ],
     [t],
   );
@@ -637,21 +649,31 @@ const VenuePage = () => {
                         const isSelected = designData.template === template.id;
 
                         return (
-                      <button
-                        key={template.id}
-                        type="button"
-                        onClick={isDisabled ? undefined : () => setDesignData({ ...designData, template: template.id })}
-                        disabled={isDisabled}
-                        className={`p-4 rounded-xl border-2 text-sm font-bold transition-all text-center ${
-                          isDisabled
-                            ? 'border-border/40 bg-muted/40 text-muted-foreground/70 cursor-not-allowed'
-                            : isSelected
-                            ? 'border-brand-purple bg-brand-purple/5 text-brand-purple'
-                            : 'border-border/40 hover:border-border text-muted-foreground'
-                        }`}
-                      >
-                        {template.label}
-                      </button>
+                          <div
+                            key={template.id}
+                            onClick={isDisabled ? undefined : () => setDesignData({ ...designData, template: template.id })}
+                            className={`relative p-4 rounded-xl border-2 text-center flex items-center justify-center min-h-[56px] sm:min-h-[62px] transition-all select-none ${
+                              isDisabled
+                                ? 'border-border/40 bg-muted/40 text-muted-foreground/70 cursor-not-allowed'
+                                : 'cursor-pointer ' + (isSelected
+                                  ? 'border-brand-purple bg-brand-purple/5 text-brand-purple'
+                                  : 'border-border/40 hover:border-border text-muted-foreground')
+                            }`}
+                          >
+                            <span className="text-sm font-bold">{template.label}</span>
+                            {template.demoUrl && (
+                              <a
+                                href={template.demoUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                onClick={(e) => e.stopPropagation()}
+                                className="absolute -top-3 right-6 z-10 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-[#f3f0ff] dark:bg-zinc-800 text-brand-purple border border-brand-purple/20 hover:bg-brand-purple hover:text-white hover:border-brand-purple transition-all flex items-center gap-0.5 active:scale-95"
+                              >
+                                <span>{t('venues.design.viewDemo', 'Демо')}</span>
+                                <ExternalLink size={10} />
+                              </a>
+                            )}
+                          </div>
                         );
                       })()
                     ))}
