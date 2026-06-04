@@ -124,7 +124,7 @@ const QrDesignControls = ({
           <label className="flex items-center gap-4 p-3 border border-dashed border-border rounded-2xl cursor-pointer hover:border-brand-purple/50 hover:bg-brand-purple/5 transition-all">
             <input
               type="file"
-              accept="image/png,image/jpeg,image/jpg"
+              accept="image/png,image/jpeg,image/jpg,image/webp,image/svg+xml"
               onChange={onLogoUpload}
               className="hidden"
             />

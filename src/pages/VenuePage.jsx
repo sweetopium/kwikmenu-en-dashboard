@@ -12,6 +12,7 @@ import {
   Image as ImageIcon,
   LayoutTemplate,
   Palette,
+  Globe,
 } from 'lucide-react';
 
 import { Button } from "../components/ui/button";
@@ -53,6 +54,7 @@ const EMPTY_VENUE = {
   phone: '',
   city: '',
   country: '',
+  instagramUrl: '',
   currency: 'RUB',
   publicUrl: '',
 };
@@ -182,6 +184,7 @@ const VenuePage = () => {
       phone: venue.phone || '',
       city: venue.city || '',
       country: venue.country || '',
+      instagramUrl: venue.instagramUrl || '',
       currency: venue.currency || settings?.currency || 'RUB',
       publicUrl: venue.publicUrl || settings?.qr?.publicUrl || '',
     });
@@ -261,6 +264,7 @@ const VenuePage = () => {
         phone: buildFullPhone({ selectedDial: phoneDial, localPhone: phoneLocalNumber }) || null,
         city: venueData.city || null,
         country: venueData.country || null,
+        instagramUrl: venueData.instagramUrl || null,
         currency: venueData.currency || 'RUB',
       });
       const phoneParts = resolvePhoneParts(venue.phone);
@@ -271,6 +275,7 @@ const VenuePage = () => {
         phone: venue.phone || '',
         city: venue.city || '',
         country: venue.country || '',
+        instagramUrl: venue.instagramUrl || '',
         currency: venue.currency || 'RUB',
         publicUrl: venue.publicUrl || current.publicUrl,
       }));
@@ -500,6 +505,19 @@ const VenuePage = () => {
                   />
                 </div>
 
+                <div className="space-y-2">
+                  <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">{t('venues.fields.instagram', 'Ссылка на сайт / соцсети')}</Label>
+                  <div className="relative">
+                    <Globe className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={16} />
+                    <Input
+                      value={venueData.instagramUrl}
+                      onChange={(e) => setVenueData({ ...venueData, instagramUrl: e.target.value })}
+                      className={`${formFieldClasses} !pl-10`}
+                      placeholder="https://example.com"
+                    />
+                  </div>
+                </div>
+
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 border-t border-border/50 pt-6">
                   <div className="space-y-2">
                     <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">{t('venues.fields.city', 'Город')}</Label>
@@ -681,7 +699,7 @@ const VenuePage = () => {
                     <input
                       id="venue-logo-input"
                       type="file"
-                      accept="image/png,image/jpeg,image/jpg"
+                      accept="image/png,image/jpeg,image/jpg,image/webp,image/svg+xml"
                       onChange={handleDesignLogoUpload}
                       className="hidden"
                     />

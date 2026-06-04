@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { ExternalLink, Globe, Info, MapPin, Phone, Wifi, X } from 'lucide-react';
+import { Check, ExternalLink, Globe, Info, MapPin, Phone, Wifi, X } from 'lucide-react';
 
 import {
   formatCurrency,
@@ -162,6 +162,8 @@ const ExtendedPublicMenuTemplate = ({
   const [activeCategoryId, setActiveCategoryId] = useState(payload?.categories?.[0]?.id || '');
   const [openSheet, setOpenSheet] = useState(null);
   const [isDescExpanded, setIsDescExpanded] = useState(false);
+  const [passwordCopied, setPasswordCopied] = useState(false);
+  const copyResetTimeoutRef = useRef(null);
   const sectionRefs = useRef(new Map());
   const categoryChipRefs = useRef(new Map());
   const categoryNavRef = useRef(null);
@@ -270,6 +272,7 @@ const ExtendedPublicMenuTemplate = ({
   const venueName = venue?.name || payload?.venue?.name || 'Menu';
   const venueDescription = venue?.description || payload?.venue?.description || '';
   const venueLogoUrl = venue?.design?.logoUrl || payload?.venue?.logoUrl || null;
+  const venueInstagramUrl = venue?.instagramUrl || payload?.venue?.instagramUrl || null;
 
   useEffect(() => {
     if (!visibleLanguages.length) {
@@ -315,18 +318,51 @@ const ExtendedPublicMenuTemplate = ({
     }, 540);
   };
 
+  const hasWifi = Boolean(venue?.wifi?.enabled && venue?.wifi?.ssid && venue?.wifi?.password);
+
+  const handleCopyWifiPassword = async () => {
+    const password = venue?.wifi?.password;
+    if (!password) {
+      return;
+    }
+    try {
+      await navigator.clipboard.writeText(password);
+      setPasswordCopied(true);
+      if (copyResetTimeoutRef.current) {
+        window.clearTimeout(copyResetTimeoutRef.current);
+      }
+      copyResetTimeoutRef.current = window.setTimeout(() => {
+        setPasswordCopied(false);
+      }, 2000);
+    } catch (e) {
+      // ignore
+    }
+  };
+
   const aboutFacts = [
     isFilled(venue?.city) ? { icon: MapPin, label: language === 'en' ? 'City' : 'Город', value: [venue.city, venue.country].filter(isFilled).join(', ') } : null,
     isFilled(venue?.phone) ? { icon: Phone, label: language === 'en' ? 'Phone' : 'Телефон', value: venue.phone } : null,
-    venue?.wifi?.enabled && isFilled(venue?.wifi?.ssid) ? { icon: Wifi, label: 'Wi-Fi', value: venue.wifi.ssid } : null,
+    hasWifi ? { icon: Wifi, label: language === 'en' ? 'Wi-Fi Network' : 'Сеть Wi-Fi', value: venue.wifi.ssid } : null,
   ].filter(Boolean);
 
   const aboutActions = [
-    venue?.phone
-      ? { icon: Phone, label: language === 'en' ? 'Call' : 'Позвонить', href: `tel:${venue.phone}` }
-      : { icon: Phone, label: language === 'en' ? 'Call' : 'Позвонить', href: '#' },
-    { icon: Globe, label: 'Instagram', href: '#' },
-    { icon: MapPin, label: language === 'en' ? 'Route' : 'Маршрут', href: '#' },
+    {
+      icon: Phone,
+      label: language === 'en' ? 'Call' : 'Позвонить',
+      href: venue?.phone ? `tel:${venue.phone.replace(/[^\d+]/g, '')}` : undefined,
+    },
+    {
+      icon: Globe,
+      label: language === 'en' ? 'Website' : 'Сайт',
+      href: venueInstagramUrl || undefined,
+    },
+    {
+      icon: passwordCopied ? Check : Wifi,
+      label: passwordCopied 
+        ? (language === 'en' ? 'Copied!' : 'Скопировано!') 
+        : (language === 'en' ? 'WiFi Pass' : 'Пароль Wi-Fi'),
+      onClick: hasWifi ? handleCopyWifiPassword : undefined,
+    },
   ];
 
   const renderSheetContent = () => {
@@ -346,7 +382,6 @@ const ExtendedPublicMenuTemplate = ({
             <div className="space-y-3">
               <div className="space-y-1.5">
                 <div className="font-serif text-[1.7rem] font-medium tracking-[0.18em] text-foreground">{venueName.toUpperCase()}</div>
-                <div className="text-[0.58rem] font-medium uppercase tracking-[0.34em] text-muted-foreground">Bistro</div>
               </div>
               {isFilled(venueDescription) ? (
                 <p className="text-[0.95rem] leading-[1.55] text-foreground/88">{venueDescription}</p>
@@ -381,26 +416,52 @@ const ExtendedPublicMenuTemplate = ({
             <div className="grid grid-cols-3 gap-2 border-t border-black/8 pt-4">
               {aboutActions.map((action) => {
                 const Icon = action.icon;
-                const isPlaceholder = action.href === '#';
+                const isPlaceholder = !action.href && !action.onClick;
+
+                const content = (
+                  <>
+                    <Icon size={16} />
+                    <span>{action.label}</span>
+                  </>
+                );
+
+                const baseClass = `flex min-h-16 flex-col items-center justify-center gap-1 rounded-[1rem] border px-2 py-3 text-center text-[0.74rem] font-medium transition ${
+                  isPlaceholder ? 'cursor-default opacity-70' : 'hover:border-black/15 hover:bg-black/5 cursor-pointer'
+                }`;
+                const baseStyle = { borderColor: 'rgba(162,142,121,0.18)', backgroundColor: '#fffaf2' };
+
+                if (isPlaceholder) {
+                  return (
+                    <div key={action.label} className={baseClass} style={baseStyle}>
+                      {content}
+                    </div>
+                  );
+                }
+
+                if (action.onClick) {
+                  return (
+                    <button
+                      key={action.label}
+                      type="button"
+                      onClick={action.onClick}
+                      className={baseClass}
+                      style={baseStyle}
+                    >
+                      {content}
+                    </button>
+                  );
+                }
 
                 return (
                   <a
                     key={action.label}
                     href={action.href}
-                    target={isPlaceholder ? undefined : '_blank'}
-                    rel={isPlaceholder ? undefined : 'noreferrer'}
-                    onClick={(event) => {
-                      if (isPlaceholder) {
-                        event.preventDefault();
-                      }
-                    }}
-                    className={`flex min-h-16 flex-col items-center justify-center gap-1 rounded-[1rem] border px-2 py-3 text-center text-[0.74rem] font-medium transition ${
-                      isPlaceholder ? 'cursor-default opacity-70' : 'hover:border-black/15 hover:bg-black/5'
-                    }`}
-                    style={{ borderColor: 'rgba(162,142,121,0.18)', backgroundColor: '#fffaf2' }}
+                    target="_blank"
+                    rel="noreferrer"
+                    className={baseClass}
+                    style={baseStyle}
                   >
-                    <Icon size={16} />
-                    <span>{action.label}</span>
+                    {content}
                   </a>
                 );
               })}
@@ -614,26 +675,9 @@ const ExtendedPublicMenuTemplate = ({
             <div className="flex items-end justify-between gap-4 pt-1">
               <div className="min-w-0 flex-1">
                 {isFilled(venueDescription) ? (
-                  <>
-                    <p
-                      className={`text-[0.88rem] leading-[1.4] text-[#82796f] break-words transition-all duration-200 ${
-                        isDescExpanded ? '' : 'line-clamp-3'
-                      }`}
-                    >
-                      {venueDescription}
-                    </p>
-                    {venueDescription.length > 150 && (
-                      <button
-                        type="button"
-                        onClick={() => setIsDescExpanded(!isDescExpanded)}
-                        className="mt-1 text-[0.82rem] font-bold underline cursor-pointer hover:opacity-85 block focus:outline-none text-[#82796f]"
-                      >
-                        {isDescExpanded 
-                          ? (language === 'en' ? 'hide' : 'скрыть') 
-                          : (language === 'en' ? 'show details' : 'подробнее')}
-                      </button>
-                    )}
-                  </>
+                  <p className="text-[0.88rem] leading-[1.4] text-[#82796f] break-words line-clamp-3">
+                    {venueDescription}
+                  </p>
                 ) : null}
               </div>
               <div className="shrink-0 pb-0.5">

@@ -56,6 +56,7 @@ def serialize_venue(venue: Venue, *, menus_count: int = 0) -> VenueResponse:
         country=venue.country,
         city=venue.city,
         description=venue.description,
+        instagramUrl=venue.instagram_url,
         currency=(settings.currency if settings else "RUB"),
         publicPath=build_public_path(venue),
         publicUrl=build_public_url(venue),
@@ -142,6 +143,7 @@ def create_venue(
         country=payload.country.strip() if payload.country else None,
         city=payload.city.strip() if payload.city else None,
         description=payload.description.strip() if payload.description else None,
+        instagram_url=payload.instagramUrl.strip() if payload.instagramUrl else None,
     )
     db.add(venue)
     db.flush()
@@ -194,6 +196,7 @@ def update_venue_profile(
     venue.country = payload.country.strip() if payload.country else None
     venue.city = payload.city.strip() if payload.city else None
     venue.description = payload.description.strip() if payload.description else None
+    venue.instagram_url = payload.instagramUrl.strip() if payload.instagramUrl else None
     venue_settings.currency = (payload.currency or "RUB").strip().upper()
 
     record_product_event(

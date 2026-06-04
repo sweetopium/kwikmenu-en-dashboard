@@ -33,6 +33,7 @@ class PublicVenueResponse(StrictModel):
     phone: str | None = None
     city: str | None = None
     country: str | None = None
+    instagramUrl: str | None = None
     currency: str = "RUB"
     publicPath: str
     publicUrl: str

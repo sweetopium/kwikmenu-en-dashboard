@@ -82,6 +82,7 @@ def get_public_venue_menus(
             phone=venue.phone,
             city=venue.city,
             country=venue.country,
+            instagramUrl=venue.instagram_url,
             currency=venue_settings.currency,
             publicPath=build_public_path(venue),
             publicUrl=build_public_url(venue),

@@ -15,6 +15,7 @@ class Venue(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     country: Mapped[str | None] = mapped_column(String(64), nullable=True)
     city: Mapped[str | None] = mapped_column(String(128), nullable=True)
     description: Mapped[str | None] = mapped_column(Text, nullable=True)
+    instagram_url: Mapped[str | None] = mapped_column(String(512), nullable=True)
 
     menus: Mapped[list["Menu"]] = relationship(back_populates="venue", cascade="all, delete-orphan")
     import_jobs: Mapped[list["MenuImportJob"]] = relationship(back_populates="venue")

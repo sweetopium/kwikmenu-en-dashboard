@@ -14,6 +14,7 @@ class VenueCreateRequest(StrictModel):
     city: str | None = Field(default=None, max_length=128)
     description: str | None = None
     currency: str | None = Field(default=None, max_length=8)
+    instagramUrl: str | None = Field(default=None, max_length=512)
 
 
 class VenueProfileUpdateRequest(StrictModel):
@@ -23,6 +24,7 @@ class VenueProfileUpdateRequest(StrictModel):
     city: str | None = Field(default=None, max_length=128)
     description: str | None = None
     currency: str | None = Field(default=None, max_length=8)
+    instagramUrl: str | None = Field(default=None, max_length=512)
 
 
 class VenueWifiSettingsUpdateRequest(StrictModel):
@@ -89,6 +91,7 @@ class VenueResponse(StrictModel):
     country: str | None = None
     city: str | None = None
     description: str | None = None
+    instagramUrl: str | None = None
     currency: str = "RUB"
     publicPath: str
     publicUrl: str
