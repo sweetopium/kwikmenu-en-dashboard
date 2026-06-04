@@ -13,6 +13,7 @@ import {
   impersonateVirtualClient,
   resetVirtualClient,
   activateVirtualClient,
+  createAdminVenue,
 } from '../lib/adminApi';
 import { formatDateTime } from '../lib/formatters';
 
@@ -50,6 +51,14 @@ const UserDetailPage = () => {
   const [activatePassword, setActivatePassword] = useState('');
   const [activateName, setActivateName] = useState('');
   const [isActivating, setIsActivating] = useState(false);
+
+  // Create Venue State
+  const [showCreateVenueModal, setShowCreateVenueModal] = useState(false);
+  const [newVenueName, setNewVenueName] = useState('');
+  const [newVenueCity, setNewVenueCity] = useState('Москва');
+  const [newVenueCountry, setNewVenueCountry] = useState('Россия');
+  const [newVenueCurrency, setNewVenueCurrency] = useState('RUB');
+  const [isCreatingVenue, setIsCreatingVenue] = useState(false);
 
   useEffect(() => {
     fetchUserDetail(id).then(setData).catch((nextError) => setError(nextError.message));
@@ -123,9 +132,13 @@ const UserDetailPage = () => {
   const handleImpersonate = async () => {
     setError('');
     try {
-      await impersonateVirtualClient(id);
-      const dashboardUrl = getClientDashboardUrl();
-      window.open(dashboardUrl, '_blank');
+      const res = await impersonateVirtualClient(id);
+      if (res && res.magicUrl) {
+        window.open(res.magicUrl, '_blank');
+      } else {
+        const dashboardUrl = getClientDashboardUrl();
+        window.open(dashboardUrl, '_blank');
+      }
     } catch (err) {
       setError(err.message);
     }
@@ -176,6 +189,35 @@ const UserDetailPage = () => {
       setIsActivating(false);
     }
   };
+
+  const handleCreateVenueSubmit = async (e) => {
+    e.preventDefault();
+    if (!newVenueName.trim()) return;
+
+    setIsCreatingVenue(true);
+    setError('');
+    try {
+      await createAdminVenue({
+        name: newVenueName.trim(),
+        ownerUserId: id,
+        city: newVenueCity.trim() || null,
+        country: newVenueCountry.trim() || null,
+        currency: newVenueCurrency,
+      });
+      setShowCreateVenueModal(false);
+      setNewVenueName('');
+      setNewVenueCity('Москва');
+      setNewVenueCountry('Россия');
+      setNewVenueCurrency('RUB');
+      const refreshed = await fetchUserDetail(id);
+      setData(refreshed);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setIsCreatingVenue(false);
+    }
+  };
+
 
   return (
     <>
@@ -299,22 +341,100 @@ const UserDetailPage = () => {
               </div>
             </div>
           </div>
-          <div className="lg:col-span-2 space-y-4">
-            <DataTable rows={data.venues} columns={[
-              { key: 'name', label: 'Заведение', render: (row) => <Link className="font-black text-brand-purple hover:underline" to={`/venues/${row.id}`}>{row.name}</Link> },
-              { key: 'city', label: 'Город', render: (row) => row.city || '—' },
-              { key: 'country', label: 'Страна', render: (row) => row.country || '—' },
-              { key: 'createdAt', label: 'Создано', render: (row) => formatDateTime(row.createdAt) },
-            ]} />
-            <DataTable rows={data.imports} columns={[
-              { key: 'id', label: 'Импорт' },
-              { key: 'status', label: 'Статус', render: (row) => <StatusBadge value={row.status} /> },
-              { key: 'menuSource', label: 'Источник' },
-              { key: 'createdAt', label: 'Создан', render: (row) => formatDateTime(row.createdAt) },
-            ]} />
+          <div className="lg:col-span-2 space-y-6">
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <h3 className="text-lg font-black text-foreground">Заведения</h3>
+                <Button size="sm" onClick={() => setShowCreateVenueModal(true)}>
+                  Добавить заведение
+                </Button>
+              </div>
+              <DataTable rows={data.venues} columns={[
+                { key: 'name', label: 'Заведение', render: (row) => <Link className="font-black text-brand-purple hover:underline" to={`/venues/${row.id}`}>{row.name}</Link> },
+                { key: 'city', label: 'Город', render: (row) => row.city || '—' },
+                { key: 'country', label: 'Страна', render: (row) => row.country || '—' },
+                { key: 'createdAt', label: 'Создано', render: (row) => formatDateTime(row.createdAt) },
+              ]} />
+            </div>
+
+            <div className="space-y-3">
+              <h3 className="text-lg font-black text-foreground">Импорты</h3>
+              <DataTable rows={data.imports} columns={[
+                { key: 'id', label: 'Импорт' },
+                { key: 'status', label: 'Статус', render: (row) => <StatusBadge value={row.status} /> },
+                { key: 'menuSource', label: 'Источник' },
+                { key: 'createdAt', label: 'Создан', render: (row) => formatDateTime(row.createdAt) },
+              ]} />
+            </div>
           </div>
         </div>
       ) : null}
+
+      {/* Create Venue Modal */}
+      {showCreateVenueModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 animate-in fade-in duration-200">
+          <div className="w-full max-w-md rounded-3xl bg-white dark:bg-zinc-900 p-6 shadow-2xl border border-zinc-100 dark:border-zinc-800">
+            <h3 className="text-lg font-black text-foreground mb-4">Создать заведение</h3>
+            <form onSubmit={handleCreateVenueSubmit} className="space-y-4">
+              <div>
+                <label className="block text-xs font-bold text-muted-foreground uppercase tracking-wider mb-1.5 font-sans">Название заведения</label>
+                <input
+                  type="text"
+                  required
+                  value={newVenueName}
+                  onChange={(e) => setNewVenueName(e.target.value)}
+                  placeholder="Кафе Ромашка"
+                  className="w-full px-3.5 py-2 border border-zinc-200 dark:border-zinc-800 rounded-xl bg-transparent text-sm focus:outline-none focus:ring-2 focus:ring-brand-purple/50 focus:border-brand-purple text-foreground"
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-bold text-muted-foreground uppercase tracking-wider mb-1.5 font-sans">Город</label>
+                  <input
+                    type="text"
+                    value={newVenueCity}
+                    onChange={(e) => setNewVenueCity(e.target.value)}
+                    placeholder="Москва"
+                    className="w-full px-3.5 py-2 border border-zinc-200 dark:border-zinc-800 rounded-xl bg-transparent text-sm focus:outline-none focus:ring-2 focus:ring-brand-purple/50 focus:border-brand-purple text-foreground"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-muted-foreground uppercase tracking-wider mb-1.5 font-sans">Страна</label>
+                  <input
+                    type="text"
+                    value={newVenueCountry}
+                    onChange={(e) => setNewVenueCountry(e.target.value)}
+                    placeholder="Россия"
+                    className="w-full px-3.5 py-2 border border-zinc-200 dark:border-zinc-800 rounded-xl bg-transparent text-sm focus:outline-none focus:ring-2 focus:ring-brand-purple/50 focus:border-brand-purple text-foreground"
+                  />
+                </div>
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-muted-foreground uppercase tracking-wider mb-1.5 font-sans">Валюта</label>
+                <select
+                  value={newVenueCurrency}
+                  onChange={(e) => setNewVenueCurrency(e.target.value)}
+                  className="w-full px-3.5 py-2 border border-zinc-200 dark:border-zinc-800 rounded-xl bg-transparent text-sm focus:outline-none focus:ring-2 focus:ring-brand-purple/50 focus:border-brand-purple text-foreground"
+                >
+                  <option value="RUB">RUB (₽)</option>
+                  <option value="USD">USD ($)</option>
+                  <option value="EUR">EUR (€)</option>
+                  <option value="AED">AED (Dh)</option>
+                  <option value="KZT">KZT (₸)</option>
+                </select>
+              </div>
+              <div className="flex justify-end gap-2 pt-3 border-t border-zinc-100 dark:border-zinc-800/80">
+                <Button type="button" variant="ghost" onClick={() => setShowCreateVenueModal(false)}>
+                  Отмена
+                </Button>
+                <Button type="submit" disabled={isCreatingVenue || !newVenueName}>
+                  {isCreatingVenue ? 'Создание...' : 'Создать'}
+                </Button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
       {/* Activation Modal */}
       {showActivateModal && (

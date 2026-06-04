@@ -138,4 +138,14 @@ export const activateVirtualClient = (clientId, payload) => adminFetch(`/virtual
   body: JSON.stringify(payload),
 });
 
+export const createAdminVenue = (payload) => adminFetch('/venues', {
+  method: 'POST',
+  body: JSON.stringify(payload),
+});
+
+export const createAdminMenu = (payload) => adminFetch('/menus', {
+  method: 'POST',
+  body: JSON.stringify(payload),
+});
+
 

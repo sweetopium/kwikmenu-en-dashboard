@@ -46,6 +46,22 @@ class AdminMenuUpdateRequest(StrictModel):
     status: str | None = Field(default=None, max_length=32)
 
 
+class AdminVenueCreateRequest(StrictModel):
+    name: str = Field(..., max_length=255)
+    ownerUserId: str = Field(..., max_length=36)
+    city: str | None = Field(default=None, max_length=128)
+    country: str | None = Field(default=None, max_length=64)
+    phone: str | None = Field(default=None, max_length=64)
+    description: str | None = Field(default=None)
+    currency: str = Field(default="RUB", max_length=8)
+
+
+class AdminMenuCreateRequest(StrictModel):
+    name: str = Field(..., max_length=255)
+    venueId: str = Field(..., max_length=36)
+    status: str = Field(default="draft", max_length=32)
+
+
 def _client_ip(request: Request) -> str:
     forwarded_for = request.headers.get("x-forwarded-for", "")
     if forwarded_for:
@@ -446,6 +462,57 @@ def list_admin_venues(
     }
 
 
+@router.post("/venues", status_code=status.HTTP_201_CREATED)
+def create_admin_venue(
+    payload: AdminVenueCreateRequest,
+    _: None = AdminAccess,
+    db: Session = Depends(get_db),
+) -> dict:
+    owner = db.query(User).filter(User.id == payload.ownerUserId).first()
+    if not owner:
+        raise HTTPException(status_code=400, detail="Владелец не найден.")
+
+    venue_id = None
+    is_virtual = owner.email.endswith("@virtual.kwikmenu.ru")
+    if is_virtual:
+        existing_venues_count = db.query(Venue).filter(Venue.owner_user_id == owner.id).count()
+        if existing_venues_count == 0:
+            venue_id = owner.id
+
+    venue_kwargs = {
+        "owner_user_id": payload.ownerUserId,
+        "name": payload.name.strip(),
+        "phone": payload.phone.strip() if payload.phone else None,
+        "country": payload.country.strip() if payload.country else None,
+        "city": payload.city.strip() if payload.city else None,
+        "description": payload.description.strip() if payload.description else None,
+    }
+    if venue_id:
+        venue_kwargs["id"] = venue_id
+
+    venue = Venue(**venue_kwargs)
+    db.add(venue)
+    db.flush()
+
+    settings = VenueSettings(
+        venue_id=venue.id,
+        currency=payload.currency.strip().upper(),
+    )
+    db.add(settings)
+    db.commit()
+    db.refresh(venue)
+
+    return {
+        "id": venue.id,
+        "name": venue.name,
+        "ownerId": venue.owner_user_id,
+        "city": venue.city,
+        "country": venue.country,
+        "createdAt": venue.created_at,
+    }
+
+
+
 @router.get("/venues/{venue_id}")
 def get_admin_venue_detail(
     venue_id: str,
@@ -531,6 +598,62 @@ def list_admin_menus(
             for menu, venue, user in rows
         ],
     }
+
+
+@router.post("/menus", status_code=status.HTTP_201_CREATED)
+def create_admin_menu(
+    payload: AdminMenuCreateRequest,
+    _: None = AdminAccess,
+    db: Session = Depends(get_db),
+) -> dict:
+    venue = db.query(Venue).filter(Venue.id == payload.venueId).first()
+    if not venue:
+        raise HTTPException(status_code=400, detail="Заведение не найдено.")
+
+    menu_payload = {
+        "menuMeta": {
+            "id": "menu",
+            "slug": "menu",
+            "name": payload.name.strip(),
+            "description": "",
+            "translations": {}
+        },
+        "venue": {
+            "name": venue.name,
+            "description": venue.description or "",
+            "logoUrl": None,
+            "coverImageUrl": None
+        },
+        "categories": [],
+        "languages": [
+            {"code": "ru", "shortLabel": "RU", "nativeName": "Русский", "flag": "RU"}
+        ],
+        "settings": {
+            "templateType": "classic",
+            "accentColor": "#6d67eb"
+        }
+    }
+
+    from app.core.slugs import slugify
+    menu = Menu(
+        venue_id=payload.venueId,
+        name=payload.name.strip(),
+        slug=slugify(payload.name.strip(), fallback="menu"),
+        status=payload.status,
+        payload=menu_payload,
+    )
+    db.add(menu)
+    db.commit()
+    db.refresh(menu)
+
+    return {
+        "id": menu.id,
+        "name": menu.name,
+        "status": menu.status,
+        "venueId": menu.venue_id,
+        "createdAt": menu.created_at,
+    }
+
 
 
 @router.get("/menus/{menu_id}")

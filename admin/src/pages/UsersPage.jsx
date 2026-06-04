@@ -125,9 +125,13 @@ const UsersPage = () => {
   const handleImpersonate = async (userId) => {
     setError('');
     try {
-      await impersonateVirtualClient(userId);
-      const dashboardUrl = getClientDashboardUrl();
-      window.open(dashboardUrl, '_blank');
+      const res = await impersonateVirtualClient(userId);
+      if (res && res.magicUrl) {
+        window.open(res.magicUrl, '_blank');
+      } else {
+        const dashboardUrl = getClientDashboardUrl();
+        window.open(dashboardUrl, '_blank');
+      }
     } catch (err) {
       setError(err.message);
     }

@@ -66,41 +66,13 @@ def create_virtual_client(
     # 2. Setup subscription
     ensure_default_subscription(db, user)
 
-    # 3. Create Venue with matching UUID
-    existing_venue = db.query(Venue).filter(Venue.id == uuid_str).first()
-    if existing_venue:
-        # If the venue already exists for some reason, reassign it
-        existing_venue.owner_user_id = user.id
-        venue = existing_venue
-    else:
-        venue = Venue(
-            id=uuid_str,
-            owner_user_id=user.id,
-            name="Новое заведение",
-            city="Москва",
-            country="Россия",
-        )
-        db.add(venue)
-        db.flush()
-
-    # 4. Create Venue Settings
-    existing_settings = db.query(VenueSettings).filter(VenueSettings.venue_id == venue.id).first()
-    if not existing_settings:
-        venue_settings = VenueSettings(
-            venue_id=venue.id,
-            currency="RUB",
-            public_menu_enabled=True,
-        )
-        db.add(venue_settings)
-
     db.commit()
-    logger.info("Created virtual client user_id=%s venue_id=%s", user.id, venue.id)
+    logger.info("Created virtual client user_id=%s", user.id)
     
     return {
         "id": user.id,
         "email": user.email,
         "name": user.name,
-        "venueId": venue.id,
         "createdAt": user.created_at,
     }
 
@@ -128,16 +100,21 @@ def impersonate_virtual_client(
     )
     db.commit()
 
-    # Set session cookie in response so the browser will save it
-    attach_session_cookie(response, session_token)
-    logger.info("Admin impersonated user user_id=%s session_id=%s", user.id, session_row.id)
+    from app.core.config import get_settings
+    settings = get_settings()
+    frontend_base = settings.menu_import_frontend_origin.rstrip("/")
+    magic_url = f"{frontend_base}/api/auth/magic-login?token={session_token}"
+
+    logger.info("Admin generated impersonation magic url for user user_id=%s session_id=%s", user.id, session_row.id)
 
     return {
         "status": "ok",
         "userId": user.id,
         "email": user.email,
         "sessionToken": session_token,
+        "magicUrl": magic_url,
     }
+
 
 
 @router.post("/{client_id}/reset")
@@ -153,52 +130,27 @@ def reset_virtual_client(
             detail="Пользователь не найден.",
         )
 
-    venue = db.query(Venue).filter(Venue.id == client_id).first()
-    if not venue:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Заведение для данного слота не найдено.",
-        )
+    # Find any venues owned by this user
+    venues = db.query(Venue).filter(Venue.owner_user_id == user.id).all()
+    for venue in venues:
+        # 1. Delete all menus under this venue
+        db.query(Menu).filter(Menu.venue_id == venue.id).delete(synchronize_session=False)
 
-    # 1. Delete all menus under this venue
-    db.query(Menu).filter(Menu.venue_id == venue.id).delete(synchronize_session=False)
+        # 2. Delete all import jobs under this venue
+        db.query(MenuImportJob).filter(MenuImportJob.venue_id == venue.id).delete(synchronize_session=False)
 
-    # 2. Delete all import jobs under this venue
-    db.query(MenuImportJob).filter(MenuImportJob.venue_id == venue.id).delete(synchronize_session=False)
+        # 3. Delete the venue settings
+        db.query(VenueSettings).filter(VenueSettings.venue_id == venue.id).delete(synchronize_session=False)
 
-    # 3. Reset venue profile to defaults
-    venue.name = "Новое заведение"
-    venue.description = None
-    venue.phone = None
-    venue.city = "Москва"
-    venue.country = "Россия"
-    db.add(venue)
-
-    # 4. Reset venue settings
-    settings = db.query(VenueSettings).filter(VenueSettings.venue_id == venue.id).first()
-    if settings:
-        settings.wifi_enabled = False
-        settings.wifi_ssid = None
-        settings.wifi_password = None
-        settings.design_template = "classic"
-        settings.design_accent_color = "#6d67eb"
-        settings.design_logo_url = None
-        settings.qr_style = "rounded"
-        settings.qr_color = "#863bff"
-        settings.qr_logo_url = None
-        settings.qr_has_frame = True
-        settings.qr_frame_text = "СКАНИРУЙ МЕНЮ"
-        settings.qr_frame_color = "#08060d"
-        settings.public_menu_enabled = True
-        db.add(settings)
+        # 4. Delete the venue
+        db.query(Venue).filter(Venue.id == venue.id).delete(synchronize_session=False)
 
     db.commit()
-    logger.info("Reset virtual client slot user_id=%s venue_id=%s", user.id, venue.id)
+    logger.info("Reset virtual client slot user_id=%s", user.id)
 
     return {
         "status": "ok",
         "userId": user.id,
-        "venueId": venue.id,
     }
 
 

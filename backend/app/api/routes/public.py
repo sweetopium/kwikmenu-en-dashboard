@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 from app.api.routes.analytics import record_public_menu_view
 from app.api.deps import get_db
 from app.api.routes.venues import build_public_path, build_public_url, get_or_create_venue_settings
-from app.models import Menu, Venue
+from app.models import Menu, User, Venue
 from app.schemas.menu import MenuPayload
 from app.schemas.public_api import (
     PublicBillingPlanResponse,
@@ -53,6 +53,11 @@ def get_public_venue_menus(
     db: Session = Depends(get_db),
 ) -> PublicVenueMenusResponse:
     venue = db.query(Venue).filter(Venue.id == venue_id).first()
+    if venue is None:
+        user = db.query(User).filter(User.id == venue_id).first()
+        if user:
+            venue = db.query(Venue).filter(Venue.owner_user_id == user.id).order_by(Venue.created_at.asc()).first()
+
     if venue is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Venue not found.")
 

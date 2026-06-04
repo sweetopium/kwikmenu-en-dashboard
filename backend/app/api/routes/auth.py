@@ -154,6 +154,45 @@ def logout(
     return response
 
 
+@router.get("/magic-login")
+def magic_login(
+    token: str,
+    response: Response,
+    db: Session = Depends(get_db),
+) -> Response:
+    from datetime import datetime, timezone
+    from app.services.auth import hash_session_token
+
+    token_hash = hash_session_token(token)
+    session_row = (
+        db.query(SessionModel)
+        .filter(
+            SessionModel.token_hash == token_hash,
+            SessionModel.is_active == True,
+        )
+        .first()
+    )
+
+    if not session_row:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Недействительный или истекший токен входа.",
+        )
+
+    if session_row.expires_at < datetime.now(timezone.utc):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Срок действия сессии истек.",
+        )
+
+    attach_session_cookie(response, token)
+
+    response.status_code = status.HTTP_302_FOUND
+    response.headers["Location"] = "/dashboard"
+    return response
+
+
+
 @router.get("/me", response_model=CurrentUserResponse)
 def me(
     current_user: User = Depends(get_current_user),
