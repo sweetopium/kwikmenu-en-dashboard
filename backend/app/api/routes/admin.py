@@ -19,6 +19,7 @@ from app.models import (
     ProductEvent,
     PublicMenuEvent,
     SessionModel,
+    SubscriptionPlan,
     User,
     Venue,
     VenueSettings,
@@ -286,6 +287,13 @@ def list_admin_users(
     }
 
 
+class AdminUserSubscriptionUpdateRequest(StrictModel):
+    planId: str = Field(min_length=1, max_length=64)
+    status: str = Field(min_length=1, max_length=32)
+    currentPeriodEnd: datetime | None = None
+    trialEndsAt: datetime | None = None
+
+
 @router.get("/users/{user_id}")
 def get_admin_user_detail(
     user_id: str,
@@ -295,6 +303,9 @@ def get_admin_user_detail(
     user = db.query(User).filter(User.id == user_id).first()
     if user is None:
         raise HTTPException(status_code=404, detail="User not found.")
+
+    from app.services.billing import ensure_default_subscription
+    subscription = ensure_default_subscription(db, user)
 
     venues = db.query(Venue).filter(Venue.owner_user_id == user.id).order_by(Venue.created_at.desc()).all()
     events = db.query(ProductEvent).filter(ProductEvent.user_id == user.id).order_by(ProductEvent.created_at.desc()).limit(50).all()
@@ -309,6 +320,16 @@ def get_admin_user_detail(
             "isActive": user.is_active,
             "createdAt": user.created_at,
             "updatedAt": user.updated_at,
+            "subscription": {
+                "id": subscription.id,
+                "status": subscription.status,
+                "planId": subscription.plan_id,
+                "planCode": subscription.plan.code,
+                "planName": subscription.plan.name,
+                "currentPeriodStart": subscription.current_period_start,
+                "currentPeriodEnd": subscription.current_period_end,
+                "trialEndsAt": subscription.trial_ends_at,
+            } if subscription else None
         },
         "venues": [
             {"id": venue.id, "name": venue.name, "city": venue.city, "country": venue.country, "createdAt": venue.created_at}
@@ -322,6 +343,49 @@ def get_admin_user_detail(
             {"id": event.id, "eventName": event.event_name, "page": event.page, "createdAt": event.created_at}
             for event in events
         ],
+    }
+
+
+@router.post("/users/{user_id}/subscription")
+def update_admin_user_subscription(
+    user_id: str,
+    payload: AdminUserSubscriptionUpdateRequest,
+    _: None = AdminAccess,
+    db: Session = Depends(get_db),
+) -> dict:
+    user = db.query(User).filter(User.id == user_id).first()
+    if user is None:
+        raise HTTPException(status_code=404, detail="User not found.")
+
+    from app.services.billing import ensure_default_subscription
+    subscription = ensure_default_subscription(db, user)
+
+    # Validate that the plan exists
+    plan = db.query(SubscriptionPlan).filter(SubscriptionPlan.id == payload.planId).first()
+    if plan is None:
+        raise HTTPException(status_code=400, detail="Subscription plan not found.")
+
+    subscription.plan_id = plan.id
+    subscription.status = payload.status
+    subscription.current_period_end = payload.currentPeriodEnd
+    subscription.trial_ends_at = payload.trialEndsAt
+    
+    if payload.status == "active" and not subscription.current_period_start:
+        subscription.current_period_start = datetime.now(timezone.utc)
+
+    db.add(subscription)
+    db.commit()
+    db.refresh(subscription)
+
+    return {
+        "id": subscription.id,
+        "status": subscription.status,
+        "planId": subscription.plan_id,
+        "planCode": subscription.plan.code,
+        "planName": subscription.plan.name,
+        "currentPeriodStart": subscription.current_period_start,
+        "currentPeriodEnd": subscription.current_period_end,
+        "trialEndsAt": subscription.trial_ends_at,
     }
 
 

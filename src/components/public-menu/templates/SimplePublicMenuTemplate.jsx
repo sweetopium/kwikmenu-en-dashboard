@@ -28,6 +28,7 @@ const SimplePublicMenuTemplate = ({
   const [language, setLanguage] = useState(defaultLanguage);
   const [activeCategoryId, setActiveCategoryId] = useState(payload?.categories?.[0]?.id || '');
   const [passwordCopied, setPasswordCopied] = useState(false);
+  const [isDescExpanded, setIsDescExpanded] = useState(false);
   const sectionRefs = useRef(new Map());
   const categoryChipRefs = useRef(new Map());
   const categoryNavRef = useRef(null);
@@ -39,6 +40,7 @@ const SimplePublicMenuTemplate = ({
   useEffect(() => {
     setLanguage(payload?.defaultLanguage || 'ru');
     setActiveCategoryId(payload?.categories?.[0]?.id || '');
+    setIsDescExpanded(false);
   }, [payload?.defaultLanguage, payload?.categories, activeMenuId]);
 
   useEffect(() => {
@@ -220,11 +222,25 @@ const SimplePublicMenuTemplate = ({
           {isFilled(venueDescription) ? (
             <div className="pt-1">
               <p
-                className="text-[0.88rem] leading-[1.4] break-words"
+                className={`text-[0.88rem] leading-[1.4] break-words transition-all duration-200 ${
+                  isDescExpanded ? '' : 'line-clamp-3'
+                }`}
                 style={{ color: heroMutedColor }}
               >
                 {venueDescription}
               </p>
+              {venueDescription.length > 150 && (
+                <button
+                  type="button"
+                  onClick={() => setIsDescExpanded(!isDescExpanded)}
+                  className="mt-1 text-[0.82rem] font-bold underline cursor-pointer hover:opacity-85 block focus:outline-none"
+                  style={{ color: heroTextColor }}
+                >
+                  {isDescExpanded 
+                    ? (language === 'en' ? 'hide' : 'скрыть') 
+                    : (language === 'en' ? 'show details' : 'подробнее')}
+                </button>
+              )}
             </div>
           ) : null}
         </section>

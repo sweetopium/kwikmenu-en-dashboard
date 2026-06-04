@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 
 import { PageHeader } from '../components/admin/PageHeader';
 import { Button } from '../components/ui/Button';
@@ -214,7 +215,9 @@ const BillingPage = () => {
               {subscriptions.map((subscription) => (
                 <tr key={subscription.id} className="border-t border-border/50">
                   <td className="py-3 pr-4">
-                    <div className="font-bold">{subscription.name}</div>
+                    <Link to={`/users/${subscription.userId}`} className="font-bold text-brand-purple hover:underline">
+                      {subscription.name}
+                    </Link>
                     <div className="text-xs text-muted-foreground">{subscription.email}</div>
                   </td>
                   <td className="py-3 pr-4">{subscription.planName}</td>

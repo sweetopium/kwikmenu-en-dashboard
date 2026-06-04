@@ -678,13 +678,17 @@ const VenuePage = () => {
                 <div className="pt-6 border-t border-border/50 space-y-4">
                   <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">{t('venues.design.logoLabel', 'Логотип заведения в меню')}</Label>
                   <div className="flex items-center gap-6">
-                    <label className="w-24 h-24 rounded-2xl bg-secondary/30 border-2 border-dashed border-input flex items-center justify-center cursor-pointer hover:bg-secondary/50 transition-colors overflow-hidden">
-                      <input
-                        type="file"
-                        accept="image/png,image/jpeg,image/jpg"
-                        onChange={handleDesignLogoUpload}
-                        className="hidden"
-                      />
+                    <input
+                      id="venue-logo-input"
+                      type="file"
+                      accept="image/png,image/jpeg,image/jpg"
+                      onChange={handleDesignLogoUpload}
+                      className="hidden"
+                    />
+                    <label
+                      htmlFor="venue-logo-input"
+                      className="w-24 h-24 rounded-2xl bg-secondary/30 border-2 border-dashed border-input flex items-center justify-center cursor-pointer hover:bg-secondary/50 transition-colors overflow-hidden"
+                    >
                       {designData.logoUrl ? (
                         <img src={designData.logoUrl} alt={t('venues.design.logoAlt', 'Логотип заведения')} className="w-full h-full object-cover" />
                       ) : (
@@ -694,8 +698,15 @@ const VenuePage = () => {
                     <div className="space-y-1">
                       <p className="text-sm font-bold">{t('venues.design.logoUploadTitle', 'Загрузите квадратное лого')}</p>
                       <p className="text-xs text-muted-foreground">{t('venues.design.logoUploadDesc', 'Рекомендуемый размер 512x512px, формат PNG или SVG')}</p>
-                      <Button variant="outline" size="sm" className="mt-2 rounded-lg border-border/60 text-[10px] uppercase tracking-wider font-black">
-                        {t('venues.design.btnSelectFile', 'Выбрать файл')}
+                      <Button
+                        asChild
+                        variant="outline"
+                        size="sm"
+                        className="mt-2 rounded-lg border-border/60 text-[10px] uppercase tracking-wider font-black"
+                      >
+                        <label htmlFor="venue-logo-input" className="cursor-pointer">
+                          {t('venues.design.btnSelectFile', 'Выбрать файл')}
+                        </label>
                       </Button>
                     </div>
                   </div>

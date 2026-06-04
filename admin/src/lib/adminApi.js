@@ -115,3 +115,8 @@ export const updateBillingPlan = (planId, payload) => adminFetch(`/billing/plans
 });
 export const fetchBillingSubscriptions = () => adminFetch('/billing/subscriptions');
 export const processBillingRenewals = () => adminFetch('/billing/process-renewals', { method: 'POST' });
+export const updateUserSubscription = (userId, payload) => adminFetch(`/users/${userId}/subscription`, {
+  method: 'POST',
+  body: JSON.stringify(payload),
+});
+
