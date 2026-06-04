@@ -456,13 +456,15 @@ const MenuEditor = () => {
   };
 
   const addVariant = () => {
+    const isFirstVariant = !(editingItem.variants && editingItem.variants.length > 0);
+
     const newVariant = {
       id: `var-${Date.now()}`,
       label: '',
       translations: {},
-      price: '',
-      measureValue: '',
-      measureUnit: 'ml',
+      price: isFirstVariant && editingItem.price ? editingItem.price : '',
+      measureValue: isFirstVariant && editingItem.measureValue ? editingItem.measureValue : '',
+      measureUnit: isFirstVariant && editingItem.measureUnit ? editingItem.measureUnit : 'ml',
       sortOrder: (editingItem.variants?.length || 0) + 1,
       isAvailable: true,
     };

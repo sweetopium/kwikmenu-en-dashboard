@@ -104,6 +104,21 @@ const getCardPrice = (item, currencyCode) => {
   return formatCurrency(item?.price, currencyCode);
 };
 
+const getOptionsText = (count, lang) => {
+  if (lang === 'en') {
+    return `${count} option${count > 1 ? 's' : ''}`;
+  }
+  const mod10 = count % 10;
+  const mod100 = count % 100;
+  if (mod10 === 1 && mod100 !== 11) {
+    return `${count} вариант`;
+  }
+  if (mod10 >= 2 && mod10 <= 4 && (mod100 < 12 || mod100 > 14)) {
+    return `${count} варианта`;
+  }
+  return `${count} вариантов`;
+};
+
 const PlaceholderImage = ({ label }) => (
   <div
     className="flex h-full w-full items-center justify-center"
@@ -811,6 +826,8 @@ const ExtendedPublicMenuTemplate = ({
                     const cardPrice = getCardPrice(item, currencyCode);
                     const isItemAvailable = item.isAvailable !== false;
                     const badge = getItemBadge(item, language);
+                    const availableVariants = (item?.variants || []).filter((variant) => variant.isAvailable !== false && isFilled(variant.price));
+                    const hasVariants = availableVariants.length > 0;
 
                     return (
                       <motion.div
@@ -861,10 +878,17 @@ const ExtendedPublicMenuTemplate = ({
                             <div className="[display:-webkit-box] overflow-hidden [-webkit-box-orient:vertical] [-webkit-line-clamp:2] break-words">
                               {itemName}
                             </div>
+                            {hasVariants && (
+                              <div className="text-[0.72rem] text-muted-foreground truncate pt-0.5 font-normal">
+                                {getOptionsText(availableVariants.length, language)}
+                              </div>
+                            )}
                           </div>
                           {isFilled(cardPrice.amount) ? (
                             <div className="text-[0.9rem] font-semibold leading-none tracking-[-0.02em]" style={{ color: accentColor }}>
-                              {cardPrice.amount}{cardPrice.symbol ? ` ${cardPrice.symbol}` : ''}
+                              {hasVariants && (language === 'en' ? 'from ' : 'от ')}
+                              {cardPrice.amount}
+                              {cardPrice.symbol ? ` ${cardPrice.symbol}` : ''}
                             </div>
                           ) : null}
                         </div>
