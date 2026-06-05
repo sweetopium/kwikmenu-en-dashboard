@@ -162,5 +162,10 @@ export const deletePromoPage = (id) => adminFetch(`/promo-pages/${id}`, {
   method: 'DELETE',
 });
 
+export const convertHtmlToJson = (html) => adminFetch('/promo-pages/convert-html', {
+  method: 'POST',
+  body: JSON.stringify({ html }),
+});
+
 
 

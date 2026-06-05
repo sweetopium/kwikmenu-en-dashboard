@@ -8,6 +8,7 @@ import {
   createPromoPage,
   updatePromoPage,
   deletePromoPage,
+  convertHtmlToJson,
 } from '../lib/adminApi';
 import { formatDateTime } from '../lib/formatters';
 
@@ -468,13 +469,42 @@ const PromoPagesPage = () => {
                   />
                 </div>
               </div>
-
               <div className="flex-grow flex-1 flex flex-col min-h-0">
                 <div className="flex items-center justify-between mb-1.5">
                   <label className="block text-xs font-bold text-muted-foreground uppercase tracking-wider font-sans">
                     Контент страницы (JSON)
                   </label>
                   <div className="flex gap-2">
+                    <button
+                      type="button"
+                      onClick={async () => {
+                        const rawHtml = prompt("Вставьте исходный HTML-код страницы для импорта:");
+                        if (!rawHtml) return;
+                        setSubmitting(true);
+                        setJsonError(null);
+                        try {
+                          const result = await convertHtmlToJson(rawHtml);
+                          if (result && result.content) {
+                            setContentStr(JSON.stringify(result.content, null, 2));
+                            if (result.content.meta && result.content.meta.title) {
+                              const cleanTitle = result.content.meta.title.split('|')[0].trim();
+                              setTitle(cleanTitle);
+                              setSlug(slugify(cleanTitle));
+                            }
+                          } else {
+                            alert("Не удалось распознать структуру из HTML.");
+                          }
+                        } catch (err) {
+                          alert(`Ошибка импорта: ${err.message}`);
+                        } finally {
+                          setSubmitting(false);
+                        }
+                      }}
+                      className="inline-flex items-center gap-1 text-[11px] font-bold text-violet-600 hover:underline bg-violet-50 dark:bg-violet-950/40 rounded-full px-2.5 py-1"
+                    >
+                      <RefreshCw size={10} />
+                      Импорт из HTML
+                    </button>
                     <button
                       type="button"
                       onClick={handleFillTemplate}

@@ -145,3 +145,119 @@ def delete_promo_page(
     db.commit()
 
     return {"status": "ok"}
+
+
+from pydantic import BaseModel
+class ConvertHtmlRequest(BaseModel):
+    html: str
+
+@router.post("/convert-html")
+def convert_html_to_json(
+    payload: ConvertHtmlRequest,
+    _: None = AdminAccess,
+) -> dict:
+    from app.services.openrouter_client import OpenRouterClient
+    openrouter = OpenRouterClient()
+
+    if not openrouter.enabled:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="OPENROUTER_API_KEY is not configured.",
+        )
+
+    prompt = (
+        "Extract content from the following restaurant SEO landing page HTML and map it STRICTLY to the target JSON schema below.\n"
+        "Return ONLY the valid JSON object fitting the schema. Do not output markdown code blocks or additional text.\n\n"
+        "### TARGET SCHEMA STRUCTURE:\n"
+        "{\n"
+        "  \"registerUrl\": \"string\",\n"
+        "  \"helpUrl\": \"string\",\n"
+        "  \"videoUrl\": \"string (e.g. from iframe src if any, otherwise default)\",\n"
+        "  \"footerTitle\": \"string (the title in footer, e.g. 'Онлайн-меню для ресторана')\",\n"
+        "  \"meta\": {\n"
+        "    \"title\": \"string\",\n"
+        "    \"description\": \"string\"\n"
+        "  },\n"
+        "  \"hero\": {\n"
+        "    \"title\": \"string (include <br /> tag if present in original title)\",\n"
+        "    \"description\": \"string\",\n"
+        "    \"primaryBtnText\": \"string (text on the primary registration button)\",\n"
+        "    \"secondaryBtnText\": \"string (text on the secondary/help button)\",\n"
+        "    \"image\": \"string (image path)\"\n"
+        "  },\n"
+        "  \"process\": {\n"
+        "    \"title\": \"string (include html tags like <br /> and gradient spans if any)\",\n"
+        "    \"steps\": [\n"
+        "      { \"num\": 1, \"title\": \"string\", \"description\": \"string\" }\n"
+        "    ]\n"
+        "  },\n"
+        "  \"formats\": {\n"
+        "    \"title\": \"string\",\n"
+        "    \"description\": \"string\",\n"
+        "    \"items\": [\n"
+        "      { \"title\": \"string\", \"tagline\": \"string\", \"description\": \"string\", \"image\": \"string\", \"type\": \"basic|extended\" }\n"
+        "    ]\n"
+        "  },\n"
+        "  \"value\": {\n"
+        "    \"title\": \"string\",\n"
+        "    \"description\": \"string\",\n"
+        "    \"items\": [\n"
+        "      { \"icon\": \"launch|savings|fresh|control|format|questions (select nearest matching)\", \"title\": \"string\", \"description\": \"string\" }\n"
+        "    ]\n"
+        "  },\n"
+        "  \"guestValue\": {\n"
+        "    \"title\": \"string\",\n"
+        "    \"description\": \"string\",\n"
+        "    \"items\": [\n"
+        "      { \"title\": \"string\", \"description\": \"string\", \"size\": \"large|medium|small|info\" }\n"
+        "    ]\n"
+        "  },\n"
+        "  \"faq\": {\n"
+        "    \"title\": \"string\",\n"
+        "    \"items\": [\n"
+        "      { \"question\": \"string\", \"answer\": \"string\" }\n"
+        "    ]\n"
+        "  },\n"
+        "  \"venues\": {\n"
+        "    \"title\": \"string\",\n"
+        "    \"description\": \"string\",\n"
+        "    \"chips\": [\"string\"]\n"
+        "  },\n"
+        "  \"cta\": {\n"
+        "    \"title\": \"string\",\n"
+        "    \"description\": \"string\",\n"
+        "    \"primaryBtnText\": \"string\",\n"
+        "    \"secondaryBtnText\": \"string\"\n"
+        "  }\n"
+        "}\n\n"
+        f"### INPUT HTML:\n{payload.html}"
+    )
+
+    api_payload = {
+        "model": openrouter.settings.menu_import_model,
+        "temperature": 0.1,
+        "messages": [
+            {
+                "role": "system",
+                "content": "You are a precise data extractor. Extract the page content and format it into the requested JSON schema. Do not explain, return ONLY valid JSON.",
+            },
+            {
+                "role": "user",
+                "content": prompt,
+            },
+        ],
+        "response_format": {"type": "json_object"},
+        "stream": False,
+    }
+
+    try:
+        response_payload = openrouter._post_json(api_payload)
+        raw_content = response_payload["choices"][0]["message"]["content"]
+        structured = json.loads(raw_content)
+        return {"content": structured}
+    except Exception as exc:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"HTML to JSON conversion failed: {exc}",
+        )
+
