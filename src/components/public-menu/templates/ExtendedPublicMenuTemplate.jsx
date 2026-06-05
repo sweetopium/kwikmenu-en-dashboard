@@ -957,6 +957,35 @@ const ExtendedPublicMenuTemplate = ({
           })}
         </motion.section>
 
+        <div className="mt-8 mb-6 flex flex-row items-center justify-center gap-2 text-xs sm:text-sm text-muted-foreground/60">
+          <span>{language === 'en' ? 'Made in' : 'Сделано в'}</span>
+          <a
+            className="flex items-center gap-1.5 text-sm sm:text-base font-bold tracking-tight text-zinc-900 dark:text-zinc-100 transition-transform hover:scale-105"
+            href="https://kwikmenu.ru?utm_source=menu_footer"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <div className="flex h-7 w-7 items-center justify-center rounded-[0.5rem] bg-violet-600 text-white shadow-sm">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="currentColor"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="lucide lucide-zap h-3.5 w-3.5"
+                aria-hidden="true"
+              >
+                <path d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z"></path>
+              </svg>
+            </div>
+            <span className="text-zinc-900 dark:text-zinc-100">KwikMenu</span>
+          </a>
+        </div>
+
           {renderSheet()}
         </div>
       </div>
