@@ -319,6 +319,8 @@
     "btnPreview": "Превью",
     "btnNormalizing": "Нормализация...",
     "btnNormalize": "Нормализовать",
+    "statusActiveText": "Вкл",
+    "statusDraftText": "Выкл",
     "searchPlaceholder": "Поиск блюда...",
     "btnAddItem": "Блюдо",
     "availableHours": "Доступно",

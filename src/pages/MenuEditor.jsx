@@ -572,21 +572,22 @@ const MenuEditor = () => {
         {activeCategory ? (
           <div className="p-3 sm:p-5 lg:p-3 border-b border-border/60 flex flex-col gap-3 bg-card z-20 sticky top-0 min-w-0 max-w-full">
             <div className="flex flex-col sm:flex-row sm:flex-wrap items-stretch sm:items-center gap-2.5 w-full min-w-0 sm:justify-end md:ml-auto md:w-auto md:max-w-full md:rounded-xl md:border md:border-border/70 md:bg-secondary/35 md:px-2.5 md:py-2.5 mb-0 md:mb-3">
-              <div className="flex flex-row flex-wrap items-center gap-2 w-full sm:w-auto shrink-0">
+              <div className="flex flex-row items-center gap-2 w-full sm:w-auto shrink-0 justify-start">
                 <Button
                   variant="outline"
                   onClick={() => setIsTranslationModalOpen(true)}
-                  className="sm:h-10 h-10 px-3 bg-background hover:bg-secondary border-border/60 text-foreground font-semibold text-xs sm:text-sm shrink-0 flex items-center justify-center gap-1.5"
+                  className="sm:h-10 h-10 flex-1 sm:flex-none w-auto px-3 bg-background hover:bg-secondary border-border/60 text-foreground font-semibold text-xs sm:text-sm shrink-0 flex items-center justify-center gap-1.5"
+                  title={t('menuEditor.btnTranslations', 'Переводы')}
                 >
                   <Globe size={14} className="text-muted-foreground" />
-                  {t('menuEditor.btnTranslations', 'Переводы')}
+                  <span>{t('menuEditor.btnTranslations', 'Переводы')}</span>
                 </Button>
 
                 <Button
                   variant="outline"
                   size="icon"
                   onClick={handleEditMenuMeta}
-                  className={`${secondaryActionButtonClasses} sm:h-10 h-10 w-10 shrink-0 flex items-center justify-center`}
+                  className={`${secondaryActionButtonClasses} sm:h-10 h-10 flex-1 sm:flex-none sm:w-10 shrink-0 flex items-center justify-center`}
                   title={t('menuEditor.btnEdit', 'Редактировать')}
                 >
                   <Edit2 size={14} />
@@ -596,7 +597,8 @@ const MenuEditor = () => {
                   <Button
                     asChild
                     variant="outline"
-                    className={`${secondaryActionButtonClasses} sm:h-10 h-10 px-4 w-full sm:w-auto shrink-0 text-xs sm:text-sm`}
+                    className={`${secondaryActionButtonClasses} sm:h-10 h-10 flex-1 sm:flex-none w-auto px-3 shrink-0 text-xs sm:text-sm`}
+                    title={t('menuEditor.btnPreview', 'Превью')}
                   >
                     <a
                       href={publicPreviewUrl}
@@ -606,19 +608,20 @@ const MenuEditor = () => {
                         venueId: remoteVenueId,
                         menuId: id,
                       })}
+                      className="flex items-center justify-center gap-1.5"
                     >
-                      <ExternalLink size={14} className="mr-2" />
-                      {t('menuEditor.btnPreview', 'Превью')}
+                      <ExternalLink size={14} />
+                      <span>{t('menuEditor.btnPreview', 'Превью')}</span>
                     </a>
                   </Button>
                 )}
 
                 {isRemoteMenu && (
-                  <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl border border-border/60 bg-secondary/10 sm:h-10 h-10 shrink-0 select-none">
+                  <div className="flex items-center justify-center gap-2 px-2 sm:px-3 py-1.5 rounded-xl border border-border/60 bg-secondary/10 sm:h-10 h-10 flex-1 sm:flex-none sm:w-auto shrink-0 select-none">
                     <span className="text-xs font-semibold text-muted-foreground">
                       {menuStatus === 'active' 
-                        ? t('menuEditor.statusActive', 'Активно') 
-                        : t('menuEditor.statusDraft', 'Черновик')}
+                        ? t('menuEditor.statusActiveText', 'Вкл') 
+                        : t('menuEditor.statusDraftText', 'Выкл')}
                     </span>
                     <Switch
                       checked={menuStatus === 'active'}
@@ -633,10 +636,13 @@ const MenuEditor = () => {
                     variant="outline"
                     onClick={handleNormalizeMenu}
                     disabled={isNormalizing}
-                    className={`${secondaryActionButtonClasses} sm:h-10 h-10 px-4 w-full sm:w-auto shrink-0 text-xs sm:text-sm`}
+                    className={`${secondaryActionButtonClasses} sm:h-10 h-10 flex-1 sm:flex-none sm:w-auto px-3 shrink-0 text-xs sm:text-sm`}
+                    title={isNormalizing ? t('menuEditor.btnNormalizing', 'Нормализация...') : t('menuEditor.btnNormalize', 'Нормализовать')}
                   >
-                    <Sparkles size={14} className="mr-2" />
-                    {isNormalizing ? t('menuEditor.btnNormalizing', 'Нормализация...') : t('menuEditor.btnNormalize', 'Нормализовать')}
+                    <Sparkles size={14} className={isNormalizing ? "animate-spin" : ""} />
+                    <span className="hidden sm:inline">
+                      {isNormalizing ? t('menuEditor.btnNormalizing', 'Нормализация...') : t('menuEditor.btnNormalize', 'Нормализовать')}
+                    </span>
                   </Button>
                 )}
               </div>

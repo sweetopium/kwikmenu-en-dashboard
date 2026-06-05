@@ -319,6 +319,8 @@
     "btnPreview": "Preview",
     "btnNormalizing": "Normalizing...",
     "btnNormalize": "Normalize",
+    "statusActiveText": "On",
+    "statusDraftText": "Off",
     "searchPlaceholder": "Search dish...",
     "btnAddItem": "Dish",
     "availableHours": "Available",
