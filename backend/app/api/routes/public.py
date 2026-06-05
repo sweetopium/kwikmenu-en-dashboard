@@ -120,7 +120,17 @@ def get_public_venue_menus(
                 slug=menu.slug,
                 description=menu.description,
                 status=menu.status,
-                payload=MenuPayload.model_validate(menu.payload),
+                payload=MenuPayload.model_validate(
+                    {
+                        **menu.payload,
+                        "venue": {
+                            **(menu.payload.get("venue") or {}),
+                            "name": venue.name,
+                            "description": venue.description,
+                            "logoUrl": venue_settings.design_logo_url if venue_settings else None,
+                        }
+                    }
+                ),
             )
             for menu in menus
         ],

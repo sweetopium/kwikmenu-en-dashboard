@@ -16,7 +16,17 @@ router = APIRouter(prefix="/api/menus", tags=["menus"])
 
 
 def serialize_menu(menu: Menu) -> MenuResponse:
-    payload = MenuPayload.model_validate(menu.payload)
+    payload_dict = {**menu.payload}
+    venue = menu.venue
+    if venue:
+        venue_settings = venue.settings
+        payload_dict["venue"] = {
+            **(payload_dict.get("venue") or {}),
+            "name": venue.name,
+            "description": venue.description,
+            "logoUrl": venue_settings.design_logo_url if venue_settings else None,
+        }
+    payload = MenuPayload.model_validate(payload_dict)
     return MenuResponse(
         id=menu.id,
         venueId=menu.venue_id,

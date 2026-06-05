@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { AlertCircle, Check, ChevronDown, Edit2, ExternalLink, Plus, Search, Sparkles, Trash2 } from 'lucide-react';
+import { AlertCircle, Check, ChevronDown, Edit2, ExternalLink, Globe, Plus, Search, Sparkles, Trash2, X } from 'lucide-react';
 import { useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 
@@ -9,6 +9,7 @@ import DeleteConfirmModal from "../components/menu-editor/DeleteConfirmModal";
 import ItemModal from "../components/menu-editor/ItemModal";
 import MenuMetaModal from "../components/menu-editor/MenuMetaModal";
 import MenuItemList from "../components/menu-editor/MenuItemList";
+import TranslationModal from "../components/menu-editor/TranslationModal";
 import { simpleMenuPayload } from "../data/menu_mock.js";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
@@ -58,35 +59,12 @@ const MenuEditor = () => {
   const [targetCategoryId, setTargetCategoryId] = useState(null);
   const [deleteConfirm, setDeleteConfirm] = useState(null);
   const [isNormalizing, setIsNormalizing] = useState(false);
-  const [translationStatus, setTranslationStatus] = useState('idle');
-  const [translationError, setTranslationError] = useState('');
+  const [isTranslationModalOpen, setIsTranslationModalOpen] = useState(false);
   const [isLoadingRemoteMenu, setIsLoadingRemoteMenu] = useState(false);
   const [remoteMenuError, setRemoteMenuError] = useState('');
   const [remoteVenueId, setRemoteVenueId] = useState(null);
   const hasLoadedRemoteMenuRef = useRef(false);
   const [menuStatus, setMenuStatus] = useState('draft');
-  const [isLangDropdownOpen, setIsLangDropdownOpen] = useState(false);
-  const langDropdownRef = useRef(null);
-
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (langDropdownRef.current && !langDropdownRef.current.contains(event.target)) {
-        setIsLangDropdownOpen(false);
-      }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, []);
-
-  const translatedLanguages = useMemo(() => {
-    return getVisibleMenuLanguages(menu, menu.defaultLanguage || 'ru');
-  }, [menu]);
-
-  const translatedCodes = useMemo(() => {
-    return new Set(translatedLanguages.map((lang) => lang.code));
-  }, [translatedLanguages]);
 
   const currentLanguageMeta = useMemo(() => {
     return TOP_MENU_LANGUAGES.find((lang) => lang.code === editorLanguage);
@@ -556,27 +534,23 @@ const MenuEditor = () => {
     }
   };
 
-  const handleTranslateMenu = async () => {
+  const handleTranslateMenu = async (targetLang) => {
     if (!isRemoteMenu) {
-      alert(t('menuEditor.errors.remoteOnly', 'Функционал автоперевода доступен только для сохраненных на сервере меню.'));
-      return;
+      throw new Error(t('menuEditor.errors.remoteOnly', 'Функционал автоперевода доступен только для сохраненных на сервере меню.'));
     }
 
-    setTranslationStatus('translating');
-    setTranslationError('');
     trackProductEvent('menu_translate_clicked', {
       venueId: remoteVenueId,
       menuId: id,
-      properties: { targetLang: editorLanguage },
+      properties: { targetLang },
     });
 
     try {
-      const response = await translateMenu(id, editorLanguage);
+      const response = await translateMenu(id, targetLang);
       setMenu(response.payload);
-      setTranslationStatus('success');
+      return response.payload;
     } catch (error) {
-      setTranslationError(error?.message || t('menuEditor.errors.translateFailed', 'Не удалось перевести меню'));
-      setTranslationStatus('error');
+      throw new Error(error?.message || t('menuEditor.errors.translateFailed', 'Не удалось перевести меню'));
     }
   };
 
@@ -597,74 +571,25 @@ const MenuEditor = () => {
       <div className="flex-1 flex flex-col bg-background relative min-w-0 w-full max-w-full overflow-hidden">
         {activeCategory ? (
           <div className="p-3 sm:p-5 lg:p-3 border-b border-border/60 flex flex-col gap-3 bg-card z-20 sticky top-0 min-w-0 max-w-full">
-            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 w-full min-w-0 sm:justify-end md:ml-auto md:w-auto md:max-w-full md:rounded-xl md:border md:border-border/70 md:bg-secondary/35 md:px-2.5 md:py-2.5 mb-0 md:mb-3">
-              <div className="grid grid-cols-2 gap-2.5 w-full sm:w-auto sm:flex sm:flex-row shrink-0">
-                <div className="relative w-fit min-w-0" ref={langDropdownRef}>
-                  <button
-                    type="button"
-                    onClick={() => setIsLangDropdownOpen(!isLangDropdownOpen)}
-                    className={`${formSelectClasses} !w-auto h-10 sm:h-10 text-xs sm:text-sm pl-3.5 pr-10 flex items-center gap-2 select-none relative cursor-pointer`}
-                  >
-                    <span>{currentLanguageMeta?.flag} {currentLanguageMeta?.shortLabel}</span>
-                    <ChevronDown size={14} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
-                  </button>
-
-                  {isLangDropdownOpen && (
-                    <div className="absolute left-0 sm:right-0 sm:left-auto top-full mt-1.5 w-48 max-h-72 overflow-y-auto rounded-2xl border border-border bg-card p-1 shadow-lg z-50 animate-in fade-in slide-in-from-top-1 duration-150">
-                      {TOP_MENU_LANGUAGES.map((lang) => {
-                        const hasTranslation = lang.code === menu.defaultLanguage || translatedCodes.has(lang.code);
-                        const isSelected = lang.code === editorLanguage;
-                        return (
-                          <button
-                            key={lang.code}
-                            type="button"
-                            onClick={() => {
-                              handleEditorLanguageChange(lang.code);
-                              setIsLangDropdownOpen(false);
-                            }}
-                            className={`w-full text-left px-3 py-2 rounded-xl text-xs sm:text-sm flex items-center justify-between transition-all cursor-pointer ${
-                              isSelected
-                                ? 'bg-violet-50 text-violet-700 font-semibold'
-                                : 'hover:bg-secondary/50 text-foreground'
-                            } ${!hasTranslation && !isSelected ? 'text-muted-foreground/60' : ''}`}
-                          >
-                            <span className="flex items-center gap-2">
-                              <span>{lang.flag}</span>
-                              <span>{lang.shortLabel}</span>
-                              {hasTranslation && (
-                                <span className="text-[10px] text-emerald-600 bg-emerald-50 border border-emerald-200/60 rounded px-1 py-0.5 flex items-center justify-center font-bold shadow-sm">
-                                  <Check size={9} className="stroke-[3.5]" />
-                                </span>
-                              )}
-                            </span>
-                            {isSelected && (
-                              <Check size={14} className="text-violet-600 shrink-0" />
-                            )}
-                          </button>
-                        );
-                      })}
-                    </div>
-                  )}
-                </div>
-
-                {editorLanguage !== menu.defaultLanguage && (
-                  <Button
-                    variant="outline"
-                    onClick={handleTranslateMenu}
-                    disabled={translationStatus === 'translating'}
-                    className="sm:h-10 h-10 px-3 bg-violet-50 hover:bg-violet-100 border-violet-200/80 text-violet-700 font-medium text-xs sm:text-sm shrink-0 flex items-center justify-center gap-1.5 shadow-sm w-full sm:w-auto"
-                  >
-                    <Sparkles size={14} className={translationStatus === 'translating' ? "animate-spin" : ""} />
-                    {translationStatus === 'translating' ? t('menuEditor.translating', 'Перевод...') : t('menuEditor.translateBtn', 'Перевести ИИ')}
-                  </Button>
-                )}
+            <div className="flex flex-col sm:flex-row sm:flex-wrap items-stretch sm:items-center gap-2.5 w-full min-w-0 sm:justify-end md:ml-auto md:w-auto md:max-w-full md:rounded-xl md:border md:border-border/70 md:bg-secondary/35 md:px-2.5 md:py-2.5 mb-0 md:mb-3">
+              <div className="flex flex-row flex-wrap items-center gap-2 w-full sm:w-auto shrink-0">
+                <Button
+                  variant="outline"
+                  onClick={() => setIsTranslationModalOpen(true)}
+                  className="sm:h-10 h-10 px-3 bg-background hover:bg-secondary border-border/60 text-foreground font-semibold text-xs sm:text-sm shrink-0 flex items-center justify-center gap-1.5"
+                >
+                  <Globe size={14} className="text-muted-foreground" />
+                  {t('menuEditor.btnTranslations', 'Переводы')}
+                </Button>
 
                 <Button
                   variant="outline"
+                  size="icon"
                   onClick={handleEditMenuMeta}
-                  className={`${secondaryActionButtonClasses} sm:h-10 h-10 px-4 w-full sm:w-auto shrink-0 text-xs sm:text-sm`}
+                  className={`${secondaryActionButtonClasses} sm:h-10 h-10 w-10 shrink-0 flex items-center justify-center`}
+                  title={t('menuEditor.btnEdit', 'Редактировать')}
                 >
-                  {t('menuEditor.btnEdit', 'Редактировать')}
+                  <Edit2 size={14} />
                 </Button>
 
                 {publicPreviewUrl && (
@@ -761,7 +686,7 @@ const MenuEditor = () => {
               <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-muted-foreground mb-1.5">
                 {localizedMenuName}
               </p>
-              <div className="flex items-center gap-2.5 min-w-0 max-w-full">
+              <div className="flex items-center gap-2.5 min-w-0 max-w-full flex-wrap sm:flex-nowrap">
                 <h1 className="text-xl sm:text-[22px] font-extrabold text-foreground tracking-tight truncate min-w-0">
                   {localizedCategoryName}
                 </h1>
@@ -781,6 +706,20 @@ const MenuEditor = () => {
                     <Trash2 size={14} />
                   </button>
                 </div>
+
+                {editorLanguage !== (menu.defaultLanguage || 'ru') && (
+                  <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-violet-50 border border-violet-200/60 text-violet-700 text-xs font-bold shrink-0 shadow-sm animate-in fade-in duration-200 select-none">
+                    <span>{currentLanguageMeta?.flag} {currentLanguageMeta?.nativeName}</span>
+                    <button
+                      type="button"
+                      onClick={() => setEditorLanguage(menu.defaultLanguage || 'ru')}
+                      className="hover:bg-violet-100 p-0.5 rounded transition-colors text-violet-500 hover:text-violet-700 cursor-pointer"
+                      title={t('menuEditor.translationModal.btnSwitchDefault', 'Редактировать оригинал')}
+                    >
+                      <X size={12} strokeWidth={2.5} />
+                    </button>
+                  </div>
+                )}
               </div>
 
               {localizedCategoryDescription && (
@@ -852,68 +791,14 @@ const MenuEditor = () => {
         onSave={handleSaveItem}
       />
 
-      {/* Translation Status Modal Overlay */}
-      {translationStatus !== 'idle' && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-md flex items-center justify-center z-[9999] p-4 animate-in fade-in duration-200">
-          <div className="bg-card border border-border/85 w-full max-w-sm rounded-3xl p-6 shadow-2xl flex flex-col items-center text-center gap-4 animate-in zoom-in-95 duration-200">
-            {translationStatus === 'translating' && (
-              <>
-                <div className="w-16 h-16 rounded-full bg-violet-50 border border-violet-100 flex items-center justify-center relative shadow-[0_0_20px_rgba(139,92,246,0.15)]">
-                  <Sparkles size={32} className="text-violet-600 animate-spin duration-[3000ms]" />
-                  <div className="absolute inset-0 rounded-full border-2 border-violet-400/20 border-t-violet-600 animate-spin" />
-                </div>
-                <h3 className="text-base font-bold text-foreground">
-                  {t('menuEditor.translatingTitle', 'Перевод меню...')}
-                </h3>
-                <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
-                  {t('menuEditor.translatingDesc', 'Это может занять пару минут. Пожалуйста, не закрывайте и не обновляйте эту вкладку.')}
-                </p>
-              </>
-            )}
-
-            {translationStatus === 'success' && (
-              <>
-                <div className="w-16 h-16 rounded-full bg-emerald-50 border border-emerald-100 flex items-center justify-center shadow-[0_0_20px_rgba(16,185,129,0.15)] relative">
-                  <div className="absolute inset-0 rounded-full bg-emerald-500/10 animate-ping duration-1000 scale-110" />
-                  <Check size={32} className="text-emerald-600 stroke-[3]" />
-                </div>
-                <h3 className="text-base font-bold text-foreground">
-                  {t('menuEditor.translateSuccessTitle', 'Перевод готов!')}
-                </h3>
-                <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
-                  {t('menuEditor.translateSuccessDesc', 'Меню было успешно переведено и сохранено на сервере.')}
-                </p>
-                <Button
-                  onClick={() => setTranslationStatus('idle')}
-                  className="w-full mt-2 h-11 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-semibold shadow-md shadow-emerald-600/20 transition-all cursor-pointer flex items-center justify-center"
-                >
-                  {t('menuEditor.btnClose', 'Закрыть')}
-                </Button>
-              </>
-            )}
-
-            {translationStatus === 'error' && (
-              <>
-                <div className="w-16 h-16 rounded-full bg-rose-50 border border-rose-100 flex items-center justify-center shadow-[0_0_20px_rgba(239,68,68,0.15)]">
-                  <AlertCircle size={32} className="text-rose-600" />
-                </div>
-                <h3 className="text-base font-bold text-foreground">
-                  {t('menuEditor.translateErrorTitle', 'Ошибка перевода')}
-                </h3>
-                <p className="text-xs sm:text-sm text-rose-600 bg-rose-50/50 border border-rose-100 rounded-xl p-3 w-full leading-relaxed break-words text-left">
-                  {translationError}
-                </p>
-                <Button
-                  variant="outline"
-                  onClick={() => setTranslationStatus('idle')}
-                  className="w-full mt-2 h-11 rounded-xl border border-border/80 text-foreground font-semibold hover:bg-secondary transition-all cursor-pointer flex items-center justify-center"
-                >
-                  {t('menuEditor.btnClose', 'Закрыть')}
-                </Button>
-              </>
-            )}
-          </div>
-        </div>
+      {isTranslationModalOpen && (
+        <TranslationModal
+          menu={menu}
+          editorLanguage={editorLanguage}
+          onClose={() => setIsTranslationModalOpen(false)}
+          onSwitchLanguage={setEditorLanguage}
+          onTranslate={handleTranslateMenu}
+        />
       )}
     </div>
   );

@@ -85,8 +85,8 @@ const SidebarContent = ({ pathname, navItems, onNavigate, onLogout }) => {
         })}
       </nav>
 
-      <div className="p-4 mt-auto">
-        <div className="bg-secondary/40 border border-border/50 rounded-2xl p-4 mb-4">
+      <div className="p-4 mt-auto flex flex-col gap-1.5">
+        <div className="bg-secondary/40 border border-border/50 rounded-2xl p-4">
           <div className="flex items-center gap-2 font-bold text-sm text-foreground mb-1">
             <LifeBuoy size={16} className="text-brand-purple shrink-0" />
             <span className="truncate">{t('navigation.needHelp', 'Нужна помощь?')}</span>
@@ -105,6 +105,8 @@ const SidebarContent = ({ pathname, navItems, onNavigate, onLogout }) => {
             {t('navigation.contactSupport', 'Написать в поддержку')}
           </a>
         </div>
+
+        <LanguageSwitcher variant="sidebar" />
 
         <button onClick={onLogout} className="flex items-center gap-3 px-3 h-11 w-full text-sm font-semibold text-muted-foreground hover:bg-destructive/10 hover:text-destructive rounded-lg transition-colors group min-w-0">
           <LogOut size={18} className="group-hover:text-destructive transition-colors shrink-0" />
@@ -232,7 +234,6 @@ const DashboardLayout = ({ children }) => {
           </div>
 
           <div className="ml-auto flex items-center gap-3 min-w-0 shrink-0">
-            <LanguageSwitcher />
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <button className="flex items-center gap-2 rounded-xl border border-border/60 bg-background px-3 py-2 hover:bg-secondary/50 transition-colors min-w-0 max-w-[220px] sm:max-w-[280px]">
