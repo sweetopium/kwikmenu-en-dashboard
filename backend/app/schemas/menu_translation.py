@@ -28,6 +28,7 @@ class TranslatableItem(BaseModel):
 
 
 class TranslatableMenu(BaseModel):
+    venue: TranslatableMeta | None = None
     menuMeta: TranslatableMeta
     categories: list[TranslatableCategory] = Field(default_factory=list)
     items: list[TranslatableItem] = Field(default_factory=list)
@@ -37,12 +38,21 @@ def extract_translatable(payload: MenuPayload) -> TranslatableMenu:
     def_lang = payload.defaultLanguage
 
     def get_val(obj, field):
-        trans = obj.translations.get(def_lang)
+        if not obj:
+            return None
+        trans = getattr(obj, "translations", {}).get(def_lang)
         if trans:
             val = getattr(trans, field, None)
             if val:
                 return val
         return getattr(obj, field, None)
+
+    venue = None
+    if payload.venue:
+        venue = TranslatableMeta(
+            name=get_val(payload.venue, "name") or payload.venue.name or "",
+            description=get_val(payload.venue, "description") or payload.venue.description,
+        )
 
     meta = TranslatableMeta(
         name=get_val(payload.menuMeta, "name") or payload.menuMeta.name or "",
@@ -77,10 +87,16 @@ def extract_translatable(payload: MenuPayload) -> TranslatableMenu:
                 )
             )
 
-    return TranslatableMenu(menuMeta=meta, categories=categories, items=items)
+    return TranslatableMenu(venue=venue, menuMeta=meta, categories=categories, items=items)
 
 
 def merge_translations(payload: MenuPayload, translated: TranslatableMenu, target_lang: str) -> None:
+    if translated.venue and payload.venue:
+        payload.venue.translations[target_lang] = LocalizedContent(
+            name=translated.venue.name,
+            description=translated.venue.description,
+        )
+
     meta_trans = LocalizedContent(
         name=translated.menuMeta.name,
         description=translated.menuMeta.description,

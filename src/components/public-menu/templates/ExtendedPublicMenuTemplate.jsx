@@ -76,46 +76,22 @@ const getItemBadge = (item, language) => {
   if (item?.badge) {
     const badgeVal = item.badge.toLowerCase().trim();
     if (badgeVal === 'hit') {
-      return {
-        text: isEn ? 'HIT' : 'ХИТ',
-        bgClass: 'bg-gradient-to-r from-amber-500 to-orange-500 text-white border-white/10',
-        glowClass: 'shadow-[0_2px_8px_rgba(245,158,11,0.4)]',
-      };
+      return isEn ? 'HIT' : 'ХИТ';
     }
     if (badgeVal === 'new') {
-      return {
-        text: isEn ? 'NEW' : 'NEW',
-        bgClass: 'bg-gradient-to-r from-emerald-500 to-teal-500 text-white border-white/10',
-        glowClass: 'shadow-[0_2px_8px_rgba(16,185,129,0.4)]',
-      };
+      return isEn ? 'NEW' : 'НОВИНКА';
     }
     if (badgeVal === 'chefs-choice') {
-      return {
-        text: isEn ? 'CHEF' : 'ШЕФ',
-        bgClass: 'bg-gradient-to-r from-indigo-500 to-purple-500 text-white border-white/10',
-        glowClass: 'shadow-[0_2px_8px_rgba(99,102,241,0.4)]',
-      };
+      return isEn ? 'CHEF' : 'ОТ ШЕФА';
     }
     if (badgeVal === 'season') {
-      return {
-        text: isEn ? 'SEASON' : 'СЕЗОН',
-        bgClass: 'bg-gradient-to-r from-rose-500 to-pink-500 text-white border-white/10',
-        glowClass: 'shadow-[0_2px_8px_rgba(244,63,94,0.4)]',
-      };
+      return isEn ? 'SEASON' : 'СЕЗОН';
     }
     if (badgeVal === 'promo') {
-      return {
-        text: isEn ? 'PROMO' : 'АКЦИЯ',
-        bgClass: 'bg-gradient-to-r from-red-500 to-rose-600 text-white border-white/10',
-        glowClass: 'shadow-[0_2px_8px_rgba(239,68,68,0.4)]',
-      };
+      return isEn ? 'PROMO' : 'АКЦИЯ';
     }
     if (badgeVal === 'special') {
-      return {
-        text: isEn ? 'SPECIAL' : 'ФИРМЕННОЕ',
-        bgClass: 'bg-gradient-to-r from-purple-600 to-fuchsia-600 text-white border-white/10',
-        glowClass: 'shadow-[0_2px_8px_rgba(168,85,247,0.4)]',
-      };
+      return isEn ? 'SPECIAL' : 'ФИРМЕННОЕ';
     }
   }
 
@@ -125,39 +101,19 @@ const getItemBadge = (item, language) => {
   for (const tag of item.tags) {
     const lower = tag.toLowerCase().trim();
     if (lower === 'хит' || lower === 'hit' || lower === 'popular' || lower === 'популярное') {
-      return {
-        text: isEn ? 'HIT' : 'ХИТ',
-        bgClass: 'bg-gradient-to-r from-amber-500 to-orange-500 text-white border-white/10',
-        glowClass: 'shadow-[0_2px_8px_rgba(245,158,11,0.4)]',
-      };
+      return isEn ? 'HIT' : 'ХИТ';
     }
     if (lower === 'new' || lower === 'новинка') {
-      return {
-        text: isEn ? 'NEW' : 'NEW',
-        bgClass: 'bg-gradient-to-r from-emerald-500 to-teal-500 text-white border-white/10',
-        glowClass: 'shadow-[0_2px_8px_rgba(16,185,129,0.4)]',
-      };
+      return isEn ? 'NEW' : 'НОВИНКА';
     }
     if (lower === 'острое' || lower === 'spicy' || lower === 'hot' || lower === 'острый') {
-      return {
-        text: isEn ? 'SPICY' : 'ОСТРОЕ',
-        bgClass: 'bg-gradient-to-r from-rose-500 to-red-500 text-white border-white/10',
-        glowClass: 'shadow-[0_2px_8px_rgba(244,63,94,0.4)]',
-      };
+      return isEn ? 'SPICY' : 'ОСТРОЕ';
     }
     if (lower === 'vegan' || lower === 'веган' || lower === 'постное' || lower === 'вегетарианское') {
-      return {
-        text: isEn ? 'VEGAN' : 'ВЕГАН',
-        bgClass: 'bg-gradient-to-r from-green-500 to-emerald-500 text-white border-white/10',
-        glowClass: 'shadow-[0_2px_8px_rgba(34,197,94,0.4)]',
-      };
+      return isEn ? 'VEGAN' : 'ВЕГАН';
     }
     if (lower === 'шеф' || lower === 'chef' || lower === 'рекомендуем' || lower === 'recommend') {
-      return {
-        text: isEn ? 'CHEF' : 'ШЕФ',
-        bgClass: 'bg-gradient-to-r from-indigo-500 to-purple-500 text-white border-white/10',
-        glowClass: 'shadow-[0_2px_8px_rgba(99,102,241,0.4)]',
-      };
+      return isEn ? 'CHEF' : 'ОТ ШЕФА';
     }
   }
   return null;
@@ -370,8 +326,8 @@ const ExtendedPublicMenuTemplate = ({
   );
 
   const currencyCode = venue?.currency || payload?.currency || 'RUB';
-  const venueName = venue?.name || payload?.venue?.name || 'Menu';
-  const venueDescription = venue?.description || payload?.venue?.description || '';
+  const venueName = getLocalizedField(payload?.venue, 'name', language, defaultLanguage) || venue?.name || payload?.venue?.name || 'Menu';
+  const venueDescription = getLocalizedField(payload?.venue, 'description', language, defaultLanguage) || venue?.description || payload?.venue?.description || '';
   const venueLogoUrl = venue?.design?.logoUrl || payload?.venue?.logoUrl || null;
   const venueInstagramUrl = venue?.instagramUrl || payload?.venue?.instagramUrl || null;
 
@@ -578,7 +534,7 @@ const ExtendedPublicMenuTemplate = ({
     const itemMeasure = formatMeasure(item.measureValue, item.measureUnit, language);
     const itemPrice = formatCurrency(item.price, currencyCode);
     const visibleVariants = (item.variants || []).filter((variant) => variant.isAvailable !== false);
-    const metaParts = [itemMeasure, getScheduleLabel(item.availableHours)].filter(isFilled);
+    const metaParts = [itemMeasure].filter(isFilled);
     const badge = getItemBadge(item, language);
 
     return (
@@ -598,8 +554,11 @@ const ExtendedPublicMenuTemplate = ({
               className="h-full w-full"
             />
             {badge && (
-              <div className={`absolute left-3 top-3 z-10 rounded-full px-2 py-0.5 text-[8px] font-bold tracking-wider uppercase border border-white/20 shadow-sm ${badge.bgClass} ${badge.glowClass}`}>
-                {badge.text}
+              <div
+                className="absolute left-3 top-3 z-10 rounded-full px-2 py-0.5 text-[8px] font-bold tracking-wider uppercase border border-white/20"
+                style={{ backgroundColor: accentColor, color: accentText }}
+              >
+                {badge}
               </div>
             )}
           </div>
@@ -950,8 +909,11 @@ const ExtendedPublicMenuTemplate = ({
                             className="h-full w-full"
                           />
                           {isItemAvailable && badge && (
-                            <div className={`absolute left-2.5 top-2.5 z-10 rounded-full px-2 py-0.5 text-[8px] font-bold tracking-wider uppercase border border-white/20 shadow-sm ${badge.bgClass} ${badge.glowClass}`}>
-                              {badge.text}
+                            <div
+                              className="absolute left-2.5 top-2.5 z-10 rounded-full px-2 py-0.5 text-[8px] font-bold tracking-wider uppercase border border-white/20"
+                              style={{ backgroundColor: accentColor, color: accentText }}
+                            >
+                              {badge}
                             </div>
                           )}
                           {!isItemAvailable && (

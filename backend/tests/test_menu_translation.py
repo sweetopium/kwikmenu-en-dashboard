@@ -59,6 +59,8 @@ class MenuTranslationTests(unittest.TestCase):
     def test_extract_translatable(self) -> None:
         translatable = extract_translatable(self.menu_payload)
 
+        self.assertIsNotNone(translatable.venue)
+        self.assertEqual(translatable.venue.name, "Вкусное Место")
         self.assertEqual(translatable.menuMeta.name, "Основное меню")
         self.assertEqual(translatable.menuMeta.description, "Вкусное описание")
         self.assertEqual(len(translatable.categories), 1)
@@ -72,6 +74,7 @@ class MenuTranslationTests(unittest.TestCase):
 
     def test_merge_translations(self) -> None:
         translated = TranslatableMenu(
+            venue=TranslatableMeta(name="Tasty Place", description="A cozy restaurant"),
             menuMeta=TranslatableMeta(name="Main Menu", description="Tasty description"),
             categories=[
                 TranslatableCategory(id="cat-1", name="Soups", description="Hot soups")
@@ -91,6 +94,8 @@ class MenuTranslationTests(unittest.TestCase):
         merge_translations(self.menu_payload, translated, "en")
 
         # Verify translations dicts are filled
+        self.assertEqual(self.menu_payload.venue.translations["en"].name, "Tasty Place")
+        self.assertEqual(self.menu_payload.venue.translations["en"].description, "A cozy restaurant")
         self.assertEqual(self.menu_payload.menuMeta.translations["en"].name, "Main Menu")
         self.assertEqual(self.menu_payload.menuMeta.translations["en"].description, "Tasty description")
         self.assertEqual(self.menu_payload.categories[0].translations["en"].name, "Soups")

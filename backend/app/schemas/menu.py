@@ -101,6 +101,7 @@ class VenueMeta(StrictModel):
     description: str | None = None
     logoUrl: str | None = None
     coverImageUrl: str | None = None
+    translations: dict[str, LocalizedContent] = Field(default_factory=dict)
 
 
 class MenuVariant(StrictModel):

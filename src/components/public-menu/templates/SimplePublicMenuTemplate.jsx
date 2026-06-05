@@ -21,46 +21,22 @@ const getItemBadge = (item, language) => {
   if (item?.badge) {
     const badgeVal = item.badge.toLowerCase().trim();
     if (badgeVal === 'hit') {
-      return {
-        text: isEn ? 'HIT' : 'ХИТ',
-        bgClass: 'bg-gradient-to-r from-amber-500 to-orange-500 text-white border-white/10',
-        glowClass: 'shadow-[0_2px_8px_rgba(245,158,11,0.4)]',
-      };
+      return isEn ? 'HIT' : 'ХИТ';
     }
     if (badgeVal === 'new') {
-      return {
-        text: isEn ? 'NEW' : 'NEW',
-        bgClass: 'bg-gradient-to-r from-emerald-500 to-teal-500 text-white border-white/10',
-        glowClass: 'shadow-[0_2px_8px_rgba(16,185,129,0.4)]',
-      };
+      return isEn ? 'NEW' : 'НОВИНКА';
     }
     if (badgeVal === 'chefs-choice') {
-      return {
-        text: isEn ? 'CHEF' : 'ШЕФ',
-        bgClass: 'bg-gradient-to-r from-indigo-500 to-purple-500 text-white border-white/10',
-        glowClass: 'shadow-[0_2px_8px_rgba(99,102,241,0.4)]',
-      };
+      return isEn ? 'CHEF' : 'ОТ ШЕФА';
     }
     if (badgeVal === 'season') {
-      return {
-        text: isEn ? 'SEASON' : 'СЕЗОН',
-        bgClass: 'bg-gradient-to-r from-rose-500 to-pink-500 text-white border-white/10',
-        glowClass: 'shadow-[0_2px_8px_rgba(244,63,94,0.4)]',
-      };
+      return isEn ? 'SEASON' : 'СЕЗОН';
     }
     if (badgeVal === 'promo') {
-      return {
-        text: isEn ? 'PROMO' : 'АКЦИЯ',
-        bgClass: 'bg-gradient-to-r from-red-500 to-rose-600 text-white border-white/10',
-        glowClass: 'shadow-[0_2px_8px_rgba(239,68,68,0.4)]',
-      };
+      return isEn ? 'PROMO' : 'АКЦИЯ';
     }
     if (badgeVal === 'special') {
-      return {
-        text: isEn ? 'SPECIAL' : 'ФИРМЕННОЕ',
-        bgClass: 'bg-gradient-to-r from-purple-600 to-fuchsia-600 text-white border-white/10',
-        glowClass: 'shadow-[0_2px_8px_rgba(168,85,247,0.4)]',
-      };
+      return isEn ? 'SPECIAL' : 'ФИРМЕННОЕ';
     }
   }
 
@@ -70,39 +46,19 @@ const getItemBadge = (item, language) => {
   for (const tag of item.tags) {
     const lower = tag.toLowerCase().trim();
     if (lower === 'хит' || lower === 'hit' || lower === 'popular' || lower === 'популярное') {
-      return {
-        text: isEn ? 'HIT' : 'ХИТ',
-        bgClass: 'bg-gradient-to-r from-amber-500 to-orange-500 text-white border-white/10',
-        glowClass: 'shadow-[0_2px_8px_rgba(245,158,11,0.4)]',
-      };
+      return isEn ? 'HIT' : 'ХИТ';
     }
     if (lower === 'new' || lower === 'новинка') {
-      return {
-        text: isEn ? 'NEW' : 'NEW',
-        bgClass: 'bg-gradient-to-r from-emerald-500 to-teal-500 text-white border-white/10',
-        glowClass: 'shadow-[0_2px_8px_rgba(16,185,129,0.4)]',
-      };
+      return isEn ? 'NEW' : 'НОВИНКА';
     }
     if (lower === 'острое' || lower === 'spicy' || lower === 'hot' || lower === 'острый') {
-      return {
-        text: isEn ? 'SPICY' : 'ОСТРОЕ',
-        bgClass: 'bg-gradient-to-r from-rose-500 to-red-500 text-white border-white/10',
-        glowClass: 'shadow-[0_2px_8px_rgba(244,63,94,0.4)]',
-      };
+      return isEn ? 'SPICY' : 'ОСТРОЕ';
     }
     if (lower === 'vegan' || lower === 'веган' || lower === 'постное' || lower === 'вегетарианское') {
-      return {
-        text: isEn ? 'VEGAN' : 'ВЕГАН',
-        bgClass: 'bg-gradient-to-r from-green-500 to-emerald-500 text-white border-white/10',
-        glowClass: 'shadow-[0_2px_8px_rgba(34,197,94,0.4)]',
-      };
+      return isEn ? 'VEGAN' : 'ВЕГАН';
     }
     if (lower === 'шеф' || lower === 'chef' || lower === 'рекомендуем' || lower === 'recommend') {
-      return {
-        text: isEn ? 'CHEF' : 'ШЕФ',
-        bgClass: 'bg-gradient-to-r from-indigo-500 to-purple-500 text-white border-white/10',
-        glowClass: 'shadow-[0_2px_8px_rgba(99,102,241,0.4)]',
-      };
+      return isEn ? 'CHEF' : 'ОТ ШЕФА';
     }
   }
   return null;
@@ -211,8 +167,8 @@ const SimplePublicMenuTemplate = ({
     [payload, defaultLanguage]
   );
 
-  const venueName = venue?.name || payload?.venue?.name || 'Menu';
-  const venueDescription = venue?.description || payload?.venue?.description || '';
+  const venueName = getLocalizedField(payload?.venue, 'name', language, defaultLanguage) || venue?.name || payload?.venue?.name || 'Menu';
+  const venueDescription = getLocalizedField(payload?.venue, 'description', language, defaultLanguage) || venue?.description || payload?.venue?.description || '';
   const venueLogoUrl = venue?.design?.logoUrl || payload?.venue?.logoUrl || null;
   const showWifiCard = Boolean(venue?.wifi?.enabled && venue?.wifi?.ssid && venue?.wifi?.password);
   const currencyCode = venue?.currency || payload?.currency || 'RUB';
@@ -463,8 +419,11 @@ const SimplePublicMenuTemplate = ({
                             <div className="flex flex-wrap items-center gap-2">
                               <h3 className="text-[1.02rem] font-medium tracking-[-0.01em] text-foreground sm:text-[1.12rem]">{itemName}</h3>
                               {isItemAvailable && badge && (
-                                <span className={`rounded-full px-1.5 py-0.5 text-[7px] font-bold tracking-wider uppercase border border-white/20 shadow-[0_1px_3px_rgba(0,0,0,0.05)] ${badge.bgClass} ${badge.glowClass}`}>
-                                  {badge.text}
+                                <span
+                                  className="rounded-full px-1.5 py-0.5 text-[7px] font-bold tracking-wider uppercase border border-white/20"
+                                  style={{ backgroundColor: accentColor, color: heroTextColor }}
+                                >
+                                  {badge}
                                 </span>
                               )}
                             </div>
