@@ -114,17 +114,17 @@ def get_public_venue_menus(
         ),
         menus=[
             PublicMenuResponse(
-                id=menu.id,
-                venueId=menu.venue_id,
-                name=menu.name,
-                slug=menu.slug,
-                description=menu.description,
-                status=menu.status,
+                id=m.id,
+                venueId=m.venue_id,
+                name=m.name,
+                slug=m.slug,
+                description=m.description,
+                status=m.status,
                 payload=MenuPayload.model_validate(
                     {
-                        **menu.payload,
+                        **m.payload,
                         "venue": {
-                            **(menu.payload.get("venue") or {}),
+                            **(m.payload.get("venue") or {}),
                             "name": venue.name,
                             "description": venue.description,
                             "logoUrl": venue_settings.design_logo_url if venue_settings else None,
@@ -132,6 +132,7 @@ def get_public_venue_menus(
                     }
                 ),
             )
+            for m in menus
         ],
     )
 

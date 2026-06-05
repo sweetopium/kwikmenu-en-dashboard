@@ -269,6 +269,11 @@ const PromoPagesPage = () => {
   const [jsonError, setJsonError] = useState(null);
   const [submitting, setSubmitting] = useState(false);
 
+  // HTML Import State
+  const [showImportModal, setShowImportModal] = useState(false);
+  const [importHtml, setImportHtml] = useState('');
+  const [importing, setImporting] = useState(false);
+
   const loadPromoPages = () => {
     setLoading(true);
     fetchPromoPages()
@@ -315,6 +320,39 @@ const PromoPagesPage = () => {
   const handleFillTemplate = () => {
     setContentStr(JSON.stringify(DEFAULT_PROMO_TEMPLATE, null, 2));
     setJsonError(null);
+  };
+
+  const handleOpenImport = () => {
+    setImportHtml('');
+    setImporting(false);
+    setShowImportModal(true);
+  };
+
+  const handleImportHtml = async () => {
+    if (!importHtml.trim()) return;
+    setImporting(true);
+    try {
+      const result = await convertHtmlToJson(importHtml);
+      if (result && result.content) {
+        setContentStr(JSON.stringify(result.content, null, 2));
+        if (result.content.meta && result.content.meta.title) {
+          const cleanTitle = result.content.meta.title.split('|')[0].trim();
+          setTitle(cleanTitle);
+          setSlug(slugify(cleanTitle));
+        } else {
+          setTitle('');
+          setSlug('');
+        }
+        setShowImportModal(false);
+        setShowModal(true);
+      } else {
+        alert("Не удалось распознать структуру из HTML.");
+      }
+    } catch (err) {
+      alert(`Ошибка импорта: ${err.message}`);
+    } finally {
+      setImporting(false);
+    }
   };
 
   const handleOpenCreate = () => {
@@ -388,10 +426,16 @@ const PromoPagesPage = () => {
         title="Промо-страницы"
         description="Контент сео-лендингов и промо-статей KwikMenu."
         actions={
-          <Button onClick={handleOpenCreate}>
-            <Plus size={16} />
-            Добавить страницу
-          </Button>
+          <div className="flex gap-2">
+            <Button variant="outline" onClick={handleOpenImport}>
+              <RefreshCw size={16} />
+              Импорт из HTML
+            </Button>
+            <Button onClick={handleOpenCreate}>
+              <Plus size={16} />
+              Добавить страницу
+            </Button>
+          </div>
         }
       />
 
@@ -477,28 +521,9 @@ const PromoPagesPage = () => {
                   <div className="flex gap-2">
                     <button
                       type="button"
-                      onClick={async () => {
-                        const rawHtml = prompt("Вставьте исходный HTML-код страницы для импорта:");
-                        if (!rawHtml) return;
-                        setSubmitting(true);
-                        setJsonError(null);
-                        try {
-                          const result = await convertHtmlToJson(rawHtml);
-                          if (result && result.content) {
-                            setContentStr(JSON.stringify(result.content, null, 2));
-                            if (result.content.meta && result.content.meta.title) {
-                              const cleanTitle = result.content.meta.title.split('|')[0].trim();
-                              setTitle(cleanTitle);
-                              setSlug(slugify(cleanTitle));
-                            }
-                          } else {
-                            alert("Не удалось распознать структуру из HTML.");
-                          }
-                        } catch (err) {
-                          alert(`Ошибка импорта: ${err.message}`);
-                        } finally {
-                          setSubmitting(false);
-                        }
+                      onClick={() => {
+                        setImportHtml('');
+                        setShowImportModal(true);
                       }}
                       className="inline-flex items-center gap-1 text-[11px] font-bold text-violet-600 hover:underline bg-violet-50 dark:bg-violet-950/40 rounded-full px-2.5 py-1"
                     >
@@ -552,6 +577,43 @@ const PromoPagesPage = () => {
                 </Button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {showImportModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 animate-in fade-in duration-200">
+          <div className="w-full max-w-2xl rounded-3xl bg-white dark:bg-zinc-900 p-6 shadow-2xl border border-zinc-100 dark:border-zinc-800 flex flex-col max-h-[85vh]">
+            <h3 className="text-lg font-black text-foreground mb-1">
+              Импорт страницы из HTML
+            </h3>
+            <p className="text-xs text-muted-foreground mb-4">
+              Вставьте полный исходный HTML-код страницы. ИИ распознает структуру и заполнит форму.
+            </p>
+            
+            <div className="flex-grow flex-1 flex flex-col min-h-0 space-y-4">
+              <div className="flex-grow flex-1 min-h-[300px] relative">
+                <textarea
+                  value={importHtml}
+                  onChange={(e) => setImportHtml(e.target.value)}
+                  placeholder="<!doctype html>..."
+                  className="w-full h-full p-3.5 font-mono text-xs border border-zinc-200 dark:border-zinc-800 rounded-xl bg-zinc-50 dark:bg-zinc-950 text-foreground focus:outline-none focus:ring-2 focus:ring-brand-purple/50 focus:border-brand-purple resize-none"
+                />
+              </div>
+              
+              <div className="flex justify-end gap-2 pt-3 border-t border-zinc-100 dark:border-zinc-800/80">
+                <Button type="button" variant="ghost" onClick={() => setShowImportModal(false)}>
+                  Отмена
+                </Button>
+                <Button 
+                  type="button"
+                  onClick={handleImportHtml} 
+                  disabled={importing || !importHtml.trim()}
+                >
+                  {importing ? 'Конвертация...' : 'Конвертировать'}
+                </Button>
+              </div>
+            </div>
           </div>
         </div>
       )}
