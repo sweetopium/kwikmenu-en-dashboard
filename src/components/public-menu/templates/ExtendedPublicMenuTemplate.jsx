@@ -31,11 +31,97 @@ const getScheduleLabel = (availableHours) => {
   return `${availableHours.start} - ${availableHours.end}`;
 };
 
+const DIETARY_TAG_LABELS = {
+  ru: {
+    'vegan': 'Веганское',
+    'vegetarian': 'Вегетарианское',
+    'gluten-free': 'Без глютена',
+    'spicy': 'Острое',
+    'contains-nuts': 'Содержит орехи',
+    'contains-dairy': 'Содержит лактозу',
+    'caffeine-free': 'Без кофеина',
+    'sugar-free': 'Без сахара',
+    'halal': 'Халяль',
+    'lenten': 'Постное',
+    'kids': 'Детское',
+    'lactose-free': 'Без лактозы',
+    'contains-seafood': 'Содержит морепродукты',
+  },
+  en: {
+    'vegan': 'Vegan',
+    'vegetarian': 'Vegetarian',
+    'gluten-free': 'Gluten Free',
+    'spicy': 'Spicy',
+    'contains-nuts': 'Contains Nuts',
+    'contains-dairy': 'Contains Dairy',
+    'caffeine-free': 'Caffeine Free',
+    'sugar-free': 'Sugar Free',
+    'halal': 'Halal',
+    'lenten': 'Lenten',
+    'kids': 'Kids',
+    'lactose-free': 'Lactose Free',
+    'contains-seafood': 'Contains Seafood',
+  },
+};
+
+const getDietaryTagLabel = (tagValue, language = 'ru') => {
+  const lang = String(language || 'ru').toLowerCase().split('-')[0];
+  const dict = DIETARY_TAG_LABELS[lang] || DIETARY_TAG_LABELS.ru;
+  return dict[tagValue] || tagValue;
+};
+
 const getItemBadge = (item, language) => {
+  const isEn = language === 'en';
+
+  if (item?.badge) {
+    const badgeVal = item.badge.toLowerCase().trim();
+    if (badgeVal === 'hit') {
+      return {
+        text: isEn ? 'HIT' : 'ХИТ',
+        bgClass: 'bg-gradient-to-r from-amber-500 to-orange-500 text-white border-white/10',
+        glowClass: 'shadow-[0_2px_8px_rgba(245,158,11,0.4)]',
+      };
+    }
+    if (badgeVal === 'new') {
+      return {
+        text: isEn ? 'NEW' : 'NEW',
+        bgClass: 'bg-gradient-to-r from-emerald-500 to-teal-500 text-white border-white/10',
+        glowClass: 'shadow-[0_2px_8px_rgba(16,185,129,0.4)]',
+      };
+    }
+    if (badgeVal === 'chefs-choice') {
+      return {
+        text: isEn ? 'CHEF' : 'ШЕФ',
+        bgClass: 'bg-gradient-to-r from-indigo-500 to-purple-500 text-white border-white/10',
+        glowClass: 'shadow-[0_2px_8px_rgba(99,102,241,0.4)]',
+      };
+    }
+    if (badgeVal === 'season') {
+      return {
+        text: isEn ? 'SEASON' : 'СЕЗОН',
+        bgClass: 'bg-gradient-to-r from-rose-500 to-pink-500 text-white border-white/10',
+        glowClass: 'shadow-[0_2px_8px_rgba(244,63,94,0.4)]',
+      };
+    }
+    if (badgeVal === 'promo') {
+      return {
+        text: isEn ? 'PROMO' : 'АКЦИЯ',
+        bgClass: 'bg-gradient-to-r from-red-500 to-rose-600 text-white border-white/10',
+        glowClass: 'shadow-[0_2px_8px_rgba(239,68,68,0.4)]',
+      };
+    }
+    if (badgeVal === 'special') {
+      return {
+        text: isEn ? 'SPECIAL' : 'ФИРМЕННОЕ',
+        bgClass: 'bg-gradient-to-r from-purple-600 to-fuchsia-600 text-white border-white/10',
+        glowClass: 'shadow-[0_2px_8px_rgba(168,85,247,0.4)]',
+      };
+    }
+  }
+
   if (!item?.tags?.length) {
     return null;
   }
-  const isEn = language === 'en';
   for (const tag of item.tags) {
     const lower = tag.toLowerCase().trim();
     if (lower === 'хит' || lower === 'hit' || lower === 'popular' || lower === 'популярное') {
@@ -493,6 +579,7 @@ const ExtendedPublicMenuTemplate = ({
     const itemPrice = formatCurrency(item.price, currencyCode);
     const visibleVariants = (item.variants || []).filter((variant) => variant.isAvailable !== false);
     const metaParts = [itemMeasure, getScheduleLabel(item.availableHours)].filter(isFilled);
+    const badge = getItemBadge(item, language);
 
     return (
       <div className="max-h-[76vh] overflow-y-auto px-4 pb-8 pt-4">
@@ -502,13 +589,20 @@ const ExtendedPublicMenuTemplate = ({
           transition={{ delay: 0.08, duration: 0.24, ease: 'easeOut' }}
           className="space-y-4"
         >
-          <MenuImage
-            src={item.imageUrl}
-            alt={itemName}
-            placeholderLabel={venueName}
-            eager
-            className="aspect-[16/10] overflow-hidden rounded-[1.5rem] border border-black/5"
-          />
+          <div className="relative aspect-[16/10] overflow-hidden rounded-[1.5rem] border border-black/5">
+            <MenuImage
+              src={item.imageUrl}
+              alt={itemName}
+              placeholderLabel={venueName}
+              eager
+              className="h-full w-full"
+            />
+            {badge && (
+              <div className={`absolute left-3 top-3 z-10 rounded-full px-2 py-0.5 text-[8px] font-bold tracking-wider uppercase border border-white/20 shadow-sm ${badge.bgClass} ${badge.glowClass}`}>
+                {badge.text}
+              </div>
+            )}
+          </div>
 
           <div className="space-y-2">
             <div className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-3">
@@ -580,7 +674,7 @@ const ExtendedPublicMenuTemplate = ({
                     className="rounded-full border px-3 py-1.5 text-[0.76rem] text-muted-foreground"
                     style={{ borderColor: 'rgba(162,142,121,0.18)', backgroundColor: '#fffaf2' }}
                   >
-                    {tag}
+                    {getDietaryTagLabel(tag, language)}
                   </span>
                 ))}
               </div>

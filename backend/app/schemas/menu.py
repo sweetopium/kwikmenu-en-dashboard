@@ -55,6 +55,9 @@ class MenuBadge(str, Enum):
     season = "season"
     spicy = "spicy"
     vegan = "vegan"
+    chefs_choice = "chefs-choice"
+    promo = "promo"
+    special = "special"
 
 
 class MenuAvailableHours(StrictModel):

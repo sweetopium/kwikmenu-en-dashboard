@@ -24,6 +24,12 @@ export const DIETARY_TAG_OPTIONS = [
   { value: 'contains-nuts', label: 'Contains Nuts' },
   { value: 'contains-dairy', label: 'Contains Dairy' },
   { value: 'caffeine-free', label: 'Caffeine Free' },
+  { value: 'sugar-free', label: 'Sugar Free' },
+  { value: 'halal', label: 'Halal' },
+  { value: 'lenten', label: 'Lenten' },
+  { value: 'kids', label: 'Kids' },
+  { value: 'lactose-free', label: 'Lactose Free' },
+  { value: 'contains-seafood', label: 'Contains Seafood' },
 ];
 
 export const BADGE_OPTIONS = [
@@ -31,6 +37,8 @@ export const BADGE_OPTIONS = [
   { value: 'hit', label: 'Hit', className: 'bg-amber-500/10 text-amber-700 border-amber-500/20' },
   { value: 'chefs-choice', label: "Chef's Choice", className: 'bg-emerald-500/10 text-emerald-700 border-emerald-500/20' },
   { value: 'season', label: 'Season', className: 'bg-rose-500/10 text-rose-600 border-rose-500/20' },
+  { value: 'promo', label: 'Promo', className: 'bg-red-500/10 text-red-600 border-red-500/20' },
+  { value: 'special', label: 'Specialty', className: 'bg-purple-500/10 text-purple-700 border-purple-500/20' },
 ];
 
 export const getBadgeMeta = (badge) =>

@@ -386,7 +386,9 @@
       "new": "Новинка",
       "hit": "Хит",
       "chefs-choice": "Выбор шефа",
-      "season": "Сезонное"
+      "season": "Сезонное",
+      "promo": "Акция",
+      "special": "Фирменное"
     },
     "dietaryTags": {
       "vegan": "Веганское",
@@ -395,7 +397,13 @@
       "spicy": "Острое",
       "contains-nuts": "Содержит орехи",
       "contains-dairy": "Содержит лактозу",
-      "caffeine-free": "Без кофеина"
+      "caffeine-free": "Без кофеина",
+      "sugar-free": "Без сахара",
+      "halal": "Халяль",
+      "lenten": "Постное",
+      "kids": "Детское",
+      "lactose-free": "Без лактозы",
+      "contains-seafood": "Содержит морепродукты"
     },
     "measureUnits": {
       "notSpecified": "Не указано",

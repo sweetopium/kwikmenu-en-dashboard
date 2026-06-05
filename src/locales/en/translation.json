@@ -386,7 +386,9 @@
       "new": "New",
       "hit": "Hit",
       "chefs-choice": "Chef's Choice",
-      "season": "Season"
+      "season": "Season",
+      "promo": "Promo",
+      "special": "Specialty"
     },
     "dietaryTags": {
       "vegan": "Vegan",
@@ -395,7 +397,13 @@
       "spicy": "Spicy",
       "contains-nuts": "Contains Nuts",
       "contains-dairy": "Contains Dairy",
-      "caffeine-free": "Caffeine Free"
+      "caffeine-free": "Caffeine Free",
+      "sugar-free": "Sugar Free",
+      "halal": "Halal",
+      "lenten": "Lenten",
+      "kids": "Kids",
+      "lactose-free": "Lactose Free",
+      "contains-seafood": "Contains Seafood"
     },
     "measureUnits": {
       "notSpecified": "Not specified",

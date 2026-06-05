@@ -415,69 +415,27 @@ const ItemModal = ({
             )}
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                {t('menuEditor.itemModal.badgeLabel', 'Маркетинговый бейдж')}
-              </Label>
+          <div className="space-y-2">
+            <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+              {t('menuEditor.itemModal.badgeLabel', 'Маркетинговый бейдж')}
+            </Label>
 
-              <div className="relative">
-                <select
-                  value={item.badge || ''}
-                  onChange={(event) => onChange({ ...item, badge: event.target.value || null })}
-                  className={formSelectClasses}
-                >
-                  <option value="">{t('menuEditor.itemModal.noBadge', 'Без бейджа')}</option>
-                  {BADGE_OPTIONS.map((badge) => (
-                    <option key={badge.value} value={badge.value}>
-                      {t(`menuEditor.badges.${badge.value}`, { defaultValue: badge.label })}
-                    </option>
-                  ))}
-                </select>
+            <div className="relative">
+              <select
+                value={item.badge || ''}
+                onChange={(event) => onChange({ ...item, badge: event.target.value || null })}
+                className={formSelectClasses}
+              >
+                <option value="">{t('menuEditor.itemModal.noBadge', 'Без бейджа')}</option>
+                {BADGE_OPTIONS.map((badge) => (
+                  <option key={badge.value} value={badge.value}>
+                    {t(`menuEditor.badges.${badge.value}`, { defaultValue: badge.label })}
+                  </option>
+                ))}
+              </select>
 
-                <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-muted-foreground">
-                  <ChevronDown size={16} />
-                </div>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                  {t('menuEditor.itemModal.availableFrom', 'Доступно с')}
-                </Label>
-
-                <Input
-                  type="time"
-                  value={item.availableHours?.start || ''}
-                  onChange={(event) => onChange({
-                    ...item,
-                    availableHours: {
-                      start: event.target.value,
-                      end: item.availableHours?.end || '',
-                    },
-                  })}
-                  className={formFieldClasses}
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                  {t('menuEditor.itemModal.availableTo', 'Доступно до')}
-                </Label>
-
-                <Input
-                  type="time"
-                  value={item.availableHours?.end || ''}
-                  onChange={(event) => onChange({
-                    ...item,
-                    availableHours: {
-                      start: item.availableHours?.start || '',
-                      end: event.target.value,
-                    },
-                  })}
-                  className={formFieldClasses}
-                />
+              <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-muted-foreground">
+                <ChevronDown size={16} />
               </div>
             </div>
           </div>
