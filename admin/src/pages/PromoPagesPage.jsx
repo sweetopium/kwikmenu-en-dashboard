@@ -227,12 +227,28 @@ const DEFAULT_PROMO_TEMPLATE = {
 };
 
 const slugify = (text) => {
-  return text
-    .toString()
-    .toLowerCase()
-    .trim()
+  if (!text) return '';
+
+  const cyrillicToLatin = {
+    'а': 'a', 'б': 'b', 'в': 'v', 'г': 'g', 'д': 'd', 'е': 'e', 'ё': 'yo', 'ж': 'zh',
+    'з': 'z', 'и': 'i', 'й': 'y', 'к': 'k', 'л': 'l', 'м': 'm', 'н': 'n', 'о': 'o',
+    'п': 'p', 'р': 'r', 'с': 's', 'т': 't', 'у': 'u', 'ф': 'f', 'х': 'kh', 'ц': 'ts',
+    'ч': 'ch', 'ш': 'sh', 'щ': 'shch', 'ы': 'y', 'э': 'e', 'ю': 'yu', 'я': 'ya',
+    'ъ': '', 'ь': '',
+    'і': 'i', 'ї': 'yi', 'є': 'ye', 'ґ': 'g'
+  };
+
+  let str = text.toString().toLowerCase().trim();
+
+  let transliterated = '';
+  for (let i = 0; i < str.length; i++) {
+    const char = str[i];
+    transliterated += cyrillicToLatin[char] !== undefined ? cyrillicToLatin[char] : char;
+  }
+
+  return transliterated
     .replace(/\s+/g, '-')
-    .replace(/[^\wа-яё\-]/gi, '')
+    .replace(/[^a-z0-9\-]/g, '')
     .replace(/\-\-+/g, '-')
     .replace(/^-+/, '')
     .replace(/-+$/, '');
