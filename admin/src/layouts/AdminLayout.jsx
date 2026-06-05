@@ -5,6 +5,7 @@ import {
   Building2,
   CircleHelp,
   DatabaseZap,
+  FileText,
   Home,
   LogOut,
   MenuSquare,
@@ -29,6 +30,7 @@ const navItems = [
   { to: '/analytics', label: 'Аналитика', icon: BarChart3 },
   { to: '/events', label: 'Product events', icon: Activity },
   { to: '/billing', label: 'Биллинг', icon: WalletCards },
+  { to: '/promo-pages', label: 'Промо-страницы', icon: FileText },
   { to: '/system', label: 'Система', icon: DatabaseZap },
 ];
 

@@ -148,4 +148,19 @@ export const createAdminMenu = (payload) => adminFetch('/menus', {
   body: JSON.stringify(payload),
 });
 
+export const fetchPromoPages = () => adminFetch('/promo-pages');
+export const fetchPromoPageDetail = (id) => adminFetch(`/promo-pages/${id}`);
+export const createPromoPage = (payload) => adminFetch('/promo-pages', {
+  method: 'POST',
+  body: JSON.stringify(payload),
+});
+export const updatePromoPage = (id, payload) => adminFetch(`/promo-pages/${id}`, {
+  method: 'PATCH',
+  body: JSON.stringify(payload),
+});
+export const deletePromoPage = (id) => adminFetch(`/promo-pages/${id}`, {
+  method: 'DELETE',
+});
+
+
 

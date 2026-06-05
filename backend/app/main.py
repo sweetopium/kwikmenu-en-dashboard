@@ -4,6 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.api.routes.admin import router as admin_router
 from app.api.routes.admin_billing import router as admin_billing_router
 from app.api.routes.admin_virtual import router as admin_virtual_router
+from app.api.routes.admin_promo import router as admin_promo_router
 from app.api.routes.analytics import router as analytics_router
 from app.api.routes.auth import router as auth_router
 from app.api.routes.billing import router as billing_router
@@ -55,6 +56,7 @@ def create_app() -> FastAPI:
     app.include_router(admin_router)
     app.include_router(admin_billing_router)
     app.include_router(admin_virtual_router)
+    app.include_router(admin_promo_router)
     app.include_router(auth_router)
     app.include_router(analytics_router)
     app.include_router(billing_router)

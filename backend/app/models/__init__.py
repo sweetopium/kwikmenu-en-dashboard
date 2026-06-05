@@ -5,6 +5,7 @@ from app.models.help_request import HelpRequest
 from app.models.menu import Menu
 from app.models.menu_import import MenuImportJob, MenuImportSource
 from app.models.venue import Venue, VenueSettings
+from app.models.promo_page import PromoPage
 
 __all__ = [
     "PublicMenuEvent",
@@ -22,4 +23,5 @@ __all__ = [
     "UserSubscription",
     "Venue",
     "VenueSettings",
+    "PromoPage",
 ]

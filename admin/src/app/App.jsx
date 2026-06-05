@@ -14,6 +14,7 @@ import UserDetailPage from '../pages/UserDetailPage';
 import UsersPage from '../pages/UsersPage';
 import VenueDetailPage from '../pages/VenueDetailPage';
 import VenuesPage from '../pages/VenuesPage';
+import PromoPagesPage from '../pages/PromoPagesPage';
 import { getStoredAdminKey } from '../lib/adminApi';
 
 const RequireAdminKey = () => {
@@ -41,6 +42,7 @@ const App = () => (
       <Route path="/events" element={<ProductEventsPage />} />
       <Route path="/billing" element={<BillingPage />} />
       <Route path="/system" element={<SystemPage />} />
+      <Route path="/promo-pages" element={<PromoPagesPage />} />
     </Route>
     <Route path="*" element={<Navigate to="/" replace />} />
   </Routes>
