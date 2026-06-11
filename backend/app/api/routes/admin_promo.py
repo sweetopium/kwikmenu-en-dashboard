@@ -1,14 +1,47 @@
-from __future__ import annotations
-
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, BackgroundTasks
 from sqlalchemy.orm import Session
+
+import urllib.request
+import urllib.parse
+import logging
 
 from app.api.deps import get_db
 from app.api.routes.admin import AdminAccess
 from app.models.promo_page import PromoPage
 from app.schemas.promo_page import PromoPageCreateRequest, PromoPageUpdateRequest
+from app.core.config import get_settings
 
 router = APIRouter(prefix="/api/admin/promo-pages", tags=["admin-promo"])
+
+
+def trigger_promo_revalidation(slug: str | None = None) -> None:
+    settings = get_settings()
+    token = settings.n8n_webhook_token
+    if not token:
+        logging.getLogger(__name__).info("Revalidation skipped: N8N_WEBHOOK_TOKEN is not set")
+        return
+
+    base_url = "https://kwikmenu.ru/api/revalidate-promo"
+    params = {"secret": token}
+    if slug:
+        params["slug"] = slug
+
+    url = f"{base_url}?{urllib.parse.urlencode(params)}"
+    logging.getLogger(__name__).info("Sending revalidation request for slug: %s", slug)
+
+    try:
+        req = urllib.request.Request(
+            url,
+            headers={"User-Agent": "KwikMenu-Backend-Revalidation"},
+            method="GET",
+        )
+        with urllib.request.urlopen(req, timeout=5) as response:
+            status_code = response.getcode()
+            body = response.read().decode("utf-8")
+            logging.getLogger(__name__).info("Revalidation response code=%s body=%r", status_code, body)
+    except Exception as exc:
+        logging.getLogger(__name__).warning("Promo page revalidation failed: %s", exc)
+
 
 
 @router.get("")
@@ -57,6 +90,7 @@ def get_promo_page(
 @router.post("")
 def create_promo_page(
     payload: PromoPageCreateRequest,
+    background_tasks: BackgroundTasks,
     _: None = AdminAccess,
     db: Session = Depends(get_db),
 ) -> dict:
@@ -76,6 +110,8 @@ def create_promo_page(
     db.commit()
     db.refresh(page)
 
+    background_tasks.add_task(trigger_promo_revalidation, page.slug)
+
     return {
         "id": page.id,
         "slug": page.slug,
@@ -90,6 +126,7 @@ def create_promo_page(
 def update_promo_page(
     page_id: str,
     payload: PromoPageUpdateRequest,
+    background_tasks: BackgroundTasks,
     _: None = AdminAccess,
     db: Session = Depends(get_db),
 ) -> dict:
@@ -99,6 +136,8 @@ def update_promo_page(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Promo page not found.",
         )
+
+    old_slug = page.slug
 
     if payload.slug is not None and payload.slug != page.slug:
         existing = db.query(PromoPage).filter(PromoPage.slug == payload.slug).first()
@@ -118,6 +157,10 @@ def update_promo_page(
     db.commit()
     db.refresh(page)
 
+    background_tasks.add_task(trigger_promo_revalidation, page.slug)
+    if old_slug != page.slug:
+        background_tasks.add_task(trigger_promo_revalidation, old_slug)
+
     return {
         "id": page.id,
         "slug": page.slug,
@@ -131,6 +174,7 @@ def update_promo_page(
 @router.delete("/{page_id}")
 def delete_promo_page(
     page_id: str,
+    background_tasks: BackgroundTasks,
     _: None = AdminAccess,
     db: Session = Depends(get_db),
 ) -> dict:
@@ -141,8 +185,11 @@ def delete_promo_page(
             detail="Promo page not found.",
         )
 
+    slug = page.slug
     db.delete(page)
     db.commit()
+
+    background_tasks.add_task(trigger_promo_revalidation, slug)
 
     return {"status": "ok"}
 

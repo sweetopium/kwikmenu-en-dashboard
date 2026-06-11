@@ -41,6 +41,7 @@ class Settings(BaseSettings):
     admin_frontend_origin: str = "http://localhost:5174"
     admin_api_key: str | None = None
     admin_allowed_ips: str = "*"
+    n8n_webhook_token: str | None = None
 
     auth_session_cookie_name: str = "kwikmenu_session"
     auth_session_ttl_hours: int = 720
