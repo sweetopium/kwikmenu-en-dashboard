@@ -156,6 +156,7 @@ def convert_html_to_json(
     payload: ConvertHtmlRequest,
     _: None = AdminAccess,
 ) -> dict:
+    import json
     from app.services.openrouter_client import OpenRouterClient
     openrouter = OpenRouterClient()
 

@@ -93,6 +93,10 @@ const RegisterPage = () => {
         confirmPassword: form.confirmPassword,
       });
 
+      if (typeof window.ym === 'function') {
+        window.ym(108304746, 'reachGoal', 'register');
+      }
+
       navigate(result?.redirectUrl || getPostRegisterRedirect());
     } catch (error) {
       setSubmitError(error.message || t('register.errGeneral'));
