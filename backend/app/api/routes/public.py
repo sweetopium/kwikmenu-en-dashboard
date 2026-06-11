@@ -137,6 +137,35 @@ def get_public_venue_menus(
     )
 
 
+@router.options("/promo", include_in_schema=False)
+def options_public_promo_list(response: Response) -> Response:
+    response.headers["Access-Control-Allow-Origin"] = "*"
+    response.headers["Access-Control-Allow-Methods"] = "GET, OPTIONS"
+    response.headers["Access-Control-Max-Age"] = "86400"
+    return response
+
+
+@router.get("/promo")
+def list_public_promo_pages(
+    response: Response,
+    db: Session = Depends(get_db),
+) -> dict:
+    response.headers["Access-Control-Allow-Origin"] = "*"
+    from app.models.promo_page import PromoPage
+
+    pages = db.query(PromoPage).order_by(PromoPage.created_at.desc()).all()
+    return {
+        "items": [
+            {
+                "slug": page.slug,
+                "title": page.title,
+                "createdAt": page.created_at,
+            }
+            for page in pages
+        ]
+    }
+
+
 @router.options("/promo/{slug}", include_in_schema=False)
 def options_public_promo_page(response: Response) -> Response:
     response.headers["Access-Control-Allow-Origin"] = "*"
@@ -164,4 +193,5 @@ def get_public_promo_page(
         "title": page.title,
         "content": page.content,
     }
+
 
