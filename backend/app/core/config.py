@@ -1,5 +1,6 @@
 from functools import lru_cache
 
+from pydantic import field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -99,6 +100,13 @@ class Settings(BaseSettings):
     unisender_sender_name: str | None = None
     unisender_service_type: str = "go"  # "go" or "classic"
     unisender_classic_list_id: int | None = None
+
+    @field_validator("unisender_classic_list_id", "unitpay_project_id", mode="before")
+    @classmethod
+    def empty_str_to_none(cls, v):
+        if v == "":
+            return None
+        return v
 
 
 @lru_cache(maxsize=1)
