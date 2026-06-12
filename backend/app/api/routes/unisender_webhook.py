@@ -68,6 +68,14 @@ def _process_single_event(db: Session, event_data: dict[str, Any]) -> None:
         logger.info("Updated ScheduledEmail id=%s delivery_status=%s", scheduled_email.id, normalized_status)
 
 
+@router.get("/unisender", status_code=status.HTTP_200_OK)
+def verify_unisender_webhook() -> dict[str, str]:
+    """
+    Verification endpoint for Unisender Go callback setup.
+    """
+    return {"status": "ok"}
+
+
 @router.post("/unisender", status_code=status.HTTP_200_OK)
 async def unisender_webhook(
     request: Request,

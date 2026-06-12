@@ -103,11 +103,15 @@ class UnisenderService:
             logger.error("Unisender Go API error: code=%s message=%s", error_code, error_msg)
             raise ValueError(f"Unisender Go error: {error_msg} (code: {error_code})")
 
-        # Get job_id from result
-        result = response_json.get("result", {})
-        job_id = result.get("job_id")
+        # Get job_id from top-level response or result dict
+        job_id = response_json.get("job_id")
         if not job_id:
-            raise ValueError("Unisender Go returned success but job_id is missing.")
+            result = response_json.get("result")
+            if isinstance(result, dict):
+                job_id = result.get("job_id")
+
+        if not job_id:
+            raise ValueError(f"Unisender Go returned success but job_id is missing from response: {response_json}")
 
         return str(job_id)
 
