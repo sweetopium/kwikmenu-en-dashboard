@@ -154,6 +154,32 @@ class EmailCampaignTests(unittest.TestCase):
         db_mock.query().filter().count.return_value = 2
         self.assertFalse(service.evaluate_condition(db_mock, user, "no_menu"))
 
+    def test_webhook_process_single_event(self) -> None:
+        from app.api.routes.unisender_webhook import _process_single_event
+        from app.models.email_campaign import ScheduledEmail
+
+        db_mock = MagicMock()
+        scheduled_email = ScheduledEmail(
+            id="sched_123",
+            unisender_message_id="msg_456",
+            delivery_status="none"
+        )
+        db_mock.query().filter().first.return_value = scheduled_email
+
+        event = {
+            "event_name": "transactional_email_status",
+            "event_data": {
+                "job_id": "msg_456",
+                "email": "test@example.com",
+                "status": "delivered"
+            }
+        }
+
+        _process_single_event(db_mock, event)
+
+        self.assertEqual(scheduled_email.delivery_status, "delivered")
+        db_mock.add.assert_called_with(scheduled_email)
+
 
 if __name__ == "__main__":
     unittest.main()

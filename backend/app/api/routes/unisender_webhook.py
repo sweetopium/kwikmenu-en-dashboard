@@ -13,14 +13,26 @@ logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/webhooks", tags=["webhooks"])
 
 
-def _process_single_event(db: Session, event_data: dict[str, Any]) -> None:
+def _process_single_event(db: Session, event: dict[str, Any]) -> None:
     """
     Helper to process a single event from Unisender Go callback.
     """
-    event_type = event_data.get("event")
-    email_addr = event_data.get("email")
-    unisender_msg_id = event_data.get("email_id")
-    metadata = event_data.get("metadata") or {}
+    # If the payload is from UniOne/Unisender Go, it nests fields under "event_data"
+    details = event.get("event_data") if isinstance(event.get("event_data"), dict) else event
+    
+    event_type = event.get("event_name") or event.get("event") or details.get("status")
+    email_addr = details.get("email") or details.get("to")
+    unisender_msg_id = details.get("job_id") or details.get("email_id")
+    metadata = details.get("metadata") or {}
+    
+    # If metadata is string (some APIs encode metadata as JSON string), try to parse it
+    if isinstance(metadata, str):
+        try:
+            import json
+            metadata = json.loads(metadata)
+        except Exception:
+            metadata = {}
+            
     scheduled_email_id = metadata.get("scheduled_email_id")
 
     logger.info(
@@ -49,6 +61,9 @@ def _process_single_event(db: Session, event_data: dict[str, Any]) -> None:
     # events: delivered, opened, clicked, soft_bounced, hard_bounced, spam, unsubscribed
     normalized_status = "none"
     event_str = str(event_type).lower().strip()
+    
+    if event_str == "transactional_email_status":
+        event_str = str(details.get("status") or "").lower().strip()
 
     if event_str == "delivered":
         normalized_status = "delivered"
@@ -56,7 +71,7 @@ def _process_single_event(db: Session, event_data: dict[str, Any]) -> None:
         normalized_status = "opened"
     elif event_str in ("soft_bounced", "hard_bounced", "bounced"):
         normalized_status = "bounce"
-    elif event_str in ("spam", "spam_complaint"):
+    elif event_str in ("spam", "spam_complaint", "spam_block", "transactional_spam_block"):
         normalized_status = "spam"
     elif event_str == "unsubscribed":
         normalized_status = "unsubscribed"
@@ -96,8 +111,11 @@ async def unisender_webhook(
     if isinstance(payload, list):
         events = payload
     elif isinstance(payload, dict):
-        # Unisender Go webhook can sometimes wrap the event inside a "data" envelope
-        if "data" in payload and isinstance(payload["data"], dict):
+        if "events" in payload and isinstance(payload["events"], list):
+            events = payload["events"]
+        elif "data" in payload and isinstance(payload["data"], list):
+            events = payload["data"]
+        elif "data" in payload and isinstance(payload["data"], dict):
             # inject event name from top level if needed
             single_event = payload["data"]
             if "event" not in single_event and "event" in payload:
