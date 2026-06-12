@@ -111,7 +111,11 @@ async def unisender_webhook(
     if isinstance(payload, list):
         events = payload
     elif isinstance(payload, dict):
-        if "events" in payload and isinstance(payload["events"], list):
+        if "events_by_user" in payload and isinstance(payload["events_by_user"], list):
+            for user_events in payload["events_by_user"]:
+                if isinstance(user_events, dict) and "events" in user_events and isinstance(user_events["events"], list):
+                    events.extend(user_events["events"])
+        elif "events" in payload and isinstance(payload["events"], list):
             events = payload["events"]
         elif "data" in payload and isinstance(payload["data"], list):
             events = payload["data"]

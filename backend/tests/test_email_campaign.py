@@ -180,6 +180,44 @@ class EmailCampaignTests(unittest.TestCase):
         self.assertEqual(scheduled_email.delivery_status, "delivered")
         db_mock.add.assert_called_with(scheduled_email)
 
+    @patch("app.api.routes.unisender_webhook._process_single_event")
+    def test_unisender_webhook_full_payload(self, mock_process) -> None:
+        from app.api.routes.unisender_webhook import unisender_webhook
+        import asyncio
+
+        # Mock FastAPI request
+        request = MagicMock()
+        async def json_func():
+            return {
+                "auth": "auth_key",
+                "events_by_user": [
+                    {
+                        "user_id": 456,
+                        "events": [
+                            {
+                                "event_name": "transactional_email_status",
+                                "event_data": {
+                                    "job_id": "1a3Q2V-0000OZ-S0",
+                                    "email": "recipient@example.com",
+                                    "status": "delivered"
+                                }
+                            }
+                        ]
+                    }
+                ]
+            }
+        request.json = json_func
+
+        db_mock = MagicMock()
+
+        response = asyncio.run(unisender_webhook(request, db_mock))
+
+        self.assertEqual(response.status_code, 200)
+        mock_process.assert_called_once()
+        args, kwargs = mock_process.call_args
+        self.assertEqual(args[1]["event_name"], "transactional_email_status")
+        self.assertEqual(args[1]["event_data"]["job_id"], "1a3Q2V-0000OZ-S0")
+
 
 if __name__ == "__main__":
     unittest.main()
