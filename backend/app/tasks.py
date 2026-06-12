@@ -13,3 +13,13 @@ settings = get_settings()
 )
 def process_menu_import_job_task(job_id: str) -> None:
     process_menu_import_job(job_id)
+
+
+@celery_app.task(name="email_campaign.send_scheduled_email")
+def send_scheduled_email_task(scheduled_email_id: str) -> None:
+    from app.db.session import SessionLocal
+    from app.services.email_campaign import email_campaign_service
+    
+    with SessionLocal() as db:
+        email_campaign_service.send_scheduled_email(db, scheduled_email_id)
+

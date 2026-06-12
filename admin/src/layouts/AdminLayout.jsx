@@ -8,6 +8,7 @@ import {
   FileText,
   Home,
   LogOut,
+  Mail,
   MenuSquare,
   Shield,
   UploadCloud,
@@ -30,6 +31,7 @@ const navItems = [
   { to: '/analytics', label: 'Аналитика', icon: BarChart3 },
   { to: '/events', label: 'Product events', icon: Activity },
   { to: '/billing', label: 'Биллинг', icon: WalletCards },
+  { to: '/email-campaigns', label: 'Рассылки', icon: Mail },
   { to: '/promo-pages', label: 'Промо-страницы', icon: FileText },
   { to: '/system', label: 'Система', icon: DatabaseZap },
 ];

@@ -91,6 +91,15 @@ class Settings(BaseSettings):
     media_storage_region: str = "ru-central1"
     media_storage_public_base_url: str | None = None
 
+    # Unisender settings
+    unisender_api_key: str | None = None
+    unisender_go_api_url: str = "https://goapi.unisender.ru/ru/transactional/api/v1/"
+    unisender_classic_api_url: str = "https://api.unisender.com/ru/api/"
+    unisender_sender_email: str | None = None
+    unisender_sender_name: str | None = None
+    unisender_service_type: str = "go"  # "go" or "classic"
+    unisender_classic_list_id: int | None = None
+
 
 @lru_cache(maxsize=1)
 def get_settings() -> Settings:

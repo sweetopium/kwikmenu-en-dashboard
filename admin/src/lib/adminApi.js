@@ -167,5 +167,32 @@ export const convertHtmlToJson = (html) => adminFetch('/promo-pages/convert-html
   body: JSON.stringify({ html }),
 });
 
+// Email Campaigns
+export const fetchCampaignSteps = () => adminFetch('/email-campaigns/steps');
+export const createCampaignStep = (payload) => adminFetch('/email-campaigns/steps', {
+  method: 'POST',
+  body: JSON.stringify(payload),
+});
+export const updateCampaignStep = (id, payload) => adminFetch('/email-campaigns/steps/' + id, {
+  method: 'PUT',
+  body: JSON.stringify(payload),
+});
+export const deleteCampaignStep = (id) => adminFetch('/email-campaigns/steps/' + id, {
+  method: 'DELETE',
+});
+export const fetchCampaignLogs = (q = '', status = '', offset = 0, limit = 50) => {
+  let queryParams = `?offset=${offset}&limit=${limit}`;
+  if (q) queryParams += `&q=${encodeURIComponent(q)}`;
+  if (status) queryParams += `&status=${encodeURIComponent(status)}`;
+  return adminFetch(`/email-campaigns/logs${queryParams}`);
+};
+export const sendCampaignEmailNow = (id) => adminFetch(`/email-campaigns/logs/${id}/send-now`, {
+  method: 'POST',
+});
+export const cancelCampaignEmail = (id) => adminFetch(`/email-campaigns/logs/${id}/cancel`, {
+  method: 'POST',
+});
+
+
 
 

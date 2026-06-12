@@ -6,6 +6,7 @@ from app.models.menu import Menu
 from app.models.menu_import import MenuImportJob, MenuImportSource
 from app.models.venue import Venue, VenueSettings
 from app.models.promo_page import PromoPage
+from app.models.email_campaign import EmailCampaignStep, ScheduledEmail
 
 __all__ = [
     "PublicMenuEvent",
@@ -24,4 +25,7 @@ __all__ = [
     "Venue",
     "VenueSettings",
     "PromoPage",
+    "EmailCampaignStep",
+    "ScheduledEmail",
 ]
+

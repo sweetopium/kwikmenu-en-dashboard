@@ -33,8 +33,11 @@ def create_user(db: Session, *, name: str, email: str, password: str) -> User:
     db.add(user)
     db.flush()
     from app.services.billing import ensure_default_subscription
-
     ensure_default_subscription(db, user)
+    
+    from app.services.email_campaign import email_campaign_service
+    email_campaign_service.schedule_campaign_for_user(db, user)
+    
     return user
 
 
@@ -52,8 +55,11 @@ def create_oauth_user(db: Session, *, name: str, email: str) -> User:
     db.add(user)
     db.flush()
     from app.services.billing import ensure_default_subscription
-
     ensure_default_subscription(db, user)
+    
+    from app.services.email_campaign import email_campaign_service
+    email_campaign_service.schedule_campaign_for_user(db, user)
+    
     return user
 
 

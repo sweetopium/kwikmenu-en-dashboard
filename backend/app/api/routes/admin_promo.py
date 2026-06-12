@@ -18,6 +18,7 @@ def trigger_promo_revalidation(slug: str | None = None) -> None:
     settings = get_settings()
     token = settings.n8n_webhook_token
     if not token:
+        print("[REVALIDATION] Skipped: N8N_WEBHOOK_TOKEN is not set in backend/.env", flush=True)
         logging.getLogger(__name__).info("Revalidation skipped: N8N_WEBHOOK_TOKEN is not set")
         return
 
@@ -27,6 +28,7 @@ def trigger_promo_revalidation(slug: str | None = None) -> None:
         params["slug"] = slug
 
     url = f"{base_url}?{urllib.parse.urlencode(params)}"
+    print(f"[REVALIDATION] Sending GET request for slug: {slug}", flush=True)
     logging.getLogger(__name__).info("Sending revalidation request for slug: %s", slug)
 
     try:
@@ -38,8 +40,10 @@ def trigger_promo_revalidation(slug: str | None = None) -> None:
         with urllib.request.urlopen(req, timeout=5) as response:
             status_code = response.getcode()
             body = response.read().decode("utf-8")
+            print(f"[REVALIDATION] Completed successfully code={status_code} body={body}", flush=True)
             logging.getLogger(__name__).info("Revalidation response code=%s body=%r", status_code, body)
     except Exception as exc:
+        print(f"[REVALIDATION] Failed: {exc}", flush=True)
         logging.getLogger(__name__).warning("Promo page revalidation failed: %s", exc)
 
 

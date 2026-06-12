@@ -185,6 +185,10 @@ def activate_virtual_client(
         user.name = payload.name.strip()
     
     db.add(user)
+    
+    from app.services.email_campaign import email_campaign_service
+    email_campaign_service.schedule_campaign_for_user(db, user)
+
     db.commit()
     db.refresh(user)
     

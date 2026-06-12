@@ -16,6 +16,8 @@ from app.api.routes.menu_imports import router as menu_imports_router
 from app.api.routes.menu_normalizations import router as menu_normalizations_router
 from app.api.routes.public import router as public_router
 from app.api.routes.venues import router as venues_router
+from app.api.routes.admin_email_campaigns import router as admin_email_campaigns_router
+from app.api.routes.unisender_webhook import router as unisender_webhook_router
 from app.core.config import get_settings
 from app.core.paths import DATA_ROOT, UPLOADS_ROOT
 
@@ -68,6 +70,8 @@ def create_app() -> FastAPI:
     app.include_router(menu_normalizations_router)
     app.include_router(public_router)
     app.include_router(venues_router)
+    app.include_router(admin_email_campaigns_router)
+    app.include_router(unisender_webhook_router)
     return app
 
 

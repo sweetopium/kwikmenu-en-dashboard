@@ -16,6 +16,7 @@ import UsersPage from '../pages/UsersPage';
 import VenueDetailPage from '../pages/VenueDetailPage';
 import VenuesPage from '../pages/VenuesPage';
 import PromoPagesPage from '../pages/PromoPagesPage';
+import EmailCampaignsPage from '../pages/EmailCampaignsPage';
 import { getStoredAdminKey } from '../lib/adminApi';
 
 const YandexMetrikaTracker = () => {
@@ -58,6 +59,7 @@ const App = () => (
         <Route path="/billing" element={<BillingPage />} />
         <Route path="/system" element={<SystemPage />} />
         <Route path="/promo-pages" element={<PromoPagesPage />} />
+        <Route path="/email-campaigns" element={<EmailCampaignsPage />} />
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
