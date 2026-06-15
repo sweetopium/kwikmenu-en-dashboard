@@ -1,7 +1,6 @@
 import {useState} from "react";
 import {Link, useNavigate} from "react-router-dom";
 import {Loader2} from "lucide-react";
-import {FcGoogle} from "react-icons/fc";
 import {FaYandex} from "react-icons/fa6";
 import {SiMaildotru} from "react-icons/si";
 import {useTranslation} from "react-i18next";
@@ -111,8 +110,7 @@ const RegisterPage = () => {
       subtitle={t('register.subtitle')}
     >
       <div className="space-y-6 sm:space-y-8">
-        <div className="grid grid-cols-3 gap-3 sm:grid-cols-3">
-          <SocialProviderButton icon={FcGoogle} label="Google" onClick={() => handleProviderClick("google")}/>
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-2">
           <SocialProviderButton icon={FaYandex} label="Yandex" iconClassName="text-[#fc3f1d]" onClick={() => handleProviderClick("yandex")}/>
           <SocialProviderButton icon={SiMaildotru} label="Mail.ru" iconClassName="text-[#005ff9]" onClick={() => handleProviderClick("mailru")}/>
         </div>
