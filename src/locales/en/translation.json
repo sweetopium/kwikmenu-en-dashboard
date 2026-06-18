@@ -667,7 +667,14 @@
       "title": "Stripe",
       "description": "Card payments and recurring subscriptions are processed securely by Stripe.",
       "subscriptionId": "Stripe subscription ID",
-      "notLinked": "Not linked yet"
+      "notLinked": "Not linked yet",
+      "checkoutError": "Could not start Stripe checkout. Please try again later.",
+      "activateTitle": "Activate your current plan",
+      "activateDescription": "Add a payment method now. Your card will be used when the trial ends.",
+      "activateButton": "Add payment method",
+      "activating": "Opening checkout...",
+      "linkedTitle": "Payment method linked",
+      "linkedDescription": "Stripe will handle recurring billing for this subscription."
     },
     "history": {
       "title": "Payment History",
@@ -710,6 +717,8 @@
     "title": "Subscription",
     "description": "Select a plan that will apply to your entire account and all your venues.",
     "planCurrent": "Current",
+    "planCurrentTrial": "Current trial",
+    "planActivate": "Activate plan",
     "planSelected": "Selected",
     "planSelect": "Choose plan",
     "recommended": "Recommended",
@@ -723,6 +732,7 @@
       "selectedPlan": "Selected plan",
       "btnProceeding": "Proceeding to payment...",
       "btnProceed": "Proceed to payment",
+      "btnActivateCurrent": "Add payment method",
       "btnActive": "Current plan active",
       "agreeOffer": "I agree to the terms of the",
       "agreeOfferLink": "public offer",

@@ -76,6 +76,7 @@ class StripeBillingClient:
         customer_id: str | None,
         client_reference_id: str,
         metadata: dict[str, str],
+        trial_end: int | None = None,
     ) -> StripeCheckoutSessionResult:
         data: list[tuple[str, str | int | bool]] = [
             ("mode", "subscription"),
@@ -94,6 +95,8 @@ class StripeBillingClient:
         for key, value in metadata.items():
             data.append((f"metadata[{key}]", value))
             data.append((f"subscription_data[metadata][{key}]", value))
+        if trial_end:
+            data.append(("subscription_data[trial_end]", trial_end))
 
         payload = self._request("POST", "/checkout/sessions", data=data)
         session_id = str(payload.get("id") or "")

@@ -296,6 +296,13 @@ def create_checkout(
             "planCode": plan.code,
             "transactionId": transaction.id,
         },
+        trial_end=(
+            int(subscription.trial_ends_at.timestamp())
+            if subscription.status == "trialing"
+            and subscription.trial_ends_at is not None
+            and subscription.trial_ends_at > datetime.now(timezone.utc)
+            else None
+        ),
     )
     transaction.stripe_checkout_session_id = result.session_id
     transaction.checkout_url = result.url

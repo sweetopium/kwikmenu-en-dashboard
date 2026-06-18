@@ -68,9 +68,14 @@ const SubscriptionPlansPage = () => {
     [data, selectedPlanId]
   );
 
+  const needsPaymentActivation = useMemo(
+    () => Boolean(data?.subscription) && data.subscription.status === 'trialing' && !data.subscription.stripeSubscriptionId,
+    [data]
+  );
+
   const canPurchaseSelectedPlan = useMemo(
-    () => Boolean(selectedPlan) && (!isCurrentSelected || Boolean(data?.subscription?.cancelAtPeriodEnd)),
-    [data, isCurrentSelected, selectedPlan]
+    () => Boolean(selectedPlan) && (!isCurrentSelected || needsPaymentActivation || Boolean(data?.subscription?.cancelAtPeriodEnd)),
+    [data, isCurrentSelected, needsPaymentActivation, selectedPlan]
   );
 
   const handleSelectPlan = (planId) => {
@@ -127,6 +132,7 @@ const SubscriptionPlansPage = () => {
         {(data?.plans || []).map((plan) => {
           const isSelected = selectedPlanId === plan.id;
           const isCurrent = data?.subscription?.plan?.id === plan.id;
+          const isCurrentTrialWithoutPayment = isCurrent && needsPaymentActivation;
           const isFeatured = plan.code === 'pro';
 
           return (
@@ -158,7 +164,9 @@ const SubscriptionPlansPage = () => {
                   </div>
                   {isCurrent ? (
                     <div className="rounded-full bg-brand-purple/20 border border-brand-purple/30 px-2.5 py-0.5 text-[9px] sm:text-[10px] font-black uppercase tracking-wide text-brand-purple">
-                      {t('subscription.planCurrent', 'Current')}
+                      {isCurrentTrialWithoutPayment
+                        ? t('subscription.planCurrentTrial', 'Current trial')
+                        : t('subscription.planCurrent', 'Current')}
                     </div>
                   ) : null}
                 </div>
@@ -191,7 +199,11 @@ const SubscriptionPlansPage = () => {
                       : 'border-border/60 bg-background hover:bg-secondary text-foreground'
                 }`}
               >
-                {isSelected ? t('subscription.planSelected', 'Selected') : t('subscription.planSelect', 'Select plan')}
+                {isSelected && isCurrentTrialWithoutPayment
+                  ? t('subscription.planActivate', 'Activate plan')
+                  : isSelected
+                    ? t('subscription.planSelected', 'Selected')
+                    : t('subscription.planSelect', 'Select plan')}
               </button>
             </article>
           );
@@ -305,6 +317,8 @@ const SubscriptionPlansPage = () => {
                     <Lock size={16} className="mr-2" />
                     {isCurrentSelected && data?.subscription?.cancelAtPeriodEnd
                       ? 'Restart subscription'
+                      : isCurrentSelected && needsPaymentActivation
+                        ? t('subscription.checkout.btnActivateCurrent', 'Add payment method')
                       : t('subscription.checkout.btnProceed', 'Proceed to payment')}
                     <ArrowRight size={16} className="ml-2" />
                   </>

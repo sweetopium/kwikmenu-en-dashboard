@@ -5,8 +5,8 @@ import { Link } from 'react-router-dom';
 
 import { Button } from "../components/ui/button";
 import SettingsPageHeader from "../components/settings/SettingsPageHeader";
-import { cancelBillingSubscription, fetchBillingSummary, syncBillingTransaction } from "../lib/billingApi";
-import { secondaryActionButtonClasses } from "../lib/uiStyles";
+import { cancelBillingSubscription, createBillingCheckout, fetchBillingSummary, syncBillingTransaction } from "../lib/billingApi";
+import { primaryActionButtonClasses } from "../lib/uiStyles";
 
 const formatDate = (value, lng = 'en') => {
   if (!value) {
@@ -27,6 +27,7 @@ const BillingPage = () => {
   const [data, setData] = useState(null);
   const [error, setError] = useState('');
   const [isCancelling, setIsCancelling] = useState(false);
+  const [isActivatingPayment, setIsActivatingPayment] = useState(false);
   const [syncingId, setSyncingId] = useState('');
 
   const load = () => {
@@ -70,6 +71,27 @@ const BillingPage = () => {
   const subscription = data?.subscription;
   const usage = data?.usage;
   const canRestartSubscription = Boolean(subscription?.cancelAtPeriodEnd);
+  const needsPaymentActivation = Boolean(subscription) && subscription.status === 'trialing' && !subscription.stripeSubscriptionId;
+
+  const handleActivateCurrentPlan = async () => {
+    if (!subscription?.plan?.code) {
+      return;
+    }
+    setIsActivatingPayment(true);
+    setError('');
+    try {
+      const result = await createBillingCheckout(subscription.plan.code);
+      if (result.redirectUrl) {
+        window.location.assign(result.redirectUrl);
+        return;
+      }
+      setError(t('billing.stripe.checkoutError', 'Could not start Stripe checkout. Please try again later.'));
+    } catch (nextError) {
+      setError(nextError.message);
+    } finally {
+      setIsActivatingPayment(false);
+    }
+  };
 
   return (
     <div className="mx-auto space-y-6 sm:space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700 ease-out">
@@ -144,6 +166,12 @@ const BillingPage = () => {
                     Restart subscription
                   </Button>
                 </Link>
+              ) : needsPaymentActivation ? (
+                <Link to="/dashboard/subscription" className="sm:flex-1">
+                  <Button className="w-full p-3 sm:h-12 rounded-lg font-bold">
+                    Change plan
+                  </Button>
+                </Link>
               ) : (
                 <Button
                   variant="destructive"
@@ -174,6 +202,33 @@ const BillingPage = () => {
               <p className="text-sm font-semibold text-foreground">{t('billing.stripe.subscriptionId', 'Stripe subscription ID')}</p>
               <p className="text-sm text-muted-foreground mt-1">{subscription?.stripeSubscriptionId || t('billing.stripe.notLinked', 'Not linked yet')}</p>
             </div>
+
+            {needsPaymentActivation ? (
+              <div className="rounded-2xl border border-brand-purple/15 bg-brand-purple/5 px-4 py-4 space-y-4">
+                <div>
+                  <p className="text-sm font-bold text-foreground">{t('billing.stripe.activateTitle', 'Activate your current plan')}</p>
+                  <p className="mt-1 text-sm text-muted-foreground">
+                    {t('billing.stripe.activateDescription', 'Add a payment method now. Your card will be used when the trial ends.')}
+                  </p>
+                </div>
+                <Button
+                  className={`${primaryActionButtonClasses} w-full h-11 rounded-lg`}
+                  onClick={handleActivateCurrentPlan}
+                  disabled={isActivatingPayment}
+                >
+                  {isActivatingPayment
+                    ? t('billing.stripe.activating', 'Opening checkout...')
+                    : t('billing.stripe.activateButton', 'Add payment method')}
+                </Button>
+              </div>
+            ) : subscription?.stripeSubscriptionId ? (
+              <div className="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-4">
+                <p className="text-sm font-bold text-emerald-700">{t('billing.stripe.linkedTitle', 'Payment method linked')}</p>
+                <p className="mt-1 text-sm text-emerald-700/80">
+                  {t('billing.stripe.linkedDescription', 'Stripe will handle recurring billing for this subscription.')}
+                </p>
+              </div>
+            ) : null}
           </section>
 
           <section className="bg-card border border-border/60 rounded-3xl shadow-sm p-6 sm:p-8 space-y-5">
