@@ -60,7 +60,6 @@ x-backend-env: &backend-env
 services:
   postgres:
     image: postgres:16-alpine
-    container_name: kwikmenu-en-postgres-${COOLIFY_RESOURCE_UUID:-local}
     restart: unless-stopped
     environment:
       POSTGRES_DB: ${POSTGRES_DB:-kwikmenu}
@@ -81,7 +80,6 @@ services:
 
   redis:
     image: redis:7-alpine
-    container_name: kwikmenu-en-redis-${COOLIFY_RESOURCE_UUID:-local}
     restart: unless-stopped
     command: redis-server --appendonly yes
     volumes:
