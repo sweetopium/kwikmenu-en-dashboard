@@ -156,11 +156,28 @@ def _sync_transaction_record(
     current_user: User,
     db: Session,
 ) -> BillingSyncResponse:
-    subscription = ensure_default_subscription(db, current_user)
-    unitpay = UnitPayClient()
-    if not transaction.unitpay_payment_id:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Payment does not contain a UnitPay ID.")
+    if transaction.stripe_checkout_session_id:
+        stripe = StripeBillingClient()
+        session_payload = stripe.retrieve_checkout_session(transaction.stripe_checkout_session_id)
+        subscription = _apply_stripe_checkout_session(db=db, session_payload=session_payload, transaction=transaction)
+        log_billing_event(
+            db,
+            source="api",
+            event_type="stripe_checkout_synced",
+            user_id=current_user.id,
+            subscription_id=subscription.id,
+            payment_id=transaction.id,
+            payload={"stripeCheckoutSessionId": transaction.stripe_checkout_session_id},
+        )
+        db.commit()
+        db.refresh(subscription)
+        return BillingSyncResponse(subscription=build_subscription_response(subscription), syncedAt=datetime.now(timezone.utc))
 
+    subscription = ensure_default_subscription(db, current_user)
+    if not transaction.unitpay_payment_id:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Payment cannot be synchronized because it has no external provider ID.")
+
+    unitpay = UnitPayClient()
     payment_payload = unitpay.get_payment(payment_id=transaction.unitpay_payment_id)
     payment_result = payment_payload.get("result") or {}
     remote_status = str(payment_result.get("status") or "wait")

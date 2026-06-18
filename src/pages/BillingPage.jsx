@@ -183,7 +183,7 @@ const BillingPage = () => {
               </div>
               <div>
                 <h2 className="text-lg font-bold text-foreground">{t('billing.history.title', 'Payment History')}</h2>
-                <p className="text-sm text-muted-foreground">{t('billing.history.description', 'Recent transactions and manual status synchronization.')}</p>
+                <p className="text-sm text-muted-foreground">{t('billing.history.description', 'Recent Stripe transactions and checkout status.')}</p>
               </div>
             </div>
 
@@ -198,14 +198,14 @@ const BillingPage = () => {
                       </p>
                       <p className="text-xs text-muted-foreground mt-1">{formatAmount(transaction.amount, transaction.currency, lng)}</p>
                     </div>
-                    {transaction.status === 'pending' ? (
+                    {transaction.status === 'pending' && (transaction.stripeCheckoutSessionId || transaction.unitpayPaymentId) ? (
                       <Button
                         variant="outline"
                         className="h-9 rounded-lg"
                         onClick={() => handleSync(transaction.id)}
                         disabled={syncingId === transaction.id}
                       >
-                        {syncingId === transaction.id ? t('billing.history.syncing', 'Syncing...') : t('billing.history.sync', 'Synchronize')}
+                        {syncingId === transaction.id ? t('billing.history.syncing', 'Refreshing...') : t('billing.history.sync', 'Refresh status')}
                       </Button>
                     ) : null}
                   </div>

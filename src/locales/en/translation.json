@@ -671,9 +671,9 @@
     },
     "history": {
       "title": "Payment History",
-      "description": "Recent transactions and manual status synchronization.",
-      "syncing": "Syncing...",
-      "sync": "Synchronize",
+      "description": "Recent Stripe transactions and checkout status.",
+      "syncing": "Refreshing...",
+      "sync": "Refresh status",
       "empty": "Payment history is empty."
     },
     "transactionStatus": {
