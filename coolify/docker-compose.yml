@@ -1,11 +1,8 @@
 x-backend-env: &backend-env
   APP_ENV: production
-  COOLIFY_RESOURCE_UUID: ${COOLIFY_RESOURCE_UUID:-local}
-  KWIKMENU_POSTGRES_HOST: kwikmenu-en-postgres-${COOLIFY_RESOURCE_UUID:-local}
-  KWIKMENU_REDIS_HOST: kwikmenu-en-redis-${COOLIFY_RESOURCE_UUID:-local}
-  DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-kwikmenu}:${POSTGRES_PASSWORD:-change-me-strong-password}@kwikmenu-en-postgres-${COOLIFY_RESOURCE_UUID:-local}:5432/${POSTGRES_DB:-kwikmenu}
-  CELERY_BROKER_URL: redis://kwikmenu-en-redis-${COOLIFY_RESOURCE_UUID:-local}:6379/0
-  CELERY_RESULT_BACKEND: redis://kwikmenu-en-redis-${COOLIFY_RESOURCE_UUID:-local}:6379/1
+  DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-kwikmenu}:${POSTGRES_PASSWORD:-change-me-strong-password}@postgres:5432/${POSTGRES_DB:-kwikmenu}
+  CELERY_BROKER_URL: redis://redis:6379/0
+  CELERY_RESULT_BACKEND: redis://redis:6379/1
   AUTH_SESSION_COOKIE_NAME: ${AUTH_SESSION_COOKIE_NAME:-kwikmenu_session}
   AUTH_SESSION_TTL_HOURS: ${AUTH_SESSION_TTL_HOURS:-720}
   AUTH_COOKIE_SECURE: "true"
@@ -71,7 +68,6 @@ services:
       default:
         aliases:
           - postgres
-          - kwikmenu-en-postgres-${COOLIFY_RESOURCE_UUID:-local}
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-kwikmenu} -d ${POSTGRES_DB:-kwikmenu}"]
       interval: 10s
@@ -88,7 +84,6 @@ services:
       default:
         aliases:
           - redis
-          - kwikmenu-en-redis-${COOLIFY_RESOURCE_UUID:-local}
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 10s
@@ -107,6 +102,9 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
+    links:
+      - postgres:postgres
+      - redis:redis
     volumes:
       - backend_data:/app/.data
     expose:
@@ -131,6 +129,9 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
+    links:
+      - postgres:postgres
+      - redis:redis
     volumes:
       - backend_data:/app/.data
 
