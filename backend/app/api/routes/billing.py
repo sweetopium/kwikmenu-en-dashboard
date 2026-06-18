@@ -15,8 +15,10 @@ from app.schemas.billing import (
     BillingSyncResponse,
     BillingTestSubscriptionChargeRequest,
 )
+from app.core.config import get_settings
 from app.services.billing import (
     apply_successful_payment,
+    apply_stripe_subscription_state,
     build_plan_response,
     build_subscription_receipt_items,
     build_subscription_response,
@@ -27,6 +29,7 @@ from app.services.billing import (
     log_billing_event,
     mark_payment_failed,
 )
+from app.services.stripe_billing import StripeBillingClient
 from app.services.unitpay import UnitPayClient
 
 
@@ -68,6 +71,83 @@ def _get_transaction_for_user_by_unitpay_id(
         )
         .first()
     )
+
+
+def _get_plan_by_stripe_price_id(db: Session, price_id: str | None) -> SubscriptionPlan | None:
+    if not price_id:
+        return None
+    return db.query(SubscriptionPlan).filter(SubscriptionPlan.stripe_price_id == price_id).first()
+
+
+def _extract_stripe_price_id(subscription_payload: dict) -> str | None:
+    items = (subscription_payload.get("items") or {}).get("data") or []
+    if not items:
+        return None
+    price = (items[0] or {}).get("price") or {}
+    price_id = price.get("id")
+    return str(price_id) if price_id else None
+
+
+def _stripe_checkout_urls() -> tuple[str, str]:
+    settings = get_settings()
+    frontend_origin = settings.menu_import_frontend_origin.rstrip("/")
+    success_url = settings.stripe_checkout_success_url or f"{frontend_origin}/dashboard/billing/success?session_id={{CHECKOUT_SESSION_ID}}"
+    cancel_url = settings.stripe_checkout_cancel_url or f"{frontend_origin}/dashboard/billing/fail"
+    return success_url, cancel_url
+
+
+def _apply_stripe_checkout_session(
+    *,
+    db: Session,
+    session_payload: dict,
+    transaction: PaymentTransaction | None = None,
+) -> UserSubscription:
+    session_id = str(session_payload.get("id") or "")
+    subscription_payload = session_payload.get("subscription")
+    stripe = StripeBillingClient()
+    if isinstance(subscription_payload, str):
+        subscription_payload = stripe.retrieve_subscription(subscription_payload)
+    if not isinstance(subscription_payload, dict):
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Stripe subscription is missing.")
+
+    metadata = session_payload.get("metadata") or subscription_payload.get("metadata") or {}
+    subscription_id = metadata.get("subscriptionId")
+    user_id = metadata.get("userId") or session_payload.get("client_reference_id")
+    plan_code = metadata.get("planCode")
+    price_id = _extract_stripe_price_id(subscription_payload)
+
+    subscription = None
+    if subscription_id:
+        subscription = db.query(UserSubscription).filter(UserSubscription.id == str(subscription_id)).first()
+    if subscription is None and user_id:
+        subscription = db.query(UserSubscription).filter(UserSubscription.user_id == str(user_id)).first()
+    if subscription is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Subscription target not found.")
+
+    plan = _get_plan_by_stripe_price_id(db, price_id)
+    if plan is None and plan_code:
+        plan = db.query(SubscriptionPlan).filter(SubscriptionPlan.code == str(plan_code)).first()
+    if plan is None:
+        plan = subscription.plan
+
+    if transaction is None and session_id:
+        transaction = db.query(PaymentTransaction).filter(PaymentTransaction.stripe_checkout_session_id == session_id).first()
+    if transaction is not None:
+        transaction.raw_response = session_payload
+        transaction.stripe_checkout_session_id = session_id or transaction.stripe_checkout_session_id
+        transaction.stripe_invoice_id = str(session_payload.get("invoice") or "") or transaction.stripe_invoice_id
+        transaction.stripe_payment_intent_id = str(session_payload.get("payment_intent") or "") or transaction.stripe_payment_intent_id
+
+    apply_stripe_subscription_state(
+        subscription,
+        plan,
+        stripe_subscription=subscription_payload,
+        transaction=transaction,
+    )
+    db.add(subscription)
+    if transaction is not None:
+        db.add(transaction)
+    return subscription
 
 
 def _sync_transaction_record(
@@ -158,52 +238,52 @@ def create_checkout(
         .first()
     )
     if plan is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Тариф не найден.")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Plan not found.")
+    if not plan.stripe_price_id:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Stripe price is not configured for this plan.")
 
-    unitpay = UnitPayClient()
+    stripe = StripeBillingClient()
+    success_url, cancel_url = _stripe_checkout_urls()
     description = f"KwikMenu {plan.name} subscription"
     amount = float(plan.price_amount)
-    receipt_items = build_subscription_receipt_items(
-        name=description,
-        amount=plan.price_amount,
-        currency=plan.currency,
-    )
-    result = unitpay.init_subscription_payment(
-        account=current_user.id,
-        sum_amount=amount,
-        description=description,
-        customer_email=current_user.email,
-        customer_phone=current_user.phone,
-        receipt_items=receipt_items,
-        subscription=True,
-    )
-
     transaction = PaymentTransaction(
         user_id=current_user.id,
         subscription_id=subscription.id,
         plan_id=plan.id,
         kind="initial",
         status="pending",
-        unitpay_payment_id=result.payment_id,
         amount=amount,
         currency=plan.currency,
         description=description,
-        checkout_url=result.redirect_url,
-        receipt_url=result.receipt_url,
-        status_url=result.status_url,
-        is_test=unitpay.settings.unitpay_test_mode,
+        is_test=stripe.secret_key.startswith("sk_test_") if stripe.secret_key else False,
         raw_request={
-            "account": current_user.id,
             "description": description,
             "planCode": plan.code,
-            "subscription": True,
+            "stripePriceId": plan.stripe_price_id,
             "customerEmail": current_user.email,
-            "receiptItems": receipt_items,
         },
-        raw_response=result.payload,
     )
     db.add(transaction)
     db.flush()
+
+    result = stripe.create_checkout_session(
+        price_id=plan.stripe_price_id,
+        success_url=success_url,
+        cancel_url=cancel_url,
+        customer_email=current_user.email,
+        customer_id=subscription.stripe_customer_id,
+        client_reference_id=current_user.id,
+        metadata={
+            "userId": current_user.id,
+            "subscriptionId": subscription.id,
+            "planCode": plan.code,
+            "transactionId": transaction.id,
+        },
+    )
+    transaction.stripe_checkout_session_id = result.session_id
+    transaction.checkout_url = result.url
+    transaction.raw_response = result.payload
+
     log_billing_event(
         db,
         source="api",
@@ -211,13 +291,13 @@ def create_checkout(
         user_id=current_user.id,
         subscription_id=subscription.id,
         payment_id=transaction.id,
-        payload={"planCode": plan.code, "unitpayPaymentId": transaction.unitpay_payment_id},
+        payload={"planCode": plan.code, "stripeCheckoutSessionId": transaction.stripe_checkout_session_id},
     )
     db.commit()
     db.refresh(transaction)
     return BillingCheckoutResponse(
         transaction=build_transaction_response(transaction),
-        redirectUrl=result.redirect_url,
+        redirectUrl=result.url,
     )
 
 
@@ -317,8 +397,12 @@ def cancel_subscription(
     db: Session = Depends(get_db),
 ) -> BillingSubscriptionResponse:
     subscription = ensure_default_subscription(db, current_user)
+    if subscription.stripe_subscription_id:
+        stripe = StripeBillingClient()
+        if stripe.enabled:
+            stripe.cancel_subscription(subscription.stripe_subscription_id)
     unitpay = UnitPayClient()
-    if subscription.unitpay_subscription_id and unitpay.enabled:
+    if not subscription.stripe_subscription_id and subscription.unitpay_subscription_id and unitpay.enabled:
         unitpay.close_subscription(subscription_id=subscription.unitpay_subscription_id)
 
     subscription.cancel_at_period_end = True
@@ -332,7 +416,10 @@ def cancel_subscription(
         event_type="subscription_canceled",
         user_id=current_user.id,
         subscription_id=subscription.id,
-        payload={"unitpaySubscriptionId": subscription.unitpay_subscription_id},
+        payload={
+            "stripeSubscriptionId": subscription.stripe_subscription_id,
+            "unitpaySubscriptionId": subscription.unitpay_subscription_id,
+        },
     )
     db.add(subscription)
     db.commit()
@@ -362,6 +449,94 @@ def sync_transaction_by_unitpay_payment_id(
     if transaction is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Платеж не найден.")
     return _sync_transaction_record(transaction=transaction, current_user=current_user, db=db)
+
+
+@router.post("/transactions/stripe/session/{session_id}/sync", response_model=BillingSyncResponse)
+def sync_transaction_by_stripe_session_id(
+    session_id: str,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+) -> BillingSyncResponse:
+    transaction = (
+        db.query(PaymentTransaction)
+        .filter(
+            PaymentTransaction.stripe_checkout_session_id == session_id,
+            PaymentTransaction.user_id == current_user.id,
+        )
+        .first()
+    )
+    if transaction is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Payment not found.")
+
+    stripe = StripeBillingClient()
+    session_payload = stripe.retrieve_checkout_session(session_id)
+    subscription = _apply_stripe_checkout_session(db=db, session_payload=session_payload, transaction=transaction)
+    log_billing_event(
+        db,
+        source="api",
+        event_type="stripe_checkout_synced",
+        user_id=current_user.id,
+        subscription_id=subscription.id,
+        payment_id=transaction.id,
+        payload={"stripeCheckoutSessionId": session_id},
+    )
+    db.commit()
+    db.refresh(subscription)
+    return BillingSyncResponse(subscription=build_subscription_response(subscription), syncedAt=datetime.now(timezone.utc))
+
+
+@router.post("/stripe/webhook")
+async def handle_stripe_webhook(
+    request: Request,
+    db: Session = Depends(get_db),
+) -> dict:
+    stripe = StripeBillingClient()
+    raw_body = await request.body()
+    event = stripe.verify_webhook_event(raw_body, request.headers.get("stripe-signature"))
+    event_type = str(event.get("type") or "")
+    event_object = (event.get("data") or {}).get("object") or {}
+
+    subscription = None
+    transaction = None
+    if event_type == "checkout.session.completed":
+        session_payload = event_object
+        session_id = str(session_payload.get("id") or "")
+        if session_id:
+            transaction = db.query(PaymentTransaction).filter(PaymentTransaction.stripe_checkout_session_id == session_id).first()
+        subscription = _apply_stripe_checkout_session(db=db, session_payload=session_payload, transaction=transaction)
+    elif event_type in {"customer.subscription.updated", "customer.subscription.deleted"}:
+        stripe_subscription_id = str(event_object.get("id") or "")
+        subscription = db.query(UserSubscription).filter(UserSubscription.stripe_subscription_id == stripe_subscription_id).first()
+        if subscription is not None:
+            price_id = _extract_stripe_price_id(event_object)
+            plan = _get_plan_by_stripe_price_id(db, price_id) or subscription.plan
+            apply_stripe_subscription_state(subscription, plan, stripe_subscription=event_object)
+            db.add(subscription)
+    elif event_type in {"invoice.payment_succeeded", "invoice.payment_failed"}:
+        stripe_subscription_id = str(event_object.get("subscription") or "")
+        subscription = db.query(UserSubscription).filter(UserSubscription.stripe_subscription_id == stripe_subscription_id).first()
+        if subscription is not None:
+            if event_type == "invoice.payment_succeeded":
+                subscription.status = "active"
+                subscription.last_payment_status = "success"
+                subscription.last_payment_at = datetime.now(timezone.utc)
+            else:
+                subscription.status = "past_due"
+                subscription.last_payment_status = "error"
+            subscription.last_synced_at = datetime.now(timezone.utc)
+            db.add(subscription)
+
+    log_billing_event(
+        db,
+        source="stripe",
+        event_type=event_type or "unknown",
+        user_id=subscription.user_id if subscription is not None else None,
+        subscription_id=subscription.id if subscription is not None else None,
+        payment_id=transaction.id if transaction is not None else None,
+        payload={"eventId": event.get("id"), "type": event_type},
+    )
+    db.commit()
+    return {"received": True}
 
 
 @router.get("/unitpay/callback")

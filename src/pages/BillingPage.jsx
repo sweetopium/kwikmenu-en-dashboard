@@ -165,14 +165,14 @@ const BillingPage = () => {
                 <CreditCard size={20} />
               </div>
               <div>
-                <h2 className="text-lg font-bold text-foreground">{t('billing.unitpay.title', 'UnitPay')}</h2>
-                <p className="text-sm text-muted-foreground">{t('billing.unitpay.description', 'Привязка карты и последующие списания управляются через UnitPay.')}</p>
+                <h2 className="text-lg font-bold text-foreground">{t('billing.stripe.title', 'Stripe')}</h2>
+                <p className="text-sm text-muted-foreground">{t('billing.stripe.description', 'Card payments and recurring subscriptions are processed securely by Stripe.')}</p>
               </div>
             </div>
 
             <div className="rounded-2xl border border-border/60 bg-secondary/15 px-4 py-4">
-              <p className="text-sm font-semibold text-foreground">{t('billing.unitpay.subscriptionId', 'Subscription ID')}</p>
-              <p className="text-sm text-muted-foreground mt-1">{subscription?.unitpaySubscriptionId || t('billing.unitpay.notLinked', 'Пока не привязана')}</p>
+              <p className="text-sm font-semibold text-foreground">{t('billing.stripe.subscriptionId', 'Stripe subscription ID')}</p>
+              <p className="text-sm text-muted-foreground mt-1">{subscription?.stripeSubscriptionId || t('billing.stripe.notLinked', 'Not linked yet')}</p>
             </div>
           </section>
 

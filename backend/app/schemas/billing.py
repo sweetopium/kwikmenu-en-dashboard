@@ -18,6 +18,8 @@ class BillingPlanResponse(StrictModel):
     isActive: bool
     isPublic: bool
     sortOrder: int
+    stripeProductId: str | None = None
+    stripePriceId: str | None = None
     maxVenues: int
     maxMenusPerVenue: int
     maxMenuItemsPerMenu: int
@@ -74,6 +76,8 @@ class BillingSubscriptionResponse(StrictModel):
     lastPaymentAt: datetime | None = None
     lastPaymentStatus: str | None = None
     unitpaySubscriptionId: str | None = None
+    stripeCustomerId: str | None = None
+    stripeSubscriptionId: str | None = None
     plan: BillingPlanResponse
 
 
@@ -86,6 +90,9 @@ class BillingTransactionResponse(StrictModel):
     description: str | None = None
     unitpayPaymentId: str | None = None
     unitpaySubscriptionId: str | None = None
+    stripeCheckoutSessionId: str | None = None
+    stripeInvoiceId: str | None = None
+    stripePaymentIntentId: str | None = None
     checkoutUrl: str | None = None
     receiptUrl: str | None = None
     isTest: bool

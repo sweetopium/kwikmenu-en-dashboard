@@ -104,7 +104,7 @@ const SubscriptionPlansPage = () => {
         window.location.assign(result.redirectUrl);
         return;
       }
-      setError(t('subscription.checkoutErrorUnitpay', 'Could not start the payment session. Please try again later or contact support.'));
+      setError(t('subscription.checkoutErrorStripe', 'Could not start the payment session. Please try again later or contact support.'));
     } catch (nextError) {
       setError(nextError.message);
     } finally {
@@ -127,7 +127,7 @@ const SubscriptionPlansPage = () => {
         {(data?.plans || []).map((plan) => {
           const isSelected = selectedPlanId === plan.id;
           const isCurrent = data?.subscription?.plan?.id === plan.id;
-          const isFeatured = plan.code === 'business';
+          const isFeatured = plan.code === 'pro';
 
           return (
             <article

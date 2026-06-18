@@ -3,6 +3,7 @@ from __future__ import annotations
 from calendar import monthrange
 from datetime import datetime, timezone
 from decimal import Decimal
+from typing import Any
 
 from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
@@ -138,6 +139,8 @@ def build_plan_response(plan: SubscriptionPlan) -> BillingPlanResponse:
         isActive=plan.is_active,
         isPublic=plan.is_public,
         sortOrder=plan.sort_order,
+        stripeProductId=plan.stripe_product_id,
+        stripePriceId=plan.stripe_price_id,
         maxVenues=plan.max_venues,
         maxMenusPerVenue=plan.max_menus_per_venue,
         maxMenuItemsPerMenu=plan.max_menu_items_per_menu,
@@ -230,7 +233,7 @@ def build_public_plan_response(plan: SubscriptionPlan) -> PublicBillingPlanRespo
         currency=plan.currency,
         billingPeriod=plan.billing_period,
         sortOrder=plan.sort_order,
-        isFeatured=plan.code == "business",
+        isFeatured=plan.code == "pro",
         maxVenues=plan.max_venues,
         maxMenusPerVenue=plan.max_menus_per_venue,
         maxMenuItemsPerMenu=plan.max_menu_items_per_menu,
@@ -259,6 +262,8 @@ def build_subscription_response(subscription: UserSubscription) -> BillingSubscr
         lastPaymentAt=subscription.last_payment_at,
         lastPaymentStatus=subscription.last_payment_status,
         unitpaySubscriptionId=subscription.unitpay_subscription_id,
+        stripeCustomerId=subscription.stripe_customer_id,
+        stripeSubscriptionId=subscription.stripe_subscription_id,
         plan=build_plan_response(subscription.plan),
     )
 
@@ -273,6 +278,9 @@ def build_transaction_response(transaction: PaymentTransaction) -> BillingTransa
         description=transaction.description,
         unitpayPaymentId=transaction.unitpay_payment_id,
         unitpaySubscriptionId=transaction.unitpay_subscription_id,
+        stripeCheckoutSessionId=transaction.stripe_checkout_session_id,
+        stripeInvoiceId=transaction.stripe_invoice_id,
+        stripePaymentIntentId=transaction.stripe_payment_intent_id,
         checkoutUrl=transaction.checkout_url,
         receiptUrl=transaction.receipt_url,
         isTest=transaction.is_test,
@@ -494,6 +502,64 @@ def apply_successful_payment(
         subscription.unitpay_subscription_id = unitpay_subscription_id
     if transaction.kind == "initial" and transaction.unitpay_payment_id:
         subscription.parent_payment_id = transaction.unitpay_payment_id
+
+
+def _stripe_timestamp_to_datetime(value: Any) -> datetime | None:
+    if value in (None, ""):
+        return None
+    try:
+        return datetime.fromtimestamp(int(value), tz=timezone.utc)
+    except (TypeError, ValueError, OSError):
+        return None
+
+
+def _stripe_subscription_period(subscription_payload: dict[str, Any]) -> tuple[datetime | None, datetime | None]:
+    period_start = _stripe_timestamp_to_datetime(subscription_payload.get("current_period_start"))
+    period_end = _stripe_timestamp_to_datetime(subscription_payload.get("current_period_end"))
+    if period_start and period_end:
+        return period_start, period_end
+
+    items = (subscription_payload.get("items") or {}).get("data") or []
+    if items:
+        first_item = items[0] or {}
+        period_start = period_start or _stripe_timestamp_to_datetime(first_item.get("current_period_start"))
+        period_end = period_end or _stripe_timestamp_to_datetime(first_item.get("current_period_end"))
+    return period_start, period_end
+
+
+def apply_stripe_subscription_state(
+    subscription: UserSubscription,
+    plan: SubscriptionPlan,
+    *,
+    stripe_subscription: dict[str, Any],
+    transaction: PaymentTransaction | None = None,
+) -> None:
+    applied_at = now_utc()
+    stripe_status = str(stripe_subscription.get("status") or "active")
+    period_start, period_end = _stripe_subscription_period(stripe_subscription)
+    customer = stripe_subscription.get("customer")
+    subscription_id = stripe_subscription.get("id")
+
+    subscription.plan_id = plan.id
+    subscription.status = stripe_status
+    subscription.current_period_start = period_start or subscription.current_period_start or applied_at
+    subscription.current_period_end = period_end or subscription.current_period_end or add_months(applied_at, 1)
+    subscription.trial_ends_at = _stripe_timestamp_to_datetime(stripe_subscription.get("trial_end"))
+    subscription.cancel_at_period_end = bool(stripe_subscription.get("cancel_at_period_end"))
+    subscription.canceled_at = _stripe_timestamp_to_datetime(stripe_subscription.get("canceled_at"))
+    subscription.last_synced_at = applied_at
+    if stripe_status in {"active", "trialing"}:
+        subscription.last_payment_status = "success"
+        subscription.last_payment_at = applied_at
+    elif stripe_status in {"past_due", "unpaid", "incomplete", "incomplete_expired"}:
+        subscription.last_payment_status = "error"
+    if customer:
+        subscription.stripe_customer_id = str(customer)
+    if subscription_id:
+        subscription.stripe_subscription_id = str(subscription_id)
+    if transaction is not None:
+        transaction.status = "success" if stripe_status in {"active", "trialing"} else stripe_status
+        transaction.processed_at = applied_at
 
 
 def mark_payment_failed(subscription: UserSubscription, *, error_message: str | None = None) -> None:

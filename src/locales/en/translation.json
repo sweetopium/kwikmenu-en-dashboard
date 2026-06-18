@@ -663,10 +663,10 @@
       "update": "Refresh data",
       "disableAutoRenewal": "Disable auto-renewal"
     },
-    "unitpay": {
-      "title": "UnitPay",
-      "description": "Card binding and subsequent charges are managed via UnitPay.",
-      "subscriptionId": "Subscription ID",
+    "stripe": {
+      "title": "Stripe",
+      "description": "Card payments and recurring subscriptions are processed securely by Stripe.",
+      "subscriptionId": "Stripe subscription ID",
       "notLinked": "Not linked yet"
     },
     "history": {
@@ -678,12 +678,17 @@
     },
     "transactionStatus": {
       "completed": "Completed",
+      "success": "Success",
       "pending": "Pending",
-      "failed": "Failed"
+      "failed": "Failed",
+      "error": "Error",
+      "active": "Active"
     },
     "transactionKind": {
       "charge": "Charge",
-      "refund": "Refund"
+      "refund": "Refund",
+      "initial": "Initial payment",
+      "recurring": "Recurring payment"
     }
   },
   "subscription": {
@@ -701,7 +706,7 @@
       "extended": "extended",
       "premium": "premium"
     },
-    "checkoutErrorUnitpay": "Failed to launch payment session. Please try again later or contact support.",
+    "checkoutErrorStripe": "Failed to launch Stripe Checkout. Please try again later or contact support.",
     "title": "Subscription",
     "description": "Select a plan that will apply to your entire account and all your venues.",
     "planCurrent": "Current",

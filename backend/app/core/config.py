@@ -64,7 +64,14 @@ class Settings(BaseSettings):
     currency: str = "USD"
     billing_trial_days: int = 14
     billing_grace_period_days: int = 3
-    billing_default_plan_code: str = "business"
+    billing_default_plan_code: str = "starter"
+
+    stripe_api_url: str = "https://api.stripe.com/v1"
+    stripe_secret_key: str | None = None
+    stripe_webhook_secret: str | None = None
+    stripe_checkout_success_url: str | None = None
+    stripe_checkout_cancel_url: str | None = None
+    stripe_automatic_tax_enabled: bool = False
 
     unitpay_base_url: str = "https://unitpay.ru"
     unitpay_api_url: str = "https://unitpay.ru/api"

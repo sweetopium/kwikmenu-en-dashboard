@@ -4,7 +4,7 @@ import { CheckCircle2, LoaderCircle, TriangleAlert, XCircle } from 'lucide-react
 
 import SettingsPageHeader from "../components/settings/SettingsPageHeader";
 import { Button } from "../components/ui/button";
-import { fetchBillingSummary, syncBillingTransactionByUnitPayId } from "../lib/billingApi";
+import { fetchBillingSummary, syncBillingTransactionByStripeSessionId } from "../lib/billingApi";
 import { secondaryActionButtonClasses } from "../lib/uiStyles";
 import { listVenues } from "../lib/venuesApi";
 
@@ -13,15 +13,15 @@ const STATUS_COPY = {
     icon: CheckCircle2,
     iconClassName: 'text-emerald-600',
     badgeClassName: 'border-emerald-200 bg-emerald-50 text-emerald-700',
-    title: 'Подписка оформлена',
-    description: 'Платеж подтвержден, а статус подписки обновлен в вашем кабинете.',
+    title: 'Subscription activated',
+    description: 'Stripe confirmed the payment and your subscription is being updated.',
   },
   fail: {
     icon: XCircle,
     iconClassName: 'text-red-600',
     badgeClassName: 'border-red-200 bg-red-50 text-red-700',
-    title: 'Платеж не завершен',
-    description: 'Если деньги не списались, вы можете вернуться к оформлению и попробовать снова.',
+    title: 'Payment was not completed',
+    description: 'You can return to checkout and try again.',
   },
 };
 
@@ -37,11 +37,10 @@ const BillingCheckoutReturnPage = ({ mode = 'success' }) => {
     primaryVenueId: '',
   });
 
-  const unitpayPaymentId = searchParams.get('paymentId') || '';
-  const account = searchParams.get('account') || '';
+  const stripeSessionId = searchParams.get('session_id') || '';
   const statusLabel = state.subscriptionStatus === 'active'
-    ? 'Активна'
-    : state.subscriptionStatus || 'Активна';
+    ? 'Active'
+    : state.subscriptionStatus || 'Active';
   const managementHref = state.primaryVenueId ? `/dashboard/venues/${state.primaryVenueId}` : '/dashboard/venues';
 
   const copy = useMemo(() => STATUS_COPY[mode] || STATUS_COPY.success, [mode]);
@@ -55,10 +54,10 @@ const BillingCheckoutReturnPage = ({ mode = 'success' }) => {
     let cancelled = false;
 
     const run = async () => {
-      if (!unitpayPaymentId) {
+      if (!stripeSessionId) {
         setState({
           loading: false,
-          error: 'UnitPay не передал paymentId. Откройте страницу биллинга и проверьте статус вручную.',
+          error: 'Stripe did not return a session_id. Open Billing and check the subscription status.',
           synced: false,
           subscriptionStatus: '',
           planName: '',
@@ -69,7 +68,7 @@ const BillingCheckoutReturnPage = ({ mode = 'success' }) => {
       }
 
       try {
-        const syncResult = await syncBillingTransactionByUnitPayId(unitpayPaymentId);
+        const syncResult = await syncBillingTransactionByStripeSessionId(stripeSessionId);
         const billingSummary = await fetchBillingSummary();
         const venues = await listVenues();
         if (cancelled) {
@@ -90,7 +89,7 @@ const BillingCheckoutReturnPage = ({ mode = 'success' }) => {
         }
         setState({
           loading: false,
-          error: error.message || 'Не удалось синхронизировать платеж.',
+          error: error.message || 'Could not sync the payment.',
           synced: false,
           subscriptionStatus: '',
           planName: '',
@@ -105,15 +104,15 @@ const BillingCheckoutReturnPage = ({ mode = 'success' }) => {
     return () => {
       cancelled = true;
     };
-  }, [mode, unitpayPaymentId]);
+  }, [mode, stripeSessionId]);
 
   return (
     <div className="mx-auto space-y-6 sm:space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700 ease-out">
       <SettingsPageHeader
-        title={mode === 'success' ? 'Оформление подписки' : 'Возврат после оплаты'}
+        title={mode === 'success' ? 'Subscription checkout' : 'Payment return'}
         description={mode === 'success'
-          ? 'Редирект из UnitPay и подтверждение платежа на нашей стороне.'
-          : 'Платеж не был завершен или был отменен в процессе оплаты.'}
+          ? 'Stripe redirect and subscription confirmation.'
+          : 'The payment was not completed or was canceled during checkout.'}
         actionLabel={null}
       />
 
@@ -134,7 +133,7 @@ const BillingCheckoutReturnPage = ({ mode = 'success' }) => {
               {state.loading ? (
                 <div className="flex items-center gap-3 text-sm font-semibold text-foreground">
                   <LoaderCircle className="animate-spin text-brand-purple" size={18} />
-                  Проверяем статус платежа и обновляем подписку...
+                  Checking payment status and updating your subscription...
                 </div>
               ) : state.error ? (
                 <div className="space-y-3">
@@ -143,19 +142,19 @@ const BillingCheckoutReturnPage = ({ mode = 'success' }) => {
                     <span>{state.error}</span>
                   </div>
                   <p className="text-sm text-muted-foreground">
-                    Если оплата уже прошла, ничего не потеряно: callback `pay` от UnitPay все равно обновит подписку на backend.
+                    If the payment succeeded, the Stripe webhook will also update the subscription on the backend.
                   </p>
                 </div>
               ) : (
                 <div className="space-y-3 text-sm">
                   <p className="font-semibold text-foreground">
-                    Платеж синхронизирован. Текущий статус подписки: <span className="text-brand-purple">{statusLabel}</span>
+                    Payment synced. Current subscription status: <span className="text-brand-purple">{statusLabel}</span>
                   </p>
                   {state.planName ? (
-                    <p className="text-muted-foreground">Текущий тариф: {state.planName}</p>
+                    <p className="text-muted-foreground">Current plan: {state.planName}</p>
                   ) : null}
                   {state.currentPeriodEnd ? (
-                    <p className="text-muted-foreground">Доступ оплачен до: {new Date(state.currentPeriodEnd).toLocaleDateString('ru-RU')}</p>
+                    <p className="text-muted-foreground">Access paid until: {new Date(state.currentPeriodEnd).toLocaleDateString('en-US')}</p>
                   ) : null}
                 </div>
               )}
@@ -163,15 +162,14 @@ const BillingCheckoutReturnPage = ({ mode = 'success' }) => {
           ) : (
             <div className="rounded-2xl border border-border/60 bg-secondary/15 p-5">
               <p className="text-sm text-muted-foreground">
-                Вы можете вернуться к выбору тарифа и повторить оплату. Если деньги были списаны, откройте биллинг в кабинете и проверьте историю платежей.
+                You can return to plan selection and try again. If you were charged, open Billing and check your payment history.
               </p>
             </div>
           )}
 
-          {(unitpayPaymentId || account) ? (
+          {stripeSessionId ? (
             <div className="rounded-2xl border border-border/60 bg-secondary/10 p-5 text-sm text-muted-foreground">
-              {unitpayPaymentId ? <p>UnitPay paymentId: {unitpayPaymentId}</p> : null}
-              {account ? <p>Account: {account}</p> : null}
+              <p>Stripe session: {stripeSessionId}</p>
             </div>
           ) : null}
 
@@ -179,19 +177,19 @@ const BillingCheckoutReturnPage = ({ mode = 'success' }) => {
             {mode === 'success' && state.synced && state.subscriptionStatus === 'active' ? (
               <Link to={managementHref} className="sm:flex-1">
                 <Button className="w-full h-10 sm:h-12">
-                  Управлять заведением
+                  Manage venue
                 </Button>
               </Link>
             ) : (
               <Link to="/dashboard/billing" className="sm:flex-1">
                 <Button className="w-full h-10 sm:h-12">
-                  Перейти в биллинг
+                  Go to billing
                 </Button>
               </Link>
             )}
             <Link to="/dashboard/subscription" className="sm:flex-1">
               <Button variant="outline" className={`w-full ${secondaryActionButtonClasses}`}>
-                Вернуться к тарифам
+                Back to plans
               </Button>
             </Link>
           </div>

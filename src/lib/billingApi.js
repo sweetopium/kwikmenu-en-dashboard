@@ -54,3 +54,8 @@ export const syncBillingTransactionByUnitPayId = (unitpayPaymentId) =>
   billingFetch(`/transactions/unitpay/${unitpayPaymentId}/sync`, {
     method: 'POST',
   });
+
+export const syncBillingTransactionByStripeSessionId = (sessionId) =>
+  billingFetch(`/transactions/stripe/session/${sessionId}/sync`, {
+    method: 'POST',
+  });
