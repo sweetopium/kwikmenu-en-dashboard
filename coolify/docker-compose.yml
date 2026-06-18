@@ -1,6 +1,6 @@
 x-backend-env: &backend-env
   APP_ENV: production
-  DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-kwikmenu}:${POSTGRES_PASSWORD:-change-me-strong-password}@postgres:5432/${POSTGRES_DB:-kwikmenu}
+  DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-kwikmenu}:${POSTGRES_PASSWORD_ENCODED:-${POSTGRES_PASSWORD:-change-me-strong-password}}@postgres:5432/${POSTGRES_DB:-kwikmenu}
   CELERY_BROKER_URL: redis://redis:6379/0
   CELERY_RESULT_BACKEND: redis://redis:6379/1
   AUTH_SESSION_COOKIE_NAME: ${AUTH_SESSION_COOKIE_NAME:-kwikmenu_session}
