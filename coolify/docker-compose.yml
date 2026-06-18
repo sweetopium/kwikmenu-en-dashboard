@@ -84,7 +84,7 @@ services:
 
   backend:
     build:
-      context: ..
+      context: .
       dockerfile: backend/Dockerfile
     restart: unless-stopped
     environment:
@@ -107,7 +107,7 @@ services:
 
   worker:
     build:
-      context: ..
+      context: .
       dockerfile: backend/Dockerfile
     command: celery -A app.celery_app.celery_app worker --loglevel=info --concurrency=${WORKER_CONCURRENCY:-1}
     restart: unless-stopped
@@ -123,7 +123,7 @@ services:
 
   frontend:
     build:
-      context: ..
+      context: .
       dockerfile: Dockerfile
     restart: unless-stopped
     depends_on:
@@ -139,7 +139,7 @@ services:
 
   admin:
     build:
-      context: ..
+      context: .
       dockerfile: admin/Dockerfile
     restart: unless-stopped
     depends_on:
