@@ -3,7 +3,7 @@
 This project has a production-oriented Docker Compose file for Coolify:
 
 ```text
-docker-compose.coolify.yml
+coolify/docker-compose.yml
 ```
 
 It does not bind fixed host ports. Services only expose internal ports, so Coolify can route domains through its proxy without conflicting with other projects on the same server.
@@ -27,7 +27,7 @@ If you prefer a separate API domain, add a domain to the `backend` service and u
 
 1. Create a new Coolify project.
 2. Add a Docker Compose resource from this repository.
-3. Use `docker-compose.coolify.yml` as the compose file.
+3. Use `/coolify/docker-compose.yml` as the Docker Compose location.
 4. Add environment variables from `.env.coolify.example` in Coolify.
 5. Set real secrets in Coolify, not in repository files.
 6. Assign `https://app.kwikme.nu` to the `frontend` service.
