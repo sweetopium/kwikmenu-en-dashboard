@@ -64,6 +64,10 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-change-me-strong-password}
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    networks:
+      default:
+        aliases:
+          - postgres
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-kwikmenu} -d ${POSTGRES_DB:-kwikmenu}"]
       interval: 10s
@@ -76,6 +80,10 @@ services:
     command: redis-server --appendonly yes
     volumes:
       - redis_data:/data
+    networks:
+      default:
+        aliases:
+          - redis
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 10s

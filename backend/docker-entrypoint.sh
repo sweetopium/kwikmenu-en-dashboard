@@ -4,12 +4,19 @@ set -e
 python - <<'PY'
 import os
 import time
+from urllib.parse import urlparse
 
 from sqlalchemy import create_engine, text
 
 database_url = os.environ.get("DATABASE_URL")
 if not database_url:
     raise SystemExit("DATABASE_URL is not set")
+
+parsed_database_url = urlparse(database_url)
+print(
+    f"Waiting for database host={parsed_database_url.hostname} port={parsed_database_url.port or 5432}",
+    flush=True,
+)
 
 last_error = None
 for attempt in range(1, 31):
