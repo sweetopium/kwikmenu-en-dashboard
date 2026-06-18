@@ -18,9 +18,12 @@ RUN pip install --no-cache-dir -r /app/requirements.txt
 COPY backend/app /app/app
 COPY backend/alembic /app/alembic
 COPY backend/alembic.ini /app/alembic.ini
+COPY backend/docker-entrypoint.sh /app/docker-entrypoint.sh
 
-RUN mkdir -p /app/.data/uploads
+RUN chmod +x /app/docker-entrypoint.sh \
+    && mkdir -p /app/.data/uploads
 
 EXPOSE 8000
 
+ENTRYPOINT ["/app/docker-entrypoint.sh"]
 CMD ["sh", "-c", "alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port 8000"]
