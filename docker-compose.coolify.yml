@@ -1,0 +1,159 @@
+x-backend-env: &backend-env
+  APP_ENV: production
+  DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-kwikmenu}:${POSTGRES_PASSWORD:-change-me-strong-password}@postgres:5432/${POSTGRES_DB:-kwikmenu}
+  CELERY_BROKER_URL: redis://redis:6379/0
+  CELERY_RESULT_BACKEND: redis://redis:6379/1
+  AUTH_SESSION_COOKIE_NAME: ${AUTH_SESSION_COOKIE_NAME:-kwikmenu_session}
+  AUTH_SESSION_TTL_HOURS: ${AUTH_SESSION_TTL_HOURS:-720}
+  AUTH_COOKIE_SECURE: "true"
+  AUTH_COOKIE_DOMAIN: ${AUTH_COOKIE_DOMAIN:-.kwikme.nu}
+  MENU_IMPORT_FRONTEND_ORIGIN: ${MENU_IMPORT_FRONTEND_ORIGIN:-https://app.kwikme.nu}
+  MENU_IMPORT_API_URL: ${MENU_IMPORT_API_URL:-https://app.kwikme.nu}
+  PUBLIC_MENU_BASE_URL: ${PUBLIC_MENU_BASE_URL:-https://app.kwikme.nu}
+  ADMIN_FRONTEND_ORIGIN: ${ADMIN_FRONTEND_ORIGIN:-https://admin.kwikme.nu}
+  ADMIN_API_KEY: ${ADMIN_API_KEY:-}
+  ADMIN_ALLOWED_IPS: ${ADMIN_ALLOWED_IPS:-*}
+  OPENROUTER_API_KEY: ${OPENROUTER_API_KEY:-}
+  OPENROUTER_REFERER: ${OPENROUTER_REFERER:-https://app.kwikme.nu}
+  OPENROUTER_APP_NAME: ${OPENROUTER_APP_NAME:-KwikMenu Dashboard}
+  OPENROUTER_PDF_ENGINE: ${OPENROUTER_PDF_ENGINE:-}
+  MENU_IMPORT_MODEL: ${MENU_IMPORT_MODEL:-openai/gpt-4.1-mini}
+  MENU_IMPORT_MAX_COMPLETION_TOKENS: ${MENU_IMPORT_MAX_COMPLETION_TOKENS:-12000}
+  MENU_IMPORT_RETRY_MAX_COMPLETION_TOKENS: ${MENU_IMPORT_RETRY_MAX_COMPLETION_TOKENS:-24000}
+  MENU_NORMALIZATION_MAX_COMPLETION_TOKENS: ${MENU_NORMALIZATION_MAX_COMPLETION_TOKENS:-24000}
+  MENU_IMPORT_REQUEST_TIMEOUT_SECONDS: ${MENU_IMPORT_REQUEST_TIMEOUT_SECONDS:-180}
+  MENU_IMPORT_PAGE_PARSE_ATTEMPTS: ${MENU_IMPORT_PAGE_PARSE_ATTEMPTS:-3}
+  MENU_IMPORT_TASK_SOFT_TIME_LIMIT_SECONDS: ${MENU_IMPORT_TASK_SOFT_TIME_LIMIT_SECONDS:-60}
+  MENU_IMPORT_TASK_HARD_TIME_LIMIT_SECONDS: ${MENU_IMPORT_TASK_HARD_TIME_LIMIT_SECONDS:-70}
+  CURRENCY: ${CURRENCY:-USD}
+  BILLING_TRIAL_DAYS: ${BILLING_TRIAL_DAYS:-14}
+  BILLING_DEFAULT_PLAN_CODE: ${BILLING_DEFAULT_PLAN_CODE:-basic}
+  STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY:-}
+  STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET:-}
+  STRIPE_CHECKOUT_SUCCESS_URL: ${STRIPE_CHECKOUT_SUCCESS_URL:-https://app.kwikme.nu/dashboard/billing/success?session_id={CHECKOUT_SESSION_ID}}
+  STRIPE_CHECKOUT_CANCEL_URL: ${STRIPE_CHECKOUT_CANCEL_URL:-https://app.kwikme.nu/dashboard/billing/fail}
+  STRIPE_AUTOMATIC_TAX_ENABLED: ${STRIPE_AUTOMATIC_TAX_ENABLED:-false}
+  OAUTH_GOOGLE_CLIENT_ID: ${OAUTH_GOOGLE_CLIENT_ID:-}
+  OAUTH_GOOGLE_CLIENT_SECRET: ${OAUTH_GOOGLE_CLIENT_SECRET:-}
+  OAUTH_YANDEX_CLIENT_ID: ""
+  OAUTH_YANDEX_CLIENT_SECRET: ""
+  OAUTH_MAILRU_CLIENT_ID: ""
+  OAUTH_MAILRU_CLIENT_SECRET: ""
+  MEDIA_STORAGE_ENDPOINT_URL: ${MEDIA_STORAGE_ENDPOINT_URL:-}
+  MEDIA_STORAGE_BUCKET: ${MEDIA_STORAGE_BUCKET:-}
+  MEDIA_STORAGE_ACCESS_KEY_ID: ${MEDIA_STORAGE_ACCESS_KEY_ID:-}
+  MEDIA_STORAGE_SECRET_ACCESS_KEY: ${MEDIA_STORAGE_SECRET_ACCESS_KEY:-}
+  MEDIA_STORAGE_REGION: ${MEDIA_STORAGE_REGION:-auto}
+  MEDIA_STORAGE_PUBLIC_BASE_URL: ${MEDIA_STORAGE_PUBLIC_BASE_URL:-}
+  HELP_REQUESTS_TELEGRAM_BOT_TOKEN: ${HELP_REQUESTS_TELEGRAM_BOT_TOKEN:-}
+  HELP_REQUESTS_TELEGRAM_CHAT_ID: ${HELP_REQUESTS_TELEGRAM_CHAT_ID:-}
+  N8N_WEBHOOK_TOKEN: ${N8N_WEBHOOK_TOKEN:-}
+  UNISENDER_API_KEY: ${UNISENDER_API_KEY:-}
+  UNISENDER_SERVICE_TYPE: ${UNISENDER_SERVICE_TYPE:-go}
+  UNISENDER_SENDER_EMAIL: ${UNISENDER_SENDER_EMAIL:-support@kwikme.nu}
+  UNISENDER_SENDER_NAME: ${UNISENDER_SENDER_NAME:-KwikMenu}
+  UNISENDER_CLASSIC_LIST_ID: ${UNISENDER_CLASSIC_LIST_ID:-}
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-kwikmenu}
+      POSTGRES_USER: ${POSTGRES_USER:-kwikmenu}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-change-me-strong-password}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-kwikmenu} -d ${POSTGRES_DB:-kwikmenu}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    restart: unless-stopped
+    environment:
+      <<: *backend-env
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - backend_data:/app/.data
+    expose:
+      - "8000"
+    healthcheck:
+      test: ["CMD-SHELL", "python -c \"import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=5).read()\""]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+
+  worker:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    command: celery -A app.celery_app.celery_app worker --loglevel=info --concurrency=${WORKER_CONCURRENCY:-1}
+    restart: unless-stopped
+    environment:
+      <<: *backend-env
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - backend_data:/app/.data
+
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    depends_on:
+      backend:
+        condition: service_healthy
+    expose:
+      - "80"
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1/ >/dev/null"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  admin:
+    build:
+      context: .
+      dockerfile: admin/Dockerfile
+    restart: unless-stopped
+    depends_on:
+      backend:
+        condition: service_healthy
+    expose:
+      - "80"
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1/ >/dev/null"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+volumes:
+  postgres_data:
+  redis_data:
+  backend_data:
