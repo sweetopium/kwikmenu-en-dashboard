@@ -67,7 +67,7 @@ const QrPreview = ({
             }`}
             style={{ backgroundColor: frameColor }}
           >
-            {frameText || t('qr.preview.defaultFrameText', 'СКАНИРУЙ МЕНЮ')}
+            {frameText || t('qr.preview.defaultFrameText', 'SCAN MENU')}
           </div>
         )}
       </div>

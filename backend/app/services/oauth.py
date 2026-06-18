@@ -145,7 +145,7 @@ def get_provider_config(provider: str, settings: Settings | None = None) -> OAut
     current_settings = settings or get_settings()
     normalized = provider.strip().lower()
     if normalized == "google":
-        raise OAuthError("Google OAuth is disabled.")
+        return _google_provider(current_settings)
     if normalized == "yandex":
         return _yandex_provider(current_settings)
     if normalized == "mailru":

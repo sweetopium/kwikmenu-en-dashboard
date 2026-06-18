@@ -7,8 +7,8 @@ import SettingsPageHeader from "../components/settings/SettingsPageHeader";
 import { createBillingCheckout, fetchBillingSummary } from "../lib/billingApi";
 import { primaryActionButtonClasses } from "../lib/uiStyles";
 
-const formatRub = (value, currency = 'RUB', lng = 'ru') => {
-  const locale = lng === 'ru' ? 'ru-RU' : 'en-US';
+const formatCurrency = (value, currency = 'USD', lng = 'en') => {
+  const locale = 'en-US';
   return new Intl.NumberFormat(locale, { style: 'currency', currency, maximumFractionDigits: 0 }).format(value);
 };
 
@@ -104,7 +104,7 @@ const SubscriptionPlansPage = () => {
         window.location.assign(result.redirectUrl);
         return;
       }
-      setError(t('subscription.checkoutErrorUnitpay', 'Не удалось запустить платежную сессию. Пожалуйста, попробуйте позже или свяжитесь с поддержкой.'));
+      setError(t('subscription.checkoutErrorUnitpay', 'Could not start the payment session. Please try again later or contact support.'));
     } catch (nextError) {
       setError(nextError.message);
     } finally {
@@ -115,8 +115,8 @@ const SubscriptionPlansPage = () => {
   return (
     <div className="space-y-6 sm:space-y-8">
       <SettingsPageHeader
-        title={t('subscription.title', 'Подписка')}
-        description={t('subscription.description', 'Выберите тариф, который будет применяться ко всему аккаунту и всем вашим заведениям.')}
+        title={t('subscription.title', 'Subscription')}
+        description={t('subscription.description', 'Choose the plan that applies to your account and all venues.')}
         actionLabel={null}
       />
 
@@ -143,7 +143,7 @@ const SubscriptionPlansPage = () => {
             >
               {isFeatured && (
                 <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 rounded-full bg-gradient-to-r from-brand-purple to-[#8b5cf6] px-4 py-1 text-[10px] font-black uppercase tracking-wider text-white shadow-md shadow-brand-purple/35 whitespace-nowrap">
-                  {t('subscription.recommended', 'Рекомендуем')}
+                  {t('subscription.recommended', 'Recommended')}
                 </div>
               )}
 
@@ -158,16 +158,16 @@ const SubscriptionPlansPage = () => {
                   </div>
                   {isCurrent ? (
                     <div className="rounded-full bg-brand-purple/20 border border-brand-purple/30 px-2.5 py-0.5 text-[9px] sm:text-[10px] font-black uppercase tracking-wide text-brand-purple">
-                      {t('subscription.planCurrent', 'Текущий')}
+                      {t('subscription.planCurrent', 'Current')}
                     </div>
                   ) : null}
                 </div>
 
                 <div className="flex items-end gap-2 border-b pb-4 border-border/10">
                   <span className={`text-4xl font-black ${isFeatured ? 'text-white' : 'text-foreground'}`}>
-                    {formatRub(plan.priceAmount, plan.currency, lng)}
+                    {formatCurrency(plan.priceAmount, plan.currency, lng)}
                   </span>
-                  <span className={`pb-1 text-xs font-semibold ${isFeatured ? 'text-white/60' : 'text-muted-foreground'}`}>{t('billing.perMonth', '/ мес')}</span>
+                  <span className={`pb-1 text-xs font-semibold ${isFeatured ? 'text-white/60' : 'text-muted-foreground'}`}>{t('billing.perMonth', '/ mo')}</span>
                 </div>
 
                 <ul className="space-y-3 pt-2">
@@ -191,7 +191,7 @@ const SubscriptionPlansPage = () => {
                       : 'border-border/60 bg-background hover:bg-secondary text-foreground'
                 }`}
               >
-                {isSelected ? t('subscription.planSelected', 'Выбран') : t('subscription.planSelect', 'Выбрать тариф')}
+                {isSelected ? t('subscription.planSelected', 'Selected') : t('subscription.planSelect', 'Select plan')}
               </button>
             </article>
           );
@@ -206,15 +206,15 @@ const SubscriptionPlansPage = () => {
                 <ShieldCheck size={24} />
               </div>
               <div className="space-y-1">
-                <h2 className="text-lg sm:text-xl font-black text-foreground">{t('subscription.howItWorks.title', 'Безопасные платежи')}</h2>
+                <h2 className="text-lg sm:text-xl font-black text-foreground">{t('subscription.howItWorks.title', 'Secure payments')}</h2>
                 <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
-                  {t('subscription.howItWorks.description', 'Оплата обрабатывается сертифицированным провайдером. Все транзакции надежно защищены SSL-шифрованием и соответствуют международным стандартам безопасности PCI DSS.')}
+                  {t('subscription.howItWorks.description', 'Payments are processed by a certified provider. All transactions are protected with SSL encryption and PCI DSS compliant infrastructure.')}
                 </p>
               </div>
             </div>
 
             <div className="rounded-2xl border border-brand-purple/10 bg-brand-purple/5 p-4 text-xs sm:text-sm text-brand-purple leading-relaxed">
-              {t('subscription.howItWorks.warning', 'Подписка продлевается автоматически каждые 30 дней. Вы можете изменить тарифный план или отменить автопродление в любой момент без каких-либо комиссий в настройках кабинета.')}
+              {t('subscription.howItWorks.warning', 'The subscription renews automatically every 30 days. You can change your plan or cancel auto-renewal at any time from your dashboard.')}
             </div>
           </div>
 
@@ -234,15 +234,15 @@ const SubscriptionPlansPage = () => {
           <div className="space-y-5">
             <div className="flex items-center gap-3">
               <Sparkles size={18} className="text-brand-purple" />
-              <h2 className="text-lg font-black text-foreground">{t('subscription.checkout.title', 'Оформление')}</h2>
+              <h2 className="text-lg font-black text-foreground">{t('subscription.checkout.title', 'Checkout')}</h2>
             </div>
 
             <div className="rounded-2xl border border-border/60 bg-secondary/20 px-4 py-4 space-y-1">
-              <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">{t('subscription.checkout.selectedPlan', 'Выбранный тариф')}</p>
+              <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">{t('subscription.checkout.selectedPlan', 'Selected plan')}</p>
               <div className="flex items-center justify-between">
                 <p className="text-base font-extrabold text-foreground">{selectedPlan?.name || '—'}</p>
                 <p className="text-base font-black text-brand-purple">
-                  {selectedPlan ? formatRub(selectedPlan.priceAmount, selectedPlan.currency, lng) : '—'}
+                  {selectedPlan ? formatCurrency(selectedPlan.priceAmount, selectedPlan.currency, lng) : '—'}
                 </p>
               </div>
             </div>
@@ -259,7 +259,7 @@ const SubscriptionPlansPage = () => {
                   <span className="text-xs sm:text-sm text-muted-foreground leading-normal">
                     {t('subscription.checkout.agreeOffer')}{' '}
                     <a
-                      href="https://kwikmenu.ru/terms"
+                      href="https://kwikme.nu/terms"
                       target="_blank"
                       rel="noopener noreferrer"
                       className="text-brand-purple font-bold hover:underline"
@@ -279,7 +279,7 @@ const SubscriptionPlansPage = () => {
                   />
                   <span className="text-xs sm:text-sm text-muted-foreground leading-normal">
                     {t('subscription.checkout.agreeRecurring', {
-                      price: formatRub(selectedPlan.priceAmount, selectedPlan.currency, lng),
+                      price: formatCurrency(selectedPlan.priceAmount, selectedPlan.currency, lng),
                     })}
                   </span>
                 </label>
@@ -290,7 +290,7 @@ const SubscriptionPlansPage = () => {
           <div className="space-y-3">
             {!canPurchaseSelectedPlan ? (
               <Button className="w-full h-12 rounded-lg text-sm font-black bg-secondary text-muted-foreground border border-border/50 cursor-not-allowed" disabled>
-                {t('subscription.checkout.btnActive', 'Текущий тариф активен')}
+                {t('subscription.checkout.btnActive', 'Current plan is active')}
               </Button>
             ) : (
               <Button
@@ -299,13 +299,13 @@ const SubscriptionPlansPage = () => {
                 disabled={!selectedPlan || isSubmitting || !agreeOffer || !agreeRecurring}
               >
                 {isSubmitting ? (
-                  t('subscription.checkout.btnProceeding', 'Переходим к оплате...')
+                  t('subscription.checkout.btnProceeding', 'Opening checkout...')
                 ) : (
                   <>
                     <Lock size={16} className="mr-2" />
                     {isCurrentSelected && data?.subscription?.cancelAtPeriodEnd
-                      ? 'Оформить подписку заново'
-                      : t('subscription.checkout.btnProceed', 'Перейти к оплате')}
+                      ? 'Restart subscription'
+                      : t('subscription.checkout.btnProceed', 'Proceed to payment')}
                     <ArrowRight size={16} className="ml-2" />
                   </>
                 )}
@@ -313,7 +313,7 @@ const SubscriptionPlansPage = () => {
             )}
 
             <div className="flex items-center justify-center gap-2 text-muted-foreground/60 text-[10px] font-extrabold uppercase tracking-widest text-center">
-              <span>{t('subscription.checkout.securePaymentNotice', 'Безопасное соединение SSL · PCI DSS')}</span>
+              <span>{t('subscription.checkout.securePaymentNotice', 'Secure SSL connection · PCI DSS')}</span>
             </div>
           </div>
         </div>

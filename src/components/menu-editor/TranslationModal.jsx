@@ -13,7 +13,7 @@ const TranslationModal = ({
   onTranslate,
 }) => {
   const { t } = useTranslation();
-  const defaultLanguage = menu.defaultLanguage || 'ru';
+  const defaultLanguage = menu.defaultLanguage || 'en';
 
   // Find translated codes: default language + languages with translated entries
   const translatedCodes = new Set(

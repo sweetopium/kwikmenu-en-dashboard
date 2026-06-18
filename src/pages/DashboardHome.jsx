@@ -182,7 +182,7 @@ const DashboardHome = () => {
           <div className="mt-4 sm:mt-6">
             <p className="text-[10px] sm:text-xs font-bold text-muted-foreground uppercase tracking-[0.12em] sm:tracking-wider">{t('dashboard.menuViews')}</p>
             <h3 className="text-3xl sm:text-4xl font-black text-foreground mt-1 leading-none">
-              {isLoading ? '...' : overview.totalViews.toLocaleString(i18n.language === 'ru' ? 'ru-RU' : 'en-US')}
+              {isLoading ? '...' : overview.totalViews.toLocaleString('en-US')}
             </h3>
           </div>
         </div>
@@ -201,7 +201,7 @@ const DashboardHome = () => {
           <div className="mt-4 sm:mt-6">
             <p className="text-[10px] sm:text-xs font-bold text-muted-foreground uppercase tracking-[0.12em] sm:tracking-wider">{t('dashboard.uniqueGuests')}</p>
             <h3 className="text-3xl sm:text-4xl font-black text-foreground mt-1 leading-none">
-              {isLoading ? '...' : overview.uniqueVisitors.toLocaleString(i18n.language === 'ru' ? 'ru-RU' : 'en-US')}
+              {isLoading ? '...' : overview.uniqueVisitors.toLocaleString('en-US')}
             </h3>
           </div>
         </div>

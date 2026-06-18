@@ -3,11 +3,10 @@ import { Globe } from 'lucide-react';
 
 const LanguageSwitcher = ({ variant = 'pill' }) => {
   const { i18n } = useTranslation();
-  const currentLang = i18n.language || 'ru';
+  const currentLang = i18n.language || 'en';
 
   const toggleLanguage = () => {
-    const nextLang = currentLang.startsWith('ru') ? 'en' : 'ru';
-    i18n.changeLanguage(nextLang);
+    i18n.changeLanguage('en');
   };
 
   if (variant === 'sidebar') {
@@ -19,10 +18,10 @@ const LanguageSwitcher = ({ variant = 'pill' }) => {
       >
         <Globe size={18} className="group-hover:text-brand-purple transition-colors shrink-0" />
         <span className="truncate">
-          {currentLang.startsWith('ru') ? 'Язык: Русский' : 'Language: English'}
+          Language: English
         </span>
         <span className="ml-auto text-xs px-2 py-0.5 rounded-full bg-secondary font-bold uppercase tracking-wider text-muted-foreground shrink-0">
-          {currentLang.startsWith('ru') ? 'RU' : 'EN'}
+          EN
         </span>
       </button>
     );
@@ -33,11 +32,11 @@ const LanguageSwitcher = ({ variant = 'pill' }) => {
       type="button"
       onClick={toggleLanguage}
       className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-border/60 bg-card hover:bg-secondary/35 text-xs font-bold text-foreground shadow-sm hover:shadow-md hover:border-brand-purple/20 transition-all cursor-pointer group"
-      title={currentLang.startsWith('ru') ? 'Switch to English' : 'Переключить на русский'}
+      title="Language: English"
     >
       <Globe size={13} className="text-muted-foreground group-hover:text-brand-purple transition-colors" />
       <span className="uppercase tracking-wider">
-        {currentLang.startsWith('ru') ? 'RU' : 'EN'}
+        EN
       </span>
     </button>
   );

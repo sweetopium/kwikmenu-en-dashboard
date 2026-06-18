@@ -27,10 +27,10 @@ const QrFrameControls = ({
 
           <div className="min-w-0">
             <h2 className="font-bold text-lg text-foreground">
-              {t('qr.frame.title', 'Рамка и текст')}
+              {t('qr.frame.title', 'Frame & Text')}
             </h2>
             <p className="text-sm text-muted-foreground mt-1">
-              {t('qr.frame.subtitle', 'Добавьте короткий призыв к действию и цвет для печатной версии QR.')}
+              {t('qr.frame.subtitle', 'Add a brief call to action and a frame color for the printed QR version.')}
             </p>
           </div>
         </div>
@@ -45,25 +45,25 @@ const QrFrameControls = ({
       <div className={hasFrame ? 'space-y-6' : 'space-y-6 opacity-40 pointer-events-none'}>
         <div className="space-y-3">
           <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-            {t('qr.frame.callToAction', 'Призыв к действию')}
+            {t('qr.frame.callToAction', 'Call to action')}
           </Label>
 
           <Input
             value={frameText}
             onChange={(e) => onFrameTextChange(e.target.value)}
             className={formFieldClasses}
-            placeholder={t('qr.frame.placeholder', 'Например: СКАНИРУЙ МЕНЮ')}
+            placeholder={t('qr.frame.placeholder', 'E.g., SCAN MENU')}
             maxLength={24}
           />
 
           <p className="text-[11px] text-muted-foreground">
-            {t('qr.frame.hint', 'Лучше коротко: 1-3 слова, чтобы хорошо читалось на наклейке.')}
+            {t('qr.frame.hint', 'Keep it short: 1-3 words read best on a table sticker.')}
           </p>
         </div>
 
         <div className="space-y-3">
           <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-            {t('qr.frame.colorLabel', 'Цвет рамки')}
+            {t('qr.frame.colorLabel', 'Frame color')}
           </Label>
 
           <div className="flex items-center gap-3 flex-wrap">

@@ -1,5 +1,4 @@
-import { useEffect } from 'react';
-import {BrowserRouter, Routes, Route, Navigate, useLocation} from 'react-router-dom';
+import {BrowserRouter, Routes, Route, Navigate} from 'react-router-dom';
 import DashboardLayout from "./layouts/DashboardLayout.jsx";
 import WelcomePage from "./pages/WelcomePage.jsx";
 import HelpPage from "./pages/HelpPage.jsx";
@@ -21,22 +20,9 @@ import { ProtectedRoute, PublicOnlyRoute } from "./components/auth/AuthGuards.js
 import ActiveVenueQrRedirect from "./components/venue/ActiveVenueQrRedirect.jsx";
 import PublicVenueMenuPage from "./pages/PublicVenueMenuPage.jsx";
 
-function YandexMetrikaTracker() {
-    const location = useLocation();
-
-    useEffect(() => {
-        if (typeof window.ym === 'function') {
-            window.ym(108304746, 'hit', window.location.href);
-        }
-    }, [location.pathname, location.search]);
-
-    return null;
-}
-
 function App() {
     return (
         <BrowserRouter>
-            <YandexMetrikaTracker />
             <Routes>
                 {/* Onboarding Flow */}
                 <Route path="/" element={<OnboardingLayout><WelcomePage/></OnboardingLayout>}/>

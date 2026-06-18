@@ -1,12 +1,11 @@
 import {useMemo, useState} from "react";
 import {Link, useNavigate} from "react-router-dom";
 import {Loader2} from "lucide-react";
-import {FaYandex} from "react-icons/fa6";
-import {SiMaildotru} from "react-icons/si";
+import {FcGoogle} from "react-icons/fc";
 import {useTranslation} from "react-i18next";
 import AuthShell from "../components/auth/AuthShell.jsx";
-import SocialProviderButton from "../components/auth/SocialProviderButton.jsx";
 import AuthField from "../components/auth/AuthField.jsx";
+import SocialProviderButton from "../components/auth/SocialProviderButton.jsx";
 import {getForgotPasswordUrl, getPostLoginRedirect, getProviderAuthUrl, loginWithEmail} from "../lib/auth.js";
 import { primaryActionButtonClasses } from "../lib/uiStyles.js";
 
@@ -23,6 +22,10 @@ const LoginPage = () => {
   const [submitError, setSubmitError] = useState("");
   const [pending, setPending] = useState(false);
   const forgotPasswordUrl = useMemo(() => getForgotPasswordUrl(), []);
+
+  const handleProviderClick = (provider) => {
+    window.location.assign(getProviderAuthUrl(provider));
+  };
 
   const validate = () => {
     const nextErrors = {};
@@ -46,10 +49,6 @@ const LoginPage = () => {
     setForm((current) => ({...current, [field]: value}));
     setErrors((current) => ({...current, [field]: undefined}));
     setSubmitError("");
-  };
-
-  const handleProviderClick = (provider) => {
-    window.location.assign(getProviderAuthUrl(provider));
   };
 
   const handleSubmit = async (event) => {
@@ -85,10 +84,7 @@ const LoginPage = () => {
       subtitle={t('login.subtitle')}
     >
       <div className="space-y-6 sm:space-y-8">
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-2">
-          <SocialProviderButton icon={FaYandex} label="Yandex" iconClassName="text-[#fc3f1d]" onClick={() => handleProviderClick("yandex")}/>
-          <SocialProviderButton icon={SiMaildotru} label="Mail" iconClassName="text-[#005ff9]" onClick={() => handleProviderClick("mailru")}/>
-        </div>
+        <SocialProviderButton icon={FcGoogle} label="Continue with Google" onClick={() => handleProviderClick("google")}/>
 
         <div className="flex items-center gap-4 text-[11px] font-semibold uppercase tracking-[0.22em] text-muted-foreground sm:text-xs">
           <div className="h-px flex-1 bg-border"/>

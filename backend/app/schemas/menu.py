@@ -156,12 +156,11 @@ class MenuCategory(StrictModel):
 
 class MenuPayload(StrictModel):
     schemaVersion: int = 2
-    defaultLanguage: str = "ru"
-    currency: str = "RUB"
+    defaultLanguage: str = "en"
+    currency: str = "USD"
     settings: MenuSettings = Field(default_factory=MenuSettings)
     languages: list[MenuLanguage] = Field(
         default_factory=lambda: [
-            MenuLanguage(code="ru", shortLabel="RU", nativeName="Русский", flag="RU"),
             MenuLanguage(code="en", shortLabel="EN", nativeName="English", flag="EN"),
         ]
     )

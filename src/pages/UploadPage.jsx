@@ -66,8 +66,8 @@ const UploadPage = () => {
   const [restaurant, setRestaurant] = useState('');
   const [phone, setPhone] = useState('');
   const [city, setCity] = useState('');
-  const [selectedCountry, setSelectedCountry] = useState('ru');
-  const [selectedDial, setSelectedDial] = useState('+7');
+  const [selectedCountry, setSelectedCountry] = useState('us');
+  const [selectedDial, setSelectedDial] = useState('+1');
   const [currentVenueId, setCurrentVenueId] = useState(() => {
     if (typeof window === 'undefined') {
       return null;

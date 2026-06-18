@@ -66,7 +66,7 @@ class VenueQrSettingsResponse(StrictModel):
     color: str = "#863bff"
     logoUrl: str | None = None
     hasFrame: bool = True
-    frameText: str = "СКАНИРУЙ МЕНЮ"
+    frameText: str = "SCAN MENU"
     frameColor: str = "#08060d"
     publicMenuEnabled: bool = True
     publicPath: str
@@ -76,7 +76,7 @@ class VenueQrSettingsResponse(StrictModel):
 class VenueSettingsResponse(StrictModel):
     id: str
     venueId: str
-    currency: str = "RUB"
+    currency: str = "USD"
     wifi: VenueWifiSettingsResponse
     design: VenueDesignSettingsResponse
     qr: VenueQrSettingsResponse
@@ -92,7 +92,7 @@ class VenueResponse(StrictModel):
     city: str | None = None
     description: str | None = None
     instagramUrl: str | None = None
-    currency: str = "RUB"
+    currency: str = "USD"
     publicPath: str
     publicUrl: str
     createdAt: datetime

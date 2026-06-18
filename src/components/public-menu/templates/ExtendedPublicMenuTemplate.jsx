@@ -64,8 +64,8 @@ const DIETARY_TAG_LABELS = {
   },
 };
 
-const getDietaryTagLabel = (tagValue, language = 'ru') => {
-  const lang = String(language || 'ru').toLowerCase().split('-')[0];
+const getDietaryTagLabel = (tagValue, language = 'en') => {
+  const lang = String(language || 'en').toLowerCase().split('-')[0];
   const dict = DIETARY_TAG_LABELS[lang] || DIETARY_TAG_LABELS.ru;
   return dict[tagValue] || tagValue;
 };
@@ -214,7 +214,7 @@ const ExtendedPublicMenuTemplate = ({
   availableMenus = [],
 }) => {
   const payload = menu?.payload;
-  const defaultLanguage = payload?.defaultLanguage || 'ru';
+  const defaultLanguage = payload?.defaultLanguage || 'en';
   const [language, setLanguage] = useState(defaultLanguage);
   const [activeCategoryId, setActiveCategoryId] = useState(payload?.categories?.[0]?.id || '');
   const [openSheet, setOpenSheet] = useState(null);
@@ -229,7 +229,7 @@ const ExtendedPublicMenuTemplate = ({
   const pendingCategoryIdRef = useRef(null);
 
   useEffect(() => {
-    setLanguage(payload?.defaultLanguage || 'ru');
+    setLanguage(payload?.defaultLanguage || 'en');
     setActiveCategoryId(payload?.categories?.[0]?.id || '');
     setOpenSheet(null);
     setIsDescExpanded(false);
@@ -325,7 +325,7 @@ const ExtendedPublicMenuTemplate = ({
     [payload, defaultLanguage]
   );
 
-  const currencyCode = venue?.currency || payload?.currency || 'RUB';
+  const currencyCode = venue?.currency || payload?.currency || 'USD';
   const venueName = getLocalizedField(payload?.venue, 'name', language, defaultLanguage) || venue?.name || payload?.venue?.name || 'Menu';
   const venueDescription = getLocalizedField(payload?.venue, 'description', language, defaultLanguage) || venue?.description || payload?.venue?.description || '';
   const venueLogoUrl = venue?.design?.logoUrl || payload?.venue?.logoUrl || null;
@@ -919,7 +919,7 @@ const ExtendedPublicMenuTemplate = ({
                           {!isItemAvailable && (
                             <div className="absolute inset-0 z-10 flex items-center justify-center bg-black/40 backdrop-blur-[2.5px]">
                               <span className="rounded-full bg-white/95 px-2.5 py-1 text-[9px] font-extrabold uppercase tracking-widest text-[#252a2d] shadow-md border border-white/10">
-                                {language === 'ru' ? 'Закончилось' : 'Sold Out'}
+                                Sold Out
                               </span>
                             </div>
                           )}
@@ -961,7 +961,7 @@ const ExtendedPublicMenuTemplate = ({
           <span>{language === 'en' ? 'Made in' : 'Сделано в'}</span>
           <a
             className="flex items-center gap-1.5 text-sm sm:text-base font-bold tracking-tight text-zinc-900 dark:text-zinc-100 transition-transform hover:scale-105"
-            href="https://kwikmenu.ru?utm_source=menu_footer"
+            href="https://kwikme.nu?utm_source=menu_footer"
             target="_blank"
             rel="noopener noreferrer"
           >

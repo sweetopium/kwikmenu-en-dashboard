@@ -190,7 +190,7 @@ const MenuListPage = () => {
                 <div className="flex items-center gap-1.5">
                   <Calendar size={14} />
                   <span className="text-[12px] font-medium">
-                    {new Date(menu.updatedAt).toLocaleString(i18n.language === 'ru' ? 'ru-RU' : 'en-US')}
+                    {new Date(menu.updatedAt).toLocaleString('en-US')}
                   </span>
                 </div>
                 <div className="flex items-center gap-1.5">

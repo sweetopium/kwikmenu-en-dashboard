@@ -44,13 +44,13 @@ export const BADGE_OPTIONS = [
 export const getBadgeMeta = (badge) =>
   BADGE_OPTIONS.find((item) => item.value === badge) || null;
 
-export const getLocalizedField = (entity, field, language, defaultLanguage = 'ru') => {
+export const getLocalizedField = (entity, field, language, defaultLanguage = 'en') => {
   if (!entity) return '';
   if (language === defaultLanguage) return entity[field] || '';
   return entity.translations?.[language]?.[field] || entity[field] || '';
 };
 
-export const setLocalizedField = (entity, field, value, language, defaultLanguage = 'ru') => {
+export const setLocalizedField = (entity, field, value, language, defaultLanguage = 'en') => {
   if (language === defaultLanguage) {
     return { ...entity, [field]: value };
   }
@@ -93,7 +93,7 @@ export const getItemPriceDisplay = (item, t) => {
   const variants = Array.isArray(item?.variants) ? item.variants.filter((variant) => variant?.price) : [];
   if (!variants.length) {
     if (!item?.price) return '';
-    return t ? t('menuEditor.priceValue', { price: item.price, defaultValue: `${item.price} ₽` }) : `${item.price} ₽`;
+    return t ? t('menuEditor.priceValue', { price: item.price, defaultValue: `${item.price}` }) : `${item.price}`;
   }
 
   const numericPrices = variants
@@ -109,12 +109,12 @@ export const getItemPriceDisplay = (item, t) => {
 
   if (minPrice === maxPrice) {
     const formatted = formatEditorPriceValue(minPrice);
-    return t ? t('menuEditor.priceValue', { price: formatted, defaultValue: `${formatted} ₽` }) : `${formatted} ₽`;
+    return t ? t('menuEditor.priceValue', { price: formatted, defaultValue: `${formatted}` }) : `${formatted}`;
   }
 
   const minFormatted = formatEditorPriceValue(minPrice);
   const maxFormatted = formatEditorPriceValue(maxPrice);
   return t
-    ? t('menuEditor.priceRange', { min: minFormatted, max: maxFormatted, defaultValue: `от ${minFormatted} до ${maxFormatted} ₽` })
-    : `от ${minFormatted} до ${maxFormatted} ₽`;
+    ? t('menuEditor.priceRange', { min: minFormatted, max: maxFormatted, defaultValue: `from ${minFormatted} to ${maxFormatted}` })
+    : `from ${minFormatted} to ${maxFormatted}`;
 };

@@ -35,9 +35,9 @@ class Settings(BaseSettings):
     menu_import_task_hard_time_limit_seconds: int = 70
     menu_import_max_items_per_single_category: int = 40
 
-    menu_import_frontend_origin: str = "http://localhost:5173"
+    menu_import_frontend_origin: str = "https://app.kwikme.nu"
     menu_import_frontend_origin_regex: str | None = None
-    menu_import_api_url: str = "http://localhost:8000"
+    menu_import_api_url: str = "https://app.kwikme.nu"
     public_menu_base_url: str | None = None
     admin_frontend_origin: str = "http://localhost:5174"
     admin_api_key: str | None = None
@@ -61,7 +61,7 @@ class Settings(BaseSettings):
     help_requests_telegram_chat_id: str | None = None
     telegram_api_base_url: str = "https://api.telegram.org"
 
-    currency: str = "RUB"
+    currency: str = "USD"
     billing_trial_days: int = 14
     billing_grace_period_days: int = 3
     billing_default_plan_code: str = "business"

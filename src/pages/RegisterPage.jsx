@@ -1,12 +1,11 @@
 import {useState} from "react";
 import {Link, useNavigate} from "react-router-dom";
 import {Loader2} from "lucide-react";
-import {FaYandex} from "react-icons/fa6";
-import {SiMaildotru} from "react-icons/si";
+import {FcGoogle} from "react-icons/fc";
 import {useTranslation} from "react-i18next";
 import AuthShell from "../components/auth/AuthShell.jsx";
-import SocialProviderButton from "../components/auth/SocialProviderButton.jsx";
 import AuthField from "../components/auth/AuthField.jsx";
+import SocialProviderButton from "../components/auth/SocialProviderButton.jsx";
 import {getPostRegisterRedirect, getProviderAuthUrl, registerWithEmail} from "../lib/auth.js";
 import { primaryActionButtonClasses } from "../lib/uiStyles.js";
 
@@ -69,6 +68,7 @@ const RegisterPage = () => {
       setSubmitError(t('register.errAgreeRequired'));
       return;
     }
+
     window.location.assign(getProviderAuthUrl(provider));
   };
 
@@ -110,10 +110,7 @@ const RegisterPage = () => {
       subtitle={t('register.subtitle')}
     >
       <div className="space-y-6 sm:space-y-8">
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-2">
-          <SocialProviderButton icon={FaYandex} label="Yandex" iconClassName="text-[#fc3f1d]" onClick={() => handleProviderClick("yandex")}/>
-          <SocialProviderButton icon={SiMaildotru} label="Mail.ru" iconClassName="text-[#005ff9]" onClick={() => handleProviderClick("mailru")}/>
-        </div>
+        <SocialProviderButton icon={FcGoogle} label="Continue with Google" onClick={() => handleProviderClick("google")}/>
 
         <div className="flex items-center gap-4 text-[11px] font-semibold uppercase tracking-[0.22em] text-muted-foreground sm:text-xs">
           <div className="h-px flex-1 bg-border"/>
@@ -179,7 +176,7 @@ const RegisterPage = () => {
             <label htmlFor="agree-legal" className="text-xs text-muted-foreground leading-normal cursor-pointer text-left mt-[4px]">
               {t('register.agreeLabel')}{' '}
               <a
-                href="https://kwikmenu.ru/terms"
+                href="https://kwikme.nu/terms"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-brand-purple font-semibold hover:underline"
@@ -188,7 +185,7 @@ const RegisterPage = () => {
               </a>{' '}
               {t('register.andWord')}{' '}
               <a
-                href="https://kwikmenu.ru/privacy"
+                href="https://kwikme.nu/privacy"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-brand-purple font-semibold hover:underline"

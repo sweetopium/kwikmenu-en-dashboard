@@ -73,7 +73,7 @@ const SimplePublicMenuTemplate = ({
   availableMenus = [],
 }) => {
   const payload = menu?.payload;
-  const defaultLanguage = payload?.defaultLanguage || 'ru';
+  const defaultLanguage = payload?.defaultLanguage || 'en';
   const [language, setLanguage] = useState(defaultLanguage);
   const [activeCategoryId, setActiveCategoryId] = useState(payload?.categories?.[0]?.id || '');
   const [passwordCopied, setPasswordCopied] = useState(false);
@@ -87,7 +87,7 @@ const SimplePublicMenuTemplate = ({
   const pendingCategoryIdRef = useRef(null);
 
   useEffect(() => {
-    setLanguage(payload?.defaultLanguage || 'ru');
+    setLanguage(payload?.defaultLanguage || 'en');
     setActiveCategoryId(payload?.categories?.[0]?.id || '');
     setIsDescExpanded(false);
   }, [payload?.defaultLanguage, payload?.categories, activeMenuId]);
@@ -171,7 +171,7 @@ const SimplePublicMenuTemplate = ({
   const venueDescription = getLocalizedField(payload?.venue, 'description', language, defaultLanguage) || venue?.description || payload?.venue?.description || '';
   const venueLogoUrl = venue?.design?.logoUrl || payload?.venue?.logoUrl || null;
   const showWifiCard = Boolean(venue?.wifi?.enabled && venue?.wifi?.ssid && venue?.wifi?.password);
-  const currencyCode = venue?.currency || payload?.currency || 'RUB';
+  const currencyCode = venue?.currency || payload?.currency || 'USD';
 
   useEffect(() => {
     if (!visibleLanguages.length) {
@@ -413,7 +413,7 @@ const SimplePublicMenuTemplate = ({
                           <div className="min-w-0 flex-1 space-y-2">
                             {!isItemAvailable && (
                               <span className="text-[10px] font-bold text-red-500 uppercase block mb-1">
-                                {language === 'ru' ? 'Нет в наличии' : 'Out of stock'}
+                                Out of stock
                               </span>
                             )}
                             <div className="flex flex-wrap items-center gap-2">
@@ -560,7 +560,7 @@ const SimplePublicMenuTemplate = ({
           <span>{language === 'en' ? 'Made in' : 'Сделано в'}</span>
           <a
             className="flex items-center gap-1.5 text-sm sm:text-base font-bold tracking-tight text-zinc-900 dark:text-zinc-100 transition-transform hover:scale-105"
-            href="https://kwikmenu.ru?utm_source=menu_footer"
+            href="https://kwikme.nu?utm_source=menu_footer"
             target="_blank"
             rel="noopener noreferrer"
           >

@@ -95,14 +95,14 @@ export const getLocalizedField = (entity, field, language, fallbackLanguage) => 
   return entity[field] || '';
 };
 
-export const formatMeasure = (value, unitCode, language = 'ru') => {
+export const formatMeasure = (value, unitCode, language = 'en') => {
   if (!isFilled(value)) {
     return '';
   }
 
   const normalizedUnit = unitCode ? String(unitCode).toLowerCase() : '';
-  const lang = String(language || 'ru').toLowerCase().split('-')[0];
-  const labels = UNIT_LABELS[lang] || UNIT_LABELS.ru;
+  const lang = String(language || 'en').toLowerCase().split('-')[0];
+  const labels = UNIT_LABELS[lang] || UNIT_LABELS.en;
   const unitLabel = labels[normalizedUnit];
 
   return unitLabel ? `${value} ${unitLabel}` : `${value}`;
@@ -153,7 +153,7 @@ const objectHasLanguageContent = (value, languageCode, shortLanguageCode) => {
   return Object.values(value).some((nestedValue) => objectHasLanguageContent(nestedValue, languageCode, shortLanguageCode));
 };
 
-export const getVisibleMenuLanguages = (payload, defaultLanguage = 'ru') => {
+export const getVisibleMenuLanguages = (payload, defaultLanguage = 'en') => {
   const configuredLanguages = payload?.languages || [];
 
   if (!configuredLanguages.length) {
@@ -166,7 +166,7 @@ export const getVisibleMenuLanguages = (payload, defaultLanguage = 'ru') => {
       return false;
     }
 
-    if (code === String(defaultLanguage || 'ru').trim().toLowerCase()) {
+    if (code === String(defaultLanguage || 'en').trim().toLowerCase()) {
       return true;
     }
 
@@ -215,7 +215,7 @@ export const getCurrencySymbol = (currencyCode) => {
   return CURRENCY_SYMBOLS[normalizedCode] || normalizedCode || '';
 };
 
-export const formatCurrency = (price, currencyCode = 'RUB') => {
+export const formatCurrency = (price, currencyCode = 'USD') => {
   if (!isFilled(price)) {
     return { amount: '', symbol: '' };
   }

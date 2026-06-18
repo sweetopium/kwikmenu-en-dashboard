@@ -117,11 +117,11 @@ const SidebarContent = ({ pathname, navItems, onNavigate, onLogout }) => {
   );
 };
 
-const formatDate = (value, lng = 'ru') => {
+const formatDate = (value, lng = 'en') => {
   if (!value) {
     return '—';
   }
-  const locale = lng === 'ru' ? 'ru-RU' : 'en-US';
+  const locale = 'en-US';
   return new Date(value).toLocaleDateString(locale);
 };
 

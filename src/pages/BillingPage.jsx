@@ -8,16 +8,16 @@ import SettingsPageHeader from "../components/settings/SettingsPageHeader";
 import { cancelBillingSubscription, fetchBillingSummary, syncBillingTransaction } from "../lib/billingApi";
 import { secondaryActionButtonClasses } from "../lib/uiStyles";
 
-const formatDate = (value, lng = 'ru') => {
+const formatDate = (value, lng = 'en') => {
   if (!value) {
     return '—';
   }
-  const locale = lng === 'ru' ? 'ru-RU' : 'en-US';
+  const locale = 'en-US';
   return new Date(value).toLocaleDateString(locale);
 };
 
-const formatAmount = (value, currency = 'RUB', lng = 'ru') => {
-  const locale = lng === 'ru' ? 'ru-RU' : 'en-US';
+const formatAmount = (value, currency = 'USD', lng = 'en') => {
+  const locale = 'en-US';
   return new Intl.NumberFormat(locale, { style: 'currency', currency, maximumFractionDigits: 0 }).format(value);
 };
 
@@ -39,7 +39,7 @@ const BillingPage = () => {
   }, []);
 
   const handleCancel = async () => {
-    if (!window.confirm(t('billing.cancelConfirm', 'Отключить автопродление подписки?'))) {
+    if (!window.confirm(t('billing.cancelConfirm', 'Disable subscription auto-renewal?'))) {
       return;
     }
     setIsCancelling(true);
@@ -74,8 +74,8 @@ const BillingPage = () => {
   return (
     <div className="mx-auto space-y-6 sm:space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700 ease-out">
       <SettingsPageHeader
-        title={t('billing.title', 'Биллинг')}
-        description={t('billing.description', 'Тариф, автопродление и история списаний по вашему аккаунту.')}
+        title={t('billing.title', 'Billing')}
+        description={t('billing.description', 'Plan, auto-renewal, and payment history for your account.')}
         actionLabel={null}
       />
 
@@ -89,17 +89,17 @@ const BillingPage = () => {
                 <ShieldCheck size={24} />
               </div>
               <div>
-                <h2 className="text-lg font-extrabold text-foreground">{subscription?.plan?.name || t('billing.subscription', 'Подписка')}</h2>
+                <h2 className="text-lg font-extrabold text-foreground">{subscription?.plan?.name || t('billing.subscription', 'Subscription')}</h2>
                 <p className="text-sm text-brand-purple font-bold">
-                  {t('billing.status', 'Статус')}: {subscription?.status ? t(`billing.statuses.${subscription.status}`, subscription.status) : t('common.loading', 'Загрузка...')}
-                  {subscription?.cancelAtPeriodEnd ? ` · ${t('billing.autoRenewalDisabled', 'автопродление отключено')}` : ''}
+                  {t('billing.status', 'Status')}: {subscription?.status ? t(`billing.statuses.${subscription.status}`, subscription.status) : t('common.loading', 'Loading...')}
+                  {subscription?.cancelAtPeriodEnd ? ` · ${t('billing.autoRenewalDisabled', 'auto-renewal disabled')}` : ''}
                 </p>
               </div>
             </div>
             <div className="text-left sm:text-right">
               <p className="text-2xl font-black text-foreground">
                 {subscription?.plan ? formatAmount(subscription.plan.priceAmount, subscription.plan.currency, lng) : '—'}
-                <span className="text-sm text-muted-foreground font-medium"> {t('billing.perMonth', '/ мес')}</span>
+                <span className="text-sm text-muted-foreground font-medium"> {t('billing.perMonth', '/ mo')}</span>
               </p>
             </div>
           </div>

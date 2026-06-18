@@ -1,0 +1,71 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: kwikmenu
+      POSTGRES_USER: kwikmenu
+      POSTGRES_PASSWORD: kwikmenu
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "${POSTGRES_PORT:-25432}:5432"
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    ports:
+      - "${REDIS_PORT:-26379}:6379"
+
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    env_file:
+      - backend/.env.local
+    depends_on:
+      - postgres
+      - redis
+    restart: unless-stopped
+    volumes:
+      - backend_data:/app/.data
+    ports:
+      - "${BACKEND_PORT:-28082}:8000"
+
+  worker:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    command: celery -A app.celery_app.celery_app worker --loglevel=info --concurrency=1
+    env_file:
+      - backend/.env.local
+    depends_on:
+      - postgres
+      - redis
+    restart: unless-stopped
+    volumes:
+      - backend_data:/app/.data
+
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    depends_on:
+      - backend
+    restart: unless-stopped
+    ports:
+      - "${FRONTEND_PORT:-28080}:80"
+
+  admin:
+    build:
+      context: .
+      dockerfile: admin/Dockerfile
+    depends_on:
+      - backend
+    restart: unless-stopped
+    ports:
+      - "${ADMIN_PORT:-28081}:80"
+
+volumes:
+  backend_data:
+  postgres_data:

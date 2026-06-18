@@ -303,7 +303,7 @@ const ItemModal = ({
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div className="space-y-2">
                   <Label className="text-xs text-muted-foreground">
-                    {t('menuEditor.itemModal.priceLabel', 'Цена (₽)')}
+                    {t('menuEditor.itemModal.priceLabel', 'Price')}
                   </Label>
 
                   <Input
@@ -399,7 +399,7 @@ const ItemModal = ({
 
                     <div className="w-[90px] sm:w-[100px] space-y-1.5">
                       <Label className="text-[10px] text-muted-foreground">
-                        {t('menuEditor.itemModal.priceLabel', 'Цена (₽)')}
+                        {t('menuEditor.itemModal.priceLabel', 'Price')}
                       </Label>
 
                       <Input

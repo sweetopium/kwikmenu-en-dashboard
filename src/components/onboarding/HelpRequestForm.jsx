@@ -28,8 +28,8 @@ const HelpRequestForm = ({ onClose = null }) => {
   const [messenger, setMessenger] = useState('telegram');
   const [city, setCity] = useState('');
   const [restaurant, setRestaurant] = useState('');
-  const [selectedCountry, setSelectedCountry] = useState('ru');
-  const [selectedDial, setSelectedDial] = useState('+7');
+  const [selectedCountry, setSelectedCountry] = useState('us');
+  const [selectedDial, setSelectedDial] = useState('+1');
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -136,7 +136,6 @@ const HelpRequestForm = ({ onClose = null }) => {
                   className={`${inputBaseClasses} pr-10 cursor-pointer text-[11px] sm:text-base`}
                 >
                   <option value="telegram">Telegram</option>
-                  <option value="max">Max</option>
                   <option value="whatsapp">WhatsApp*</option>
                   <option value="call">{t('helpForm.messengerOptions.call')}</option>
                 </select>
@@ -179,7 +178,7 @@ const HelpRequestForm = ({ onClose = null }) => {
             </div>
 
             <div className="rounded-2xl border border-brand-purple/10 bg-brand-purple/5 p-4 text-xs sm:text-sm text-muted-foreground leading-relaxed">
-              {t('helpForm.menuHandledByManager', 'Меню на этом этапе прикладывать не нужно. После заявки менеджер свяжется с вами и отдельно запросит материалы для переноса.')}
+              {t('helpForm.menuHandledByManager', 'You do not need to attach the menu at this stage. After submitting the request, a manager will contact you and ask for the materials separately.')}
             </div>
 
             <div className="pt-3 sm:pt-4">
@@ -236,7 +235,7 @@ const HelpRequestForm = ({ onClose = null }) => {
             <div className="flex items-center gap-3 sm:gap-4 w-full sm:w-auto">
               <img
                 src="https://storage.yandexcloud.net/ez-front/anna_kwikmenu.png"
-                alt="Анна"
+                alt={t('helpForm.managerName')}
                 className="w-12 h-12 sm:w-14 sm:h-14 rounded-full object-cover shadow-sm bg-secondary/50"
               />
               <div className="text-left">

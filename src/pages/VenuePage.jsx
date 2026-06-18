@@ -55,7 +55,7 @@ const EMPTY_VENUE = {
   city: '',
   country: '',
   instagramUrl: '',
-  currency: 'RUB',
+  currency: 'USD',
   publicUrl: '',
 };
 
@@ -77,7 +77,7 @@ const EMPTY_QR = {
   color: '#863bff',
   logoUrl: null,
   hasFrame: true,
-  frameText: 'СКАНИРУЙ МЕНЮ',
+  frameText: 'SCAN MENU',
   frameColor: '#08060d',
   publicMenuEnabled: true,
   publicPath: '',
@@ -145,17 +145,17 @@ const VenuePage = () => {
     () => [
       {
         id: 'classic',
-        label: t('venues.design.templates.classic', 'Классический'),
-        demoUrl: 'https://app.kwikmenu.ru/m/f17458fc-6895-4772-b6d0-800a2ad44527',
+        label: t('venues.design.templates.classic', 'Classic'),
+        demoUrl: null,
       },
       {
         id: 'minimal',
-        label: t('venues.design.templates.minimal', 'Продвинутый'),
-        demoUrl: 'https://app.kwikmenu.ru/m/497cea1f-62b6-4426-8372-1948fc67ed33',
+        label: t('venues.design.templates.minimal', 'Advanced'),
+        demoUrl: null,
       },
       {
         id: 'accent',
-        label: t('venues.design.templates.accent', 'Премиум'),
+        label: t('venues.design.templates.accent', 'Premium'),
         demoUrl: null,
       },
     ],
@@ -197,7 +197,7 @@ const VenuePage = () => {
       city: venue.city || '',
       country: venue.country || '',
       instagramUrl: venue.instagramUrl || '',
-      currency: venue.currency || settings?.currency || 'RUB',
+      currency: venue.currency || settings?.currency || 'USD',
       publicUrl: venue.publicUrl || settings?.qr?.publicUrl || '',
     });
     setPhoneCountryId(phoneParts.selectedCountryId);
@@ -221,7 +221,7 @@ const VenuePage = () => {
         color: settings.qr?.color || '#863bff',
         logoUrl: settings.qr?.logoUrl || null,
         hasFrame: settings.qr?.hasFrame ?? true,
-        frameText: settings.qr?.frameText || 'СКАНИРУЙ МЕНЮ',
+        frameText: settings.qr?.frameText || 'SCAN MENU',
         frameColor: settings.qr?.frameColor || '#08060d',
         publicMenuEnabled: settings.qr?.publicMenuEnabled ?? true,
         publicPath: settings.qr?.publicPath || '',
@@ -277,7 +277,7 @@ const VenuePage = () => {
         city: venueData.city || null,
         country: venueData.country || null,
         instagramUrl: venueData.instagramUrl || null,
-        currency: venueData.currency || 'RUB',
+        currency: venueData.currency || 'USD',
       });
       const phoneParts = resolvePhoneParts(venue.phone);
       setVenueData((current) => ({
@@ -288,7 +288,7 @@ const VenuePage = () => {
         city: venue.city || '',
         country: venue.country || '',
         instagramUrl: venue.instagramUrl || '',
-        currency: venue.currency || 'RUB',
+        currency: venue.currency || 'USD',
         publicUrl: venue.publicUrl || current.publicUrl,
       }));
       setPhoneCountryId(phoneParts.selectedCountryId);
@@ -374,7 +374,7 @@ const VenuePage = () => {
         color: settings.qr?.color || '#863bff',
         logoUrl: settings.qr?.logoUrl || null,
         hasFrame: settings.qr?.hasFrame ?? true,
-        frameText: settings.qr?.frameText || 'СКАНИРУЙ МЕНЮ',
+        frameText: settings.qr?.frameText || 'SCAN MENU',
         frameColor: settings.qr?.frameColor || '#08060d',
         publicMenuEnabled: settings.qr?.publicMenuEnabled ?? true,
         publicPath: settings.qr?.publicPath || '',

@@ -20,7 +20,7 @@ class PublicVenueQrResponse(StrictModel):
     color: str = "#863bff"
     logoUrl: str | None = None
     hasFrame: bool = True
-    frameText: str = "СКАНИРУЙ МЕНЮ"
+    frameText: str = "SCAN MENU"
     frameColor: str = "#08060d"
     publicPath: str
     publicUrl: str
@@ -34,7 +34,7 @@ class PublicVenueResponse(StrictModel):
     city: str | None = None
     country: str | None = None
     instagramUrl: str | None = None
-    currency: str = "RUB"
+    currency: str = "USD"
     publicPath: str
     publicUrl: str
     design: PublicVenueDesignResponse

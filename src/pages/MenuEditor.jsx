@@ -49,7 +49,7 @@ const MenuEditor = () => {
     return resolveMenuPayload();
   });
   const [activeCategoryId, setActiveCategoryId] = useState(menu.categories[0]?.id);
-  const [editorLanguage, setEditorLanguage] = useState(menu.defaultLanguage || 'ru');
+  const [editorLanguage, setEditorLanguage] = useState(menu.defaultLanguage || 'en');
   const [searchQuery, setSearchQuery] = useState('');
   const [editingCategory, setEditingCategory] = useState(null);
   const [editingItem, setEditingItem] = useState(null);
@@ -115,7 +115,7 @@ const MenuEditor = () => {
           setMenu(nextMenu);
           setMenuStatus(response.status || 'draft');
           setActiveCategoryId(nextMenu.categories[0]?.id || null);
-          setEditorLanguage(nextMenu.defaultLanguage || 'ru');
+          setEditorLanguage(nextMenu.defaultLanguage || 'en');
           setSearchQuery('');
         })
         .catch((error) => {
@@ -142,7 +142,7 @@ const MenuEditor = () => {
     setMenu(nextMenu);
     setMenuStatus('active');
     setActiveCategoryId(nextMenu.categories[0]?.id || null);
-    setEditorLanguage(nextMenu.defaultLanguage || 'ru');
+    setEditorLanguage(nextMenu.defaultLanguage || 'en');
     setSearchQuery('');
   }, [id]);
 
@@ -283,7 +283,7 @@ const MenuEditor = () => {
   };
 
   const handleSaveItem = () => {
-    const defaultLang = menu.defaultLanguage || 'ru';
+    const defaultLang = menu.defaultLanguage || 'en';
     const localizedName = getLocalizedField(editingItem, 'name', defaultLang, defaultLang) || 
                           getLocalizedField(editingItem, 'name', editorLanguage, defaultLang);
     if (!localizedName || !localizedName.trim()) {
@@ -713,12 +713,12 @@ const MenuEditor = () => {
                   </button>
                 </div>
 
-                {editorLanguage !== (menu.defaultLanguage || 'ru') && (
+                {editorLanguage !== (menu.defaultLanguage || 'en') && (
                   <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-violet-50 border border-violet-200/60 text-violet-700 text-xs font-bold shrink-0 shadow-sm animate-in fade-in duration-200 select-none">
                     <span>{currentLanguageMeta?.flag} {currentLanguageMeta?.nativeName}</span>
                     <button
                       type="button"
-                      onClick={() => setEditorLanguage(menu.defaultLanguage || 'ru')}
+                      onClick={() => setEditorLanguage(menu.defaultLanguage || 'en')}
                       className="hover:bg-violet-100 p-0.5 rounded transition-colors text-violet-500 hover:text-violet-700 cursor-pointer"
                       title={t('menuEditor.translationModal.btnSwitchDefault', 'Редактировать оригинал')}
                     >

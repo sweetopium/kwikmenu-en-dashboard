@@ -519,8 +519,8 @@ class MenuImportPipeline:
     def _merge_pages(self, *, extracted_pages: list[ExtractedPage], context: dict[str, str]) -> MenuPayload:
         category_map: dict[str, MenuCategory] = {}
         category_order: list[str] = []
-        discovered_languages = {"ru", "en"}
-        menu_name = context.get("restaurant_name") or "Импортированное меню"
+        discovered_languages = {"en"}
+        menu_name = context.get("restaurant_name") or "Imported Menu"
         menu_description = None
         venue_name = context.get("restaurant_name") or "KwikMenu Venue"
         active_category_key: str | None = None
@@ -828,7 +828,6 @@ class MenuImportPipeline:
 
     def _build_languages(self, codes: list[str]) -> list[MenuLanguage]:
         mapping = {
-            "ru": MenuLanguage(code="ru", shortLabel="RU", nativeName="Русский", flag="RU"),
             "en": MenuLanguage(code="en", shortLabel="EN", nativeName="English", flag="EN"),
         }
         languages: list[MenuLanguage] = []
