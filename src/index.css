@@ -9,7 +9,7 @@
     --font-heading: var(--font-sans);
     --font-sans: 'Geist Variable', sans-serif;
 
-    /* Кастомный акцентный цвет бренда (фиолетовый/индиго для AI-фич и иконок) */
+    /* Custom brand accent color for AI features and icons */
     --color-brand-purple: var(--brand-purple);
 
     --color-sidebar-ring: var(--sidebar-ring);
@@ -56,7 +56,7 @@
 }
 
 :root {
-    /* Идеальный белый фон и глубокий темно-синий/slate текст */
+    /* Clean white background and deep slate text */
     --background: oklch(1 0 0);
     --foreground: oklch(0.25 0.02 260);
 
@@ -65,38 +65,38 @@
     --popover: oklch(1 0 0);
     --popover-foreground: oklch(0.25 0.02 260);
 
-    /* Primary: Плотный темно-синий для главных кнопок */
+    /* Primary: dense dark slate for primary buttons */
     --primary: oklch(0.18 0.03 260);
-    --primary-foreground: oklch(0.985 0 0); /* Белый текст */
+    --primary-foreground: oklch(0.985 0 0); /* White text */
 
-    /* Фирменный фиолетовый акцент */
+    /* Brand purple accent */
     --brand-purple: oklch(0.6 0.18 280);
 
-    /* Secondary: Светло-серые плашки с легким холодным подтоном */
+    /* Secondary: light cool-gray surfaces */
     --secondary: oklch(0.96 0.01 260);
     --secondary-foreground: oklch(0.25 0.02 260);
 
-    /* Muted: Приглушенные фоны для инпутов, неактивный текст */
+    /* Muted: subdued input backgrounds and inactive text */
     --muted: oklch(0.96 0.01 260);
     --muted-foreground: oklch(0.55 0.01 260);
 
-    /* Accent: Hover стейты для прозрачных кнопок */
+    /* Accent: hover states for transparent buttons */
     --accent: oklch(0.96 0.01 260);
     --accent-foreground: oklch(0.25 0.02 260);
 
     --destructive: oklch(0.577 0.245 27.325);
 
-    /* Деликатные бордеры */
+    /* Subtle borders */
     --border: oklch(0.92 0.01 260);
     --input: oklch(0.92 0.01 260);
 
-    /* Строгий фокус ринг в цвет Primary */
+    /* Focus ring in primary color */
     --ring: oklch(0.18 0.03 260);
 
-    /* Увеличенные скругления для SaaS-эстетики */
+    /* Larger radii for SaaS surfaces */
     --radius: 1rem;
 
-    /* Сайдбар */
+    /* Sidebar */
     --sidebar: oklch(0.98 0.005 260);
     --sidebar-foreground: oklch(0.25 0.02 260);
     --sidebar-primary: oklch(0.18 0.03 260);
@@ -108,7 +108,7 @@
 }
 
 .dark {
-    /* Реверс для темной темы с сохранением холодного подтона */
+    /* Dark theme reverse with a cool tone */
     --background: oklch(0.15 0.02 260);
     --foreground: oklch(0.98 0.005 260);
 

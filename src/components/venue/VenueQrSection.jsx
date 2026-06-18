@@ -67,9 +67,9 @@ const VenueQrSection = ({ value, onChange, onSave, onDownload, onOpenPublicLink,
     <div className="space-y-6">
       <div className="bg-card border border-border/60 rounded-3xl shadow-sm overflow-hidden">
         <div className="p-6 sm:p-8 border-b border-border/50">
-          <h3 className="text-lg font-bold text-foreground">{t('venues.qr.title', 'QR и публичная ссылка')}</h3>
+          <h3 className="text-lg font-bold text-foreground">{t('venues.qr.title', 'QR and public link')}</h3>
           <p className="text-sm text-muted-foreground mt-1 max-w-2xl">
-            {t('venues.qr.subtitle', 'Для заведения используется один основной QR-код, который ведёт на публичное меню гостей.')}
+            {t('venues.qr.subtitle', 'Each venue uses one main QR code that opens the public guest menu.')}
           </p>
         </div>
 
@@ -115,7 +115,7 @@ const VenueQrSection = ({ value, onChange, onSave, onDownload, onOpenPublicLink,
                   className={`${primaryActionButtonClasses} px-5`}
                 >
                   <Save size={18} className="mr-2" />
-                  {isSaving ? t('common.saving', 'Сохраняем...') : t('venues.qr.btnSave', 'Сохранить QR')}
+                  {isSaving ? t('common.saving', 'Saving...') : t('venues.qr.btnSave', 'Save QR')}
                 </Button>
               </div>
             </div>

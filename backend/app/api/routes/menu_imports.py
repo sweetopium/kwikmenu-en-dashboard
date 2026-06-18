@@ -143,7 +143,7 @@ async def create_menu_import(
     except Exception as exc:  # noqa: BLE001
         logger.exception("Failed to enqueue menu import job job_id=%s error=%s", job.id, exc)
         job.status = MenuImportStatus.failed.value
-        job.error = "Сервис импорта сейчас недоступен. Попробуйте повторить загрузку через минуту."
+        job.error = "Menu import is temporarily unavailable. Try uploading again in a minute."
         db.add(job)
         db.commit()
         raise HTTPException(

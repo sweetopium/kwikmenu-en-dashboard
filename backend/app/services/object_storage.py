@@ -44,7 +44,7 @@ class ObjectStorageClient:
             return
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail="Хранилище медиа не настроено.",
+            detail="Media storage is not configured.",
         )
 
     def generate_menu_item_upload(self, *, user_id: str, filename: str, content_type: str) -> PresignedUpload:
@@ -55,7 +55,7 @@ class ObjectStorageClient:
         if extension is None:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Поддерживаются только изображения JPG, PNG и WEBP.",
+                detail="Only JPG, PNG, and WEBP images are supported.",
             )
 
         suffix = Path(filename).suffix.lower()
@@ -102,6 +102,6 @@ class ObjectStorageClient:
         if not endpoint or not bucket:
             raise HTTPException(
                 status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-                detail="Публичный URL для медиа не настроен.",
+                detail="Public media URL is not configured.",
             )
         return f"{endpoint}/{bucket}/{object_key}"

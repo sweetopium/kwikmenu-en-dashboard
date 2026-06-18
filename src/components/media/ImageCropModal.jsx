@@ -19,8 +19,8 @@ const ImageCropModal = ({ imageSrc, onCancel, onConfirm, isSubmitting = false })
       <div className="w-full max-w-3xl overflow-hidden rounded-[2rem] border border-border/50 bg-card shadow-2xl">
         <div className="flex items-center justify-between border-b border-border/60 bg-secondary/20 px-6 py-5">
           <div>
-            <h2 className="text-xl font-bold text-foreground">Обрезать фото блюда</h2>
-            <p className="mt-1 text-xs text-muted-foreground">Выберите кадр. Сохраним оптимизированную версию и подставим ссылку в блюдо.</p>
+            <h2 className="text-xl font-bold text-foreground">Crop item photo</h2>
+            <p className="mt-1 text-xs text-muted-foreground">Choose the frame. We will save an optimized version and add it to the item.</p>
           </div>
           <button
             type="button"
@@ -49,7 +49,7 @@ const ImageCropModal = ({ imageSrc, onCancel, onConfirm, isSubmitting = false })
 
           <div className="space-y-2">
             <div className="flex items-center justify-between text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-              <span>Масштаб</span>
+              <span>Zoom</span>
               <span>{zoom.toFixed(1)}x</span>
             </div>
             <input
@@ -65,7 +65,7 @@ const ImageCropModal = ({ imageSrc, onCancel, onConfirm, isSubmitting = false })
 
           <div className="flex flex-col gap-3 sm:flex-row">
             <Button type="button" variant="outline" className="sm:flex-1" onClick={onCancel} disabled={isSubmitting}>
-              Отмена
+              Cancel
             </Button>
             <Button
               type="button"
@@ -73,7 +73,7 @@ const ImageCropModal = ({ imageSrc, onCancel, onConfirm, isSubmitting = false })
               onClick={() => croppedAreaPixels && onConfirm(croppedAreaPixels)}
               disabled={!croppedAreaPixels || isSubmitting}
             >
-              {isSubmitting ? 'Загружаем...' : 'Сохранить фото'}
+              {isSubmitting ? 'Uploading...' : 'Save photo'}
             </Button>
           </div>
         </div>

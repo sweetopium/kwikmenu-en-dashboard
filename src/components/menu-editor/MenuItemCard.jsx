@@ -12,15 +12,15 @@ const MenuItemCard = ({ item, language, defaultLanguage, onEdit, onDelete, onTog
   return (
     <div className="group flex flex-col sm:flex-row sm:items-center bg-card border border-border/60 rounded-2xl shadow-sm hover:shadow-md hover:border-brand-purple/30 transition-all min-w-0 max-w-full overflow-hidden">
 
-      {/* --- ЛЕВАЯ ЧАСТЬ (Десктоп) / ВЕРХНЯЯ ЧАСТЬ (Мобилка) --- */}
+      {/* Main content on desktop, top section on mobile */}
       <div className="flex items-start sm:items-center gap-2.5 sm:gap-3 flex-1 min-w-0 p-3 sm:p-3.5 sm:pr-2">
 
-        {/* Драг-хэндл (Скрыт на мобилке) */}
+        {/* Drag handle, hidden on mobile */}
         <button className="text-muted-foreground/40 hover:text-foreground cursor-grab active:cursor-grabbing hidden sm:block shrink-0">
           <GripVertical size={18} />
         </button>
 
-        {/* Изображение */}
+        {/* Image */}
         <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-xl bg-secondary/50 flex items-center justify-center border border-border/50 shrink-0 overflow-hidden">
           {item.imageUrl ? (
             <img src={item.imageUrl} alt={name} className="w-full h-full object-cover" />
@@ -29,19 +29,19 @@ const MenuItemCard = ({ item, language, defaultLanguage, onEdit, onDelete, onTog
           )}
         </div>
 
-        {/* Инфо-блок */}
+        {/* Info block */}
         <div className="flex flex-col flex-1 min-w-0 pt-0.5">
 
-          {/* Категория блюда (при поиске) */}
+          {/* Item category shown during search */}
           {item.categoryName && (
             <span className="text-[10px] font-bold tracking-wider text-brand-purple uppercase mb-0.5">
               {item.categoryName}
             </span>
           )}
 
-          {/* Название и Цена */}
+          {/* Name and price */}
           <div className="flex items-start justify-between gap-2 min-w-0">
-            {/* Убрали truncate, добавили break-words и leading-snug для аккуратного переноса строк */}
+            {/* Allow clean wrapping for long names */}
             <h3 className="font-bold text-[13px] leading-snug sm:text-sm text-foreground break-words">
               {name}
             </h3>
@@ -52,14 +52,13 @@ const MenuItemCard = ({ item, language, defaultLanguage, onEdit, onDelete, onTog
             )}
           </div>
 
-          {/* Описание */}
-          {/* Убрали line-clamp-2, текст теперь выводится полностью */}
+          {/* Description */}
           <p className="text-[11px] sm:text-xs text-muted-foreground mt-0.5 break-words leading-relaxed">
             {desc || t('menuEditor.noDescription')}
             {item.measureValue && ` • ${formatMeasure(item.measureValue, item.measureUnit, t)}`}
           </p>
 
-          {/* Варианты (Чипсы) */}
+          {/* Variants */}
           {item.variants && item.variants.length > 0 && (
             <div className="flex flex-wrap gap-1.5 mt-2 min-w-0">
               {item.variants.map(v => (
@@ -76,17 +75,17 @@ const MenuItemCard = ({ item, language, defaultLanguage, onEdit, onDelete, onTog
         </div>
       </div>
 
-      {/* --- ПРАВАЯ ЧАСТЬ (Десктоп) / ФУТЕР ДЕЙСТВИЙ (Мобилка) --- */}
+      {/* Actions on desktop, footer on mobile */}
       <div className="flex items-center justify-between sm:justify-end gap-2.5 sm:gap-5 w-full sm:w-auto px-3 py-2 sm:p-3.5 sm:pl-2 bg-secondary/30 sm:bg-transparent border-t border-border/50 sm:border-t-0">
 
-        {/* Цена (Показывается ТОЛЬКО на десктопе) */}
+        {/* Desktop-only price */}
         {priceDisplay && (
           <div className="font-extrabold text-sm whitespace-nowrap text-foreground hidden sm:block">
             {priceDisplay}
           </div>
         )}
 
-        {/* Свитч */}
+        {/* Availability switch */}
         <div className="flex items-center h-full">
           <Switch
             checked={item.isAvailable !== false}
@@ -95,7 +94,7 @@ const MenuItemCard = ({ item, language, defaultLanguage, onEdit, onDelete, onTog
           />
         </div>
 
-        {/* Кнопки управления */}
+        {/* Controls */}
         <div className="flex items-center gap-2 shrink-0">
           <button
             onClick={() => onEdit(item)}

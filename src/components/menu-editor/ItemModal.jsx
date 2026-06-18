@@ -66,13 +66,13 @@ const ItemModal = ({
 
     const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
     if (!allowedTypes.includes(nextFile.type)) {
-      setImageError('Поддерживаются только JPG, PNG и WEBP.');
+      setImageError('Only JPG, PNG, and WEBP are supported.');
       event.target.value = '';
       return;
     }
 
     if (nextFile.size > 10 * 1024 * 1024) {
-      setImageError('Файл слишком большой. Максимум 10 МБ.');
+      setImageError('File is too large. Maximum size is 10 MB.');
       event.target.value = '';
       return;
     }
@@ -117,7 +117,7 @@ const ItemModal = ({
       URL.revokeObjectURL(cropSource);
       setCropSource(null);
     } catch (error) {
-      setImageError(error instanceof Error ? error.message : 'Не удалось загрузить изображение блюда.');
+      setImageError(error instanceof Error ? error.message : 'Could not upload item image.');
     } finally {
       setIsUploadingImage(false);
     }
@@ -143,11 +143,11 @@ const ItemModal = ({
         <div className="p-6 border-b border-border/60 flex items-center justify-between bg-secondary/20">
           <div>
             <h2 className="text-xl font-bold text-foreground">
-              {mode === 'add' ? t('menuEditor.itemModal.titleAdd', 'Новое блюдо') : t('menuEditor.itemModal.titleEdit', 'Редактирование блюда')}
+              {mode === 'add' ? t('menuEditor.itemModal.titleAdd', 'New item') : t('menuEditor.itemModal.titleEdit', 'Edit item')}
             </h2>
 
             <p className="text-xs text-muted-foreground mt-1">
-              {t('menuEditor.itemModal.subtitle', 'Изменения применятся после сохранения.')}
+              {t('menuEditor.itemModal.subtitle', 'Changes are applied after saving.')}
             </p>
           </div>
 
@@ -162,7 +162,7 @@ const ItemModal = ({
         <div className="p-6 overflow-y-auto space-y-6 bg-background custom-scrollbar">
           <div className="space-y-2">
             <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-              {t('menuEditor.itemModal.categoryLabel', 'Категория')}
+              {t('menuEditor.itemModal.categoryLabel', 'Category')}
             </Label>
 
             <div className="relative">
@@ -186,7 +186,7 @@ const ItemModal = ({
 
           <div className="space-y-2">
             <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-              {t('menuEditor.itemModal.nameLabel', 'Название')} ({language.toUpperCase()})
+              {t('menuEditor.itemModal.nameLabel', 'Name')} ({language.toUpperCase()})
             </Label>
 
             <Input
@@ -198,20 +198,20 @@ const ItemModal = ({
 
           <div className="space-y-2">
             <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-              {t('menuEditor.itemModal.descriptionLabel', 'Описание')} ({language.toUpperCase()})
+              {t('menuEditor.itemModal.descriptionLabel', 'Description')} ({language.toUpperCase()})
             </Label>
 
             <textarea
               value={localizedDescription || ''}
               onChange={(event) => onChange(setLocalizedField(item, 'description', event.target.value, language, defaultLanguage))}
               className={formTextareaClasses}
-              placeholder={t('menuEditor.itemModal.descriptionPlaceholder', 'Вкусное описание для гостей...')}
+              placeholder={t('menuEditor.itemModal.descriptionPlaceholder', 'A concise guest-facing description...')}
             />
           </div>
 
           <div className="space-y-2">
             <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-              {t('menuEditor.itemModal.imageLabel', 'Изображение блюда')}
+              {t('menuEditor.itemModal.imageLabel', 'Item image')}
             </Label>
 
             <div className="space-y-4 rounded-2xl border border-border/60 bg-secondary/15 p-4">
@@ -234,7 +234,7 @@ const ItemModal = ({
                       disabled={isUploadingImage}
                     >
                       <Upload size={16} className="mr-2" />
-                      {item.imageUrl ? 'Заменить фото' : 'Загрузить фото'}
+                      {item.imageUrl ? 'Replace photo' : 'Upload photo'}
                     </Button>
                     {item.imageUrl ? (
                       <Button
@@ -245,7 +245,7 @@ const ItemModal = ({
                         disabled={isUploadingImage}
                       >
                         <Trash2 size={16} className="mr-2" />
-                        Удалить фото
+                        Remove photo
                       </Button>
                     ) : null}
                   </div>
@@ -259,7 +259,7 @@ const ItemModal = ({
                   />
 
                   <p className="text-xs text-muted-foreground">
-                    JPG, PNG или WEBP до 10 МБ. Перед загрузкой можно подрезать кадр.
+                    JPG, PNG, or WEBP up to 10 MB. You can crop the image before upload.
                   </p>
                 </div>
               </div>
@@ -272,7 +272,7 @@ const ItemModal = ({
 
               <div className="space-y-2">
                 <Label className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
-                  Или вставьте ссылку вручную
+                  Or paste a direct link
                 </Label>
                 <Input
                   value={item.imageUrl || ''}
@@ -287,7 +287,7 @@ const ItemModal = ({
           <div className="bg-secondary/20 p-4 sm:p-5 rounded-2xl border border-border/50 space-y-4">
             <div className="flex items-center justify-between gap-3">
               <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                {t('menuEditor.itemModal.pricingVolumeLabel', 'Стоимость и объем')}
+                {t('menuEditor.itemModal.pricingVolumeLabel', 'Price and size')}
               </Label>
 
               <button
@@ -295,7 +295,7 @@ const ItemModal = ({
                 className="text-xs font-bold text-brand-purple flex items-center gap-1 hover:bg-brand-purple/10 px-2 py-1 rounded-md transition-colors shrink-0"
               >
                 <Plus size={14} />
-                {t('menuEditor.itemModal.btnAddOption', 'Добавить опцию')}
+                {t('menuEditor.itemModal.btnAddOption', 'Add option')}
               </button>
             </div>
 
@@ -310,13 +310,13 @@ const ItemModal = ({
                     value={item.price || ''}
                     onChange={(event) => onChange({ ...item, price: event.target.value })}
                     className={formFieldClasses}
-                    placeholder={t('menuEditor.itemModal.pricePlaceholder', 'Например: 350')}
+                    placeholder={t('menuEditor.itemModal.pricePlaceholder', 'E.g., 12')}
                   />
                 </div>
 
                 <div className="space-y-2">
                   <Label className="text-xs text-muted-foreground">
-                    {t('menuEditor.itemModal.measureValueLabel', 'Значение')}
+                    {t('menuEditor.itemModal.measureValueLabel', 'Value')}
                   </Label>
 
                   <Input
@@ -324,13 +324,13 @@ const ItemModal = ({
                     value={item.measureValue || ''}
                     onChange={(event) => onChange({ ...item, measureValue: event.target.value })}
                     className={formFieldClasses}
-                    placeholder={t('menuEditor.itemModal.measureValuePlaceholder', 'Например: 250')}
+                    placeholder={t('menuEditor.itemModal.measureValuePlaceholder', 'E.g., 250')}
                   />
                 </div>
 
                 <div className="space-y-2">
                   <Label className="text-xs text-muted-foreground">
-                    {t('menuEditor.itemModal.measureUnitLabel', 'Ед. изм.')}
+                    {t('menuEditor.itemModal.measureUnitLabel', 'Unit')}
                   </Label>
 
                   <MeasureUnitSelect
@@ -358,20 +358,20 @@ const ItemModal = ({
 
                     <div className="flex-1 min-w-[120px] space-y-1.5">
                       <Label className="text-[10px] text-muted-foreground">
-                        {t('menuEditor.itemModal.optionNameLabel', 'Название опции')} ({language.toUpperCase()})
+                        {t('menuEditor.itemModal.optionNameLabel', 'Option name')} ({language.toUpperCase()})
                       </Label>
 
                       <Input
                         value={getLocalizedField(variant, 'label', language, defaultLanguage)}
                         onChange={(event) => onVariantChange(index, 'label', event.target.value, language)}
                         className={`${formFieldClasses} h-11 text-xs px-3`}
-                        placeholder={t('menuEditor.itemModal.optionNamePlaceholder', 'Например: Гранд')}
+                        placeholder={t('menuEditor.itemModal.optionNamePlaceholder', 'E.g., Large')}
                       />
                     </div>
 
                     <div className="w-[80px] sm:w-[90px] space-y-1.5">
                       <Label className="text-[10px] text-muted-foreground">
-                        {t('menuEditor.itemModal.measureValueLabel', 'Значение')}
+                        {t('menuEditor.itemModal.measureValueLabel', 'Value')}
                       </Label>
 
                       <Input
@@ -385,7 +385,7 @@ const ItemModal = ({
 
                     <div className="w-[80px] sm:w-[90px] space-y-1.5">
                       <Label className="text-[10px] text-muted-foreground">
-                        {t('menuEditor.itemModal.measureUnitLabel', 'Ед. изм.')}
+                        {t('menuEditor.itemModal.measureUnitLabel', 'Unit')}
                       </Label>
 
                       <MeasureUnitSelect
@@ -417,7 +417,7 @@ const ItemModal = ({
 
           <div className="space-y-2">
             <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-              {t('menuEditor.itemModal.badgeLabel', 'Маркетинговый бейдж')}
+              {t('menuEditor.itemModal.badgeLabel', 'Marketing badge')}
             </Label>
 
             <div className="relative">
@@ -426,7 +426,7 @@ const ItemModal = ({
                 onChange={(event) => onChange({ ...item, badge: event.target.value || null })}
                 className={formSelectClasses}
               >
-                <option value="">{t('menuEditor.itemModal.noBadge', 'Без бейджа')}</option>
+                <option value="">{t('menuEditor.itemModal.noBadge', 'No badge')}</option>
                 {BADGE_OPTIONS.map((badge) => (
                   <option key={badge.value} value={badge.value}>
                     {t(`menuEditor.badges.${badge.value}`, { defaultValue: badge.label })}
@@ -442,7 +442,7 @@ const ItemModal = ({
 
           <div className="space-y-3">
             <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-              {t('menuEditor.itemModal.tagsLabel', 'Теги и аллергены')}
+              {t('menuEditor.itemModal.tagsLabel', 'Tags and allergens')}
             </Label>
 
             <div className="flex flex-wrap gap-2">
@@ -474,11 +474,11 @@ const ItemModal = ({
           <div className="flex items-center justify-between gap-4 p-4 bg-secondary/20 rounded-xl border border-border/50">
             <div>
               <Label className="text-sm font-bold text-foreground cursor-pointer">
-                {t('menuEditor.itemModal.availableInMenu', 'Отображать в меню')}
+                {t('menuEditor.itemModal.availableInMenu', 'Show in menu')}
               </Label>
 
               <p className="text-xs text-muted-foreground mt-0.5">
-                {t('menuEditor.itemModal.availableInMenuDesc', 'Выключите, если позиция закончилась (Стоп-лист)')}
+                {t('menuEditor.itemModal.availableInMenuDesc', 'Turn off if this item is unavailable.')}
               </p>
             </div>
 
@@ -496,7 +496,7 @@ const ItemModal = ({
             onClick={onCancel}
             className={secondaryActionButtonClasses}
           >
-            {t('common.cancel', 'Отмена')}
+            {t('common.cancel', 'Cancel')}
           </Button>
 
           <Button
@@ -504,7 +504,7 @@ const ItemModal = ({
             disabled={!getLocalizedField(item, 'name', defaultLanguage, defaultLanguage).trim()}
             className={`${primaryActionButtonClasses} px-6`}
           >
-            {mode === 'add' ? t('menuEditor.itemModal.btnAddItemSubmit', 'Добавить блюдо') : t('menuEditor.itemModal.btnSaveItemSubmit', 'Сохранить изменения')}
+            {mode === 'add' ? t('menuEditor.itemModal.btnAddItemSubmit', 'Add item') : t('menuEditor.itemModal.btnSaveItemSubmit', 'Save changes')}
           </Button>
         </div>
       </div>

@@ -33,16 +33,16 @@ const VenueListPage = () => {
           <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-5">
             <div className="min-w-0">
               <h1 className="text-2xl sm:text-3xl font-extrabold text-foreground tracking-tight">
-                {t('venues.title', 'Заведения')}
+                {t('venues.title', 'Venues')}
               </h1>
               <p className="text-sm text-muted-foreground mt-2 max-w-2xl leading-relaxed">
-                {t('venues.subtitle', 'Выберите заведение, чтобы открыть его профиль, Wi‑Fi и внешний вид меню.')}
+                {t('venues.subtitle', 'Select a venue to open its profile, Wi-Fi, and menu appearance settings.')}
               </p>
             </div>
 
             <div className="w-full sm:w-auto shrink-0">
               <Button className={`${primaryActionButtonClasses} px-5 shrink-0 cursor-pointer`}>
-                {t('venues.btnAddVenue', 'Добавить заведение')}
+                {t('venues.btnAddVenue', 'Add venue')}
               </Button>
             </div>
           </div>
@@ -61,7 +61,7 @@ const VenueListPage = () => {
               </div>
 
               <div className="px-3 py-1 bg-green-500/10 text-green-600 text-[11px] font-bold uppercase tracking-wider rounded-lg border border-green-500/20">
-                {t('venues.status.active', 'Активно')}
+                {t('venues.status.active', 'Active')}
               </div>
             </div>
 
@@ -82,14 +82,14 @@ const VenueListPage = () => {
             <div className="flex flex-wrap items-center gap-3 mb-6">
               <div className="flex items-center gap-2 bg-secondary/50 px-3 py-1.5 rounded-xl border border-border/50">
                 <FolderOpen size={14} className="text-muted-foreground" />
-                <span className="text-xs font-semibold text-muted-foreground">{t('venues.menuCountBadge', 'Меню')}</span>
+                <span className="text-xs font-semibold text-muted-foreground">{t('venues.menuCountBadge', 'Menu')}</span>
                 <span className="text-xs font-black text-foreground">{venue.menusCount}</span>
               </div>
 
               <div className="flex items-center gap-2 bg-secondary/50 px-3 py-1.5 rounded-xl border border-border/50">
                 <LinkIcon size={14} className="text-muted-foreground" />
                 <span className="text-xs font-semibold text-muted-foreground">
-                  {venue.publicPath || t('venues.noPublicLink', 'Без ссылки')}
+                  {venue.publicPath || t('venues.noPublicLink', 'No link')}
                 </span>
               </div>
 
@@ -102,7 +102,7 @@ const VenueListPage = () => {
             <div className="flex items-center justify-between mt-auto pt-3 md:pt-4 border-t border-border/50 gap-4 -mb-2 md:-mb-0">
               <div className="flex items-center gap-2 text-muted-foreground">
                 <Calendar size={14} />
-                <span className="text-[11px] font-medium">{new Date(venue.updatedAt).toLocaleString(i18n.language || 'ru-RU')}</span>
+                <span className="text-[11px] font-medium">{new Date(venue.updatedAt).toLocaleString(i18n.language || 'en-US')}</span>
               </div>
 
               <div className="flex items-center gap-2">
@@ -114,7 +114,7 @@ const VenueListPage = () => {
                   to={`/dashboard/venues/${venue.id}`}
                   className="h-10 sm:h-12 px-4 rounded-lg bg-foreground hover:bg-foreground/90 text-background font-bold text-sm flex items-center gap-2 transition-all shadow-sm cursor-pointer"
                 >
-                  {t('venues.btnOpen', 'Открыть')}
+                  {t('venues.btnOpen', 'Open')}
                   <ArrowRight size={16} />
                 </Link>
               </div>

@@ -57,60 +57,60 @@ def list_steps(
         default_steps = [
             EmailCampaignStep(
                 step_number=1,
-                name="Добро пожаловать (сразу)",
+                name="Welcome (immediate)",
                 delay_hours=0,
-                subject="Добро пожаловать в KwikMenu!",
+                subject="Welcome to KwikMenu!",
                 body_html="""<div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #eee; border-radius: 10px;">
-  <h2 style="color: #6d67eb;">Приветствуем в KwikMenu, {{name}}!</h2>
-  <p>Мы рады, что вы присоединились к нам. KwikMenu поможет вашему ресторану создать стильное бесконтактное интерактивное меню по QR-коду за считанные минуты.</p>
-  <p>Чтобы начать работу, перейдите в ваш личный кабинет:</p>
+  <h2 style="color: #6d67eb;">Welcome to KwikMenu, {{name}}!</h2>
+  <p>We're glad you joined us. KwikMenu helps your restaurant create a polished contactless QR menu in minutes.</p>
+  <p>To get started, open your dashboard:</p>
   <div style="text-align: center; margin: 30px 0;">
-    <a href="{{dashboard_url}}" style="background-color: #6d67eb; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-weight: bold; display: inline-block;">Начать настройку</a>
+    <a href="{{dashboard_url}}" style="background-color: #6d67eb; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-weight: bold; display: inline-block;">Start setup</a>
   </div>
-  <p>Если возникнут вопросы, просто ответьте на это письмо — наша поддержка всегда на связи!</p>
+  <p>If you have questions, reply to this email and our support team will help.</p>
   <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;">
-  <p style="font-size: 12px; color: #888;">Вы получили это письмо, так как зарегистрировались на сайте KwikMenu.ru</p>
+  <p style="font-size: 12px; color: #888;">You received this email because you signed up for KwikMenu.</p>
 </div>""",
                 condition_rule="always",
                 is_active=True,
             ),
             EmailCampaignStep(
                 step_number=2,
-                name="Напоминание (через 24 часа)",
+                name="Reminder (after 24 hours)",
                 delay_hours=24,
-                subject="Создайте ваше заведение в KwikMenu",
+                subject="Create your venue in KwikMenu",
                 body_html="""<div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #eee; border-radius: 10px;">
-  <h2 style="color: #6d67eb;">{{name}}, ваше меню еще не создано</h2>
-  <p>Мы заметили, что вы зарегистрировались, но еще не добавили ваше первое заведение. Это займет всего 2 минуты!</p>
-  <p>После создания заведения вы сможете:</p>
+  <h2 style="color: #6d67eb;">{{name}}, your menu is not created yet</h2>
+  <p>We noticed that you signed up but have not added your first venue yet. It only takes a couple of minutes.</p>
+  <p>After creating a venue, you can:</p>
   <ul>
-    <li>Добавить категории блюд и напитков.</li>
-    <li>Загрузить фотографии.</li>
-    <li>Скачать уникальный дизайн QR-кода для столов.</li>
+    <li>Add food and drink categories.</li>
+    <li>Upload photos.</li>
+    <li>Download a unique QR design for your tables.</li>
   </ul>
   <div style="text-align: center; margin: 30px 0;">
-    <a href="{{dashboard_url}}" style="background-color: #6d67eb; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-weight: bold; display: inline-block;">Создать заведение</a>
+    <a href="{{dashboard_url}}" style="background-color: #6d67eb; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-weight: bold; display: inline-block;">Create venue</a>
   </div>
   <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;">
-  <p style="font-size: 12px; color: #888;">Если вы больше не хотите получать эти письма, вы можете отписаться.</p>
+  <p style="font-size: 12px; color: #888;">If you no longer want to receive these emails, you can unsubscribe.</p>
 </div>""",
                 condition_rule="no_venue",
                 is_active=True,
             ),
             EmailCampaignStep(
                 step_number=3,
-                name="Напоминание о меню (через 72 часа)",
+                name="Menu reminder (after 72 hours)",
                 delay_hours=72,
-                subject="Добавьте блюда в меню",
+                subject="Add items to your menu",
                 body_html="""<div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #eee; border-radius: 10px;">
-  <h2 style="color: #6d67eb;">{{name}}, добавьте меню в KwikMenu</h2>
-  <p>Вы создали заведение, но в нем еще нет меню или категорий блюд. Давайте это исправим!</p>
-  <p>Красивое и структурированное меню повышает средний чек заведения на 15-20% за счет легкого заказа и качественных фото.</p>
+  <h2 style="color: #6d67eb;">{{name}}, add your menu to KwikMenu</h2>
+  <p>You created a venue, but it does not have menu categories or items yet. Let's fix that.</p>
+  <p>A polished, structured menu helps guests browse faster and makes your best dishes easier to discover.</p>
   <div style="text-align: center; margin: 30px 0;">
-    <a href="{{dashboard_url}}" style="background-color: #6d67eb; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-weight: bold; display: inline-block;">Заполнить меню</a>
+    <a href="{{dashboard_url}}" style="background-color: #6d67eb; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-weight: bold; display: inline-block;">Fill menu</a>
   </div>
   <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;">
-  <p style="font-size: 12px; color: #888;">С уважением, команда KwikMenu.</p>
+  <p style="font-size: 12px; color: #888;">Regards, the KwikMenu team.</p>
 </div>""",
                 condition_rule="no_menu",
                 is_active=True,

@@ -23,7 +23,7 @@ def create_user(db: Session, *, name: str, email: str, password: str) -> User:
     normalized_email = email.strip().lower()
     existing_user = db.query(User).filter(User.email == normalized_email).first()
     if existing_user:
-        raise ValueError("Пользователь с таким email уже существует.")
+        raise ValueError("A user with this email already exists.")
 
     user = User(
         name=name.strip(),
@@ -45,7 +45,7 @@ def create_oauth_user(db: Session, *, name: str, email: str) -> User:
     normalized_email = email.strip().lower()
     existing_user = db.query(User).filter(User.email == normalized_email).first()
     if existing_user:
-        raise ValueError("Пользователь с таким email уже существует.")
+        raise ValueError("A user with this email already exists.")
 
     user = User(
         name=name.strip(),
@@ -67,9 +67,9 @@ def authenticate_user(db: Session, *, email: str, password: str) -> User:
     normalized_email = email.strip().lower()
     user = db.query(User).filter(User.email == normalized_email).first()
     if user is None or not user.password_hash or not verify_password(password, user.password_hash):
-        raise ValueError("Неверный email или пароль.")
+        raise ValueError("Invalid email or password.")
     if not user.is_active:
-        raise ValueError("Пользователь деактивирован.")
+        raise ValueError("User account is deactivated.")
     return user
 
 
@@ -77,7 +77,7 @@ def update_user_profile(db: Session, *, user: User, name: str, email: str, phone
     normalized_email = email.strip().lower()
     existing_user = db.query(User).filter(User.email == normalized_email, User.id != user.id).first()
     if existing_user:
-        raise ValueError("Пользователь с таким email уже существует.")
+        raise ValueError("A user with this email already exists.")
 
     user.name = name.strip()
     user.email = normalized_email
@@ -95,9 +95,9 @@ def update_user_password(
     new_password: str,
 ) -> User:
     if not user.password_hash:
-        raise ValueError("Смена пароля недоступна для этого способа входа.")
+        raise ValueError("Password changes are not available for this sign-in method.")
     if not verify_password(current_password, user.password_hash):
-        raise ValueError("Текущий пароль указан неверно.")
+        raise ValueError("Current password is incorrect.")
 
     user.password_hash = hash_password(new_password)
     db.add(user)
@@ -147,7 +147,7 @@ def find_or_create_oauth_user(
     if existing_account:
         user = existing_account.user
         if not user.is_active:
-            raise ValueError("Пользователь деактивирован.")
+            raise ValueError("User account is deactivated.")
         if email and not existing_account.email:
             existing_account.email = email.strip().lower()
             db.add(existing_account)
@@ -160,7 +160,7 @@ def find_or_create_oauth_user(
         fallback_email = normalized_email or f"{provider}_{provider_account_id}@oauth.kwikmenu.app"
         user = create_oauth_user(db, name=name, email=fallback_email)
     elif not user.is_active:
-        raise ValueError("Пользователь деактивирован.")
+        raise ValueError("User account is deactivated.")
 
     auth_account = AuthAccount(
         user_id=user.id,

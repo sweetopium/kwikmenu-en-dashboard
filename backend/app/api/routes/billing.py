@@ -159,7 +159,7 @@ def _sync_transaction_record(
     subscription = ensure_default_subscription(db, current_user)
     unitpay = UnitPayClient()
     if not transaction.unitpay_payment_id:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Платеж не содержит UnitPay ID.")
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Payment does not contain a UnitPay ID.")
 
     payment_payload = unitpay.get_payment(payment_id=transaction.unitpay_payment_id)
     payment_result = payment_payload.get("result") or {}
@@ -311,7 +311,7 @@ def create_test_subscription_charge(
     if not unitpay.settings.unitpay_test_mode:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Тестовое списание по subscriptionId доступно только при UNITPAY_TEST_MODE=true.",
+            detail="Test subscriptionId charges are available only when UNITPAY_TEST_MODE=true.",
         )
 
     subscription = ensure_default_subscription(db, current_user)
@@ -323,7 +323,7 @@ def create_test_subscription_charge(
             .first()
         )
         if requested_plan is None:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Тариф не найден.")
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Plan not found.")
         plan = requested_plan
 
     description = f"KwikMenu {plan.name} subscription"
@@ -435,7 +435,7 @@ def sync_transaction(
 ) -> BillingSyncResponse:
     transaction = _get_transaction_for_user(db, current_user, payment_id)
     if transaction is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Платеж не найден.")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Payment not found.")
     return _sync_transaction_record(transaction=transaction, current_user=current_user, db=db)
 
 
@@ -447,7 +447,7 @@ def sync_transaction_by_unitpay_payment_id(
 ) -> BillingSyncResponse:
     transaction = _get_transaction_for_user_by_unitpay_id(db, current_user, unitpay_payment_id)
     if transaction is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Платеж не найден.")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Payment not found.")
     return _sync_transaction_record(transaction=transaction, current_user=current_user, db=db)
 
 
@@ -630,4 +630,4 @@ def handle_unitpay_callback(
     db.add(subscription)
     db.commit()
 
-    return {"result": {"message": "Запрос успешно обработан"}}
+    return {"result": {"message": "Request processed successfully"}}

@@ -24,7 +24,7 @@ export const DialPhoneField = ({
   selectWrapperClassName = 'w-[100px] sm:w-[120px]',
 }) => {
   const { t } = useTranslation();
-  const displayLabel = label !== undefined ? label : t('common.phone', { defaultValue: 'Контактный телефон' });
+  const displayLabel = label !== undefined ? label : t('common.phone', { defaultValue: 'Contact phone' });
 
   return (
     <div className="space-y-1.5 sm:space-y-2">
@@ -150,7 +150,7 @@ export const CountryField = ({
   required = false,
 }) => {
   const { t } = useTranslation();
-  const displayLabel = label !== undefined ? label : t('common.country', { defaultValue: 'Страна' });
+  const displayLabel = label !== undefined ? label : t('common.country', { defaultValue: 'Country' });
 
   return (
     <div className="space-y-1.5 sm:space-y-2">

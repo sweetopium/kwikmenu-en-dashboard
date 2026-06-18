@@ -54,7 +54,7 @@ const AccountPage = () => {
         });
       })
       .catch((nextError) => {
-        setError(nextError.message || t('account.errors.loadFailed', 'Не удалось загрузить аккаунт.'));
+        setError(nextError.message || t('account.errors.loadFailed', 'Could not load account.'));
       })
       .finally(() => setIsLoading(false));
   }, [t]);
@@ -63,12 +63,12 @@ const AccountPage = () => {
   const linkedProvidersLabel = useMemo(() => {
     const externalProviders = profile.authProviders.filter((provider) => provider !== 'password');
     if (!externalProviders.length) {
-      return t('account.password.providers.external', 'через внешний провайдер');
+      return t('account.password.providers.external', 'via external provider');
     }
 
     const providerLabels = {
       google: 'Google',
-      yandex: t('account.password.providers.yandex', 'Яндекс'),
+      yandex: t('account.password.providers.yandex', 'Yandex'),
       mailru: t('account.password.providers.mailru', 'Mail.ru'),
     };
 
@@ -94,7 +94,7 @@ const AccountPage = () => {
         authProviders: Array.isArray(user.authProviders) ? user.authProviders : current.authProviders,
       }));
     } catch (nextError) {
-      setError(nextError.message || t('account.errors.saveFailed', 'Не удалось сохранить профиль.'));
+      setError(nextError.message || t('account.errors.saveFailed', 'Could not save profile.'));
     } finally {
       setSavingProfile(false);
     }
@@ -120,7 +120,7 @@ const AccountPage = () => {
         confirmPassword: '',
       });
     } catch (nextError) {
-      setError(nextError.message || t('account.errors.passwordFailed', 'Не удалось обновить пароль.'));
+      setError(nextError.message || t('account.errors.passwordFailed', 'Could not update password.'));
     } finally {
       setSavingPassword(false);
     }
@@ -130,12 +130,12 @@ const AccountPage = () => {
     return (
       <div className="mx-auto space-y-6 sm:space-y-8">
         <SettingsPageHeader
-          title={t('account.title', 'Аккаунт')}
-          description={t('account.subtitle', 'Управляйте личными данными и уведомлениями')}
+          title={t('account.title', 'Account')}
+          description={t('account.subtitle', 'Manage personal details and notifications')}
           actionLabel={null}
         />
         <div className="bg-card border border-border/60 rounded-3xl shadow-sm p-8 text-sm text-muted-foreground">
-          {t('account.loading', 'Загружаем настройки аккаунта...')}
+          {t('account.loading', 'Loading account settings...')}
         </div>
       </div>
     );
@@ -144,8 +144,8 @@ const AccountPage = () => {
   return (
     <div className="mx-auto space-y-6 sm:space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700 ease-out">
       <SettingsPageHeader
-        title={t('account.title', 'Аккаунт')}
-        description={t('account.subtitle', 'Управляйте личными данными и уведомлениями')}
+        title={t('account.title', 'Account')}
+        description={t('account.subtitle', 'Manage personal details and notifications')}
         actionLabel={null}
       />
 
@@ -163,14 +163,14 @@ const AccountPage = () => {
                 <UserRound size={20} />
               </div>
               <div>
-                <h2 className="text-lg font-bold text-foreground">{t('account.profile.title', 'Профиль владельца')}</h2>
-                <p className="text-sm text-muted-foreground">{t('account.profile.subtitle', 'Контакты для входа, уведомлений и связи с поддержкой.')}</p>
+                <h2 className="text-lg font-bold text-foreground">{t('account.profile.title', 'Owner profile')}</h2>
+                <p className="text-sm text-muted-foreground">{t('account.profile.subtitle', 'Contacts for login, notifications, and support.')}</p>
               </div>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
               <div className="space-y-2 sm:col-span-2">
-                <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">{t('account.profile.name', 'Имя и фамилия')}</Label>
+                <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">{t('account.profile.name', 'Full name')}</Label>
                 <Input
                   value={profile.name}
                   onChange={(e) => setProfile({ ...profile, name: e.target.value })}
@@ -186,7 +186,7 @@ const AccountPage = () => {
                 />
               </div>
               <div className="space-y-2">
-                <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">{t('account.profile.phone', 'Телефон')}</Label>
+                <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">{t('account.profile.phone', 'Phone')}</Label>
                 <Input
                   value={profile.phone}
                   onChange={(e) => setProfile({ ...profile, phone: e.target.value })}
@@ -198,7 +198,7 @@ const AccountPage = () => {
             <div className="pt-4 border-t border-border/50 flex justify-end">
               <Button onClick={handleProfileSave} disabled={savingProfile} className={`${primaryActionButtonClasses} px-5`}>
                 <Save size={18} className="mr-2" />
-                {savingProfile ? t('common.saving', 'Сохраняем...') : t('common.save', 'Сохранить')}
+                {savingProfile ? t('common.saving', 'Saving...') : t('common.save', 'Save')}
               </Button>
             </div>
           </section>
@@ -209,16 +209,16 @@ const AccountPage = () => {
                 <Bell size={20} />
               </div>
               <div>
-                <h2 className="text-lg font-bold text-foreground">{t('account.notifications.title', 'Уведомления')}</h2>
-                <p className="text-sm text-muted-foreground">{t('account.notifications.subtitle', 'Выберите, какие письма и системные уведомления вы хотите получать.')}</p>
+                <h2 className="text-lg font-bold text-foreground">{t('account.notifications.title', 'Notifications')}</h2>
+                <p className="text-sm text-muted-foreground">{t('account.notifications.subtitle', 'Choose which emails and system notifications you want to receive.')}</p>
               </div>
             </div>
 
             <div className="space-y-4">
               {[
-                ['productUpdates', t('account.notifications.productUpdates', 'Новости продукта и новые функции')],
-                ['paymentAlerts', t('account.notifications.paymentAlerts', 'Счета, платежи и продление тарифа')],
-                ['weeklyDigest', t('account.notifications.weeklyDigest', 'Еженедельная сводка по просмотрам меню')],
+                ['productUpdates', t('account.notifications.productUpdates', 'Product updates and new features')],
+                ['paymentAlerts', t('account.notifications.paymentAlerts', 'Invoices, payments, and plan renewals')],
+                ['weeklyDigest', t('account.notifications.weeklyDigest', 'Weekly menu views digest')],
               ].map(([key, label]) => (
                 <div key={key} className="flex items-center justify-between gap-4 rounded-2xl border border-border/60 bg-secondary/15 px-4 py-4">
                   <div>
@@ -236,7 +236,7 @@ const AccountPage = () => {
             <div className="pt-4 border-t border-border/50 flex justify-end">
               <Button className={`${primaryActionButtonClasses} px-5`}>
                 <Save size={18} className="mr-2" />
-                {t('common.save', 'Сохранить')}
+                {t('common.save', 'Save')}
               </Button>
             </div>
           </section>
@@ -250,58 +250,58 @@ const AccountPage = () => {
               </div>
               <div>
                 <h2 className="text-lg font-bold text-foreground">
-                  {providerOnly ? t('account.password.authMethod', 'Способ входа') : t('account.password.title', 'Пароль')}
+                  {providerOnly ? t('account.password.authMethod', 'Login method') : t('account.password.title', 'Password')}
                 </h2>
                 <p className="text-sm text-muted-foreground">
                   {providerOnly
-                    ? t('account.password.externalLogin', 'Вы входите через {{provider}}. Смена пароля недоступна.', { provider: linkedProvidersLabel })
-                    : t('account.password.updateHint', 'Обновите пароль для входа в кабинет.')}
+                    ? t('account.password.externalLogin', 'You sign in via {{provider}}. Password changes are unavailable.', { provider: linkedProvidersLabel })
+                    : t('account.password.updateHint', 'Update the password used to sign in.')}
                 </p>
               </div>
             </div>
 
             <div className="space-y-4">
               <div className="space-y-2">
-                <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">{t('account.password.current', 'Текущий пароль')}</Label>
+                <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">{t('account.password.current', 'Current password')}</Label>
                 <Input
                   type="password"
                   className={formFieldClasses}
-                  value={providerOnly ? t('account.password.placeholders.unavailable', 'Недоступно') : passwordForm.currentPassword}
+                  value={providerOnly ? t('account.password.placeholders.unavailable', 'Unavailable') : passwordForm.currentPassword}
                   onChange={(e) => setPasswordForm({ ...passwordForm, currentPassword: e.target.value })}
                   readOnly={providerOnly}
                   disabled={providerOnly}
-                  placeholder={providerOnly ? t('account.password.placeholders.unavailableExternal', 'Недоступно для внешнего входа') : ''}
+                  placeholder={providerOnly ? t('account.password.placeholders.unavailableExternal', 'Unavailable for external login') : ''}
                 />
               </div>
               <div className="space-y-2">
-                <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">{t('account.password.new', 'Новый пароль')}</Label>
+                <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">{t('account.password.new', 'New password')}</Label>
                 <Input
                   type="password"
                   className={formFieldClasses}
-                  value={providerOnly ? t('account.password.placeholders.unavailable', 'Недоступно') : passwordForm.newPassword}
+                  value={providerOnly ? t('account.password.placeholders.unavailable', 'Unavailable') : passwordForm.newPassword}
                   onChange={(e) => setPasswordForm({ ...passwordForm, newPassword: e.target.value })}
                   readOnly={providerOnly}
                   disabled={providerOnly}
-                  placeholder={providerOnly ? t('account.password.placeholders.changeUnavailable', 'Смена пароля недоступна') : t('account.password.placeholders.minChars', 'Минимум 8 символов')}
+                  placeholder={providerOnly ? t('account.password.placeholders.changeUnavailable', 'Changing password is unavailable') : t('account.password.placeholders.minChars', 'Minimum 8 characters')}
                 />
               </div>
               <div className="space-y-2">
-                <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">{t('account.password.confirm', 'Повторите новый пароль')}</Label>
+                <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">{t('account.password.confirm', 'Confirm new password')}</Label>
                 <Input
                   type="password"
                   className={formFieldClasses}
-                  value={providerOnly ? t('account.password.placeholders.unavailable', 'Недоступно') : passwordForm.confirmPassword}
+                  value={providerOnly ? t('account.password.placeholders.unavailable', 'Unavailable') : passwordForm.confirmPassword}
                   onChange={(e) => setPasswordForm({ ...passwordForm, confirmPassword: e.target.value })}
                   readOnly={providerOnly}
                   disabled={providerOnly}
-                  placeholder={providerOnly ? t('account.password.placeholders.changeUnavailable', 'Смена пароля недоступна') : t('account.password.placeholders.repeat', 'Повторите пароль')}
+                  placeholder={providerOnly ? t('account.password.placeholders.changeUnavailable', 'Changing password is unavailable') : t('account.password.placeholders.repeat', 'Repeat password')}
                 />
               </div>
             </div>
 
             {providerOnly ? (
               <p className="text-sm text-muted-foreground">
-                {t('account.password.warningExternal', 'Смена пароля недоступна, потому что этот аккаунт использует вход через {{provider}}.', { provider: linkedProvidersLabel })}
+                {t('account.password.warningExternal', 'Password changes are unavailable because this account uses {{provider}} login.', { provider: linkedProvidersLabel })}
               </p>
             ) : null}
 
@@ -312,7 +312,7 @@ const AccountPage = () => {
                 disabled={providerOnly || savingPassword}
                 className={`${secondaryActionButtonClasses} px-5`}
               >
-                {savingPassword ? t('account.password.btnUpdating', 'Обновляем...') : t('account.password.btnUpdate', 'Обновить пароль')}
+                {savingPassword ? t('account.password.btnUpdating', 'Updating...') : t('account.password.btnUpdate', 'Update password')}
               </Button>
             </div>
           </section>

@@ -32,21 +32,6 @@ const getScheduleLabel = (availableHours) => {
 };
 
 const DIETARY_TAG_LABELS = {
-  ru: {
-    'vegan': 'Веганское',
-    'vegetarian': 'Вегетарианское',
-    'gluten-free': 'Без глютена',
-    'spicy': 'Острое',
-    'contains-nuts': 'Содержит орехи',
-    'contains-dairy': 'Содержит лактозу',
-    'caffeine-free': 'Без кофеина',
-    'sugar-free': 'Без сахара',
-    'halal': 'Халяль',
-    'lenten': 'Постное',
-    'kids': 'Детское',
-    'lactose-free': 'Без лактозы',
-    'contains-seafood': 'Содержит морепродукты',
-  },
   en: {
     'vegan': 'Vegan',
     'vegetarian': 'Vegetarian',
@@ -66,32 +51,30 @@ const DIETARY_TAG_LABELS = {
 
 const getDietaryTagLabel = (tagValue, language = 'en') => {
   const lang = String(language || 'en').toLowerCase().split('-')[0];
-  const dict = DIETARY_TAG_LABELS[lang] || DIETARY_TAG_LABELS.ru;
+  const dict = DIETARY_TAG_LABELS[lang] || DIETARY_TAG_LABELS.en;
   return dict[tagValue] || tagValue;
 };
 
 const getItemBadge = (item, language) => {
-  const isEn = language === 'en';
-
   if (item?.badge) {
     const badgeVal = item.badge.toLowerCase().trim();
     if (badgeVal === 'hit') {
-      return isEn ? 'HIT' : 'ХИТ';
+      return 'HIT';
     }
     if (badgeVal === 'new') {
-      return isEn ? 'NEW' : 'НОВИНКА';
+      return 'NEW';
     }
     if (badgeVal === 'chefs-choice') {
-      return isEn ? 'CHEF' : 'ОТ ШЕФА';
+      return 'CHEF';
     }
     if (badgeVal === 'season') {
-      return isEn ? 'SEASON' : 'СЕЗОН';
+      return 'SEASON';
     }
     if (badgeVal === 'promo') {
-      return isEn ? 'PROMO' : 'АКЦИЯ';
+      return 'PROMO';
     }
     if (badgeVal === 'special') {
-      return isEn ? 'SPECIAL' : 'ФИРМЕННОЕ';
+      return 'SPECIAL';
     }
   }
 
@@ -100,20 +83,20 @@ const getItemBadge = (item, language) => {
   }
   for (const tag of item.tags) {
     const lower = tag.toLowerCase().trim();
-    if (lower === 'хит' || lower === 'hit' || lower === 'popular' || lower === 'популярное') {
-      return isEn ? 'HIT' : 'ХИТ';
+    if (lower === 'hit' || lower === 'popular') {
+      return 'HIT';
     }
-    if (lower === 'new' || lower === 'новинка') {
-      return isEn ? 'NEW' : 'НОВИНКА';
+    if (lower === 'new') {
+      return 'NEW';
     }
-    if (lower === 'острое' || lower === 'spicy' || lower === 'hot' || lower === 'острый') {
-      return isEn ? 'SPICY' : 'ОСТРОЕ';
+    if (lower === 'spicy' || lower === 'hot') {
+      return 'SPICY';
     }
-    if (lower === 'vegan' || lower === 'веган' || lower === 'постное' || lower === 'вегетарианское') {
-      return isEn ? 'VEGAN' : 'ВЕГАН';
+    if (lower === 'vegan' || lower === 'vegetarian') {
+      return 'VEGAN';
     }
-    if (lower === 'шеф' || lower === 'chef' || lower === 'рекомендуем' || lower === 'recommend') {
-      return isEn ? 'CHEF' : 'ОТ ШЕФА';
+    if (lower === 'chef' || lower === 'recommended' || lower === 'recommend') {
+      return 'CHEF';
     }
   }
   return null;
@@ -147,18 +130,7 @@ const getCardPrice = (item, currencyCode) => {
 };
 
 const getOptionsText = (count, lang) => {
-  if (lang === 'en') {
-    return `${count} option${count > 1 ? 's' : ''}`;
-  }
-  const mod10 = count % 10;
-  const mod100 = count % 100;
-  if (mod10 === 1 && mod100 !== 11) {
-    return `${count} вариант`;
-  }
-  if (mod10 >= 2 && mod10 <= 4 && (mod100 < 12 || mod100 > 14)) {
-    return `${count} варианта`;
-  }
-  return `${count} вариантов`;
+  return `${count} option${count > 1 ? 's' : ''}`;
 };
 
 const PlaceholderImage = ({ label }) => (
@@ -397,27 +369,25 @@ const ExtendedPublicMenuTemplate = ({
   };
 
   const aboutFacts = [
-    isFilled(venue?.city) ? { icon: MapPin, label: language === 'en' ? 'City' : 'Город', value: [venue.city, venue.country].filter(isFilled).join(', ') } : null,
-    isFilled(venue?.phone) ? { icon: Phone, label: language === 'en' ? 'Phone' : 'Телефон', value: venue.phone } : null,
-    hasWifi ? { icon: Wifi, label: language === 'en' ? 'Wi-Fi Network' : 'Сеть Wi-Fi', value: venue.wifi.ssid } : null,
+    isFilled(venue?.city) ? { icon: MapPin, label: 'City', value: [venue.city, venue.country].filter(isFilled).join(', ') } : null,
+    isFilled(venue?.phone) ? { icon: Phone, label: 'Phone', value: venue.phone } : null,
+    hasWifi ? { icon: Wifi, label: 'Wi-Fi Network', value: venue.wifi.ssid } : null,
   ].filter(Boolean);
 
   const aboutActions = [
     {
       icon: Phone,
-      label: language === 'en' ? 'Call' : 'Позвонить',
+      label: 'Call',
       href: venue?.phone ? `tel:${venue.phone.replace(/[^\d+]/g, '')}` : undefined,
     },
     {
       icon: Globe,
-      label: language === 'en' ? 'Website' : 'Сайт',
+      label: 'Website',
       href: venueInstagramUrl || undefined,
     },
     {
       icon: passwordCopied ? Check : Wifi,
-      label: passwordCopied 
-        ? (language === 'en' ? 'Copied!' : 'Скопировано!') 
-        : (language === 'en' ? 'WiFi Pass' : 'Пароль Wi-Fi'),
+      label: passwordCopied ? 'Copied!' : 'WiFi Pass',
       onClick: hasWifi ? handleCopyWifiPassword : undefined,
     },
   ];
@@ -444,9 +414,7 @@ const ExtendedPublicMenuTemplate = ({
                 <p className="text-[0.95rem] leading-[1.55] text-foreground/88">{venueDescription}</p>
               ) : (
                 <p className="text-[0.95rem] leading-[1.55] text-foreground/88">
-                  {language === 'en'
-                    ? 'A calm public profile of the venue will appear here.'
-                    : 'Здесь будет более подробное описание заведения для гостя.'}
+                  A public profile of the venue will appear here.
                 </p>
               )}
             </div>
@@ -587,14 +555,14 @@ const ExtendedPublicMenuTemplate = ({
 
           {isFilled(itemDescription) ? (
             <section className="space-y-2 border-t border-black/8 pt-4">
-              <h3 className="text-[0.84rem] font-semibold text-foreground">{language === 'en' ? 'Description' : 'Описание'}</h3>
+              <h3 className="text-[0.84rem] font-semibold text-foreground">Description</h3>
               <p className="text-[0.95rem] leading-[1.55] text-foreground/88">{itemDescription}</p>
             </section>
           ) : null}
 
           {visibleVariants.length ? (
             <section className="space-y-2 border-t border-black/8 pt-4">
-              <h3 className="text-[0.84rem] font-semibold text-foreground">{language === 'en' ? 'Options' : 'Опции'}</h3>
+              <h3 className="text-[0.84rem] font-semibold text-foreground">Options</h3>
               <div className="space-y-0">
                 {visibleVariants.map((variant, index) => {
                   const variantLabel = getLocalizedField(variant, 'label', language, defaultLanguage) || variant.label;
@@ -625,7 +593,7 @@ const ExtendedPublicMenuTemplate = ({
 
           {item.tags?.length ? (
             <section className="space-y-2 border-t border-black/8 pt-4">
-              <h3 className="text-[0.84rem] font-semibold text-foreground">{language === 'en' ? 'Tags' : 'Теги'}</h3>
+              <h3 className="text-[0.84rem] font-semibold text-foreground">Tags</h3>
               <div className="flex flex-wrap gap-2">
                 {item.tags.map((tag) => (
                   <span
@@ -731,7 +699,7 @@ const ExtendedPublicMenuTemplate = ({
                   >
                     {visibleLanguages.map((menuLanguage) => (
                       <option key={menuLanguage.code} value={menuLanguage.code} className="text-foreground bg-[#fffdf8]">
-                        {menuLanguage.code === 'ru' ? 'РУ' : String(menuLanguage.code).toUpperCase()}
+                        {String(menuLanguage.code).toUpperCase()}
                       </option>
                     ))}
                   </select>
@@ -754,7 +722,7 @@ const ExtendedPublicMenuTemplate = ({
                   onClick={() => setOpenSheet({ type: 'about' })}
                   className="text-[0.82rem] font-medium text-[#82796f] border-b border-dashed border-[#82796f]/60 pb-0.5 hover:text-foreground hover:border-foreground/80 transition-colors duration-200"
                 >
-                  {language === 'en' ? 'About' : 'О заведении'}
+                  About
                 </button>
               </div>
             </div>
@@ -942,7 +910,7 @@ const ExtendedPublicMenuTemplate = ({
                           </div>
                           {isFilled(cardPrice.amount) ? (
                             <div className="text-[0.9rem] font-semibold leading-none tracking-[-0.02em]" style={{ color: accentColor }}>
-                              {hasVariants && (language === 'en' ? 'from ' : 'от ')}
+                              {hasVariants && 'from '}
                               {cardPrice.amount}
                               {cardPrice.symbol ? ` ${cardPrice.symbol}` : ''}
                             </div>
@@ -958,7 +926,7 @@ const ExtendedPublicMenuTemplate = ({
         </motion.section>
 
         <div className="mt-8 mb-6 flex flex-row items-center justify-center gap-2 text-xs sm:text-sm text-muted-foreground/60">
-          <span>{language === 'en' ? 'Made in' : 'Сделано в'}</span>
+          <span>Made in</span>
           <a
             className="flex items-center gap-1.5 text-sm sm:text-base font-bold tracking-tight text-zinc-900 dark:text-zinc-100 transition-transform hover:scale-105"
             href="https://kwikme.nu?utm_source=menu_footer"

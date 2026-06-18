@@ -134,10 +134,10 @@ def merge_translations(payload: MenuPayload, translated: TranslatableMenu, targe
                     )
 
     lang_metadata = {
-        "ru": {"shortLabel": "RU", "nativeName": "Русский", "flag": "🇷🇺"},
+        "ru": {"shortLabel": "RU", "nativeName": "Russian", "flag": "🇷🇺"},
         "en": {"shortLabel": "EN", "nativeName": "English", "flag": "🇬🇧"},
         "ar": {"shortLabel": "AR", "nativeName": "العربية", "flag": "🇦🇪"},
-        "kk": {"shortLabel": "KZ", "nativeName": "Қазақша", "flag": "🇰🇿"},
+        "kk": {"shortLabel": "KZ", "nativeName": "Kazakh", "flag": "🇰🇿"},
         "tr": {"shortLabel": "TR", "nativeName": "Türkçe", "flag": "🇹🇷"},
         "de": {"shortLabel": "DE", "nativeName": "Deutsch", "flag": "🇩🇪"},
         "fr": {"shortLabel": "FR", "nativeName": "Français", "flag": "🇫🇷"},

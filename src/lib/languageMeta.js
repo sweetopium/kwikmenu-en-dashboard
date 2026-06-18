@@ -6,9 +6,9 @@ export const LANGUAGE_META = {
   it: { flag: '🇮🇹', label: 'Italiano' },
   pt: { flag: '🇵🇹', label: 'Português' },
   pt_br: { flag: '🇧🇷', label: 'Português (BR)' },
-  ru: { flag: '🇷🇺', shortLabel: 'RU', label: 'Русский' },
-  uk: { flag: '🇺🇦', label: 'Українська' },
-  kk: { flag: '🇰🇿', shortLabel: 'KZ', label: 'Қазақша' },
+  ru: { flag: '🇷🇺', shortLabel: 'RU', label: 'Russian' },
+  uk: { flag: '🇺🇦', label: 'Ukrainian' },
+  kk: { flag: '🇰🇿', shortLabel: 'KZ', label: 'Kazakh' },
   tr: { flag: '🇹🇷', label: 'Türkçe' },
   ar: { flag: '🇦🇪', shortLabel: 'AR', label: 'العربية' },
   he: { flag: '🇮🇱', label: 'עברית' },
@@ -22,10 +22,10 @@ export const LANGUAGE_META = {
 };
 
 export const TOP_MENU_LANGUAGES = [
-  { code: 'ru', shortLabel: 'RU', nativeName: 'Русский', flag: '🇷🇺' },
+  { code: 'ru', shortLabel: 'RU', nativeName: 'Russian', flag: '🇷🇺' },
   { code: 'en', shortLabel: 'EN', nativeName: 'English', flag: '🇬🇧' },
   { code: 'ar', shortLabel: 'AR', nativeName: 'العربية', flag: '🇦🇪' },
-  { code: 'kk', shortLabel: 'KZ', nativeName: 'Қазақша', flag: '🇰🇿' },
+  { code: 'kk', shortLabel: 'KZ', nativeName: 'Kazakh', flag: '🇰🇿' },
   { code: 'tr', shortLabel: 'TR', nativeName: 'Türkçe', flag: '🇹🇷' },
   { code: 'de', shortLabel: 'DE', nativeName: 'Deutsch', flag: '🇩🇪' },
   { code: 'fr', shortLabel: 'FR', nativeName: 'Français', flag: '🇫🇷' },

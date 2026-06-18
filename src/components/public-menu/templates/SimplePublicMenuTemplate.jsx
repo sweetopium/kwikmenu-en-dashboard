@@ -16,27 +16,25 @@ const SURFACE_COLOR = '#fff7ea';
 const PUBLIC_DESKTOP_BG = '#d9d9d9';
 
 const getItemBadge = (item, language) => {
-  const isEn = language === 'en';
-
   if (item?.badge) {
     const badgeVal = item.badge.toLowerCase().trim();
     if (badgeVal === 'hit') {
-      return isEn ? 'HIT' : 'ХИТ';
+      return 'HIT';
     }
     if (badgeVal === 'new') {
-      return isEn ? 'NEW' : 'НОВИНКА';
+      return 'NEW';
     }
     if (badgeVal === 'chefs-choice') {
-      return isEn ? 'CHEF' : 'ОТ ШЕФА';
+      return 'CHEF';
     }
     if (badgeVal === 'season') {
-      return isEn ? 'SEASON' : 'СЕЗОН';
+      return 'SEASON';
     }
     if (badgeVal === 'promo') {
-      return isEn ? 'PROMO' : 'АКЦИЯ';
+      return 'PROMO';
     }
     if (badgeVal === 'special') {
-      return isEn ? 'SPECIAL' : 'ФИРМЕННОЕ';
+      return 'SPECIAL';
     }
   }
 
@@ -45,20 +43,20 @@ const getItemBadge = (item, language) => {
   }
   for (const tag of item.tags) {
     const lower = tag.toLowerCase().trim();
-    if (lower === 'хит' || lower === 'hit' || lower === 'popular' || lower === 'популярное') {
-      return isEn ? 'HIT' : 'ХИТ';
+    if (lower === 'hit' || lower === 'popular') {
+      return 'HIT';
     }
-    if (lower === 'new' || lower === 'новинка') {
-      return isEn ? 'NEW' : 'НОВИНКА';
+    if (lower === 'new') {
+      return 'NEW';
     }
-    if (lower === 'острое' || lower === 'spicy' || lower === 'hot' || lower === 'острый') {
-      return isEn ? 'SPICY' : 'ОСТРОЕ';
+    if (lower === 'spicy' || lower === 'hot') {
+      return 'SPICY';
     }
-    if (lower === 'vegan' || lower === 'веган' || lower === 'постное' || lower === 'вегетарианское') {
-      return isEn ? 'VEGAN' : 'ВЕГАН';
+    if (lower === 'vegan' || lower === 'vegetarian') {
+      return 'VEGAN';
     }
-    if (lower === 'шеф' || lower === 'chef' || lower === 'рекомендуем' || lower === 'recommend') {
-      return isEn ? 'CHEF' : 'ОТ ШЕФА';
+    if (lower === 'chef' || lower === 'recommended' || lower === 'recommend') {
+      return 'CHEF';
     }
   }
   return null;
@@ -285,9 +283,7 @@ const SimplePublicMenuTemplate = ({
                   className="mt-1 text-[0.82rem] font-bold underline cursor-pointer hover:opacity-85 block focus:outline-none"
                   style={{ color: heroTextColor }}
                 >
-                  {isDescExpanded 
-                    ? (language === 'en' ? 'hide' : 'скрыть') 
-                    : (language === 'en' ? 'show details' : 'подробнее')}
+                  {isDescExpanded ? 'hide' : 'show details'}
                 </button>
               )}
             </div>
@@ -489,12 +485,10 @@ const SimplePublicMenuTemplate = ({
                 <MenuIcon size={24} />
               </div>
               <h2 className="mt-4 text-xl font-bold text-foreground">
-                {language === 'en' ? 'Menu is empty' : 'Меню пока пустое'}
+                Menu is empty
               </h2>
               <p className="mt-2 text-sm text-muted-foreground">
-                {language === 'en'
-                  ? 'No active categories have been published for this venue yet.'
-                  : 'Для этого заведения еще не опубликованы активные разделы.'}
+                No active categories have been published for this venue yet.
               </p>
             </div>
           )}
@@ -518,11 +512,11 @@ const SimplePublicMenuTemplate = ({
                     <Wifi size={16} />
                   </div>
                   <h2 className="text-[1rem] font-bold tracking-[-0.02em] text-foreground sm:text-[1.08rem]">
-                    {language === 'en' ? 'Guest Wi‑Fi' : 'Гостевой Wi‑Fi'}
+                    Guest Wi-Fi
                   </h2>
                 </div>
                 <p className="mt-2 text-[0.84rem] leading-[1.45] text-muted-foreground">
-                  {language === 'en' ? 'Connection is available directly from the digital menu.' : 'Подключение доступно прямо из цифрового меню.'}
+                  Connection is available directly from the digital menu.
                 </p>
               </div>
             </div>
@@ -530,13 +524,13 @@ const SimplePublicMenuTemplate = ({
             <div className="mt-4 space-y-3 border-t pt-4" style={{ borderColor: 'rgba(18, 54, 47, 0.1)' }}>
               <div className="flex items-start justify-between gap-4">
                 <span className="text-[0.8rem] uppercase tracking-[0.12em] text-muted-foreground">
-                  {language === 'en' ? 'Network' : 'Сеть'}
+                  Network
                 </span>
                 <span className="text-right text-[0.96rem] font-medium text-foreground">{venue.wifi.ssid}</span>
               </div>
               <div className="flex items-start justify-between gap-4">
                 <span className="text-[0.8rem] uppercase tracking-[0.12em] text-muted-foreground">
-                  {language === 'en' ? 'Password' : 'Пароль'}
+                  Password
                 </span>
                 <button
                   type="button"
@@ -557,7 +551,7 @@ const SimplePublicMenuTemplate = ({
         ) : null}
 
         <div className="mt-8 mb-6 flex flex-row items-center justify-center gap-2 text-xs sm:text-sm text-muted-foreground/60">
-          <span>{language === 'en' ? 'Made in' : 'Сделано в'}</span>
+          <span>Made in</span>
           <a
             className="flex items-center gap-1.5 text-sm sm:text-base font-bold tracking-tight text-zinc-900 dark:text-zinc-100 transition-transform hover:scale-105"
             href="https://kwikme.nu?utm_source=menu_footer"

@@ -25,7 +25,7 @@ MOSCOW_TZ = ZoneInfo("Europe/Moscow")
 VISITOR_COOKIE_NAME = "kwikmenu_vid"
 EVENT_TYPE_VENUE_PUBLIC_VIEW = "venue_public_view"
 PERIOD_CODES = {"today", "yesterday", "7d", "30d"}
-WEEKDAY_LABELS = ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс"]
+WEEKDAY_LABELS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
 
 
 def get_owned_venue_or_404(db: Session, *, venue_id: str, user_id: str) -> Venue:

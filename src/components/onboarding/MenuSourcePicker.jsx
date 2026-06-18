@@ -18,14 +18,14 @@ const MenuSourcePicker = ({
   dropzoneHeight = 'h-24 sm:h-28',
 }) => {
   const { t } = useTranslation();
-  const displayFileTabLabel = fileTabLabel !== undefined ? fileTabLabel : t('menuSource.fileTabLabel', { defaultValue: 'Загрузить файл' });
-  const displayFileTabMobileLabel = fileTabMobileLabel !== undefined ? fileTabMobileLabel : t('menuSource.fileTabMobileLabel', { defaultValue: 'Файл' });
-  const displayLinkPlaceholder = linkPlaceholder !== undefined ? linkPlaceholder : t('menuSource.linkPlaceholder', { defaultValue: 'Прямая ссылка на PDF-файл меню' });
+  const displayFileTabLabel = fileTabLabel !== undefined ? fileTabLabel : t('menuSource.fileTabLabel', { defaultValue: 'Upload file' });
+  const displayFileTabMobileLabel = fileTabMobileLabel !== undefined ? fileTabMobileLabel : t('menuSource.fileTabMobileLabel', { defaultValue: 'File' });
+  const displayLinkPlaceholder = linkPlaceholder !== undefined ? linkPlaceholder : t('menuSource.linkPlaceholder', { defaultValue: 'Direct link to menu PDF file' });
 
   const selectedFileLabel = multiple
     ? files.length === 1
       ? files[0].name
-      : t('menuSource.selectedFilesCount', { count: files.length, defaultValue: `Выбрано файлов: ${files.length}` })
+      : t('menuSource.selectedFilesCount', { count: files.length, defaultValue: `Selected files: ${files.length}` })
     : fileName;
   const hasFiles = multiple ? files.length > 0 : Boolean(fileName);
 
@@ -55,8 +55,8 @@ const MenuSourcePicker = ({
           }`}
         >
           <LinkIcon size={14} className="sm:w-[18px] sm:h-[18px]" />
-          <span className="hidden sm:inline">{t('menuSource.linkTabLabel', { defaultValue: 'Указать ссылку' })}</span>
-          <span className="sm:hidden">{t('menuSource.linkTabMobileLabel', { defaultValue: 'Ссылка' })}</span>
+          <span className="hidden sm:inline">{t('menuSource.linkTabLabel', { defaultValue: 'Specify link' })}</span>
+          <span className="sm:hidden">{t('menuSource.linkTabMobileLabel', { defaultValue: 'Link' })}</span>
         </button>
       </div>
 
@@ -82,7 +82,7 @@ const MenuSourcePicker = ({
               </span>
               {multiple && (
                 <span className="text-[10px] sm:text-xs text-muted-foreground group-hover:text-brand-purple/70 transition-colors">
-                  {t('menuSource.clickToReplace', { defaultValue: 'Нажмите, чтобы заменить' })}
+                  {t('menuSource.clickToReplace', { defaultValue: 'Click to replace' })}
                 </span>
               )}
             </div>
@@ -91,10 +91,10 @@ const MenuSourcePicker = ({
               <UploadCloud size={multiple ? 24 : 18} className={multiple ? 'sm:w-7 sm:h-7' : 'sm:w-6 sm:h-6'} />
               <span className="text-[10px] sm:text-sm font-medium">
                 {multiple
-                  ? t('menuSource.dragAndDropMultiple', { defaultValue: 'Нажмите или перетащите PDF/Фото' })
-                  : t('menuSource.dragAndDropSingle', { defaultValue: 'Нажмите или перетащите файл' })}
+                  ? t('menuSource.dragAndDropMultiple', { defaultValue: 'Click or drag & drop PDF/Photo' })
+                  : t('menuSource.dragAndDropSingle', { defaultValue: 'Click or drag & drop file' })}
               </span>
-              {multiple && <span className="text-[10px] sm:text-xs opacity-70">{t('menuSource.multipleFilesNote', { defaultValue: 'Можно выбрать несколько файлов' })}</span>}
+              {multiple && <span className="text-[10px] sm:text-xs opacity-70">{t('menuSource.multipleFilesNote', { defaultValue: 'Multiple files can be selected' })}</span>}
             </div>
           )}
         </div>

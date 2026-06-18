@@ -1,11 +1,11 @@
 export const MEASURE_UNITS = [
-  { value: '', label: 'Не указано' },
-  { value: 'ml', label: 'мл' },
-  { value: 'l', label: 'л' },
-  { value: 'g', label: 'г' },
-  { value: 'kg', label: 'кг' },
-  { value: 'pcs', label: 'шт' },
-  { value: 'portion', label: 'порция' },
+  { value: '', label: 'Not specified' },
+  { value: 'ml', label: 'ml' },
+  { value: 'l', label: 'l' },
+  { value: 'g', label: 'g' },
+  { value: 'kg', label: 'kg' },
+  { value: 'pcs', label: 'pcs' },
+  { value: 'portion', label: 'portion' },
 ];
 
 export const formatMeasure = (value, unitCode, t) => {
@@ -86,7 +86,7 @@ const parseEditorPriceValue = (value) => {
 
 const formatEditorPriceValue = (value) => {
   if (!Number.isFinite(value)) return '';
-  return Number.isInteger(value) ? `${value}` : value.toLocaleString('ru-RU');
+  return Number.isInteger(value) ? `${value}` : value.toLocaleString('en-US');
 };
 
 export const getItemPriceDisplay = (item, t) => {
@@ -101,7 +101,7 @@ export const getItemPriceDisplay = (item, t) => {
     .filter((price) => price !== null);
 
   if (!numericPrices.length) {
-    return t ? t('menuEditor.differentPrices', { defaultValue: 'Разные цены' }) : 'Разные цены';
+    return t ? t('menuEditor.differentPrices', { defaultValue: 'Different prices' }) : 'Different prices';
   }
 
   const minPrice = Math.min(...numericPrices);

@@ -24,7 +24,7 @@ const QrPreview = ({
     }`}>
       <div className="w-full flex items-center justify-between gap-3 mb-4">
         <Label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
-          {t('qr.preview.title', 'Предпросмотр')}
+          {t('qr.preview.title', 'Preview')}
         </Label>
 
         {mobile && (
@@ -78,7 +78,7 @@ const QrPreview = ({
           className={`w-full ${primaryActionButtonClasses} bg-foreground hover:bg-foreground/90 text-background`}
         >
           <FileDown size={18} className="mr-2" />
-          {t('qr.preview.downloadPng', 'Скачать PNG')}
+          {t('qr.preview.downloadPng', 'Download PNG')}
         </Button>
       </div>
     </div>

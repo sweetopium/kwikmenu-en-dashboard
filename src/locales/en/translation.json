@@ -234,13 +234,13 @@
     }
   },
   "days": {
-    "Пн": "Mon",
-    "Вт": "Tue",
-    "Ср": "Wed",
-    "Чт": "Thu",
-    "Пт": "Fri",
-    "Сб": "Sat",
-    "Вс": "Sun"
+    "Mon": "Mon",
+    "Tue": "Tue",
+    "Wed": "Wed",
+    "Thu": "Thu",
+    "Fri": "Fri",
+    "Sat": "Sat",
+    "Sun": "Sun"
   },
   "menuList": {
     "title": "Your Menu",

@@ -36,7 +36,7 @@ class UnitPayClient:
             return
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail="Интеграция с UnitPay не настроена.",
+            detail="UnitPay integration is not configured.",
         )
 
     def init_subscription_payment(
@@ -219,7 +219,7 @@ class UnitPayClient:
                 raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=message) from exc
             raise HTTPException(
                 status_code=status.HTTP_502_BAD_GATEWAY,
-                detail=response_body or "Не удалось выполнить запрос к UnitPay.",
+                detail=response_body or "Failed to send request to UnitPay.",
             ) from exc
         except URLError as exc:
             print(
@@ -228,7 +228,7 @@ class UnitPayClient:
             )
             raise HTTPException(
                 status_code=status.HTTP_502_BAD_GATEWAY,
-                detail=f"Не удалось выполнить запрос к UnitPay: {exc.reason}",
+                detail=f"Failed to send request to UnitPay: {exc.reason}",
             ) from exc
         except Exception as exc:  # noqa: BLE001
             print(
@@ -237,7 +237,7 @@ class UnitPayClient:
             )
             raise HTTPException(
                 status_code=status.HTTP_502_BAD_GATEWAY,
-                detail=str(exc) or "Не удалось выполнить запрос к UnitPay.",
+                detail=str(exc) or "Failed to send request to UnitPay.",
             ) from exc
 
         if "error" in data:

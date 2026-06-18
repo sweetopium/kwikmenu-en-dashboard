@@ -40,6 +40,6 @@ export const uploadFileToPresignedUrl = async ({ uploadUrl, headers, file }) => 
   });
 
   if (!response.ok) {
-    throw new Error('Не удалось загрузить изображение в хранилище.');
+    throw new Error('Could not upload image to storage.');
   }
 };

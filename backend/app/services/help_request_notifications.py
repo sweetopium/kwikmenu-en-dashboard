@@ -11,7 +11,7 @@ MESSENGER_LABELS = {
     "telegram": "Telegram",
     "max": "MAX",
     "whatsapp": "WhatsApp",
-    "call": "Телефонный звонок",
+    "call": "Phone call",
 }
 
 
@@ -27,17 +27,17 @@ def _escape(text: str | None) -> str:
 
 def _format_menu_source(help_request: HelpRequest) -> str:
     if help_request.upload_later:
-        return "⏳ Прикрепит позже"
+        return "⏳ Will attach later"
 
     if help_request.menu_source == "link" and help_request.menu_link:
-        return f"🔗 <a href=\"{_escape(help_request.menu_link)}\">Открыть ссылку на меню</a>"
+        return f"🔗 <a href=\"{_escape(help_request.menu_link)}\">Open menu link</a>"
 
     if help_request.menu_file_name:
         size_hint = ""
         if help_request.menu_file_size_bytes:
             size_kb = max(1, round(help_request.menu_file_size_bytes / 1024))
             size_hint = f" ({size_kb} KB)"
-        return f"📎 Файл: <b>{_escape(help_request.menu_file_name)}</b>{size_hint}"
+        return f"📎 File: <b>{_escape(help_request.menu_file_name)}</b>{size_hint}"
 
     return "—"
 
@@ -45,14 +45,14 @@ def _format_menu_source(help_request: HelpRequest) -> str:
 def build_help_request_telegram_message(help_request: HelpRequest) -> str:
     messenger = MESSENGER_LABELS.get(help_request.messenger, help_request.messenger)
     parts = [
-        "🟣 <b>Новая заявка в Kwikmenu</b>",
+        "🟣 <b>New KwikMenu request</b>",
         "",
-        f"🏪 <b>Заведение:</b> {_escape(help_request.restaurant_name)}",
-        f"👤 <b>Имя:</b> {_escape(help_request.name)}",
-        f"📞 <b>Контакт:</b> {_escape(help_request.phone)}",
-        f"💬 <b>Канал связи:</b> {_escape(messenger)}",
-        f"🌍 <b>Локация:</b> {_escape(help_request.country_name)}, {_escape(help_request.city)}",
-        f"📋 <b>Меню:</b> {_format_menu_source(help_request)}",
+        f"🏪 <b>Venue:</b> {_escape(help_request.restaurant_name)}",
+        f"👤 <b>Name:</b> {_escape(help_request.name)}",
+        f"📞 <b>Contact:</b> {_escape(help_request.phone)}",
+        f"💬 <b>Contact channel:</b> {_escape(messenger)}",
+        f"🌍 <b>Location:</b> {_escape(help_request.country_name)}, {_escape(help_request.city)}",
+        f"📋 <b>Menu:</b> {_format_menu_source(help_request)}",
         "",
         f"🆔 <code>{_escape(help_request.id)}</code>",
     ]
@@ -106,24 +106,24 @@ def build_menu_import_success_telegram_message(
 ) -> str:
     source_names = ", ".join(_escape(source.name) for source in job.sources[:4])
     if len(job.sources) > 4:
-        source_names = f"{source_names} и еще {len(job.sources) - 4}"
+        source_names = f"{source_names} and {len(job.sources) - 4} more"
     flow = _escape((job.context or {}).get("flow") or "unknown")
     parts = [
-        "🟢 <b>Меню успешно распознано</b>",
+        "🟢 <b>Menu import completed</b>",
         "",
-        f"🏪 <b>Заведение:</b> {_escape((venue.name if venue else None) or (job.context or {}).get('restaurant_name') or '—')}",
-        f"👤 <b>Пользователь:</b> {_escape(user.email if user else None)}",
+        f"🏪 <b>Venue:</b> {_escape((venue.name if venue else None) or (job.context or {}).get('restaurant_name') or '—')}",
+        f"👤 <b>User:</b> {_escape(user.email if user else None)}",
         f"🆔 <b>Job ID:</b> <code>{_escape(job.id)}</code>",
-        f"📋 <b>Источник:</b> {_escape(job.menu_source)}",
-        f"📁 <b>Файлы:</b> <b>{job.document_count or len(job.sources)}</b>",
-        f"🧩 <b>Категории:</b> <b>{job.category_count or 0}</b>",
-        f"🍽 <b>Позиции:</b> <b>{job.item_count or 0}</b>",
+        f"📋 <b>Source:</b> {_escape(job.menu_source)}",
+        f"📁 <b>Files:</b> <b>{job.document_count or len(job.sources)}</b>",
+        f"🧩 <b>Categories:</b> <b>{job.category_count or 0}</b>",
+        f"🍽 <b>Items:</b> <b>{job.item_count or 0}</b>",
         f"🧭 <b>Flow:</b> {_escape(flow)}",
     ]
     if source_names:
-        parts.append(f"📎 <b>Имена файлов:</b> {_escape(source_names)}")
+        parts.append(f"📎 <b>File names:</b> {_escape(source_names)}")
     if job.used_fallback:
-        parts.append("⚠️ <b>Использован fallback-шаблон</b>")
+        parts.append("⚠️ <b>Fallback template was used</b>")
     if job.warnings:
         parts.append(f"⚠️ <b>Warnings:</b> {_escape(' '.join(str(item) for item in job.warnings[:3]))}")
     return "\n".join(parts)
@@ -139,20 +139,20 @@ def build_menu_import_failure_telegram_message(
     flow = _escape((job.context or {}).get("flow") or "unknown")
     source_names = ", ".join(_escape(source.name) for source in job.sources[:4])
     if len(job.sources) > 4:
-        source_names = f"{source_names} и еще {len(job.sources) - 4}"
+        source_names = f"{source_names} and {len(job.sources) - 4} more"
     parts = [
-        "🔴 <b>Ошибка распознавания меню</b>",
+        "🔴 <b>Menu import failed</b>",
         "",
-        f"🏪 <b>Заведение:</b> {_escape((venue.name if venue else None) or (job.context or {}).get('restaurant_name') or '—')}",
-        f"👤 <b>Пользователь:</b> {_escape(user.email if user else None)}",
+        f"🏪 <b>Venue:</b> {_escape((venue.name if venue else None) or (job.context or {}).get('restaurant_name') or '—')}",
+        f"👤 <b>User:</b> {_escape(user.email if user else None)}",
         f"🆔 <b>Job ID:</b> <code>{_escape(job.id)}</code>",
-        f"📋 <b>Источник:</b> {_escape(job.menu_source)}",
-        f"📁 <b>Файлы:</b> <b>{job.document_count or len(job.sources)}</b>",
+        f"📋 <b>Source:</b> {_escape(job.menu_source)}",
+        f"📁 <b>Files:</b> <b>{job.document_count or len(job.sources)}</b>",
         f"🧭 <b>Flow:</b> {_escape(flow)}",
-        f"❌ <b>Ошибка:</b> {_escape(error_message)}",
+        f"❌ <b>Error:</b> {_escape(error_message)}",
     ]
     if source_names:
-        parts.append(f"📎 <b>Имена файлов:</b> {_escape(source_names)}")
+        parts.append(f"📎 <b>File names:</b> {_escape(source_names)}")
     return "\n".join(parts)
 
 

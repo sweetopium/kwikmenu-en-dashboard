@@ -204,7 +204,7 @@ def translate_menu(
     if not subscription.plan.translations_enabled:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail=f"Переводы недоступны на тарифе {subscription.plan.name}."
+            detail=f"Translations are not available on the {subscription.plan.name} plan."
         )
 
     target_lang = target_lang.strip().lower()
@@ -212,7 +212,7 @@ def translate_menu(
     if target_lang not in valid_codes:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Недопустимый код языка: {target_lang}."
+            detail=f"Invalid language code: {target_lang}."
         )
 
     active_langs = set()
@@ -236,7 +236,7 @@ def translate_menu(
         if len(active_langs) >= subscription.plan.max_translation_languages:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
-                detail=f"Превышен лимит языков перевода для тарифа {subscription.plan.name} (макс. {subscription.plan.max_translation_languages})."
+                detail=f"Translation language limit exceeded for the {subscription.plan.name} plan (max {subscription.plan.max_translation_languages})."
             )
 
     from app.schemas.menu_translation import extract_translatable, merge_translations
@@ -250,7 +250,7 @@ def translate_menu(
     except Exception as exc:
         raise HTTPException(
             status_code=status.HTTP_502_BAD_GATEWAY,
-            detail=f"Ошибка перевода через AI: {str(exc)}"
+            detail=f"AI translation failed: {str(exc)}"
         )
 
     merge_translations(payload, translated, target_lang)
@@ -261,4 +261,3 @@ def translate_menu(
     db.refresh(menu)
 
     return serialize_menu(menu)
-

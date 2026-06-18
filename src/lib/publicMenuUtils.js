@@ -1,11 +1,11 @@
 const UNIT_LABELS = {
   ru: {
-    ml: 'мл',
-    l: 'л',
-    g: 'г',
-    kg: 'кг',
-    pcs: 'шт',
-    portion: 'порция',
+    ml: 'ml',
+    l: 'l',
+    g: 'g',
+    kg: 'kg',
+    pcs: 'pcs',
+    portion: 'portion',
   },
   en: {
     ml: 'ml',
@@ -29,7 +29,7 @@ const CURRENCY_SYMBOLS = {
   BYN: 'Br',
   GEL: '₾',
   AMD: '֏',
-  KGS: 'сом',
+  KGS: 'KGS',
   AZN: '₼',
   CNY: '¥',
   JPY: '¥',
@@ -222,13 +222,13 @@ export const formatCurrency = (price, currencyCode = 'USD') => {
 
   const rawPrice = String(price).trim();
   const configuredSymbol = getCurrencySymbol(currencyCode);
-  const symbolMatch = rawPrice.match(/[₽$€£¥₺₾֏₼]|so'm|DH|Br|сом/iu);
+  const symbolMatch = rawPrice.match(/[₽$€£¥₺₾֏₼]|so'm|DH|Br|KGS/iu);
   const amount = rawPrice
     .replace(/[₽$€£¥₺₾֏₼]/g, '')
     .replace(/so'm/giu, '')
     .replace(/DH/giu, '')
     .replace(/Br/giu, '')
-    .replace(/сом/giu, '')
+    .replace(/KGS/giu, '')
     .trim();
 
   return {

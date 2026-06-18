@@ -16,9 +16,9 @@ const QrDesignControls = ({
   const { t } = useTranslation();
 
   const shapes = {
-    square: t('qr.design.shapes.square', 'Квадраты'),
-    rounded: t('qr.design.shapes.rounded', 'Мягкие'),
-    dots: t('qr.design.shapes.dots', 'Точки'),
+    square: t('qr.design.shapes.square', 'Squares'),
+    rounded: t('qr.design.shapes.rounded', 'Rounded'),
+    dots: t('qr.design.shapes.dots', 'Dots'),
   };
 
   return (
@@ -30,17 +30,17 @@ const QrDesignControls = ({
 
         <div>
           <h2 className="font-bold text-lg text-foreground">
-            {t('qr.design.title', 'Дизайн кода')}
+            {t('qr.design.title', 'QR design')}
           </h2>
           <p className="text-sm text-muted-foreground mt-1">
-            {t('qr.design.subtitle', 'Настройте форму элементов, цвет и логотип в центре.')}
+            {t('qr.design.subtitle', 'Customize module shape, color, and the center logo.')}
           </p>
         </div>
       </div>
 
       <div className="space-y-3">
         <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-          {t('qr.design.shapeLabel', 'Форма элементов')}
+          {t('qr.design.shapeLabel', 'Module shape')}
         </Label>
 
         <div className="grid grid-cols-3 gap-2 bg-secondary/30 p-1 rounded-xl border border-input/50">
@@ -66,7 +66,7 @@ const QrDesignControls = ({
 
       <div className="space-y-3">
         <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-          {t('qr.design.colorLabel', 'Цвет узора')}
+          {t('qr.design.colorLabel', 'Pattern color')}
         </Label>
 
         <div className="flex items-center gap-3 flex-wrap">
@@ -95,21 +95,21 @@ const QrDesignControls = ({
 
       <div className="space-y-3">
         <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-          {t('qr.design.logoLabel', 'Логотип в центре')}
+          {t('qr.design.logoLabel', 'Center logo')}
         </Label>
 
         {logoFile ? (
           <div className="flex items-center gap-4 p-3 bg-secondary/20 border border-border/60 rounded-2xl">
             <div className="w-16 h-16 rounded-2xl bg-white border border-border/60 flex items-center justify-center overflow-hidden shrink-0">
-              <img src={logoFile} alt={t('qr.design.logoAlt', 'Логотип')} className="w-full h-full object-cover" />
+              <img src={logoFile} alt={t('qr.design.logoAlt', 'Logo')} className="w-full h-full object-cover" />
             </div>
 
             <div className="min-w-0 flex-1">
               <p className="text-sm font-bold text-foreground truncate">
-                {t('qr.design.logoUploaded', 'Логотип загружен')}
+                {t('qr.design.logoUploaded', 'Logo uploaded')}
               </p>
               <p className="text-xs text-muted-foreground mt-0.5">
-                {t('qr.design.logoHint', 'Он появится в центре QR-кода.')}
+                {t('qr.design.logoHint', 'It will appear in the center of the QR code.')}
               </p>
             </div>
 
@@ -135,10 +135,10 @@ const QrDesignControls = ({
 
             <div className="min-w-0">
               <p className="text-sm font-bold text-foreground">
-                {t('qr.design.logoUploadTitle', 'Загрузите иконку')}
+                {t('qr.design.logoUploadTitle', 'Upload an icon')}
               </p>
               <p className="text-xs text-muted-foreground mt-0.5">
-                {t('qr.design.logoUploadDesc', 'PNG, JPG до 2 МБ')}
+                {t('qr.design.logoUploadDesc', 'PNG or JPG up to 2 MB')}
               </p>
             </div>
           </label>

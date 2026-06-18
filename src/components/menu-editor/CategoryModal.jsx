@@ -22,7 +22,7 @@ const CategoryModal = ({ category, language, defaultLanguage, onChange, onCancel
         <div className="p-6 border-b border-border/60 flex items-center justify-between bg-secondary/20">
           <div>
             <h2 className="text-xl font-bold text-foreground">
-              {localizedName ? t('menuEditor.categoryModal.titleEdit', 'Настройки категории') : t('menuEditor.categoryModal.titleNew', 'Новая категория')}
+              {localizedName ? t('menuEditor.categoryModal.titleEdit', 'Category settings') : t('menuEditor.categoryModal.titleNew', 'New category')}
             </h2>
           </div>
 
@@ -37,33 +37,33 @@ const CategoryModal = ({ category, language, defaultLanguage, onChange, onCancel
         <div className="p-6 space-y-5 bg-background">
           <div className="space-y-2">
             <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-              {t('menuEditor.categoryModal.nameLabel', 'Название')} ({language.toUpperCase()})
+              {t('menuEditor.categoryModal.nameLabel', 'Name')} ({language.toUpperCase()})
             </Label>
 
             <Input
               value={localizedName}
               onChange={(event) => onChange(setLocalizedField(category, 'name', event.target.value, language, defaultLanguage))}
               className={formFieldClasses}
-              placeholder={t('menuEditor.categoryModal.namePlaceholder', 'Например: Десерты')}
+              placeholder={t('menuEditor.categoryModal.namePlaceholder', 'E.g., Desserts')}
             />
           </div>
 
           <div className="space-y-2">
             <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-              {t('menuEditor.categoryModal.descriptionLabel', 'Описание')} ({language.toUpperCase()})
+              {t('menuEditor.categoryModal.descriptionLabel', 'Description')} ({language.toUpperCase()})
             </Label>
 
             <textarea
               value={localizedDescription || ''}
               onChange={(event) => onChange(setLocalizedField(category, 'description', event.target.value, language, defaultLanguage))}
               className={`${formTextareaClasses} min-h-[80px]`}
-              placeholder={t('menuEditor.categoryModal.descriptionPlaceholder', 'Показывать под заголовком категории...')}
+              placeholder={t('menuEditor.categoryModal.descriptionPlaceholder', 'Shown under the category heading...')}
             />
           </div>
 
           <div className="space-y-2">
             <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-              {t('menuEditor.categoryModal.imageLabel', 'Изображение категории')}
+              {t('menuEditor.categoryModal.imageLabel', 'Category image')}
             </Label>
 
             <Input
@@ -77,7 +77,7 @@ const CategoryModal = ({ category, language, defaultLanguage, onChange, onCancel
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                {t('menuEditor.categoryModal.hoursStartLabel', 'Доступно с')}
+                {t('menuEditor.categoryModal.hoursStartLabel', 'Available from')}
               </Label>
 
               <Input
@@ -96,7 +96,7 @@ const CategoryModal = ({ category, language, defaultLanguage, onChange, onCancel
 
             <div className="space-y-2">
               <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                {t('menuEditor.categoryModal.hoursEndLabel', 'Доступно до')}
+                {t('menuEditor.categoryModal.hoursEndLabel', 'Available until')}
               </Label>
 
               <Input
@@ -121,7 +121,7 @@ const CategoryModal = ({ category, language, defaultLanguage, onChange, onCancel
             onClick={onCancel}
             className={secondaryActionButtonClasses}
           >
-            {t('common.cancel', 'Отмена')}
+            {t('common.cancel', 'Cancel')}
           </Button>
 
           <Button
@@ -129,7 +129,7 @@ const CategoryModal = ({ category, language, defaultLanguage, onChange, onCancel
             disabled={!getLocalizedField(category, 'name', defaultLanguage, defaultLanguage).trim()}
             className={`${primaryActionButtonClasses} px-6`}
           >
-            {t('common.save', 'Сохранить')}
+            {t('common.save', 'Save')}
           </Button>
         </div>
       </div>

@@ -120,7 +120,7 @@ const MenuEditor = () => {
         })
         .catch((error) => {
           if (cancelled) return;
-          setRemoteMenuError(error?.message || t('menuEditor.errors.loadFailed', 'Не удалось загрузить меню'));
+          setRemoteMenuError(error?.message || t('menuEditor.errors.loadFailed', 'Could not load menu'));
         })
         .finally(() => {
           if (cancelled) return;
@@ -167,7 +167,7 @@ const MenuEditor = () => {
   }, [id, isRemoteMenu, menu]);
 
   if (isLoadingRemoteMenu) {
-    return <div className="rounded-3xl border border-border/60 bg-card p-8 text-sm text-muted-foreground shadow-sm">{t('common.loading', 'Загрузка...')}</div>;
+    return <div className="rounded-3xl border border-border/60 bg-card p-8 text-sm text-muted-foreground shadow-sm">{t('common.loading', 'Loading...')}</div>;
   }
 
   if (remoteMenuError) {
@@ -287,7 +287,7 @@ const MenuEditor = () => {
     const localizedName = getLocalizedField(editingItem, 'name', defaultLang, defaultLang) || 
                           getLocalizedField(editingItem, 'name', editorLanguage, defaultLang);
     if (!localizedName || !localizedName.trim()) {
-      alert(t('menuEditor.errors.itemNameRequired', 'Пожалуйста, введите название блюда'));
+      alert(t('menuEditor.errors.itemNameRequired', 'Please enter an item name'));
       return;
     }
 
@@ -420,7 +420,7 @@ const MenuEditor = () => {
         });
       }
     } catch (error) {
-      alert(t('menuEditor.errors.toggleStatusFailed', 'Не удалось изменить статус меню. Попробуйте еще раз.'));
+      alert(t('menuEditor.errors.toggleStatusFailed', 'Could not change menu status. Please try again.'));
       setMenuStatus(prevStatus);
     }
   };
@@ -528,7 +528,7 @@ const MenuEditor = () => {
       const response = await normalizeMenu(menu);
       setMenu(response.menu);
     } catch (error) {
-      alert(error?.message || t('menuEditor.errors.normalizeFailed', 'Не удалось нормализовать меню'));
+      alert(error?.message || t('menuEditor.errors.normalizeFailed', 'Could not normalize menu'));
     } finally {
       setIsNormalizing(false);
     }
@@ -536,7 +536,7 @@ const MenuEditor = () => {
 
   const handleTranslateMenu = async (targetLang) => {
     if (!isRemoteMenu) {
-      throw new Error(t('menuEditor.errors.remoteOnly', 'Функционал автоперевода доступен только для сохраненных на сервере меню.'));
+      throw new Error(t('menuEditor.errors.remoteOnly', 'Auto-translation is available only for menus saved on the server.'));
     }
 
     trackProductEvent('menu_translate_clicked', {
@@ -550,7 +550,7 @@ const MenuEditor = () => {
       setMenu(response.payload);
       return response.payload;
     } catch (error) {
-      throw new Error(error?.message || t('menuEditor.errors.translateFailed', 'Не удалось перевести меню'));
+      throw new Error(error?.message || t('menuEditor.errors.translateFailed', 'Could not translate menu'));
     }
   };
 
@@ -577,10 +577,10 @@ const MenuEditor = () => {
                   variant="outline"
                   onClick={() => setIsTranslationModalOpen(true)}
                   className="sm:h-10 h-10 flex-1 sm:flex-none w-auto px-3 bg-background hover:bg-secondary border-border/60 text-foreground font-semibold text-xs sm:text-sm shrink-0 flex items-center justify-center gap-1.5"
-                  title={t('menuEditor.btnTranslations', 'Переводы')}
+                  title={t('menuEditor.btnTranslations', 'Translations')}
                 >
                   <Globe size={14} className="text-muted-foreground" />
-                  <span>{t('menuEditor.btnTranslations', 'Переводы')}</span>
+                  <span>{t('menuEditor.btnTranslations', 'Translations')}</span>
                 </Button>
 
                 <Button
@@ -588,7 +588,7 @@ const MenuEditor = () => {
                   size="icon"
                   onClick={handleEditMenuMeta}
                   className={`${secondaryActionButtonClasses} sm:h-10 h-10 flex-1 sm:flex-none sm:w-10 shrink-0 flex items-center justify-center`}
-                  title={t('menuEditor.btnEdit', 'Редактировать')}
+                  title={t('menuEditor.btnEdit', 'Edit')}
                 >
                   <Edit2 size={14} />
                 </Button>
@@ -598,7 +598,7 @@ const MenuEditor = () => {
                     asChild
                     variant="outline"
                     className={`${secondaryActionButtonClasses} sm:h-10 h-10 flex-1 sm:flex-none w-auto px-3 shrink-0 text-xs sm:text-sm`}
-                    title={t('menuEditor.btnPreview', 'Превью')}
+                    title={t('menuEditor.btnPreview', 'Preview')}
                   >
                     <a
                       href={publicPreviewUrl}
@@ -611,7 +611,7 @@ const MenuEditor = () => {
                       className="flex items-center justify-center gap-1.5"
                     >
                       <ExternalLink size={14} />
-                      <span>{t('menuEditor.btnPreview', 'Превью')}</span>
+                      <span>{t('menuEditor.btnPreview', 'Preview')}</span>
                     </a>
                   </Button>
                 )}
@@ -620,8 +620,8 @@ const MenuEditor = () => {
                   <div className="flex items-center justify-center gap-2 px-2 sm:px-3 py-1.5 rounded-xl border border-border/60 bg-secondary/10 sm:h-10 h-10 flex-1 sm:flex-none sm:w-auto shrink-0 select-none">
                     <span className="text-xs font-semibold text-muted-foreground">
                       {menuStatus === 'active' 
-                        ? t('menuEditor.statusActiveText', 'Вкл') 
-                        : t('menuEditor.statusDraftText', 'Выкл')}
+                        ? t('menuEditor.statusActiveText', 'On') 
+                        : t('menuEditor.statusDraftText', 'Off')}
                     </span>
                     <Switch
                       checked={menuStatus === 'active'}
@@ -637,11 +637,11 @@ const MenuEditor = () => {
                     onClick={handleNormalizeMenu}
                     disabled={isNormalizing}
                     className={`${secondaryActionButtonClasses} sm:h-10 h-10 flex-1 sm:flex-none sm:w-auto px-3 shrink-0 text-xs sm:text-sm`}
-                    title={isNormalizing ? t('menuEditor.btnNormalizing', 'Нормализация...') : t('menuEditor.btnNormalize', 'Нормализовать')}
+                    title={isNormalizing ? t('menuEditor.btnNormalizing', 'Normalizing...') : t('menuEditor.btnNormalize', 'Normalize')}
                   >
                     <Sparkles size={14} className={isNormalizing ? "animate-spin" : ""} />
                     <span className="hidden sm:inline">
-                      {isNormalizing ? t('menuEditor.btnNormalizing', 'Нормализация...') : t('menuEditor.btnNormalize', 'Нормализовать')}
+                      {isNormalizing ? t('menuEditor.btnNormalizing', 'Normalizing...') : t('menuEditor.btnNormalize', 'Normalize')}
                     </span>
                   </Button>
                 )}
@@ -655,7 +655,7 @@ const MenuEditor = () => {
                   />
 
                   <Input
-                    placeholder={t('menuEditor.searchPlaceholder', 'Поиск блюда...')}
+                    placeholder={t('menuEditor.searchPlaceholder', 'Search item...')}
                     value={searchQuery}
                     onChange={(event) => {
                       const nextValue = event.target.value;
@@ -683,7 +683,7 @@ const MenuEditor = () => {
                   className={`${primaryActionButtonClasses} sm:h-10 h-10 px-3.5 shrink-0 text-xs sm:text-sm`}
                 >
                   <Plus size={16} className="mr-2" />
-                  {t('menuEditor.btnAddItem', 'Блюдо')}
+                  {t('menuEditor.btnAddItem', 'Item')}
                 </Button>
               </div>
             </div>
@@ -720,7 +720,7 @@ const MenuEditor = () => {
                       type="button"
                       onClick={() => setEditorLanguage(menu.defaultLanguage || 'en')}
                       className="hover:bg-violet-100 p-0.5 rounded transition-colors text-violet-500 hover:text-violet-700 cursor-pointer"
-                      title={t('menuEditor.translationModal.btnSwitchDefault', 'Редактировать оригинал')}
+                      title={t('menuEditor.translationModal.btnSwitchDefault', 'Edit original')}
                     >
                       <X size={12} strokeWidth={2.5} />
                     </button>
@@ -736,14 +736,14 @@ const MenuEditor = () => {
 
               {activeCategory.availableHours?.start && activeCategory.availableHours?.end && (
                 <p className="text-[11px] font-semibold text-foreground/80 mt-1.5">
-                  {t('menuEditor.availableHours', 'Доступно')}: {getAvailableHoursLabel(activeCategory.availableHours)}
+                  {t('menuEditor.availableHours', 'Available')}: {getAvailableHoursLabel(activeCategory.availableHours)}
                 </p>
               )}
             </div>
           </div>
         ) : (
           <div className="p-8 border-b border-border/60 bg-card">
-            <h1 className="text-xl font-bold text-muted-foreground">{t('menuEditor.selectCategoryPlaceholder', 'Выберите категорию')}</h1>
+            <h1 className="text-xl font-bold text-muted-foreground">{t('menuEditor.selectCategoryPlaceholder', 'Select a category')}</h1>
           </div>
         )}
 

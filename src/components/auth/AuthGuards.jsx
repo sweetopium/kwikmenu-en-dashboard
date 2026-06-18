@@ -147,7 +147,7 @@ const LoadingScreen = () => {
   return (
     <div className="flex min-h-screen items-center justify-center bg-secondary/20 px-6">
       <div className="rounded-3xl border border-border/60 bg-card px-6 py-5 text-sm font-medium text-muted-foreground shadow-sm">
-        Проверяем сессию...
+        Checking session...
       </div>
     </div>
   );

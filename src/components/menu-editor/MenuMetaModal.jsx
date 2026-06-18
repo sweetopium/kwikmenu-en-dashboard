@@ -21,7 +21,7 @@ const MenuMetaModal = ({ menuMeta, language, defaultLanguage, onChange, onCancel
       >
         <div className="p-6 border-b border-border/60 flex items-center justify-between bg-secondary/20">
           <div>
-            <h2 className="text-xl font-bold text-foreground">{t('menuEditor.menuMetaModal.title', 'Настройки меню')}</h2>
+            <h2 className="text-xl font-bold text-foreground">{t('menuEditor.menuMetaModal.title', 'Menu settings')}</h2>
           </div>
 
           <button
@@ -35,27 +35,27 @@ const MenuMetaModal = ({ menuMeta, language, defaultLanguage, onChange, onCancel
         <div className="p-6 space-y-5 bg-background">
           <div className="space-y-2">
             <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-              {t('menuEditor.menuMetaModal.nameLabel', 'Название меню')} ({language.toUpperCase()})
+              {t('menuEditor.menuMetaModal.nameLabel', 'Menu name')} ({language.toUpperCase()})
             </Label>
 
             <Input
               value={localizedName}
               onChange={(event) => onChange(setLocalizedField(menuMeta, 'name', event.target.value, language, defaultLanguage))}
               className={formFieldClasses}
-              placeholder={t('menuEditor.menuMetaModal.namePlaceholder', 'Например: Основное меню')}
+              placeholder={t('menuEditor.menuMetaModal.namePlaceholder', 'E.g., Main menu')}
             />
           </div>
 
           <div className="space-y-2">
             <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-              {t('menuEditor.menuMetaModal.descriptionLabel', 'Описание меню')} ({language.toUpperCase()})
+              {t('menuEditor.menuMetaModal.descriptionLabel', 'Menu description')} ({language.toUpperCase()})
             </Label>
 
             <textarea
               value={localizedDescription || ''}
               onChange={(event) => onChange(setLocalizedField(menuMeta, 'description', event.target.value, language, defaultLanguage))}
               className={formTextareaClasses}
-              placeholder={t('menuEditor.menuMetaModal.descriptionPlaceholder', 'Краткое описание меню...')}
+              placeholder={t('menuEditor.menuMetaModal.descriptionPlaceholder', 'Short menu description...')}
             />
           </div>
         </div>
@@ -66,7 +66,7 @@ const MenuMetaModal = ({ menuMeta, language, defaultLanguage, onChange, onCancel
             onClick={onCancel}
             className={secondaryActionButtonClasses}
           >
-            {t('common.cancel', 'Отмена')}
+            {t('common.cancel', 'Cancel')}
           </Button>
 
           <Button
@@ -74,7 +74,7 @@ const MenuMetaModal = ({ menuMeta, language, defaultLanguage, onChange, onCancel
             disabled={!getLocalizedField(menuMeta, 'name', defaultLanguage, defaultLanguage).trim()}
             className={`${primaryActionButtonClasses} px-6`}
           >
-            {t('common.save', 'Сохранить')}
+            {t('common.save', 'Save')}
           </Button>
         </div>
       </div>

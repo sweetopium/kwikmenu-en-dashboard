@@ -31,25 +31,25 @@ const jsonRequest = async (url, { method = 'GET', body } = {}, fallbackMessage) 
 };
 
 export const listVenues = () =>
-  jsonRequest(VENUES_API_URL, {}, 'Не удалось загрузить список заведений.');
+  jsonRequest(VENUES_API_URL, {}, 'Could not load venue list.');
 
 export const createVenue = (payload) =>
-  jsonRequest(VENUES_API_URL, { method: 'POST', body: payload }, 'Не удалось создать заведение.');
+  jsonRequest(VENUES_API_URL, { method: 'POST', body: payload }, 'Could not create venue.');
 
 export const getVenue = (venueId) =>
-  jsonRequest(`${VENUES_API_URL}/${venueId}`, {}, 'Не удалось загрузить заведение.');
+  jsonRequest(`${VENUES_API_URL}/${venueId}`, {}, 'Could not load venue.');
 
 export const updateVenueProfile = (venueId, payload) =>
-  jsonRequest(`${VENUES_API_URL}/${venueId}/profile`, { method: 'PATCH', body: payload }, 'Не удалось сохранить профиль заведения.');
+  jsonRequest(`${VENUES_API_URL}/${venueId}/profile`, { method: 'PATCH', body: payload }, 'Could not save venue profile.');
 
 export const getVenueSettings = (venueId) =>
-  jsonRequest(`${VENUES_API_URL}/${venueId}/settings`, {}, 'Не удалось загрузить настройки заведения.');
+  jsonRequest(`${VENUES_API_URL}/${venueId}/settings`, {}, 'Could not load venue settings.');
 
 export const updateVenueWifi = (venueId, payload) =>
-  jsonRequest(`${VENUES_API_URL}/${venueId}/wifi`, { method: 'PATCH', body: payload }, 'Не удалось сохранить Wi-Fi настройки.');
+  jsonRequest(`${VENUES_API_URL}/${venueId}/wifi`, { method: 'PATCH', body: payload }, 'Could not save Wi-Fi settings.');
 
 export const updateVenueDesign = (venueId, payload) =>
-  jsonRequest(`${VENUES_API_URL}/${venueId}/design`, { method: 'PATCH', body: payload }, 'Не удалось сохранить внешний вид.');
+  jsonRequest(`${VENUES_API_URL}/${venueId}/design`, { method: 'PATCH', body: payload }, 'Could not save appearance settings.');
 
 export const updateVenueQr = (venueId, payload) =>
-  jsonRequest(`${VENUES_API_URL}/${venueId}/qr`, { method: 'PATCH', body: payload }, 'Не удалось сохранить QR-настройки.');
+  jsonRequest(`${VENUES_API_URL}/${venueId}/qr`, { method: 'PATCH', body: payload }, 'Could not save QR settings.');

@@ -229,7 +229,7 @@ const DashboardHome = () => {
           {(chartData.length ? chartData : [{ label: '—', views: 0, uniqueVisitors: 0 }]).map((data, index) => {
             const heightViews = `${((data.views || 0) / maxViews) * 100}%`;
             const heightUnique = `${((data.uniqueVisitors || 0) / maxViews) * 100}%`;
-            const isWeekend = data.label === 'Сб' || data.label === 'Вс' || data.label === 'Sa' || data.label === 'Su';
+            const isWeekend = data.label === 'Sat' || data.label === 'Sun' || data.label === 'Sa' || data.label === 'Su';
 
             return (
               <div key={`${data.date || 'empty'}-${index}`} className="flex flex-col items-center flex-1 group z-10">

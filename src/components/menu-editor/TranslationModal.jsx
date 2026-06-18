@@ -41,9 +41,9 @@ const TranslationModal = ({
     setSuccessMsg('');
     try {
       await onTranslate(selectedCode);
-      setSuccessMsg(t('menuEditor.translationModal.successMsg', 'Перевод успешно сгенерирован ИИ!'));
+      setSuccessMsg(t('menuEditor.translationModal.successMsg', 'AI translation generated successfully.'));
     } catch (err) {
-      setError(err?.message || t('menuEditor.errors.translateFailed', 'Не удалось перевести меню'));
+      setError(err?.message || t('menuEditor.errors.translateFailed', 'Could not translate menu'));
     } finally {
       setTranslatingCode(null);
     }
@@ -67,7 +67,7 @@ const TranslationModal = ({
               <Globe size={18} />
             </div>
             <h2 className="text-lg font-extrabold text-foreground tracking-tight">
-              {t('menuEditor.translationModal.title', 'Переводы меню')}
+              {t('menuEditor.translationModal.title', 'Menu translations')}
             </h2>
           </div>
 
@@ -85,7 +85,7 @@ const TranslationModal = ({
           <div className="w-full sm:w-[240px] border-b sm:border-b-0 sm:border-r border-border/60 bg-secondary/5 flex flex-col shrink-0 min-h-0">
             <div className="p-3 border-b border-border/50 bg-secondary/10">
               <span className="text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground">
-                {t('menuEditor.translationModal.selectLang', 'Выберите язык')}
+                {t('menuEditor.translationModal.selectLang', 'Choose language')}
               </span>
             </div>
             <div className="flex-1 overflow-y-auto p-2 space-y-1">
@@ -116,12 +116,12 @@ const TranslationModal = ({
 
                     {isDefault ? (
                       <span className="text-[9px] font-bold uppercase tracking-wider text-muted-foreground/60 bg-secondary px-1.5 py-0.5 rounded border border-border/30">
-                        {t('menuEditor.translationModal.badgeDefault', 'Осн.')}
+                        {t('menuEditor.translationModal.badgeDefault', 'Base')}
                       </span>
                     ) : hasTranslation ? (
                       <span className="text-[9px] font-bold text-emerald-600 bg-emerald-50 border border-emerald-200/60 rounded px-1.5 py-0.5 flex items-center justify-center gap-0.5 shadow-sm">
                         <Check size={10} className="stroke-[3.5]" />
-                        {t('menuEditor.translationModal.badgeTranslated', 'ИИ')}
+                        {t('menuEditor.translationModal.badgeTranslated', 'AI')}
                       </span>
                     ) : null}
                   </button>
@@ -142,8 +142,8 @@ const TranslationModal = ({
                     </h3>
                     <p className="text-xs text-muted-foreground">
                       {isDefaultLang 
-                        ? t('menuEditor.translationModal.mainLangDesc', 'Основной язык меню') 
-                        : t('menuEditor.translationModal.translationLangDesc', 'Язык перевода')}
+                        ? t('menuEditor.translationModal.mainLangDesc', 'Default menu language') 
+                        : t('menuEditor.translationModal.translationLangDesc', 'Translation language')}
                     </p>
                   </div>
                 </div>
@@ -153,14 +153,14 @@ const TranslationModal = ({
                   <div className="space-y-4">
                     {isDefaultLang ? (
                       <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
-                        {t('menuEditor.translationModal.defaultLangHelp', 'Это основной язык вашего меню. Все исходные названия блюд, описания, разделы и варианты цен задаются на этом языке. Автоматические переводы ИИ строятся на основе этих текстов.')}
+                        {t('menuEditor.translationModal.defaultLangHelp', 'This is the default language of your menu. Item names, descriptions, categories, and price options are edited in this language. AI translations are generated from this content.')}
                       </p>
                     ) : isAlreadyTranslated ? (
                       <div className="space-y-3">
                         <div className="flex items-start gap-2.5 p-3 rounded-2xl bg-emerald-50/50 border border-emerald-100/60 text-emerald-800">
                           <Check size={16} className="shrink-0 text-emerald-600 mt-0.5" />
                           <p className="text-xs sm:text-sm leading-relaxed">
-                            {t('menuEditor.translationModal.statusTranslated', 'Перевод для этого языка успешно сгенерирован ИИ. Вы можете включить этот язык в редакторе для ручной корректировки или обновить перевод с помощью ИИ.')}
+                            {t('menuEditor.translationModal.statusTranslated', 'AI translation for this language has been generated. You can edit it manually or update the AI translation.')}
                           </p>
                         </div>
                       </div>
@@ -169,11 +169,11 @@ const TranslationModal = ({
                         <div className="flex items-start gap-2.5 p-3 rounded-2xl bg-amber-50/50 border border-amber-100/60 text-amber-800">
                           <AlertCircle size={16} className="shrink-0 text-amber-600 mt-0.5" />
                           <p className="text-xs sm:text-sm leading-relaxed">
-                            {t('menuEditor.translationModal.statusNotTranslated', 'Перевод на этот язык ещё не создан. Гости увидят меню на основном языке ({{lang}}), если вы не добавите перевод.', { lang: selectedLangMeta.nativeName })}
+                            {t('menuEditor.translationModal.statusNotTranslated', 'Translation for this language has not been created yet. Guests will see the menu in the default language ({{lang}}) unless you add a translation.', { lang: selectedLangMeta.nativeName })}
                           </p>
                         </div>
                         <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
-                          {t('menuEditor.translationModal.translatePrompt', 'Вы можете сгенерировать перевод всего меню с помощью искусственного интеллекта в один клик. ИИ переведёт разделы, названия блюд, описания и единицы измерения.')}
+                          {t('menuEditor.translationModal.translatePrompt', 'You can generate a full menu translation with AI in one click. AI will translate sections, item names, descriptions, and units.')}
                         </p>
                       </div>
                     )}
@@ -205,16 +205,16 @@ const TranslationModal = ({
                       >
                         <Sparkles size={16} className={translatingCode === selectedCode ? 'animate-spin' : ''} />
                         {translatingCode === selectedCode
-                          ? t('menuEditor.translating', 'Перевод ИИ...')
+                          ? t('menuEditor.translating', 'Translating...')
                           : isAlreadyTranslated 
-                            ? t('menuEditor.translationModal.btnTranslateUpdate', 'Обновить перевод ИИ')
-                            : t('menuEditor.translationModal.btnTranslateStart', 'Перевести с помощью ИИ')}
+                            ? t('menuEditor.translationModal.btnTranslateUpdate', 'Update AI translation')
+                            : t('menuEditor.translationModal.btnTranslateStart', 'Translate with AI')}
                       </Button>
                     )}
 
                     {isCurrentEditorLang ? (
                       <div className="text-center md:text-left text-xs text-muted-foreground font-semibold py-3 flex-1 flex items-center justify-center bg-secondary/15 rounded-xl border border-border/40 select-none">
-                        {t('menuEditor.translationModal.alreadyActive', 'Редактор переключен на этот язык')}
+                        {t('menuEditor.translationModal.alreadyActive', 'Editor is set to this language')}
                       </div>
                     ) : (
                       <Button
@@ -225,8 +225,8 @@ const TranslationModal = ({
                         className={`${secondaryActionButtonClasses} flex-1 md:h-11 h-11 text-xs md:text-sm font-bold`}
                       >
                         {isDefaultLang 
-                          ? t('menuEditor.translationModal.btnSwitchDefault', 'Редактировать оригинал')
-                          : t('menuEditor.translationModal.btnSwitchLang', 'Редактировать на этом языке')}
+                          ? t('menuEditor.translationModal.btnSwitchDefault', 'Edit original')
+                          : t('menuEditor.translationModal.btnSwitchLang', 'Edit this language')}
                       </Button>
                     )}
                   </div>

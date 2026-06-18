@@ -76,7 +76,7 @@ def download_pdf_from_url(
                 total_size += len(chunk)
                 if total_size > max_size_bytes:
                     raise PdfLinkDownloadError(
-                        "PDF по ссылке слишком большой. Загрузите файл вручную или используйте PDF меньшего размера."
+                        "The linked PDF is too large. Upload the file manually or use a smaller PDF."
                     )
 
                 digest.update(chunk)
@@ -84,17 +84,17 @@ def download_pdf_from_url(
 
         if total_size == 0:
             raise PdfLinkDownloadError(
-                "Не удалось скачать PDF по ссылке. Проверьте, что ссылка открывается напрямую и ведет на PDF-файл."
+                "Failed to download the linked PDF. Check that the link opens directly to a PDF file."
             )
 
         if not first_chunk.startswith(PDF_SIGNATURE):
             raise PdfLinkDownloadError(
-                "Сейчас по ссылке можно импортировать только PDF. Загрузите файл вручную или вставьте прямую ссылку на PDF."
+                "Only PDF link imports are supported for now. Upload a file manually or paste a direct PDF link."
             )
 
         if content_type and content_type not in {"application/pdf", "application/octet-stream", "binary/octet-stream"}:
             raise PdfLinkDownloadError(
-                "Сейчас по ссылке можно импортировать только PDF. Загрузите файл вручную или вставьте прямую ссылку на PDF."
+                "Only PDF link imports are supported for now. Upload a file manually or paste a direct PDF link."
             )
 
         return DownloadedPdf(
@@ -108,25 +108,25 @@ def download_pdf_from_url(
 def _normalize_pdf_url(url: str) -> str:
     normalized = str(url or "").strip()
     if not normalized:
-        raise PdfLinkDownloadError("Укажите прямую ссылку на PDF-файл меню.")
+        raise PdfLinkDownloadError("Enter a direct link to a menu PDF file.")
     return normalized
 
 
 def _ensure_public_http_url(url: str) -> None:
     parsed = parse.urlparse(url)
     if parsed.scheme not in {"http", "https"} or not parsed.hostname:
-        raise PdfLinkDownloadError("Укажите публичную прямую ссылку на PDF-файл меню.")
+        raise PdfLinkDownloadError("Enter a public direct link to a menu PDF file.")
 
     try:
         addresses = socket.getaddrinfo(parsed.hostname, parsed.port or (443 if parsed.scheme == "https" else 80))
     except socket.gaierror as exc:
-        raise PdfLinkDownloadError("Не удалось открыть ссылку на PDF. Проверьте адрес файла и попробуйте снова.") from exc
+        raise PdfLinkDownloadError("Failed to open the PDF link. Check the file URL and try again.") from exc
 
     for entry in addresses:
         raw_ip = entry[4][0]
         ip = ipaddress.ip_address(raw_ip)
         if ip.is_private or ip.is_loopback or ip.is_link_local or ip.is_multicast or ip.is_unspecified or ip.is_reserved:
-            raise PdfLinkDownloadError("Укажите публичную прямую ссылку на PDF-файл меню.")
+            raise PdfLinkDownloadError("Enter a public direct link to a menu PDF file.")
 
 
 def _extract_file_name(response, *, final_url: str) -> str:

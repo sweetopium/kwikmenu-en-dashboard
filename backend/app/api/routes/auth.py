@@ -65,7 +65,7 @@ def register(
     db: Session = Depends(get_db),
 ) -> AuthResponse:
     if payload.password != payload.confirmPassword:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Пароли не совпадают.")
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Passwords do not match.")
 
     try:
         user = create_user(db, name=payload.name, email=payload.email, password=payload.password)
@@ -176,13 +176,13 @@ def magic_login(
     if not session_row:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Недействительный или истекший токен входа.",
+            detail="Invalid or expired login token.",
         )
 
     if session_row.expires_at < datetime.now(timezone.utc):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Срок действия сессии истек.",
+            detail="Session has expired.",
         )
 
     attach_session_cookie(response, token)
@@ -232,7 +232,7 @@ def change_password(
     db: Session = Depends(get_db),
 ) -> CurrentUserResponse:
     if payload.newPassword != payload.confirmPassword:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Пароли не совпадают.")
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Passwords do not match.")
 
     try:
         user = update_user_password(

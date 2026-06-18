@@ -17,7 +17,7 @@ export const getCroppedImageBlob = async (
   const ctx = canvas.getContext('2d');
 
   if (!ctx) {
-    throw new Error('Не удалось подготовить холст для изображения.');
+    throw new Error('Could not prepare image canvas.');
   }
 
   const cropWidth = Math.round(pixelCrop.width);
@@ -50,7 +50,7 @@ export const getCroppedImageBlob = async (
         resolve(nextBlob);
         return;
       }
-      reject(new Error('Не удалось сформировать изображение после обрезки.'));
+      reject(new Error('Could not generate the cropped image.'));
     }, type, quality);
   });
 

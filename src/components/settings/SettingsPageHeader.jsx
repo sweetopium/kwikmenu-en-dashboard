@@ -1,7 +1,7 @@
 import { Button } from "../ui/button";
 import { primaryActionButtonClasses } from "../../lib/uiStyles";
 
-const SettingsPageHeader = ({ title, description, actionLabel = "Сохранить изменения", actionIcon: ActionIcon }) => (
+const SettingsPageHeader = ({ title, description, actionLabel = "Save changes", actionIcon: ActionIcon }) => (
   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-card border border-border/60 p-6 rounded-3xl shadow-sm">
     <div>
       <h1 className="text-2xl sm:text-3xl font-extrabold text-foreground tracking-tight">{title}</h1>

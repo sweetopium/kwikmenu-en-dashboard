@@ -153,8 +153,8 @@ def process_menu_import_job(job_id: str) -> None:
             job_id=job_id,
             status=MenuImportStatus.timed_out,
             error_message=(
-                "Не удалось разобрать меню за 1 минуту. Попробуйте загрузить более четкий PDF или фотографии, "
-                "разделить меню на несколько файлов или повторить импорт по ссылке."
+                "The menu could not be parsed within 1 minute. Try uploading a clearer PDF or photos, "
+                "splitting the menu into several files, or repeating the link import."
             ),
         )
         logger.exception("Menu import job timed out job_id=%s", job_id)
@@ -276,7 +276,7 @@ def _ensure_job_venue(db, *, job: MenuImportJob, result: MenuImportResult) -> Ve
         job.context.get("restaurant_name")
         or result.menu.venue.name
         or result.menu.menuMeta.name
-        or "Новое заведение"
+        or "New venue"
     )
     venue = Venue(
         owner_user_id=job.user_id,

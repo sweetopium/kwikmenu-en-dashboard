@@ -158,34 +158,34 @@ def build_plan_response(plan: SubscriptionPlan) -> BillingPlanResponse:
 
 def build_public_plan_feature_flags(plan: SubscriptionPlan) -> list[PublicBillingPlanFeatureResponse]:
     template_tier_labels = {
-        "basic": "Базовый шаблон",
-        "extended": "Расширенный шаблон",
-        "premium": "Premium-шаблон",
+        "basic": "Basic template",
+        "extended": "Extended template",
+        "premium": "Premium template",
     }
     return [
-        PublicBillingPlanFeatureResponse(key="max_venues", label="Лимит заведений", enabled=True, value=plan.max_venues),
-        PublicBillingPlanFeatureResponse(key="max_menus_per_venue", label="Меню на заведение", enabled=True, value=plan.max_menus_per_venue),
-        PublicBillingPlanFeatureResponse(key="max_menu_items_per_menu", label="Позиций в меню", enabled=True, value=plan.max_menu_items_per_menu),
-        PublicBillingPlanFeatureResponse(key="ai_imports_per_month", label="AI-импортов в месяц", enabled=True, value=plan.ai_imports_per_month),
-        PublicBillingPlanFeatureResponse(key="public_menu_enabled", label="Публичное меню", enabled=plan.public_menu_enabled, value=plan.public_menu_enabled),
-        PublicBillingPlanFeatureResponse(key="translations_enabled", label="Переводы", enabled=plan.translations_enabled, value=plan.max_translation_languages),
-        PublicBillingPlanFeatureResponse(key="analytics_enabled", label="Аналитика", enabled=plan.analytics_enabled, value=plan.analytics_enabled),
-        PublicBillingPlanFeatureResponse(key="qr_customization_enabled", label="Кастомизация QR", enabled=plan.qr_customization_enabled, value=plan.qr_customization_enabled),
+        PublicBillingPlanFeatureResponse(key="max_venues", label="Venue limit", enabled=True, value=plan.max_venues),
+        PublicBillingPlanFeatureResponse(key="max_menus_per_venue", label="Menus per venue", enabled=True, value=plan.max_menus_per_venue),
+        PublicBillingPlanFeatureResponse(key="max_menu_items_per_menu", label="Items per menu", enabled=True, value=plan.max_menu_items_per_menu),
+        PublicBillingPlanFeatureResponse(key="ai_imports_per_month", label="AI imports per month", enabled=True, value=plan.ai_imports_per_month),
+        PublicBillingPlanFeatureResponse(key="public_menu_enabled", label="Public menu", enabled=plan.public_menu_enabled, value=plan.public_menu_enabled),
+        PublicBillingPlanFeatureResponse(key="translations_enabled", label="Translations", enabled=plan.translations_enabled, value=plan.max_translation_languages),
+        PublicBillingPlanFeatureResponse(key="analytics_enabled", label="Analytics", enabled=plan.analytics_enabled, value=plan.analytics_enabled),
+        PublicBillingPlanFeatureResponse(key="qr_customization_enabled", label="QR customization", enabled=plan.qr_customization_enabled, value=plan.qr_customization_enabled),
         PublicBillingPlanFeatureResponse(
             key="menu_design_customization_enabled",
-            label="Кастомизация дизайна меню",
+            label="Menu design customization",
             enabled=plan.menu_design_customization_enabled,
             value=plan.menu_design_customization_enabled,
         ),
         PublicBillingPlanFeatureResponse(
             key="max_template_tier",
-            label="Доступный шаблон",
+            label="Available template",
             enabled=True,
             value=template_tier_labels.get(plan.max_template_tier, plan.max_template_tier),
         ),
         PublicBillingPlanFeatureResponse(
             key="priority_support_enabled",
-            label="Приоритетная поддержка",
+            label="Priority support",
             enabled=plan.priority_support_enabled,
             value=plan.priority_support_enabled,
         ),
@@ -194,31 +194,31 @@ def build_public_plan_feature_flags(plan: SubscriptionPlan) -> list[PublicBillin
 
 def build_public_plan_marketing_features(plan: SubscriptionPlan) -> list[str]:
     features = [
-        f"До {plan.max_venues} заведений" if plan.max_venues > 1 else "1 заведение",
-        f"До {plan.max_menus_per_venue} меню на заведение",
-        f"До {plan.max_menu_items_per_menu} позиций в меню",
-        f"{plan.ai_imports_per_month} AI-импортов в месяц",
+        f"Up to {plan.max_venues} venues" if plan.max_venues > 1 else "1 venue",
+        f"Up to {plan.max_menus_per_venue} menus per venue",
+        f"Up to {plan.max_menu_items_per_menu} items per menu",
+        f"{plan.ai_imports_per_month} AI imports per month",
     ]
     if plan.public_menu_enabled:
-        features.append("Публичное меню")
+        features.append("Public menu")
     if plan.translations_enabled:
-        features.append(f"Переводы до {plan.max_translation_languages} языков")
+        features.append(f"Translations up to {plan.max_translation_languages} languages")
     else:
-        features.append("Без переводов")
+        features.append("No translations")
     if plan.analytics_enabled:
-        features.append("Аналитика")
+        features.append("Analytics")
     if plan.qr_customization_enabled:
-        features.append("Кастомизация QR")
+        features.append("QR customization")
     if plan.menu_design_customization_enabled:
-        features.append("Кастомизация дизайна меню")
+        features.append("Menu design customization")
     template_tier_labels = {
-        "basic": "Базовый шаблон",
-        "extended": "Расширенный шаблон",
-        "premium": "Premium-шаблон",
+        "basic": "Basic template",
+        "extended": "Extended template",
+        "premium": "Premium template",
     }
     features.append(template_tier_labels.get(plan.max_template_tier, plan.max_template_tier))
     if plan.priority_support_enabled:
-        features.append("Приоритетная поддержка")
+        features.append("Priority support")
     return features
 
 
@@ -342,7 +342,7 @@ def require_active_billing_access(subscription: UserSubscription) -> None:
         return
     raise HTTPException(
         status_code=status.HTTP_402_PAYMENT_REQUIRED,
-        detail="Подписка неактивна. Продлите тариф, чтобы продолжить работу.",
+        detail="Subscription is inactive. Renew your plan to continue.",
     )
 
 
@@ -364,7 +364,7 @@ def assert_can_create_venue(db: Session, user: User) -> UserSubscription:
     if venues_count >= subscription.plan.max_venues:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail=f"Лимит заведений для тарифа {subscription.plan.name} исчерпан.",
+            detail=f"The venue limit for the {subscription.plan.name} plan has been reached.",
         )
     return subscription
 
@@ -381,7 +381,7 @@ def assert_can_create_menu_import(db: Session, user: User) -> UserSubscription:
     if imports_count >= subscription.plan.ai_imports_per_month:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail=f"Лимит AI-импортов за месяц для тарифа {subscription.plan.name} исчерпан.",
+            detail=f"The monthly AI import limit for the {subscription.plan.name} plan has been reached.",
         )
     return subscription
 
@@ -421,8 +421,8 @@ def assert_menu_within_plan_limits(subscription: UserSubscription, payload: Menu
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail=(
-                f"В меню {items_count} позиций, а лимит тарифа {subscription.plan.name} "
-                f"составляет {subscription.plan.max_menu_items_per_menu}."
+                f"This menu has {items_count} items, while the {subscription.plan.name} plan limit is "
+                f"{subscription.plan.max_menu_items_per_menu}."
             ),
         )
 
@@ -430,13 +430,13 @@ def assert_menu_within_plan_limits(subscription: UserSubscription, payload: Menu
     if translation_languages > 0 and not subscription.plan.translations_enabled:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail=f"Переводы недоступны на тарифе {subscription.plan.name}.",
+            detail=f"Translations are not available on the {subscription.plan.name} plan.",
         )
     if translation_languages > subscription.plan.max_translation_languages:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail=(
-                f"Лимит языков перевода на тарифе {subscription.plan.name}: "
+                f"Translation language limit on the {subscription.plan.name} plan: "
                 f"{subscription.plan.max_translation_languages}."
             ),
         )
@@ -447,15 +447,15 @@ def assert_can_create_menu_for_venue(db: Session, subscription: UserSubscription
     if menus_count >= subscription.plan.max_menus_per_venue:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail=f"Лимит меню на заведение для тарифа {subscription.plan.name} исчерпан.",
+            detail=f"The menus-per-venue limit for the {subscription.plan.name} plan has been reached.",
         )
 
 
 def assert_template_allowed(subscription: UserSubscription, template_name: str) -> None:
     template_names = {
-        "classic": "Классический",
-        "minimal": "Продвинутый",
-        "accent": "Премиум",
+        "classic": "Classic",
+        "minimal": "Advanced",
+        "accent": "Premium",
     }
     normalized_template = (template_name or "basic").strip().lower()
     template_tier = "basic"
@@ -470,7 +470,7 @@ def assert_template_allowed(subscription: UserSubscription, template_name: str) 
         readable_name = template_names.get(normalized_template, template_name)
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail=f"Шаблон «{readable_name}» недоступен на тарифе {subscription.plan.name}.",
+            detail=f"The {readable_name} template is not available on the {subscription.plan.name} plan.",
         )
 
 

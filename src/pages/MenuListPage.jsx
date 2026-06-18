@@ -62,7 +62,7 @@ const MenuListPage = () => {
 
   return (
     <div className="mx-auto space-y-6 sm:space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700 ease-out">
-      {/* Шапка страницы */}
+      {/* Page header */}
       <div className="bg-card border border-border/60 rounded-3xl shadow-sm overflow-hidden">
         <div className="p-6 sm:p-8">
           <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-5">
@@ -92,7 +92,7 @@ const MenuListPage = () => {
         </div>
       </div>
 
-      {/* Сетка меню */}
+      {/* Menu grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6">
         {menus.map((menu) => {
           const iconMeta = MENU_ICON_META[menu.status] || MENU_ICON_META.default;
@@ -103,7 +103,7 @@ const MenuListPage = () => {
               key={menu.id}
               className="bg-card border border-border/60 rounded-3xl p-5 sm:p-6 shadow-sm flex flex-col group hover:shadow-xl hover:-translate-y-1 hover:border-brand-purple/30 transition-all duration-300"
             >
-              {/* Шапка карточки: Иконка, Статус и Меню (...) */}
+              {/* Card header: icon, status, and menu actions */}
               <div className="flex justify-between items-start mb-4">
                 <div className="flex items-center gap-3">
                   <div className={`w-11 h-11 rounded-xl flex items-center justify-center ${iconMeta.bgColor} ${iconMeta.color} shrink-0 border border-brand-purple/15`}>
@@ -173,7 +173,7 @@ const MenuListPage = () => {
                 </DropdownMenu>
               </div>
 
-              {/* Тело карточки: Название и описание */}
+              {/* Card body: name and description */}
               <div className="mb-4 flex-1 min-w-0">
                 <h3 className="text-xl font-bold text-foreground group-hover:text-brand-purple transition-colors truncate">
                   {menu.name}
@@ -185,7 +185,7 @@ const MenuListPage = () => {
                 )}
               </div>
 
-              {/* Метаданные: Дата, Категории, Блюда */}
+              {/* Metadata: date, categories, items */}
               <div className="flex flex-wrap items-center gap-x-4 gap-y-2 mb-5 text-sm text-muted-foreground border-b border-border/50 pb-5">
                 <div className="flex items-center gap-1.5">
                   <Calendar size={14} />
@@ -203,7 +203,7 @@ const MenuListPage = () => {
                 </div>
               </div>
 
-              {/* Подвал карточки: Кнопки действий (Всегда в один ряд) */}
+              {/* Card footer: action buttons */}
               <div className="flex flex-row gap-2 sm:gap-3 mt-auto">
 
 

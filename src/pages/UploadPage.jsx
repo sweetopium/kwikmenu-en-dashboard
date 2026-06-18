@@ -15,9 +15,9 @@ import { createVenue } from "../lib/venuesApi";
 const UploadStepper = ({ step }) => {
   const { t } = useTranslation();
   const steps = [
-    { id: 1, label: t('uploadPage.stepData', { defaultValue: 'Данные' }) },
-    { id: 2, label: t('uploadPage.stepMenu', { defaultValue: 'Меню' }) },
-    { id: 3, label: t('uploadPage.stepProcessing', { defaultValue: 'Обработка' }) },
+    { id: 1, label: t('uploadPage.stepData', { defaultValue: 'Details' }) },
+    { id: 2, label: t('uploadPage.stepMenu', { defaultValue: 'Menu' }) },
+    { id: 3, label: t('uploadPage.stepProcessing', { defaultValue: 'Processing' }) },
   ];
 
   return (
@@ -229,13 +229,13 @@ const UploadPage = () => {
             <MenuImportFlow
               venueId={currentVenueId}
               context={importContext}
-              introTitle={t('menuImport.introTitle', { defaultValue: "Загрузите меню" })}
-              introDescription={t('menuImport.introDescription', { defaultValue: "Загрузите PDF, фотографии или вставьте прямую ссылку на PDF. Создадим backend job, дождемся обработки и покажем результат." })}
-              submitLabel={t('menuImport.submitLabel', { defaultValue: "Отправить на распознавание" })}
-              successTitle={t('menuImport.successTitle', { defaultValue: "Черновик меню подготовлен" })}
-              successDescription={t('menuImport.successDescription', { defaultValue: "Исходники обработаны backend-сервисом, итоговый JSON собран, сохранен как черновик и готов к редактированию." })}
-              successPrimaryLabel={t('menuImport.successPrimaryLabel', { defaultValue: "Открыть редактор меню" })}
-              successSecondaryLabel={t('menuImport.successSecondaryLabel', { defaultValue: "Перейти в кабинет" })}
+              introTitle={t('menuImport.introTitle', { defaultValue: "Import Menu" })}
+              introDescription={t('menuImport.introDescription', { defaultValue: "Upload PDF, photos, or paste a direct link. AI will recognize categories, items, prices, and descriptions." })}
+              submitLabel={t('menuImport.submitLabel', { defaultValue: "Send for recognition" })}
+              successTitle={t('menuImport.successTitle', { defaultValue: "Menu draft ready" })}
+              successDescription={t('menuImport.successDescription', { defaultValue: "The source files were processed and the draft is ready for editing." })}
+              successPrimaryLabel={t('menuImport.successPrimaryLabel', { defaultValue: "Open menu editor" })}
+              successSecondaryLabel={t('menuImport.successSecondaryLabel', { defaultValue: "Go to dashboard" })}
               successSecondaryTo="/dashboard"
               onStageChange={setImportStage}
             />

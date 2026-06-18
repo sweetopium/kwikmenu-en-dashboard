@@ -107,27 +107,27 @@ const BillingPage = () => {
           <div className="p-6 sm:p-8 space-y-6">
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="rounded-2xl border border-border/60 bg-secondary/15 px-4 py-4">
-                <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">{t('billing.period', 'Период доступа')}</p>
+                <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">{t('billing.period', 'Access period')}</p>
                 <p className="mt-1 text-sm font-semibold text-foreground">
                   {formatDate(subscription?.currentPeriodStart, lng)} - {formatDate(subscription?.currentPeriodEnd, lng)}
                 </p>
               </div>
               <div className="rounded-2xl border border-border/60 bg-secondary/15 px-4 py-4">
-                <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">{t('billing.trialEnd', 'Trial / следующее окончание')}</p>
+                <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">{t('billing.trialEnd', 'Trial / next renewal date')}</p>
                 <p className="mt-1 text-sm font-semibold text-foreground">{formatDate(subscription?.trialEndsAt || subscription?.currentPeriodEnd, lng)}</p>
               </div>
             </div>
 
             <div className="space-y-4">
-              <h3 className="text-sm font-bold text-foreground">{t('billing.limitsTitle', 'Лимиты и использование')}</h3>
+              <h3 className="text-sm font-bold text-foreground">{t('billing.limitsTitle', 'Limits & Usage')}</h3>
               <ul className="space-y-3">
                 {[
-                  t('billing.limits.venuesCount', 'Заведений: {{count}} из {{max}}', { count: usage?.venuesCount ?? 0, max: usage?.maxVenues ?? '—' }),
-                  t('billing.limits.aiImports', 'AI-импортов в этом месяце: {{count}} из {{max}}', { count: usage?.aiImportsUsedThisMonth ?? 0, max: usage?.aiImportsPerMonth ?? '—' }),
+                  t('billing.limits.venuesCount', 'Venues: {{count}} of {{max}}', { count: usage?.venuesCount ?? 0, max: usage?.maxVenues ?? '—' }),
+                  t('billing.limits.aiImports', 'AI imports this month: {{count}} of {{max}}', { count: usage?.aiImportsUsedThisMonth ?? 0, max: usage?.aiImportsPerMonth ?? '—' }),
                   usage?.translationsEnabled 
-                    ? t('billing.limits.translations', 'Переводы: до {{count}} языков', { count: usage.maxTranslationLanguages }) 
-                    : t('billing.limits.translationsDisabled', 'Переводы: недоступны'),
-                  t('billing.limits.templateTier', 'Шаблон: {{tier}}', { tier: subscription?.plan?.maxTemplateTier || '—' }),
+                    ? t('billing.limits.translations', 'Translations: up to {{count}} languages', { count: usage.maxTranslationLanguages }) 
+                    : t('billing.limits.translationsDisabled', 'Translations: unavailable'),
+                  t('billing.limits.templateTier', 'Template tier: {{tier}}', { tier: subscription?.plan?.maxTemplateTier || '—' }),
                 ].map((feature) => (
                   <li key={feature} className="flex items-center gap-3 text-sm text-muted-foreground font-medium">
                     <div className="w-1.5 h-1.5 rounded-full bg-green-500" />
@@ -141,7 +141,7 @@ const BillingPage = () => {
               {canRestartSubscription ? (
                 <Link to="/dashboard/subscription" className="sm:flex-1">
                   <Button className="w-full p-3 sm:h-12 rounded-lg font-bold">
-                    Возобновить подписку
+                    Restart subscription
                   </Button>
                 </Link>
               ) : (
@@ -151,7 +151,7 @@ const BillingPage = () => {
                   onClick={handleCancel}
                   disabled={isCancelling}
                 >
-                  Отменить подписку
+                  Cancel subscription
                 </Button>
               )}
             </div>
@@ -182,8 +182,8 @@ const BillingPage = () => {
                 <Receipt size={20} />
               </div>
               <div>
-                <h2 className="text-lg font-bold text-foreground">{t('billing.history.title', 'История платежей')}</h2>
-                <p className="text-sm text-muted-foreground">{t('billing.history.description', 'Последние транзакции и ручная синхронизация статуса.')}</p>
+                <h2 className="text-lg font-bold text-foreground">{t('billing.history.title', 'Payment History')}</h2>
+                <p className="text-sm text-muted-foreground">{t('billing.history.description', 'Recent transactions and manual status synchronization.')}</p>
               </div>
             </div>
 
@@ -205,7 +205,7 @@ const BillingPage = () => {
                         onClick={() => handleSync(transaction.id)}
                         disabled={syncingId === transaction.id}
                       >
-                        {syncingId === transaction.id ? t('billing.history.syncing', 'Синхронизация...') : t('billing.history.sync', 'Синхронизировать')}
+                        {syncingId === transaction.id ? t('billing.history.syncing', 'Syncing...') : t('billing.history.sync', 'Synchronize')}
                       </Button>
                     ) : null}
                   </div>
@@ -213,7 +213,7 @@ const BillingPage = () => {
               ))}
               {!data?.recentTransactions?.length ? (
                 <div className="rounded-2xl border border-dashed border-border/60 px-4 py-6 text-sm text-muted-foreground">
-                  {t('billing.history.empty', 'История платежей пока пуста.')}
+                  {t('billing.history.empty', 'Payment history is empty.')}
                 </div>
               ) : null}
             </div>

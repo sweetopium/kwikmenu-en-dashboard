@@ -168,17 +168,17 @@ class MenuImportPipeline:
         ]
 
     def _build_fallback_page(self, *, page: NormalizedPage, context: dict[str, str]) -> ExtractedPage:
-        display_name = context.get("restaurant_name") or "Импортированное меню"
-        item_name = page.source_name if page.source_kind != "link" else "Меню по ссылке"
+        display_name = context.get("restaurant_name") or "Imported menu"
+        item_name = page.source_name if page.source_kind != "link" else "Menu link"
         item_description = page.menu_link if page.source_kind == "link" else None
 
         return ExtractedPage(
             pageNumber=page.page_number,
-            menuName=f"{display_name} — импорт",
+            menuName=f"{display_name} import",
             venueName=context.get("restaurant_name") or "KwikMenu Venue",
             sections=[
                 ExtractedSection(
-                    heading="Импортировано",
+                    heading="Imported",
                     items=[
                         ExtractedItem(
                             name=item_name,
@@ -588,7 +588,7 @@ class MenuImportPipeline:
             ),
             venue=VenueMeta(
                 name=venue_name,
-                description=context.get("city") and f"Загружено для заведения в {context['city']}" or None,
+                description=context.get("city") and f"Uploaded for a venue in {context['city']}" or None,
                 logoUrl=None,
                 coverImageUrl=None,
             ),
@@ -612,7 +612,7 @@ class MenuImportPipeline:
             only_key = category_order[0]
             return only_key, category_map[only_key].name
 
-        synthetic_name = f"Раздел со стр. {extracted_page.pageNumber}"
+        synthetic_name = f"Page {extracted_page.pageNumber} section"
         synthetic_key = slugify(
             synthetic_name,
             fallback=f"page-{extracted_page.pageNumber}-continuation",

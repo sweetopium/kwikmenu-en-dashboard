@@ -28,7 +28,6 @@ import {
 } from "../components/ui/dropdown-menu";
 import { listVenues } from "../lib/venuesApi";
 import { logoutSession } from "../lib/sessionApi";
-import LanguageSwitcher from "../components/LanguageSwitcher";
 import { fetchBillingSummary } from "../lib/billingApi";
 
 const SidebarContent = ({ pathname, navItems, onNavigate, onLogout }) => {
@@ -44,7 +43,7 @@ const SidebarContent = ({ pathname, navItems, onNavigate, onLogout }) => {
       </div>
 
       <div className="px-4 py-2 text-xs font-semibold text-muted-foreground/50 uppercase tracking-wider mb-1">
-        {t('navigation.mainMenu', 'Главное меню')}
+        {t('navigation.mainMenu', 'Main menu')}
       </div>
 
       <nav className="flex-1 px-3 space-y-1.5 overflow-y-auto overflow-x-hidden">
@@ -89,11 +88,11 @@ const SidebarContent = ({ pathname, navItems, onNavigate, onLogout }) => {
         <div className="bg-secondary/40 border border-border/50 rounded-2xl p-4">
           <div className="flex items-center gap-2 font-bold text-sm text-foreground mb-1">
             <LifeBuoy size={16} className="text-brand-purple shrink-0" />
-            <span className="truncate">{t('navigation.needHelp', 'Нужна помощь?')}</span>
+            <span className="truncate">{t('navigation.needHelp', 'Need help?')}</span>
           </div>
 
           <p className="text-xs text-muted-foreground mb-3 leading-relaxed">
-            {t('navigation.supportDesc', 'Напишите нашему менеджеру, мы всегда на связи.')}
+            {t('navigation.supportDesc', 'Contact our team if you need help with setup.')}
           </p>
 
           <a
@@ -102,15 +101,13 @@ const SidebarContent = ({ pathname, navItems, onNavigate, onLogout }) => {
             rel="noopener noreferrer"
             className="flex items-center justify-center w-full h-11 text-xs font-bold bg-background border border-border hover:bg-secondary transition-colors rounded-lg text-foreground"
           >
-            {t('navigation.contactSupport', 'Написать в поддержку')}
+            {t('navigation.contactSupport', 'Contact support')}
           </a>
         </div>
 
-        <LanguageSwitcher variant="sidebar" />
-
         <button onClick={onLogout} className="flex items-center gap-3 px-3 h-11 w-full text-sm font-semibold text-muted-foreground hover:bg-destructive/10 hover:text-destructive rounded-lg transition-colors group min-w-0">
           <LogOut size={18} className="group-hover:text-destructive transition-colors shrink-0" />
-          <span className="truncate">{t('navigation.logout', 'Выйти')}</span>
+          <span className="truncate">{t('navigation.logout', 'Log out')}</span>
         </button>
       </div>
     </>
@@ -166,12 +163,12 @@ const DashboardLayout = ({ children }) => {
   const activeVenue = venues.find((venue) => venue.id === activeVenueId) || venues[0] || null;
 
   const navItems = [
-    { icon: LayoutDashboard, label: t('navigation.home', 'Обзор'), path: '/dashboard' },
-    { icon: UtensilsCrossed, label: t('navigation.menu', 'Меню'), path: '/dashboard/menu' },
-    { icon: Building2, label: t('navigation.venue', 'Заведение'), path: activeVenue ? `/dashboard/venues/${activeVenue.id}` : '/dashboard/venues' },
-    { icon: UserRound, label: t('navigation.account', 'Аккаунт'), path: '/dashboard/account' },
-    { icon: CreditCard, label: t('navigation.billing', 'Биллинг'), path: '/dashboard/billing' },
-    { icon: Sparkles, label: t('navigation.subscription', 'Подписка'), path: '/dashboard/subscription' },
+    { icon: LayoutDashboard, label: t('navigation.home', 'Overview'), path: '/dashboard' },
+    { icon: UtensilsCrossed, label: t('navigation.menu', 'Menu'), path: '/dashboard/menu' },
+    { icon: Building2, label: t('navigation.venue', 'Venue'), path: activeVenue ? `/dashboard/venues/${activeVenue.id}` : '/dashboard/venues' },
+    { icon: UserRound, label: t('navigation.account', 'Account'), path: '/dashboard/account' },
+    { icon: CreditCard, label: t('navigation.billing', 'Billing'), path: '/dashboard/billing' },
+    { icon: Sparkles, label: t('navigation.subscription', 'Subscription'), path: '/dashboard/subscription' },
   ];
 
   const handleVenueSwitch = (venueId) => {
@@ -239,7 +236,7 @@ const DashboardLayout = ({ children }) => {
                 <button className="flex items-center gap-2 rounded-xl border border-border/60 bg-background px-3 py-2 hover:bg-secondary/50 transition-colors min-w-0 max-w-[220px] sm:max-w-[280px]">
                   <div className="text-left sm:text-right min-w-0">
                     <p className="text-xs sm:text-sm font-bold text-foreground truncate">
-                      {activeVenue?.name || t('navigation.noVenueSelected', 'Заведение не выбрано')}
+                      {activeVenue?.name || t('navigation.noVenueSelected', 'No venue selected')}
                     </p>
 
                     <div className="flex items-center justify-start sm:justify-end gap-1.5 mt-0.5">
@@ -247,7 +244,7 @@ const DashboardLayout = ({ children }) => {
                         <>
                           <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse shrink-0" />
                           <p className="text-[10px] font-bold tracking-wider uppercase text-amber-600 truncate">
-                            {`${billingSummary.subscription.plan.name.toUpperCase()} (${t('navigation.trialLabel', 'ТРИАЛ')})`}
+                            {`${billingSummary.subscription.plan.name.toUpperCase()} (${t('navigation.trialLabel', 'TRIAL')})`}
                           </p>
                         </>
                       ) : (
@@ -255,8 +252,8 @@ const DashboardLayout = ({ children }) => {
                           <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse shrink-0" />
                           <p className="text-[10px] font-bold tracking-wider uppercase text-brand-purple truncate">
                             {billingSummary?.subscription?.plan?.name
-                              ? `${billingSummary.subscription.plan.name.toUpperCase()}-${t('navigation.tariffLabel', 'ТАРИФ')}`
-                              : t('navigation.proTariff', 'PRO-тариф')}
+                              ? `${billingSummary.subscription.plan.name.toUpperCase()}-${t('navigation.tariffLabel', 'PLAN')}`
+                              : t('navigation.proTariff', 'PRO plan')}
                           </p>
                         </>
                       )}
@@ -267,7 +264,7 @@ const DashboardLayout = ({ children }) => {
               </DropdownMenuTrigger>
 
               <DropdownMenuContent className="min-w-[260px]">
-                <DropdownMenuLabel>{t('navigation.currentVenue', 'Текущее заведение')}</DropdownMenuLabel>
+                <DropdownMenuLabel>{t('navigation.currentVenue', 'Current venue')}</DropdownMenuLabel>
                 {venues.map((venue) => (
                   <DropdownMenuItem
                     key={venue.id}
@@ -283,7 +280,7 @@ const DashboardLayout = ({ children }) => {
 
                 <DropdownMenuItem onSelect={() => navigate('/dashboard/venues')}>
                   <Plus size={16} />
-                  {t('navigation.addVenue', 'Добавить заведение')}
+                  {t('navigation.addVenue', 'Add venue')}
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -295,7 +292,7 @@ const DashboardLayout = ({ children }) => {
             <div className="flex items-center gap-2.5 text-sm font-semibold animate-pulse">
               <Sparkles size={16} className="text-amber-300 shrink-0" />
               <span>
-                {t('billing.trialBannerText', 'У вас активен бесплатный пробный период тарифа {{planName}} до {{date}}.', {
+                {t('billing.trialBannerText', 'Your free trial for {{planName}} is active until {{date}}.', {
                   planName: billingSummary.subscription.plan.name,
                   date: formatDate(billingSummary.subscription.trialEndsAt || billingSummary.subscription.currentPeriodEnd, lng)
                 })}
@@ -305,7 +302,7 @@ const DashboardLayout = ({ children }) => {
               to="/dashboard/subscription"
               className="px-4 py-1.5 bg-white text-brand-purple hover:bg-brand-purple/10 hover:text-white border border-transparent hover:border-white text-xs font-bold rounded-xl shadow-sm transition-all shrink-0"
             >
-              {t('billing.trialBannerCTA', 'Выбрать тариф')}
+              {t('billing.trialBannerCTA', 'Choose plan')}
             </Link>
           </div>
         )}

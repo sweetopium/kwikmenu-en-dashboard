@@ -13,14 +13,14 @@ const formatCurrency = (value, currency = 'USD', lng = 'en') => {
 };
 
 const planFeatures = (plan, t) => [
-  t('subscription.features.venues', 'Заведений: {{count}}', { count: plan.maxVenues }),
-  t('subscription.features.menus', 'Меню на заведение: {{count}}', { count: plan.maxMenusPerVenue }),
-  t('subscription.features.items', 'Блюд на меню: {{count}}', { count: plan.maxMenuItemsPerMenu }),
-  t('subscription.features.aiImports', 'AI-импортов в месяц: {{count}}', { count: plan.aiImportsPerMonth }),
+  t('subscription.features.venues', 'Venues: {{count}}', { count: plan.maxVenues }),
+  t('subscription.features.menus', 'Menus per venue: {{count}}', { count: plan.maxMenusPerVenue }),
+  t('subscription.features.items', 'Dishes per menu: {{count}}', { count: plan.maxMenuItemsPerMenu }),
+  t('subscription.features.aiImports', 'AI imports per month: {{count}}', { count: plan.aiImportsPerMonth }),
   plan.translationsEnabled 
-    ? t('subscription.features.translations', 'Переводы до {{count}} языков', { count: plan.maxTranslationLanguages }) 
-    : t('subscription.features.translationsDisabled', 'Без переводов'),
-  t('subscription.features.template', 'Шаблон: {{tier}}', { tier: t(`subscription.templateTiers.${plan.maxTemplateTier}`, plan.maxTemplateTier) }),
+    ? t('subscription.features.translations', 'Translations up to {{count}} languages', { count: plan.maxTranslationLanguages }) 
+    : t('subscription.features.translationsDisabled', 'No translations'),
+  t('subscription.features.template', 'Template: {{tier}}', { tier: t(`subscription.templateTiers.${plan.maxTemplateTier}`, plan.maxTemplateTier) }),
 ];
 
 const SubscriptionPlansPage = () => {

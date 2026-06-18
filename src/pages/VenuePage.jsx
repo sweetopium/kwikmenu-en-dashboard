@@ -42,10 +42,10 @@ import {
 import { trackProductEvent } from "../lib/productAnalytics";
 
 const VENUE_TABS = [
-  { id: 'profile', label: 'Профиль', mobileLabel: 'Профиль', icon: Store },
+  { id: 'profile', label: 'Profile', mobileLabel: 'Profile', icon: Store },
   { id: 'wifi', label: 'Wi-Fi', mobileLabel: 'Wi‑Fi', icon: Wifi },
-  { id: 'design', label: 'Внешний вид', mobileLabel: 'Вид', icon: Paintbrush },
-  { id: 'qr', label: 'QR и ссылка', mobileLabel: 'QR', icon: QrCode },
+  { id: 'design', label: 'Appearance', mobileLabel: 'Design', icon: Paintbrush },
+  { id: 'qr', label: 'QR & link', mobileLabel: 'QR', icon: QrCode },
 ];
 
 const EMPTY_VENUE = {
@@ -248,7 +248,7 @@ const VenuePage = () => {
         properties: { active_tab: activeTab },
       });
     } catch (nextError) {
-      setError(nextError.message || t('venues.errors.loadFailed', 'Не удалось загрузить заведение.'));
+      setError(nextError.message || t('venues.errors.loadFailed', 'Failed to load venue.'));
     } finally {
       setIsLoading(false);
     }
@@ -295,7 +295,7 @@ const VenuePage = () => {
       setPhoneDial(phoneParts.selectedDial);
       setPhoneLocalNumber(phoneParts.localPhone);
     } catch (nextError) {
-      setError(nextError.message || t('venues.errors.saveProfileFailed', 'Не удалось сохранить профиль заведения.'));
+      setError(nextError.message || t('venues.errors.saveProfileFailed', 'Failed to save venue profile.'));
     } finally {
       setSaving('profile', false);
     }
@@ -320,7 +320,7 @@ const VenuePage = () => {
         enabled: Boolean(settings.wifi?.enabled),
       });
     } catch (nextError) {
-      setError(nextError.message || t('venues.errors.saveWifiFailed', 'Не удалось сохранить Wi‑Fi настройки.'));
+      setError(nextError.message || t('venues.errors.saveWifiFailed', 'Failed to save Wi-Fi settings.'));
     } finally {
       setSaving('wifi', false);
     }
@@ -345,7 +345,7 @@ const VenuePage = () => {
         logoUrl: settings.design?.logoUrl || null,
       });
     } catch (nextError) {
-      setError(nextError.message || t('venues.errors.saveDesignFailed', 'Не удалось сохранить внешний вид.'));
+      setError(nextError.message || t('venues.errors.saveDesignFailed', 'Failed to save menu appearance.'));
     } finally {
       setSaving('design', false);
     }
@@ -385,7 +385,7 @@ const VenuePage = () => {
         publicUrl: settings.qr?.publicUrl || current.publicUrl,
       }));
     } catch (nextError) {
-      setError(nextError.message || t('venues.errors.saveQrFailed', 'Не удалось сохранить QR-настройки.'));
+      setError(nextError.message || t('venues.errors.saveQrFailed', 'Failed to save QR settings.'));
     } finally {
       setSaving('qr', false);
     }
@@ -407,12 +407,12 @@ const VenuePage = () => {
     return (
       <div className="mx-auto space-y-6">
         <SettingsPageHeader
-          title={t('venues.pageTitle', 'Заведение')}
-          description={t('venues.loadingProfileDesc', 'Загружаем профиль заведения, Wi‑Fi и публичную ссылку.')}
+          title={t('venues.pageTitle', 'Venue')}
+          description={t('venues.loadingProfileDesc', 'Loading venue profile, Wi-Fi, and public link.')}
           actionLabel={null}
         />
         <div className="bg-card border border-border/60 rounded-3xl shadow-sm p-8 text-sm text-muted-foreground">
-          {t('venues.loadingData', 'Загружаем данные заведения...')}
+          {t('venues.loadingData', 'Loading venue data...')}
         </div>
       </div>
     );
@@ -422,14 +422,14 @@ const VenuePage = () => {
     return (
       <div className="mx-auto space-y-6">
         <SettingsPageHeader
-          title={t('venues.pageTitle', 'Заведение')}
-          description={t('venues.pageSubtitle', 'Управляйте профилем заведения, гостевым Wi‑Fi и внешним видом меню.')}
+          title={t('venues.pageTitle', 'Venue')}
+          description={t('venues.pageSubtitle', 'Manage venue profile, guest Wi-Fi, and menu appearance.')}
           actionLabel={null}
         />
         <div className="bg-card border border-destructive/20 rounded-3xl shadow-sm p-8 space-y-4">
           <p className="text-sm text-destructive">{error}</p>
           <Button variant="outline" onClick={loadVenue}>
-            {t('venues.retryBtn', 'Повторить загрузку')}
+            {t('venues.retryBtn', 'Retry')}
           </Button>
         </div>
       </div>
@@ -439,8 +439,8 @@ const VenuePage = () => {
   return (
     <div className="mx-auto space-y-6">
       <SettingsPageHeader
-        title={t('venues.pageTitle', 'Заведение')}
-        description={t('venues.pageSubtitle', 'Управляйте профилем заведения, гостевым Wi‑Fi и внешним видом меню.')}
+        title={t('venues.pageTitle', 'Venue')}
+        description={t('venues.pageSubtitle', 'Manage venue profile, guest Wi-Fi, and menu appearance.')}
         actionLabel={null}
       />
 
@@ -454,10 +454,10 @@ const VenuePage = () => {
         <div className="grid grid-cols-4 gap-2 bg-secondary/30 p-1 rounded-xl border border-input/50">
           {(() => {
             const tabLabels = {
-              profile: { label: t('venues.tabs.profile', 'Профиль'), mobile: t('venues.tabs.profileMobile', 'Профиль') },
+              profile: { label: t('venues.tabs.profile', 'Profile'), mobile: t('venues.tabs.profileMobile', 'Profile') },
               wifi: { label: t('venues.tabs.wifi', 'Wi-Fi'), mobile: t('venues.tabs.wifiMobile', 'Wi‑Fi') },
-              design: { label: t('venues.tabs.design', 'Внешний вид'), mobile: t('venues.tabs.designMobile', 'Вид') },
-              qr: { label: t('venues.tabs.qr', 'QR и ссылка'), mobile: t('venues.tabs.qrMobile', 'QR') }
+              design: { label: t('venues.tabs.design', 'Appearance'), mobile: t('venues.tabs.designMobile', 'Design') },
+              qr: { label: t('venues.tabs.qr', 'QR & link'), mobile: t('venues.tabs.qrMobile', 'QR') }
             };
             return VENUE_TABS.map((tab) => (
               <button
@@ -483,7 +483,7 @@ const VenuePage = () => {
               <div className="p-6 sm:p-8 space-y-6">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                   <div className="space-y-2">
-                    <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">{t('venues.fields.name', 'Название заведения')}</Label>
+                    <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">{t('venues.fields.name', 'Venue name')}</Label>
                     <Input
                       value={venueData.name}
                       onChange={(e) => setVenueData({ ...venueData, name: e.target.value })}
@@ -492,7 +492,7 @@ const VenuePage = () => {
                   </div>
                   <div className="space-y-2">
                     <DialPhoneField
-                      label={t('venues.fields.phone', 'Телефон для связи')}
+                      label={t('venues.fields.phone', 'Contact phone')}
                       phone={phoneLocalNumber}
                       selectedDial={phoneDial}
                       selectedCountryId={phoneCountryId}
@@ -508,17 +508,17 @@ const VenuePage = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">{t('venues.fields.description', 'Описание')}</Label>
+                  <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">{t('venues.fields.description', 'Description')}</Label>
                   <Textarea
                     value={venueData.description}
                     onChange={(e) => setVenueData({ ...venueData, description: e.target.value })}
                     className={formTextareaClasses}
-                    placeholder={t('venues.fields.descriptionPlaceholder', 'Расскажите гостям о вашем заведении...')}
+                    placeholder={t('venues.fields.descriptionPlaceholder', 'Tell guests about your venue...')}
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">{t('venues.fields.instagram', 'Ссылка на сайт / соцсети')}</Label>
+                  <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">{t('venues.fields.instagram', 'Website / social link')}</Label>
                   <div className="relative">
                     <Globe className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={16} />
                     <Input
@@ -532,7 +532,7 @@ const VenuePage = () => {
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 border-t border-border/50 pt-6">
                   <div className="space-y-2">
-                    <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">{t('venues.fields.city', 'Город')}</Label>
+                    <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">{t('venues.fields.city', 'City')}</Label>
                     <div className="relative">
                       <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={16} />
                       <Input
@@ -543,7 +543,7 @@ const VenuePage = () => {
                     </div>
                   </div>
                   <div className="space-y-2">
-                    <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">{t('venues.fields.currency', 'Валюта меню')}</Label>
+                    <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">{t('venues.fields.currency', 'Menu currency')}</Label>
                     <div className="relative">
                       <select
                         value={venueData.currency}
@@ -568,7 +568,7 @@ const VenuePage = () => {
                 <div className="pt-4 border-t border-border/50 flex justify-end">
                   <Button onClick={handleSaveProfile} disabled={savingState.profile} className={`${primaryActionButtonClasses} px-5`}>
                     <Save size={18} className="mr-2" />
-                    {savingState.profile ? t('common.saving', 'Сохраняем...') : t('venues.btnSaveProfile', 'Сохранить профиль')}
+                    {savingState.profile ? t('common.saving', 'Saving...') : t('venues.btnSaveProfile', 'Save profile')}
                   </Button>
                 </div>
               </div>
@@ -579,8 +579,8 @@ const VenuePage = () => {
             <div className="bg-card border border-border/60 rounded-3xl shadow-sm p-6 sm:p-8 space-y-8">
               <div className="flex items-center justify-between gap-4">
                 <div className="space-y-1">
-                  <h3 className="text-lg font-bold text-foreground">{t('venues.wifi.title', 'Гостевой Wi-Fi')}</h3>
-                  <p className="text-sm text-muted-foreground">{t('venues.wifi.subtitle', 'Показывайте быстрый вход в Wi-Fi прямо в цифровом меню.')}</p>
+                  <h3 className="text-lg font-bold text-foreground">{t('venues.wifi.title', 'Guest Wi-Fi')}</h3>
+                  <p className="text-sm text-muted-foreground">{t('venues.wifi.subtitle', 'Show quick Wi-Fi access directly in the digital menu.')}</p>
                 </div>
                 <Switch
                   checked={wifiData.enabled}
@@ -591,7 +591,7 @@ const VenuePage = () => {
 
               <div className={`grid grid-cols-1 sm:grid-cols-2 gap-6 transition-opacity ${!wifiData.enabled ? 'opacity-40 pointer-events-none' : ''}`}>
                 <div className="space-y-2">
-                  <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">{t('venues.wifi.ssid', 'Название сети (SSID)')}</Label>
+                  <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">{t('venues.wifi.ssid', 'Network name (SSID)')}</Label>
                   <Input
                     value={wifiData.ssid}
                     onChange={(e) => setWifiData({ ...wifiData, ssid: e.target.value })}
@@ -599,7 +599,7 @@ const VenuePage = () => {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">{t('venues.wifi.password', 'Пароль')}</Label>
+                  <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">{t('venues.wifi.password', 'Password')}</Label>
                   <Input
                     value={wifiData.password}
                     onChange={(e) => setWifiData({ ...wifiData, password: e.target.value })}
@@ -613,14 +613,14 @@ const VenuePage = () => {
                   <Wifi size={20} />
                 </div>
                 <p className="text-xs text-brand-purple/80 leading-relaxed mt-3">
-                  {t('venues.wifi.hint', 'При активации этой функции в меню появится кнопка «Подключиться к Wi‑Fi». Гостям не придётся вводить пароль вручную.')}
+                  {t('venues.wifi.hint', 'When enabled, the menu will show a Wi-Fi connection button. Guests will not need to type the password manually.')}
                 </p>
               </div>
 
               <div className="pt-4 border-t border-border/50 flex justify-end">
                 <Button onClick={handleSaveWifi} disabled={savingState.wifi} className={`${primaryActionButtonClasses} px-5`}>
                   <Save size={18} className="mr-2" />
-                  {savingState.wifi ? t('common.saving', 'Сохраняем...') : t('venues.btnSaveWifi', 'Сохранить Wi‑Fi')}
+                  {savingState.wifi ? t('common.saving', 'Saving...') : t('venues.btnSaveWifi', 'Save Wi-Fi')}
                 </Button>
               </div>
             </div>
@@ -629,7 +629,7 @@ const VenuePage = () => {
           {activeTab === 'design' && (
             <div className="space-y-6">
               <div className="bg-card border border-border/60 rounded-3xl shadow-sm p-6 sm:p-8 space-y-6">
-                <h3 className="text-lg font-bold text-foreground">{t('venues.design.title', 'Внешний вид меню')}</h3>
+                <h3 className="text-lg font-bold text-foreground">{t('venues.design.title', 'Menu appearance')}</h3>
 
                 <div className="space-y-4">
                   <div className="flex items-center gap-3">
@@ -637,8 +637,8 @@ const VenuePage = () => {
                       <LayoutTemplate size={18} />
                     </div>
                     <div>
-                      <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">{t('venues.design.templateLabel', 'Шаблон меню')}</Label>
-                      <p className="text-sm text-muted-foreground mt-1">{t('venues.design.templateDesc', 'Выберите базовую визуальную подачу меню.')}</p>
+                      <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">{t('venues.design.templateLabel', 'Menu template')}</Label>
+                      <p className="text-sm text-muted-foreground mt-1">{t('venues.design.templateDesc', 'Choose the base visual style for the menu.')}</p>
                     </div>
                   </div>
 
@@ -669,7 +669,7 @@ const VenuePage = () => {
                                 onClick={(e) => e.stopPropagation()}
                                 className="absolute -top-3 right-6 z-10 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-[#f3f0ff] dark:bg-zinc-800 text-brand-purple border border-brand-purple/20 hover:bg-brand-purple hover:text-white hover:border-brand-purple transition-all flex items-center gap-0.5 active:scale-95"
                               >
-                                <span>{t('venues.design.viewDemo', 'Демо')}</span>
+                                <span>{t('venues.design.viewDemo', 'Demo')}</span>
                                 <ExternalLink size={10} />
                               </a>
                             )}
@@ -686,8 +686,8 @@ const VenuePage = () => {
                       <Palette size={18} />
                     </div>
                     <div>
-                      <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">{t('venues.design.colorLabel', 'Акцентный цвет')}</Label>
-                      <p className="text-sm text-muted-foreground mt-1">{t('venues.design.colorDesc', 'Используется для кнопок, активных состояний и ссылок.')}</p>
+                      <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">{t('venues.design.colorLabel', 'Accent color')}</Label>
+                      <p className="text-sm text-muted-foreground mt-1">{t('venues.design.colorDesc', 'Used for buttons, active states, and links.')}</p>
                     </div>
                   </div>
 
@@ -716,7 +716,7 @@ const VenuePage = () => {
                 </div>
 
                 <div className="pt-6 border-t border-border/50 space-y-4">
-                  <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">{t('venues.design.logoLabel', 'Логотип заведения в меню')}</Label>
+                  <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">{t('venues.design.logoLabel', 'Venue logo in menu')}</Label>
                   <div className="flex items-center gap-6">
                     <input
                       id="venue-logo-input"
@@ -730,14 +730,14 @@ const VenuePage = () => {
                       className="w-24 h-24 rounded-2xl bg-secondary/30 border-2 border-dashed border-input flex items-center justify-center cursor-pointer hover:bg-secondary/50 transition-colors overflow-hidden"
                     >
                       {designData.logoUrl ? (
-                        <img src={designData.logoUrl} alt={t('venues.design.logoAlt', 'Логотип заведения')} className="w-full h-full object-cover" />
+                        <img src={designData.logoUrl} alt={t('venues.design.logoAlt', 'Venue logo')} className="w-full h-full object-cover" />
                       ) : (
                         <ImageIcon className="text-muted-foreground" size={32} />
                       )}
                     </label>
                     <div className="space-y-1">
-                      <p className="text-sm font-bold">{t('venues.design.logoUploadTitle', 'Загрузите квадратное лого')}</p>
-                      <p className="text-xs text-muted-foreground">{t('venues.design.logoUploadDesc', 'Рекомендуемый размер 512x512px, формат PNG или SVG')}</p>
+                      <p className="text-sm font-bold">{t('venues.design.logoUploadTitle', 'Upload a square logo')}</p>
+                      <p className="text-xs text-muted-foreground">{t('venues.design.logoUploadDesc', 'Recommended size 512x512px, PNG or SVG')}</p>
                       <Button
                         asChild
                         variant="outline"
@@ -745,7 +745,7 @@ const VenuePage = () => {
                         className="mt-2 rounded-lg border-border/60 text-[10px] uppercase tracking-wider font-black"
                       >
                         <label htmlFor="venue-logo-input" className="cursor-pointer">
-                          {t('venues.design.btnSelectFile', 'Выбрать файл')}
+                          {t('venues.design.btnSelectFile', 'Choose file')}
                         </label>
                       </Button>
                     </div>
@@ -755,15 +755,15 @@ const VenuePage = () => {
                 <div className="pt-4 border-t border-border/50 flex justify-end">
                   <Button onClick={handleSaveDesign} disabled={savingState.design} className={`${primaryActionButtonClasses} px-5`}>
                     <Save size={18} className="mr-2" />
-                    {savingState.design ? t('common.saving', 'Сохраняем...') : t('venues.btnSaveDesign', 'Сохранить внешний вид')}
+                    {savingState.design ? t('common.saving', 'Saving...') : t('venues.btnSaveDesign', 'Save appearance')}
                   </Button>
                 </div>
               </div>
 
               <div className="bg-gradient-to-br from-gray-900 to-gray-800 p-6 rounded-3xl shadow-xl text-white flex items-center justify-between gap-4">
                 <div className="space-y-1">
-                  <p className="text-xs font-bold text-brand-purple uppercase tracking-widest">{t('venues.design.previewLabel', 'Предпросмотр')}</p>
-                  <h4 className="text-lg font-extrabold">{t('venues.design.previewTitle', 'Посмотрите, как меню видят гости')}</h4>
+                  <p className="text-xs font-bold text-brand-purple uppercase tracking-widest">{t('venues.design.previewLabel', 'Preview')}</p>
+                  <h4 className="text-lg font-extrabold">{t('venues.design.previewTitle', 'See how guests view the menu')}</h4>
                 </div>
                 <a
                   href={qrData.publicUrl || venueData.publicUrl || '#'}
@@ -772,7 +772,7 @@ const VenuePage = () => {
                   onClick={() => trackProductEvent('public_menu_link_opened', { venueId })}
                   className="inline-flex items-center h-11 rounded-lg bg-white px-5 text-gray-900 hover:bg-gray-100 font-bold gap-2 transition-colors"
                 >
-                  {t('venues.design.btnOpenMenu', 'Открыть меню')}
+                  {t('venues.design.btnOpenMenu', 'Open menu')}
                   <ExternalLink size={16} />
                 </a>
               </div>

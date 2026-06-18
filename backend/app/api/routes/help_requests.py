@@ -50,7 +50,7 @@ def _enforce_rate_limit(request: Request) -> str:
     if len(bucket) >= RATE_LIMIT_MAX_REQUESTS:
         raise HTTPException(
             status_code=status.HTTP_429_TOO_MANY_REQUESTS,
-            detail="Слишком много заявок. Попробуйте ещё раз через несколько минут.",
+            detail="Too many requests. Try again in a few minutes.",
         )
     bucket.append(now)
     return client_ip
@@ -59,25 +59,25 @@ def _enforce_rate_limit(request: Request) -> str:
 def _validate_menu_link(menu_link: str | None) -> str:
     normalized_link = (menu_link or "").strip()
     if not normalized_link:
-        raise HTTPException(status_code=400, detail="Укажите ссылку на меню или отметьте, что прикрепите его позже.")
+        raise HTTPException(status_code=400, detail="Enter a menu link or choose to attach it later.")
     parsed = urlparse(normalized_link)
     if parsed.scheme not in {"http", "https"} or not parsed.netloc:
-        raise HTTPException(status_code=400, detail="Ссылка на меню должна начинаться с http:// или https://")
+        raise HTTPException(status_code=400, detail="The menu link must start with http:// or https://")
     return normalized_link
 
 
 def _validate_menu_file_meta(menu_file: UploadFile | None) -> tuple[str, str]:
     if menu_file is None or not menu_file.filename:
-        raise HTTPException(status_code=400, detail="Прикрепите файл меню или отметьте, что прикрепите его позже.")
+        raise HTTPException(status_code=400, detail="Attach a menu file or choose to attach it later.")
 
     safe_name = Path(menu_file.filename).name
     extension = Path(safe_name).suffix.lower()
     content_type = (menu_file.content_type or "").lower()
 
     if extension not in ALLOWED_FILE_EXTENSIONS:
-        raise HTTPException(status_code=400, detail="Неподдерживаемый формат файла меню.")
+        raise HTTPException(status_code=400, detail="Unsupported menu file format.")
     if content_type and content_type not in ALLOWED_FILE_MIME_TYPES:
-        raise HTTPException(status_code=400, detail="Неподдерживаемый MIME-тип файла меню.")
+        raise HTTPException(status_code=400, detail="Unsupported menu file MIME type.")
 
     return safe_name, content_type
 
@@ -97,7 +97,7 @@ def _persist_uploaded_file(help_request_id: str, menu_file: UploadFile, safe_nam
                     break
                 total_bytes += len(chunk)
                 if total_bytes > MAX_MENU_FILE_SIZE_BYTES:
-                    raise HTTPException(status_code=400, detail="Файл меню слишком большой. Максимум 10 МБ.")
+                    raise HTTPException(status_code=400, detail="Menu file is too large. Maximum size is 10 MB.")
                 buffer.write(chunk)
     except Exception:
         shutil.rmtree(request_dir, ignore_errors=True)
@@ -107,7 +107,7 @@ def _persist_uploaded_file(help_request_id: str, menu_file: UploadFile, safe_nam
 
     if total_bytes == 0:
         shutil.rmtree(request_dir, ignore_errors=True)
-        raise HTTPException(status_code=400, detail="Файл меню пустой.")
+        raise HTTPException(status_code=400, detail="Menu file is empty.")
 
     return str(target_path), total_bytes
 
@@ -152,13 +152,13 @@ def create_help_request(
             normalized["restaurant_name"],
         ]
     ):
-        raise HTTPException(status_code=400, detail="Заполните все обязательные поля заявки.")
+        raise HTTPException(status_code=400, detail="Fill in all required request fields.")
 
     if normalized["messenger"] not in ALLOWED_MESSENGERS:
-        raise HTTPException(status_code=400, detail="Некорректный мессенджер для связи.")
+        raise HTTPException(status_code=400, detail="Invalid contact messenger.")
 
     if normalized["menu_source"] not in ALLOWED_MENU_SOURCES:
-        raise HTTPException(status_code=400, detail="Некорректный способ передачи меню.")
+        raise HTTPException(status_code=400, detail="Invalid menu delivery method.")
 
     safe_name: str | None = None
     menu_content_type: str | None = None
