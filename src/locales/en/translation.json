@@ -734,9 +734,8 @@
       "btnProceed": "Proceed to payment",
       "btnActivateCurrent": "Add payment method",
       "btnActive": "Current plan active",
-      "agreeOffer": "I agree to the terms of the",
-      "agreeOfferLink": "public offer",
-      "agreeRecurring": "I agree to automatic recurring charges of {{price}} once a month for the subscription",
+      "trialDisclosure": "Your card will be saved securely by Stripe. Billing starts after your trial on {{date}} at {{price}} per month. You can cancel anytime before renewal.",
+      "recurringDisclosure": "You will be redirected to Stripe Checkout. The selected plan renews at {{price}} per month until canceled.",
       "securePaymentNotice": "Secure SSL Connection · PCI DSS compliant"
     }
   },

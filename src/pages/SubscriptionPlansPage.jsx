@@ -31,10 +31,6 @@ const SubscriptionPlansPage = () => {
   const [error, setError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Compliance checkboxes
-  const [agreeOffer, setAgreeOffer] = useState(false);
-  const [agreeRecurring, setAgreeRecurring] = useState(false);
-
   // Refs for scroll guides
   const checkoutSectionRef = useRef(null);
   const featuredCardRef = useRef(null);
@@ -80,10 +76,8 @@ const SubscriptionPlansPage = () => {
 
   const handleSelectPlan = (planId) => {
     setSelectedPlanId(planId);
-    setAgreeOffer(false);
-    setAgreeRecurring(false);
 
-    // Smooth scroll down to checkout compliance form on mobile
+    // Smooth scroll down to checkout summary on mobile
     if (typeof window !== 'undefined' && window.innerWidth < 1024) {
       setTimeout(() => {
         checkoutSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -96,9 +90,6 @@ const SubscriptionPlansPage = () => {
       return;
     }
     if (!canPurchaseSelectedPlan) {
-      return;
-    }
-    if (!agreeOffer || !agreeRecurring) {
       return;
     }
     setIsSubmitting(true);
@@ -260,41 +251,17 @@ const SubscriptionPlansPage = () => {
             </div>
 
             {canPurchaseSelectedPlan && selectedPlan ? (
-              <div className="space-y-4 pt-2">
-                <label className="flex items-start gap-3 cursor-pointer select-none">
-                  <input
-                    type="checkbox"
-                    checked={agreeOffer}
-                    onChange={(e) => setAgreeOffer(e.target.checked)}
-                    className="mt-1 h-4 w-4 shrink-0 rounded border-border text-brand-purple focus:ring-brand-purple/30 accent-brand-purple"
-                  />
-                  <span className="text-xs sm:text-sm text-muted-foreground leading-normal">
-                    {t('subscription.checkout.agreeOffer')}{' '}
-                    <a
-                      href="https://kwikme.nu/terms"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-brand-purple font-bold hover:underline"
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      {t('subscription.checkout.agreeOfferLink')}
-                    </a>
-                  </span>
-                </label>
-
-                <label className="flex items-start gap-3 cursor-pointer select-none">
-                  <input
-                    type="checkbox"
-                    checked={agreeRecurring}
-                    onChange={(e) => setAgreeRecurring(e.target.checked)}
-                    className="mt-1 h-4 w-4 shrink-0 rounded border-border text-brand-purple focus:ring-brand-purple/30 accent-brand-purple"
-                  />
-                  <span className="text-xs sm:text-sm text-muted-foreground leading-normal">
-                    {t('subscription.checkout.agreeRecurring', {
-                      price: formatCurrency(selectedPlan.priceAmount, selectedPlan.currency, lng),
-                    })}
-                  </span>
-                </label>
+              <div className="rounded-2xl border border-brand-purple/10 bg-brand-purple/5 p-4 text-xs sm:text-sm text-brand-purple leading-relaxed">
+                {isCurrentSelected && needsPaymentActivation
+                  ? t('subscription.checkout.trialDisclosure', {
+                    date: data?.subscription?.trialEndsAt
+                      ? new Date(data.subscription.trialEndsAt).toLocaleDateString('en-US')
+                      : 'the end of your trial',
+                    price: formatCurrency(selectedPlan.priceAmount, selectedPlan.currency, lng),
+                  })
+                  : t('subscription.checkout.recurringDisclosure', {
+                    price: formatCurrency(selectedPlan.priceAmount, selectedPlan.currency, lng),
+                  })}
               </div>
             ) : null}
           </div>
@@ -308,7 +275,7 @@ const SubscriptionPlansPage = () => {
               <Button
                 className={`${primaryActionButtonClasses} w-full h-12 rounded-lg`}
                 onClick={handleCheckout}
-                disabled={!selectedPlan || isSubmitting || !agreeOffer || !agreeRecurring}
+                disabled={!selectedPlan || isSubmitting}
               >
                 {isSubmitting ? (
                   t('subscription.checkout.btnProceeding', 'Opening checkout...')
