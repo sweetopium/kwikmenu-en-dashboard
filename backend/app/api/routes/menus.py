@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
+from fastapi import APIRouter, Depends, HTTPException, Query, Request, Response, status
 from sqlalchemy.orm import Session
 
 from app.api.deps import get_current_user, get_db
@@ -185,6 +185,36 @@ def unpublish_menu(
     db.commit()
     db.refresh(menu)
     return serialize_menu(menu)
+
+
+@router.delete("/{menu_id}", status_code=status.HTTP_204_NO_CONTENT, response_class=Response)
+def delete_menu(
+    menu_id: str,
+    request: Request,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+) -> Response:
+    menu = get_owned_menu(db, menu_id=menu_id, user_id=current_user.id)
+    if menu is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Menu not found.")
+
+    record_product_event(
+        db,
+        request=request,
+        user=current_user,
+        event_name="menu_deleted",
+        source="backend",
+        venue_id=menu.venue_id,
+        menu_id=menu.id,
+        properties={
+            "menu_id": menu.id,
+            "menu_name": menu.name,
+            "status": menu.status,
+        },
+    )
+    db.delete(menu)
+    db.commit()
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 
 @router.post("/{menu_id}/translate", response_model=MenuResponse)

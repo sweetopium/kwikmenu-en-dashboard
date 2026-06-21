@@ -9,7 +9,7 @@ import {
 
 import { Button } from "../components/ui/button";
 import { primaryActionButtonClasses, subtleIconButtonClasses } from "../lib/uiStyles";
-import { listMenus, publishMenu, unpublishMenu } from "../lib/menusApi";
+import { deleteMenu, listMenus, publishMenu, unpublishMenu } from "../lib/menusApi";
 import { trackProductEvent } from "../lib/productAnalytics";
 import {
   DropdownMenu,
@@ -30,6 +30,7 @@ const MenuListPage = () => {
   const { t, i18n } = useTranslation();
   const [menus, setMenus] = useState([]);
   const [busyMenuId, setBusyMenuId] = useState(null);
+  const [deleteTarget, setDeleteTarget] = useState(null);
 
   useEffect(() => {
     const activeVenueId = window.localStorage.getItem('kwikmenu-active-venue');
@@ -55,6 +56,27 @@ const MenuListPage = () => {
       );
     } catch (error) {
       console.error('Failed to update menu status', error);
+    } finally {
+      setBusyMenuId(null);
+    }
+  };
+
+  const handleDeleteMenu = async () => {
+    if (!deleteTarget) {
+      return;
+    }
+
+    setBusyMenuId(deleteTarget.id);
+    try {
+      await deleteMenu(deleteTarget.id);
+      setMenus((currentMenus) => currentMenus.filter((menu) => menu.id !== deleteTarget.id));
+      trackProductEvent('menu_delete_confirmed', {
+        venueId: deleteTarget.venueId,
+        menuId: deleteTarget.id,
+      });
+      setDeleteTarget(null);
+    } catch (error) {
+      console.error('Failed to delete menu', error);
     } finally {
       setBusyMenuId(null);
     }
@@ -165,7 +187,16 @@ const MenuListPage = () => {
                     ) : null}
 
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem variant="destructive">
+                    <DropdownMenuItem
+                      variant="destructive"
+                      onSelect={() => {
+                        setDeleteTarget(menu);
+                        trackProductEvent('menu_delete_clicked', {
+                          venueId: menu.venueId,
+                          menuId: menu.id,
+                        });
+                      }}
+                    >
                       <Trash2 size={16} className="mr-2" />
                       {t('menuList.dropdown.delete')}
                     </DropdownMenuItem>
@@ -265,6 +296,47 @@ const MenuListPage = () => {
           );
         })}
       </div>
+
+      {deleteTarget ? (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/45 px-4">
+          <div className="w-full max-w-md rounded-3xl border border-border/70 bg-card p-6 shadow-2xl">
+            <div className="flex items-start gap-4">
+              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-red-500/10 text-red-600">
+                <Trash2 size={20} />
+              </div>
+              <div className="min-w-0">
+                <h2 className="text-xl font-extrabold text-foreground">
+                  {t('menuList.deleteConfirm.title')}
+                </h2>
+                <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+                  {t('menuList.deleteConfirm.description', { name: deleteTarget.name })}
+                </p>
+              </div>
+            </div>
+
+            <div className="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+              <button
+                type="button"
+                onClick={() => setDeleteTarget(null)}
+                disabled={busyMenuId === deleteTarget.id}
+                className="h-11 rounded-xl border border-border/70 px-5 text-sm font-bold text-foreground transition-colors hover:bg-secondary/50 disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {t('menuList.deleteConfirm.cancel')}
+              </button>
+              <button
+                type="button"
+                onClick={handleDeleteMenu}
+                disabled={busyMenuId === deleteTarget.id}
+                className="h-11 rounded-xl bg-red-600 px-5 text-sm font-bold text-white transition-colors hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {busyMenuId === deleteTarget.id
+                  ? t('menuList.deleteConfirm.deleting')
+                  : t('menuList.deleteConfirm.confirm')}
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 };

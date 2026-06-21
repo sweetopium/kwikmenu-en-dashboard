@@ -87,6 +87,17 @@ export const unpublishMenu = async (menuId) => {
   return response.json();
 };
 
+export const deleteMenu = async (menuId) => {
+  const response = await fetch(`${MENUS_API_URL}/${menuId}`, {
+    method: 'DELETE',
+    credentials: 'include',
+  });
+
+  if (!response.ok) {
+    await parseApiError(response, `Menu delete request failed with status ${response.status}`);
+  }
+};
+
 export const translateMenu = async (menuId, targetLang) => {
   const response = await fetch(`${MENUS_API_URL}/${menuId}/translate?target_lang=${targetLang}`, {
     method: 'POST',
@@ -99,4 +110,3 @@ export const translateMenu = async (menuId, targetLang) => {
 
   return response.json();
 };
-

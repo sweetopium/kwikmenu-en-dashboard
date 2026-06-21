@@ -267,6 +267,13 @@
       "turnOn": "Вкл",
       "viewQr": "QR-код",
       "editor": "Редактор"
+    },
+    "deleteConfirm": {
+      "title": "Удалить меню?",
+      "description": "Меню \"{{name}}\" будет удалено без возможности восстановления.",
+      "cancel": "Отмена",
+      "confirm": "Удалить меню",
+      "deleting": "Удаление"
     }
   },
   "menuImportPage": {

@@ -267,6 +267,13 @@
       "turnOn": "On",
       "viewQr": "QR Code",
       "editor": "Editor"
+    },
+    "deleteConfirm": {
+      "title": "Delete menu?",
+      "description": "This will permanently delete \"{{name}}\". This action cannot be undone.",
+      "cancel": "Cancel",
+      "confirm": "Delete menu",
+      "deleting": "Deleting"
     }
   },
   "menuImportPage": {
