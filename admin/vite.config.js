@@ -9,6 +9,7 @@ export default defineConfig({
     alias: {
       '@dashboard': fileURLToPath(new URL('../src', import.meta.url)),
     },
+    dedupe: ['react', 'react-dom', 'react-router-dom', 'react-i18next', 'i18next'],
   },
   server: {
     port: 5174,
