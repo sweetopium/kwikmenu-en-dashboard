@@ -29,7 +29,10 @@ from app.services.billing import (
     log_billing_event,
     mark_payment_failed,
 )
-from app.services.help_request_notifications import send_stripe_invoice_payment_to_telegram
+from app.services.help_request_notifications import (
+    send_stripe_checkout_completed_to_telegram,
+    send_stripe_invoice_payment_to_telegram,
+)
 from app.services.stripe_billing import StripeBillingClient
 from app.services.unitpay import UnitPayClient
 
@@ -576,12 +579,22 @@ async def handle_stripe_webhook(
     subscription = None
     transaction = None
     notification_payload = None
+    telegram_delivered = None
+    telegram_error = None
+    telegram_message_id = None
     if event_type == "checkout.session.completed":
         session_payload = event_object
         session_id = str(session_payload.get("id") or "")
         if session_id:
             transaction = db.query(PaymentTransaction).filter(PaymentTransaction.stripe_checkout_session_id == session_id).first()
         subscription = _apply_stripe_checkout_session(db=db, session_payload=session_payload, transaction=transaction)
+        if subscription.status == "trialing":
+            telegram_delivered, telegram_message_id, telegram_error = send_stripe_checkout_completed_to_telegram(
+                user=subscription.user,
+                subscription=subscription,
+                stripe_session_id=session_id or None,
+                stripe_subscription_id=subscription.stripe_subscription_id,
+            )
     elif event_type in {"customer.subscription.updated", "customer.subscription.deleted"}:
         stripe_subscription_id = str(event_object.get("id") or "")
         subscription = db.query(UserSubscription).filter(UserSubscription.stripe_subscription_id == stripe_subscription_id).first()
@@ -617,9 +630,6 @@ async def handle_stripe_webhook(
                     "stripe_subscription_id": stripe_subscription_id or None,
                 }
 
-    telegram_delivered = None
-    telegram_error = None
-    telegram_message_id = None
     if notification_payload is not None:
         telegram_delivered, telegram_message_id, telegram_error = send_stripe_invoice_payment_to_telegram(
             **notification_payload,

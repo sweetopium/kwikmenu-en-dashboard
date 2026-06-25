@@ -43,3 +43,13 @@ export const trackMenuUploadConversion = () => {
     currency: 'USD',
   });
 };
+
+export const trackPaymentMethodAddedConversion = ({ planName, subscriptionStatus } = {}) => {
+  trackMetaPixelEvent('AddPaymentInfo', {
+    content_name: 'stripe_payment_method_added',
+    content_category: planName || 'subscription',
+    status: subscriptionStatus || 'unknown',
+    value: 0,
+    currency: 'USD',
+  });
+};

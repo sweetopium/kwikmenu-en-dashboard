@@ -243,3 +243,49 @@ def send_stripe_invoice_payment_to_telegram(
         ),
         disable_web_page_preview=True,
     )
+
+
+def build_stripe_checkout_completed_telegram_message(
+    *,
+    user: User | None,
+    subscription: UserSubscription | None,
+    stripe_session_id: str | None,
+    stripe_subscription_id: str | None,
+) -> str:
+    plan_name = subscription.plan.name if subscription and subscription.plan else "—"
+    status = subscription.status if subscription else "—"
+    trial_end = _format_datetime(subscription.trial_ends_at if subscription else None)
+    next_renewal = _format_datetime(subscription.current_period_end if subscription else None)
+    subscription_id = stripe_subscription_id or (subscription.stripe_subscription_id if subscription else None) or "—"
+    session_id = stripe_session_id or "—"
+    parts = [
+        "🔵 <b>Stripe payment method added</b>",
+        "",
+        f"👤 <b>User:</b> {_escape(user.email if user else None)}",
+        f"📦 <b>Plan:</b> {_escape(plan_name)}",
+        "💳 <b>Amount now:</b> <b>0.00 USD</b>",
+        f"🔁 <b>Stripe subscription ID:</b> <code>{_escape(subscription_id)}</code>",
+        f"🧾 <b>Stripe session ID:</b> <code>{_escape(session_id)}</code>",
+        f"📌 <b>Status:</b> {_escape(status)}",
+        f"🎁 <b>Trial end:</b> {_escape(trial_end)}",
+        f"📅 <b>First charge / next renewal:</b> {_escape(next_renewal)}",
+    ]
+    return "\n".join(parts)
+
+
+def send_stripe_checkout_completed_to_telegram(
+    *,
+    user: User | None,
+    subscription: UserSubscription | None,
+    stripe_session_id: str | None,
+    stripe_subscription_id: str | None,
+) -> tuple[bool, int | None, str | None]:
+    return _send_telegram_html_message(
+        build_stripe_checkout_completed_telegram_message(
+            user=user,
+            subscription=subscription,
+            stripe_session_id=stripe_session_id,
+            stripe_subscription_id=stripe_subscription_id,
+        ),
+        disable_web_page_preview=True,
+    )

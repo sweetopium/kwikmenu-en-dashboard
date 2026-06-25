@@ -5,6 +5,7 @@ import { CheckCircle2, LoaderCircle, TriangleAlert, XCircle } from 'lucide-react
 import SettingsPageHeader from "../components/settings/SettingsPageHeader";
 import { Button } from "../components/ui/button";
 import { fetchBillingSummary, syncBillingTransactionByStripeSessionId } from "../lib/billingApi";
+import { trackPaymentMethodAddedConversion } from "../lib/conversionTracking";
 import { secondaryActionButtonClasses } from "../lib/uiStyles";
 import { listVenues } from "../lib/venuesApi";
 
@@ -13,8 +14,8 @@ const STATUS_COPY = {
     icon: CheckCircle2,
     iconClassName: 'text-emerald-600',
     badgeClassName: 'border-emerald-200 bg-emerald-50 text-emerald-700',
-    title: 'Subscription activated',
-    description: 'Stripe confirmed the payment and your subscription is being updated.',
+    title: 'Payment method added',
+    description: 'Stripe saved your card and your subscription is being updated.',
   },
   fail: {
     icon: XCircle,
@@ -34,14 +35,19 @@ const BillingCheckoutReturnPage = ({ mode = 'success' }) => {
     subscriptionStatus: '',
     planName: '',
     currentPeriodEnd: '',
+    trialEndsAt: '',
     primaryVenueId: '',
   });
 
   const stripeSessionId = searchParams.get('session_id') || '';
   const statusLabel = state.subscriptionStatus === 'active'
     ? 'Active'
+    : state.subscriptionStatus === 'trialing'
+      ? 'Trial active'
     : state.subscriptionStatus || 'Active';
   const managementHref = state.primaryVenueId ? `/dashboard/venues/${state.primaryVenueId}` : '/dashboard/venues';
+  const isTrialing = state.subscriptionStatus === 'trialing';
+  const renewalDate = state.trialEndsAt || state.currentPeriodEnd;
 
   const copy = useMemo(() => STATUS_COPY[mode] || STATUS_COPY.success, [mode]);
   const Icon = copy.icon;
@@ -62,6 +68,7 @@ const BillingCheckoutReturnPage = ({ mode = 'success' }) => {
           subscriptionStatus: '',
           planName: '',
           currentPeriodEnd: '',
+          trialEndsAt: '',
           primaryVenueId: '',
         });
         return;
@@ -81,8 +88,17 @@ const BillingCheckoutReturnPage = ({ mode = 'success' }) => {
           subscriptionStatus: syncResult.subscription?.status || billingSummary.subscription?.status || '',
           planName: billingSummary.subscription?.plan?.name || '',
           currentPeriodEnd: billingSummary.subscription?.currentPeriodEnd || '',
+          trialEndsAt: billingSummary.subscription?.trialEndsAt || syncResult.subscription?.trialEndsAt || '',
           primaryVenueId: venues?.[0]?.id || '',
         });
+        const conversionStorageKey = `kwikmenu-stripe-add-payment-info:${stripeSessionId}`;
+        if (typeof window !== 'undefined' && window.localStorage.getItem(conversionStorageKey) !== '1') {
+          trackPaymentMethodAddedConversion({
+            planName: billingSummary.subscription?.plan?.name || syncResult.subscription?.plan?.name,
+            subscriptionStatus: syncResult.subscription?.status || billingSummary.subscription?.status,
+          });
+          window.localStorage.setItem(conversionStorageKey, '1');
+        }
       } catch (error) {
         if (cancelled) {
           return;
@@ -94,6 +110,7 @@ const BillingCheckoutReturnPage = ({ mode = 'success' }) => {
           subscriptionStatus: '',
           planName: '',
           currentPeriodEnd: '',
+          trialEndsAt: '',
           primaryVenueId: '',
         });
       }
@@ -148,13 +165,19 @@ const BillingCheckoutReturnPage = ({ mode = 'success' }) => {
               ) : (
                 <div className="space-y-3 text-sm">
                   <p className="font-semibold text-foreground">
-                    Payment synced. Current subscription status: <span className="text-brand-purple">{statusLabel}</span>
+                    {isTrialing ? 'Payment method synced.' : 'Payment synced.'} Current subscription status: <span className="text-brand-purple">{statusLabel}</span>
                   </p>
                   {state.planName ? (
                     <p className="text-muted-foreground">Current plan: {state.planName}</p>
                   ) : null}
-                  {state.currentPeriodEnd ? (
-                    <p className="text-muted-foreground">Access paid until: {new Date(state.currentPeriodEnd).toLocaleDateString('en-US')}</p>
+                  {renewalDate ? (
+                    <p className="text-muted-foreground">
+                      {isTrialing ? 'First charge date: ' : 'Access paid until: '}
+                      {new Date(renewalDate).toLocaleDateString('en-US')}
+                    </p>
+                  ) : null}
+                  {isTrialing ? (
+                    <p className="text-muted-foreground">No payment was charged today. Stripe will bill your card when the trial ends.</p>
                   ) : null}
                 </div>
               )}
