@@ -4,10 +4,24 @@ export const GOOGLE_ADS_REGISTRATION_CONVERSION = {
   currency: 'USD',
 };
 
+export const GOOGLE_ADS_MENU_UPLOAD_CONVERSION = {
+  send_to: 'AW-18249604362/ybNDCKeDosUcEIq6i_5D',
+  value: 1.0,
+  currency: 'USD',
+};
+
 export const trackRegistrationConversion = () => {
   if (typeof window === 'undefined' || typeof window.gtag !== 'function') {
     return;
   }
 
   window.gtag('event', 'conversion', GOOGLE_ADS_REGISTRATION_CONVERSION);
+};
+
+export const trackMenuUploadConversion = () => {
+  if (typeof window === 'undefined' || typeof window.gtag !== 'function') {
+    return;
+  }
+
+  window.gtag('event', 'conversion', GOOGLE_ADS_MENU_UPLOAD_CONVERSION);
 };

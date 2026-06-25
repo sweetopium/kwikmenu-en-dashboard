@@ -11,6 +11,7 @@ import {
   primaryActionButtonClasses,
   secondaryActionButtonClasses,
 } from "../../lib/uiStyles";
+import { trackMenuUploadConversion } from "../../lib/conversionTracking";
 import { saveImportedMenuToStorage } from "../../lib/importedMenuStorage";
 import { pollMenuImportStatus, submitMenuImport } from "../../lib/menuImport";
 import { trackProductEvent } from "../../lib/productAnalytics";
@@ -168,6 +169,7 @@ const MenuImportFlow = ({
   const [backgroundStatusMessage, setBackgroundStatusMessage] = useState('');
   const [isResumingWait, setIsResumingWait] = useState(false);
   const activeRequestRef = useRef(null);
+  const trackedConversionJobIdsRef = useRef(new Set());
 
   useEffect(() => {
     onStageChange?.(stage);
@@ -191,6 +193,15 @@ const MenuImportFlow = ({
     setFiles([]);
     setMenuLink('');
     setMenuSource('file');
+  };
+
+  const trackMenuUploadCompletionConversion = (jobId) => {
+    if (!jobId || trackedConversionJobIdsRef.current.has(jobId)) {
+      return;
+    }
+
+    trackedConversionJobIdsRef.current.add(jobId);
+    trackMenuUploadConversion();
   };
 
   const resolveImportCompletion = async ({ jobId, signal }) => {
@@ -246,6 +257,7 @@ const MenuImportFlow = ({
         used_fallback: result.usedFallback,
       },
     });
+    trackMenuUploadCompletionConversion(jobId);
     setBackgroundJobId(null);
     setBackgroundStatusMessage('');
     setStage('success');
@@ -361,6 +373,7 @@ const MenuImportFlow = ({
               used_fallback: result.usedFallback,
             },
           });
+          trackMenuUploadCompletionConversion(backgroundJobId);
           setBackgroundJobId(null);
           setBackgroundStatusMessage('');
           setStage('success');
