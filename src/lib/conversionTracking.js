@@ -10,18 +10,36 @@ export const GOOGLE_ADS_MENU_UPLOAD_CONVERSION = {
   currency: 'USD',
 };
 
-export const trackRegistrationConversion = () => {
+const trackGoogleAdsConversion = (conversion) => {
   if (typeof window === 'undefined' || typeof window.gtag !== 'function') {
     return;
   }
 
-  window.gtag('event', 'conversion', GOOGLE_ADS_REGISTRATION_CONVERSION);
+  window.gtag('event', 'conversion', conversion);
+};
+
+const trackMetaPixelEvent = (eventName, parameters = {}) => {
+  if (typeof window === 'undefined' || typeof window.fbq !== 'function') {
+    return;
+  }
+
+  window.fbq('track', eventName, parameters);
+};
+
+export const trackRegistrationConversion = () => {
+  trackGoogleAdsConversion(GOOGLE_ADS_REGISTRATION_CONVERSION);
+  trackMetaPixelEvent('CompleteRegistration', {
+    content_name: 'account_registration',
+    value: 1.0,
+    currency: 'USD',
+  });
 };
 
 export const trackMenuUploadConversion = () => {
-  if (typeof window === 'undefined' || typeof window.gtag !== 'function') {
-    return;
-  }
-
-  window.gtag('event', 'conversion', GOOGLE_ADS_MENU_UPLOAD_CONVERSION);
+  trackGoogleAdsConversion(GOOGLE_ADS_MENU_UPLOAD_CONVERSION);
+  trackMetaPixelEvent('Lead', {
+    content_name: 'menu_upload_completed',
+    value: 1.0,
+    currency: 'USD',
+  });
 };
