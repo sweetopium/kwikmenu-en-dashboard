@@ -31,6 +31,7 @@ function App() {
                 <Route path="/onboarding/help" element={<ProtectedRoute><OnboardingLayout><HelpPage/></OnboardingLayout></ProtectedRoute>}/>
                 <Route path="/onboarding/upload" element={<ProtectedRoute><OnboardingLayout><UploadPage/></OnboardingLayout></ProtectedRoute>}/>
                 <Route path="/m/:venueId" element={<PublicVenueMenuPage/>}/>
+                <Route path="/:venueId" element={<PublicVenueMenuPage/>}/>
 
                 {/* Dashboard Flow */}
                 <Route path="/dashboard" element={<ProtectedRoute><DashboardLayout><DashboardHome/></DashboardLayout></ProtectedRoute>}/>

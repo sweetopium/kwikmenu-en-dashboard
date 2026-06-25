@@ -104,12 +104,17 @@ def build_menu_import_success_telegram_message(
     user: User | None,
     venue: Venue | None,
 ) -> str:
+    settings = get_settings()
     source_names = ", ".join(_escape(source.name) for source in job.sources[:4])
     if len(job.sources) > 4:
         source_names = f"{source_names} and {len(job.sources) - 4} more"
     flow = _escape((job.context or {}).get("flow") or "unknown")
+    public_menu_url = None
+    if venue and job.menu_id:
+        public_menu_base_url = (settings.public_menu_base_url or settings.menu_import_frontend_origin).rstrip("/")
+        public_menu_url = f"{public_menu_base_url}/{venue.id}?menu={job.menu_id}"
     parts = [
-        "🟢 <b>Menu import completed</b>",
+        "🟢 <b>Menu successfully recognized</b>",
         "",
         f"🏪 <b>Venue:</b> {_escape((venue.name if venue else None) or (job.context or {}).get('restaurant_name') or '—')}",
         f"👤 <b>User:</b> {_escape(user.email if user else None)}",
@@ -126,6 +131,8 @@ def build_menu_import_success_telegram_message(
         parts.append("⚠️ <b>Fallback template was used</b>")
     if job.warnings:
         parts.append(f"⚠️ <b>Warnings:</b> {_escape(' '.join(str(item) for item in job.warnings[:3]))}")
+    if public_menu_url:
+        parts.extend(["", f"🔗 <b>Public menu:</b> <a href=\"{_escape(public_menu_url)}\">Open menu</a>"])
     return "\n".join(parts)
 
 
