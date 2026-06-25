@@ -7,6 +7,7 @@ import AuthShell from "../components/auth/AuthShell.jsx";
 import AuthField from "../components/auth/AuthField.jsx";
 import SocialProviderButton from "../components/auth/SocialProviderButton.jsx";
 import {getPostRegisterRedirect, getProviderAuthUrl, registerWithEmail} from "../lib/auth.js";
+import { trackRegistrationConversion } from "../lib/conversionTracking.js";
 import { primaryActionButtonClasses } from "../lib/uiStyles.js";
 
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -95,6 +96,7 @@ const RegisterPage = () => {
       if (typeof window.ym === 'function') {
         window.ym(108304746, 'reachGoal', 'register');
       }
+      trackRegistrationConversion();
 
       navigate(result?.redirectUrl || getPostRegisterRedirect());
     } catch (error) {

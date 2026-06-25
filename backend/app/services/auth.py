@@ -136,6 +136,24 @@ def find_or_create_oauth_user(
     email: str | None,
     name: str,
 ) -> User:
+    user, _ = find_or_create_oauth_user_with_status(
+        db,
+        provider=provider,
+        provider_account_id=provider_account_id,
+        email=email,
+        name=name,
+    )
+    return user
+
+
+def find_or_create_oauth_user_with_status(
+    db: Session,
+    *,
+    provider: str,
+    provider_account_id: str,
+    email: str | None,
+    name: str,
+) -> tuple[User, bool]:
     existing_account = (
         db.query(AuthAccount)
         .filter(
@@ -152,13 +170,15 @@ def find_or_create_oauth_user(
             existing_account.email = email.strip().lower()
             db.add(existing_account)
             db.flush()
-        return user
+        return user, False
 
     normalized_email = email.strip().lower() if email else None
     user = db.query(User).filter(User.email == normalized_email).first() if normalized_email else None
+    user_created = False
     if user is None:
         fallback_email = normalized_email or f"{provider}_{provider_account_id}@oauth.kwikmenu.app"
         user = create_oauth_user(db, name=name, email=fallback_email)
+        user_created = True
     elif not user.is_active:
         raise ValueError("User account is deactivated.")
 
@@ -170,7 +190,7 @@ def find_or_create_oauth_user(
     )
     db.add(auth_account)
     db.flush()
-    return user
+    return user, user_created
 
 
 def attach_session_cookie(response: Response, session_token: str) -> None:

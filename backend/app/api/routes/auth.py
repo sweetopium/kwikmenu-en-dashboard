@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from urllib.parse import parse_qsl, urlencode, urlsplit, urlunsplit
+
 from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
 from sqlalchemy.orm import Session
 
@@ -20,7 +22,7 @@ from app.services.auth import (
     clear_session_cookie,
     create_session,
     create_user,
-    find_or_create_oauth_user,
+    find_or_create_oauth_user_with_status,
     update_user_password,
     update_user_profile,
 )
@@ -39,6 +41,13 @@ from app.services.oauth import (
 
 
 router = APIRouter(prefix="/api/auth", tags=["auth"])
+
+
+def add_registration_conversion_param(redirect_path: str) -> str:
+    parts = urlsplit(redirect_path)
+    query_params = dict(parse_qsl(parts.query, keep_blank_values=True))
+    query_params["registration_conversion"] = "1"
+    return urlunsplit((parts.scheme, parts.netloc, parts.path, urlencode(query_params), parts.fragment))
 
 
 def serialize_user(user: User) -> CurrentUserResponse:
@@ -278,7 +287,7 @@ def oauth_provider_callback(
             raise OAuthError("OAuth callback did not include an authorization code.")
 
         profile = exchange_code_for_profile(normalized_provider, code=code)
-        user = find_or_create_oauth_user(
+        user, user_created = find_or_create_oauth_user_with_status(
             db,
             provider=profile.provider,
             provider_account_id=profile.provider_account_id,
@@ -304,7 +313,10 @@ def oauth_provider_callback(
         db.commit()
         attach_session_cookie(response, session_token)
         clear_oauth_state_cookie(response)
-        return redirect_to_frontend(response, redirect_path=build_redirect_url(has_venues=has_venues))
+        redirect_path = build_redirect_url(has_venues=has_venues)
+        if user_created:
+            redirect_path = add_registration_conversion_param(redirect_path)
+        return redirect_to_frontend(response, redirect_path=redirect_path)
     except (OAuthError, ValueError) as exc:
         db.rollback()
         clear_oauth_state_cookie(response)

@@ -17,12 +17,14 @@ import SubscriptionPlansPage from "./pages/SubscriptionPlansPage.jsx";
 import LoginPage from "./pages/LoginPage.jsx";
 import RegisterPage from "./pages/RegisterPage.jsx";
 import { ProtectedRoute, PublicOnlyRoute } from "./components/auth/AuthGuards.jsx";
+import RegistrationConversionTracker from "./components/auth/RegistrationConversionTracker.jsx";
 import ActiveVenueQrRedirect from "./components/venue/ActiveVenueQrRedirect.jsx";
 import PublicVenueMenuPage from "./pages/PublicVenueMenuPage.jsx";
 
 function App() {
     return (
         <BrowserRouter>
+            <RegistrationConversionTracker />
             <Routes>
                 {/* Onboarding Flow */}
                 <Route path="/" element={<OnboardingLayout><WelcomePage/></OnboardingLayout>}/>
