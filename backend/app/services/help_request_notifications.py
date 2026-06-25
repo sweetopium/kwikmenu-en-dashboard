@@ -4,7 +4,7 @@ import json
 from urllib import error, request
 
 from app.core.config import get_settings
-from app.models import HelpRequest, MenuImportJob, User, Venue
+from app.models import HelpRequest, MenuImportJob, User, UserSubscription, Venue
 
 
 MESSENGER_LABELS = {
@@ -184,5 +184,62 @@ def send_menu_import_failure_to_telegram(
 ) -> tuple[bool, int | None, str | None]:
     return _send_telegram_html_message(
         build_menu_import_failure_telegram_message(job=job, user=user, venue=venue, error_message=error_message),
+        disable_web_page_preview=True,
+    )
+
+
+def _format_datetime(value) -> str:
+    if value is None:
+        return "—"
+    return value.strftime("%Y-%m-%d %H:%M UTC")
+
+
+def build_stripe_invoice_payment_telegram_message(
+    *,
+    succeeded: bool,
+    user: User | None,
+    subscription: UserSubscription | None,
+    amount: str,
+    stripe_invoice_id: str | None,
+    stripe_subscription_id: str | None,
+) -> str:
+    title = "🟢 <b>Stripe payment succeeded</b>" if succeeded else "🔴 <b>Stripe payment failed</b>"
+    plan_name = subscription.plan.name if subscription and subscription.plan else "—"
+    status = subscription.status if subscription else "—"
+    next_renewal = _format_datetime(subscription.current_period_end if subscription else None)
+    invoice_id = stripe_invoice_id or "—"
+    subscription_id = stripe_subscription_id or (subscription.stripe_subscription_id if subscription else None) or "—"
+    parts = [
+        title,
+        "",
+        f"👤 <b>User:</b> {_escape(user.email if user else None)}",
+        f"📦 <b>Plan:</b> {_escape(plan_name)}",
+        f"💳 <b>Amount:</b> {_escape(amount)}",
+        f"🧾 <b>Stripe invoice ID:</b> <code>{_escape(invoice_id)}</code>",
+        f"🔁 <b>Stripe subscription ID:</b> <code>{_escape(subscription_id)}</code>",
+        f"📌 <b>Status:</b> {_escape(status)}",
+        f"📅 <b>Next renewal:</b> {_escape(next_renewal)}",
+    ]
+    return "\n".join(parts)
+
+
+def send_stripe_invoice_payment_to_telegram(
+    *,
+    succeeded: bool,
+    user: User | None,
+    subscription: UserSubscription | None,
+    amount: str,
+    stripe_invoice_id: str | None,
+    stripe_subscription_id: str | None,
+) -> tuple[bool, int | None, str | None]:
+    return _send_telegram_html_message(
+        build_stripe_invoice_payment_telegram_message(
+            succeeded=succeeded,
+            user=user,
+            subscription=subscription,
+            amount=amount,
+            stripe_invoice_id=stripe_invoice_id,
+            stripe_subscription_id=stripe_subscription_id,
+        ),
         disable_web_page_preview=True,
     )

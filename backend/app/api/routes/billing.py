@@ -6,7 +6,7 @@ from fastapi import APIRouter, Depends, HTTPException, Request, status
 from sqlalchemy.orm import Session
 
 from app.api.deps import get_current_user, get_db
-from app.models import PaymentTransaction, SubscriptionPlan, User, UserSubscription
+from app.models import BillingEvent, PaymentTransaction, SubscriptionPlan, User, UserSubscription
 from app.schemas.billing import (
     BillingCheckoutRequest,
     BillingCheckoutResponse,
@@ -29,6 +29,7 @@ from app.services.billing import (
     log_billing_event,
     mark_payment_failed,
 )
+from app.services.help_request_notifications import send_stripe_invoice_payment_to_telegram
 from app.services.stripe_billing import StripeBillingClient
 from app.services.unitpay import UnitPayClient
 
@@ -94,6 +95,54 @@ def _stripe_checkout_urls() -> tuple[str, str]:
     success_url = settings.stripe_checkout_success_url or f"{frontend_origin}/dashboard/billing/success?session_id={{CHECKOUT_SESSION_ID}}"
     cancel_url = settings.stripe_checkout_cancel_url or f"{frontend_origin}/dashboard/billing/fail"
     return success_url, cancel_url
+
+
+def _stripe_timestamp_to_datetime(value) -> datetime | None:
+    if value in (None, ""):
+        return None
+    try:
+        return datetime.fromtimestamp(int(value), tz=timezone.utc)
+    except (TypeError, ValueError, OSError):
+        return None
+
+
+def _stripe_event_already_processed(db: Session, event_id: str | None) -> bool:
+    if not event_id:
+        return False
+    recent_events = (
+        db.query(BillingEvent)
+        .filter(BillingEvent.source == "stripe")
+        .order_by(BillingEvent.created_at.desc())
+        .limit(1000)
+        .all()
+    )
+    return any((event.payload or {}).get("eventId") == event_id for event in recent_events)
+
+
+def _stripe_invoice_period_end(invoice_payload: dict) -> datetime | None:
+    lines = (invoice_payload.get("lines") or {}).get("data") or []
+    for line in lines:
+        period_end = _stripe_timestamp_to_datetime(((line or {}).get("period") or {}).get("end"))
+        if period_end:
+            return period_end
+    return _stripe_timestamp_to_datetime(invoice_payload.get("period_end"))
+
+
+def _stripe_invoice_minor_amount(invoice_payload: dict, *, succeeded: bool) -> int:
+    amount_key = "amount_paid" if succeeded else "amount_due"
+    minor_amount = invoice_payload.get(amount_key)
+    if minor_amount in (None, ""):
+        minor_amount = invoice_payload.get("amount_due") or 0
+    try:
+        return int(minor_amount)
+    except (TypeError, ValueError):
+        return 0
+
+
+def _format_stripe_invoice_amount(invoice_payload: dict, *, succeeded: bool) -> str:
+    amount = _stripe_invoice_minor_amount(invoice_payload, succeeded=succeeded) / 100
+    currency = str(invoice_payload.get("currency") or "usd").upper()
+    return f"{amount:.2f} {currency}"
 
 
 def _apply_stripe_checkout_session(
@@ -517,11 +566,16 @@ async def handle_stripe_webhook(
     stripe = StripeBillingClient()
     raw_body = await request.body()
     event = stripe.verify_webhook_event(raw_body, request.headers.get("stripe-signature"))
+    event_id = str(event.get("id") or "")
     event_type = str(event.get("type") or "")
     event_object = (event.get("data") or {}).get("object") or {}
 
+    if _stripe_event_already_processed(db, event_id):
+        return {"received": True, "duplicate": True}
+
     subscription = None
     transaction = None
+    notification_payload = None
     if event_type == "checkout.session.completed":
         session_payload = event_object
         session_id = str(session_payload.get("id") or "")
@@ -544,11 +598,32 @@ async def handle_stripe_webhook(
                 subscription.status = "active"
                 subscription.last_payment_status = "success"
                 subscription.last_payment_at = datetime.now(timezone.utc)
+                invoice_period_end = _stripe_invoice_period_end(event_object)
+                if invoice_period_end:
+                    subscription.current_period_end = invoice_period_end
             else:
                 subscription.status = "past_due"
                 subscription.last_payment_status = "error"
             subscription.last_synced_at = datetime.now(timezone.utc)
             db.add(subscription)
+            notification_succeeded = event_type == "invoice.payment_succeeded"
+            if _stripe_invoice_minor_amount(event_object, succeeded=notification_succeeded) > 0:
+                notification_payload = {
+                    "succeeded": notification_succeeded,
+                    "user": subscription.user,
+                    "subscription": subscription,
+                    "amount": _format_stripe_invoice_amount(event_object, succeeded=notification_succeeded),
+                    "stripe_invoice_id": str(event_object.get("id") or "") or None,
+                    "stripe_subscription_id": stripe_subscription_id or None,
+                }
+
+    telegram_delivered = None
+    telegram_error = None
+    telegram_message_id = None
+    if notification_payload is not None:
+        telegram_delivered, telegram_message_id, telegram_error = send_stripe_invoice_payment_to_telegram(
+            **notification_payload,
+        )
 
     log_billing_event(
         db,
@@ -557,7 +632,13 @@ async def handle_stripe_webhook(
         user_id=subscription.user_id if subscription is not None else None,
         subscription_id=subscription.id if subscription is not None else None,
         payment_id=transaction.id if transaction is not None else None,
-        payload={"eventId": event.get("id"), "type": event_type},
+        payload={
+            "eventId": event_id,
+            "type": event_type,
+            "telegramDelivered": telegram_delivered,
+            "telegramMessageId": telegram_message_id,
+            "telegramError": telegram_error,
+        },
     )
     db.commit()
     return {"received": True}
