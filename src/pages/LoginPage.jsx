@@ -66,10 +66,6 @@ const LoginPage = () => {
         password: form.password,
       });
 
-      if (typeof window.ym === 'function') {
-        window.ym(108304746, 'reachGoal', 'login');
-      }
-
       navigate(result?.redirectUrl || getPostLoginRedirect());
     } catch (error) {
       setSubmitError(error.message || t('login.errGeneral'));

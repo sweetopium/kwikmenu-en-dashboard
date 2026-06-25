@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowLeft, ArrowRight, Check } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
@@ -74,14 +74,6 @@ const UploadPage = () => {
     }
     return window.localStorage.getItem('kwikmenu-active-venue');
   });
-
-  useEffect(() => {
-    if (importStage === 'success') {
-      if (typeof window.ym === 'function') {
-        window.ym(108304746, 'reachGoal', 'onboarding_completed');
-      }
-    }
-  }, [importStage]);
 
   const handleStep1Submit = async (e) => {
     e.preventDefault();

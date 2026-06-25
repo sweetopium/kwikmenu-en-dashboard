@@ -1,5 +1,4 @@
-import { useEffect } from 'react';
-import { Navigate, Route, Routes, useLocation } from 'react-router-dom';
+import { Navigate, Route, Routes } from 'react-router-dom';
 import AdminLayout from '../layouts/AdminLayout';
 import AnalyticsPage from '../pages/AnalyticsPage';
 import BillingPage from '../pages/BillingPage';
@@ -19,18 +18,6 @@ import PromoPagesPage from '../pages/PromoPagesPage';
 import EmailCampaignsPage from '../pages/EmailCampaignsPage';
 import { getStoredAdminKey } from '../lib/adminApi';
 
-const YandexMetrikaTracker = () => {
-  const location = useLocation();
-
-  useEffect(() => {
-    if (typeof window.ym === 'function') {
-      window.ym(108304746, 'hit', window.location.href);
-    }
-  }, [location.pathname, location.search]);
-
-  return null;
-};
-
 const RequireAdminKey = () => {
   if (!getStoredAdminKey()) {
     return <Navigate to="/login" replace />;
@@ -41,7 +28,6 @@ const RequireAdminKey = () => {
 
 const App = () => (
   <>
-    <YandexMetrikaTracker />
     <Routes>
       <Route path="/login" element={<LoginPage />} />
       <Route element={<RequireAdminKey />}>
