@@ -19,6 +19,7 @@ from app.schemas.menu import (
 )
 from app.schemas.menu_extract import ExtractedItem, ExtractedPage, ExtractedSection, ExtractedVariant
 from app.schemas.menu_import import MenuImportResult, UploadedSource
+from app.services.menu_languages import build_menu_language, choose_default_language, normalize_language_code
 from app.services.menu_normalization_service import MenuNormalizationService
 from app.services.openrouter_client import OpenRouterClient
 from app.services.page_normalizer import NormalizedPage, PageNormalizer
@@ -519,7 +520,7 @@ class MenuImportPipeline:
     def _merge_pages(self, *, extracted_pages: list[ExtractedPage], context: dict[str, str]) -> MenuPayload:
         category_map: dict[str, MenuCategory] = {}
         category_order: list[str] = []
-        discovered_languages = {"en"}
+        discovered_languages: list[str] = []
         menu_name = context.get("restaurant_name") or "Imported Menu"
         menu_description = None
         venue_name = context.get("restaurant_name") or "KwikMenu Venue"
@@ -532,7 +533,10 @@ class MenuImportPipeline:
                 menu_description = extracted_page.menuDescription
             if extracted_page.venueName:
                 venue_name = extracted_page.venueName
-            discovered_languages.update(extracted_page.languages)
+            for language_code in extracted_page.languages:
+                normalized_language = normalize_language_code(language_code)
+                if normalized_language and normalized_language not in discovered_languages:
+                    discovered_languages.append(normalized_language)
 
             for section in extracted_page.sections:
                 if section.heading and section.heading.strip():
@@ -576,9 +580,13 @@ class MenuImportPipeline:
                 for variant_index, variant in enumerate(item.variants, start=1):
                     variant.sortOrder = variant_index
 
-        languages = self._build_languages(sorted(discovered_languages))
+        default_language = choose_default_language(discovered_languages)
+        if default_language not in discovered_languages:
+            discovered_languages.insert(0, default_language)
+        languages = self._build_languages(discovered_languages)
 
         return MenuPayload(
+            defaultLanguage=default_language,
             menuMeta=MenuMeta(
                 id=slugify(menu_name, fallback="menu"),
                 slug=slugify(menu_name, fallback="menu"),
@@ -827,16 +835,9 @@ class MenuImportPipeline:
                 current.price = incoming_variant.price
 
     def _build_languages(self, codes: list[str]) -> list[MenuLanguage]:
-        mapping = {
-            "en": MenuLanguage(code="en", shortLabel="EN", nativeName="English", flag="EN"),
-        }
         languages: list[MenuLanguage] = []
         for code in codes:
-            if code in mapping:
-                languages.append(mapping[code])
-            else:
-                upper = code.upper()
-                languages.append(MenuLanguage(code=code, shortLabel=upper, nativeName=upper, flag=upper))
+            languages.append(build_menu_language(code))
         return languages
 
     def _has_compound_price(self, raw_price: str | None) -> bool:

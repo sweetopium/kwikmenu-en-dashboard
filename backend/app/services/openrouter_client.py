@@ -187,6 +187,7 @@ class OpenRouterClient:
             "Never collapse unrelated menu blocks into one section.",
             "Do not use a dish name as a section heading.",
             "Keep category and item names in the source language.",
+            "Set languages to the ISO 639-1 codes of languages actually visible in the source text; do not add English unless English text is visible.",
             "Do not invent categories, items, prices, descriptions, weights, variants, tags, or translations.",
             "If some field is missing or unreadable, return null, empty string, or empty array according to the schema instead of hallucinating.",
             "If the source contains only part of the menu, return only the visible sections and items from that part.",
@@ -276,8 +277,8 @@ class OpenRouterClient:
                                 "- Preserve category count, item count, variant count, ids, sortOrder, prices, measureValue, measureUnit, availability, images and translations.\n"
                                 "- Fix obvious OCR and spelling mistakes in menu names, category names, item names, descriptions, variant labels and tags.\n"
                                 "- Normalize casing to sentence case: first letter uppercase, remaining letters lowercase.\n"
-                                "- For Russian menu fields, remove duplicated English subtitles from category names and item names when both languages are packed into one string.\n"
-                                "- Example: 'Салаты / salads' -> 'Салаты', 'Супы / soups' -> 'Супы', 'Безалкогольные напитки / soft drinks' -> 'Безалкогольные напитки'.\n"
+                                "- For non-English menu fields, remove duplicated English subtitles from category names and item names when both languages are packed into one string.\n"
+                                "- Examples: 'Салаты / salads' -> 'Салаты', 'Başlangıçlar starters' -> 'Başlangıçlar', 'Dönerler doner' -> 'Dönerler'.\n"
                                 "- If measureValue and measureUnit already store the size, remove duplicated unit text from variant labels.\n"
                                 "- Example: label '250 мл' with measureValue=250 and measureUnit='ml' should become '250'.\n"
                                 "- Do not invent dishes, categories, descriptions, prices or variants.\n"

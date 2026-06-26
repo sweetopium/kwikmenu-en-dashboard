@@ -110,3 +110,20 @@ export const translateMenu = async (menuId, targetLang) => {
 
   return response.json();
 };
+
+export const updateMenuDefaultLanguage = async (menuId, defaultLanguage) => {
+  const response = await fetch(`${MENUS_API_URL}/${menuId}/default-language`, {
+    method: 'PATCH',
+    credentials: 'include',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ defaultLanguage }),
+  });
+
+  if (!response.ok) {
+    await parseApiError(response, `Menu default language request failed with status ${response.status}`);
+  }
+
+  return response.json();
+};

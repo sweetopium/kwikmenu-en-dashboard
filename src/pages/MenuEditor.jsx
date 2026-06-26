@@ -15,7 +15,7 @@ import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import { loadImportedMenuFromStorage, saveImportedMenuToStorage } from "../lib/importedMenuStorage";
 import { normalizeMenu } from "../lib/menuNormalization";
-import { getMenu, updateMenu, publishMenu, unpublishMenu, translateMenu } from "../lib/menusApi";
+import { getMenu, updateMenu, publishMenu, unpublishMenu, translateMenu, updateMenuDefaultLanguage } from "../lib/menusApi";
 import { Switch } from "../components/ui/switch";
 import { TOP_MENU_LANGUAGES } from "../lib/languageMeta";
 import { getVisibleMenuLanguages } from "../lib/publicMenuUtils";
@@ -554,6 +554,32 @@ const MenuEditor = () => {
     }
   };
 
+  const handleSetDefaultLanguage = async (defaultLanguage) => {
+    const selectedLanguage = TOP_MENU_LANGUAGES.find((language) => language.code === defaultLanguage);
+    if (!selectedLanguage) {
+      throw new Error(t('menuEditor.errors.invalidLanguage', 'Unsupported language.'));
+    }
+
+    if (isRemoteMenu) {
+      const response = await updateMenuDefaultLanguage(id, defaultLanguage);
+      setMenu(response.payload);
+      setEditorLanguage(defaultLanguage);
+      return response.payload;
+    }
+
+    const nextLanguages = menu.languages.some((language) => language.code === defaultLanguage)
+      ? menu.languages
+      : [...menu.languages, selectedLanguage];
+    const nextMenu = {
+      ...menu,
+      defaultLanguage,
+      languages: nextLanguages,
+    };
+    setMenu(nextMenu);
+    setEditorLanguage(defaultLanguage);
+    return nextMenu;
+  };
+
 
 
   return (
@@ -804,6 +830,7 @@ const MenuEditor = () => {
           onClose={() => setIsTranslationModalOpen(false)}
           onSwitchLanguage={setEditorLanguage}
           onTranslate={handleTranslateMenu}
+          onSetDefaultLanguage={handleSetDefaultLanguage}
         />
       )}
     </div>

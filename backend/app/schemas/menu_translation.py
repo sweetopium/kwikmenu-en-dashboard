@@ -1,7 +1,8 @@
 from __future__ import annotations
 
 from pydantic import BaseModel, Field
-from app.schemas.menu import MenuPayload, LocalizedContent, MenuLanguage
+from app.schemas.menu import MenuPayload, LocalizedContent
+from app.services.menu_languages import ensure_menu_language
 
 
 class TranslatableMeta(BaseModel):
@@ -133,45 +134,4 @@ def merge_translations(payload: MenuPayload, translated: TranslatableMenu, targe
                         label=t_var.label,
                     )
 
-    lang_metadata = {
-        "ru": {"shortLabel": "RU", "nativeName": "Russian", "flag": "🇷🇺"},
-        "en": {"shortLabel": "EN", "nativeName": "English", "flag": "🇬🇧"},
-        "ar": {"shortLabel": "AR", "nativeName": "العربية", "flag": "🇦🇪"},
-        "kk": {"shortLabel": "KZ", "nativeName": "Kazakh", "flag": "🇰🇿"},
-        "tr": {"shortLabel": "TR", "nativeName": "Türkçe", "flag": "🇹🇷"},
-        "de": {"shortLabel": "DE", "nativeName": "Deutsch", "flag": "🇩🇪"},
-        "fr": {"shortLabel": "FR", "nativeName": "Français", "flag": "🇫🇷"},
-        "es": {"shortLabel": "ES", "nativeName": "Español", "flag": "🇪🇸"},
-        "zh": {"shortLabel": "ZH", "nativeName": "中文", "flag": "🇨🇳"},
-        "he": {"shortLabel": "HE", "nativeName": "עברית", "flag": "🇮🇱"},
-    }
-
-    meta = lang_metadata.get(target_lang.lower())
-    if meta:
-        existing = next((l for l in payload.languages if l.code == target_lang), None)
-        if existing:
-            # Repair default/placeholder flags with beautiful emoji flags
-            if existing.flag in {None, "", target_lang.upper(), "RU", "EN", "AR", "KZ", "TR", "DE", "FR", "ES", "ZH", "HE"}:
-                existing.flag = meta["flag"]
-                existing.shortLabel = meta["shortLabel"]
-                existing.nativeName = meta["nativeName"]
-        else:
-            payload.languages.append(
-                MenuLanguage(
-                    code=target_lang,
-                    shortLabel=meta["shortLabel"],
-                    nativeName=meta["nativeName"],
-                    flag=meta["flag"],
-                )
-            )
-    else:
-        existing_codes = {l.code for l in payload.languages}
-        if target_lang not in existing_codes:
-            payload.languages.append(
-                MenuLanguage(
-                    code=target_lang,
-                    shortLabel=target_lang.upper(),
-                    nativeName=target_lang.upper(),
-                    flag=target_lang.upper(),
-                )
-            )
+    ensure_menu_language(payload, target_lang)

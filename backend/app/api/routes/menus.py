@@ -7,8 +7,9 @@ from app.api.deps import get_current_user, get_db
 from app.core.slugs import slugify
 from app.models import Menu, User, Venue
 from app.schemas.menu import MenuPayload
-from app.schemas.menu_api import MenuListItemResponse, MenuResponse, MenuUpdateRequest
+from app.schemas.menu_api import MenuDefaultLanguageUpdateRequest, MenuListItemResponse, MenuResponse, MenuUpdateRequest
 from app.services.billing import assert_menu_within_plan_limits, get_effective_subscription
+from app.services.menu_languages import VALID_MENU_LANGUAGE_CODES, ensure_menu_language, normalize_language_code
 from app.services.product_analytics import record_product_event
 
 
@@ -125,6 +126,50 @@ def update_menu(
             "status": menu.status,
             "categories_count": len(menu_payload.categories),
             "items_count": sum(len(category.items) for category in menu_payload.categories),
+        },
+    )
+    db.add(menu)
+    db.commit()
+    db.refresh(menu)
+    return serialize_menu(menu)
+
+
+@router.patch("/{menu_id}/default-language", response_model=MenuResponse)
+def update_menu_default_language(
+    menu_id: str,
+    payload: MenuDefaultLanguageUpdateRequest,
+    request: Request,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+) -> MenuResponse:
+    menu = get_owned_menu(db, menu_id=menu_id, user_id=current_user.id)
+    if menu is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Menu not found.")
+
+    language_code = normalize_language_code(payload.defaultLanguage)
+    if language_code not in VALID_MENU_LANGUAGE_CODES:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Invalid language code: {payload.defaultLanguage}.",
+        )
+
+    menu_payload = MenuPayload.model_validate(menu.payload)
+    previous_language = menu_payload.defaultLanguage
+    menu_payload.defaultLanguage = language_code
+    ensure_menu_language(menu_payload, language_code)
+
+    menu.payload = menu_payload.model_dump(mode="json")
+    record_product_event(
+        db,
+        request=request,
+        user=current_user,
+        event_name="menu_default_language_changed",
+        source="backend",
+        venue_id=menu.venue_id,
+        menu_id=menu.id,
+        properties={
+            "from": previous_language,
+            "to": language_code,
         },
     )
     db.add(menu)

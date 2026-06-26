@@ -77,6 +77,52 @@ class MenuImportPipelineTests(unittest.TestCase):
 
         self.assertEqual(pipeline.openrouter.calls, 2)
 
+    def test_merge_pages_uses_detected_non_english_language_as_default(self) -> None:
+        pipeline = MenuImportPipeline()
+
+        payload = pipeline._merge_pages(
+            extracted_pages=[
+                ExtractedPage(
+                    pageNumber=1,
+                    languages=["tr"],
+                    sections=[
+                        ExtractedSection(
+                            heading="Başlangıçlar",
+                            items=[ExtractedItem(name="Beyran", description="Dana eti, sarımsak", price="250")],
+                        )
+                    ],
+                )
+            ],
+            context={"restaurant_name": "Istanbul"},
+        )
+
+        self.assertEqual(payload.defaultLanguage, "tr")
+        self.assertEqual(payload.languages[0].code, "tr")
+        self.assertEqual(payload.languages[0].flag, "🇹🇷")
+        self.assertEqual(payload.categories[0].name, "Başlangıçlar")
+        self.assertEqual(payload.categories[0].items[0].description, "Dana eti, sarımsak")
+
+    def test_merge_pages_falls_back_to_english_when_language_is_unknown(self) -> None:
+        pipeline = MenuImportPipeline()
+
+        payload = pipeline._merge_pages(
+            extracted_pages=[
+                ExtractedPage(
+                    pageNumber=1,
+                    sections=[
+                        ExtractedSection(
+                            heading="Starters",
+                            items=[ExtractedItem(name="Soup", price="12")],
+                        )
+                    ],
+                )
+            ],
+            context={},
+        )
+
+        self.assertEqual(payload.defaultLanguage, "en")
+        self.assertEqual([language.code for language in payload.languages], ["en"])
+
 
 if __name__ == "__main__":
     unittest.main()

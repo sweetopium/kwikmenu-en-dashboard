@@ -11,6 +11,7 @@ const TranslationModal = ({
   onClose,
   onSwitchLanguage,
   onTranslate,
+  onSetDefaultLanguage,
 }) => {
   const { t } = useTranslation();
   const defaultLanguage = menu.defaultLanguage || 'en';
@@ -27,6 +28,7 @@ const TranslationModal = ({
 
   const [selectedCode, setSelectedCode] = useState(editorLanguage || defaultLanguage);
   const [translatingCode, setTranslatingCode] = useState(null);
+  const [changingDefaultCode, setChangingDefaultCode] = useState(null);
   const [error, setError] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
 
@@ -52,6 +54,22 @@ const TranslationModal = ({
   const handleSelectLangToEdit = () => {
     onSwitchLanguage(selectedCode);
     onClose();
+  };
+
+  const handleSetDefaultClick = async () => {
+    if (!onSetDefaultLanguage) return;
+
+    setChangingDefaultCode(selectedCode);
+    setError('');
+    setSuccessMsg('');
+    try {
+      await onSetDefaultLanguage(selectedCode);
+      setSuccessMsg(t('menuEditor.translationModal.defaultLanguageUpdated', 'Original menu language updated.'));
+    } catch (err) {
+      setError(err?.message || t('menuEditor.errors.defaultLanguageFailed', 'Could not update original language'));
+    } finally {
+      setChangingDefaultCode(null);
+    }
   };
 
   return (
@@ -200,7 +218,7 @@ const TranslationModal = ({
                       <Button
                         type="button"
                         onClick={handleTranslateClick}
-                        disabled={translatingCode !== null}
+                        disabled={translatingCode !== null || changingDefaultCode !== null}
                         className={`${primaryActionButtonClasses} bg-violet-600 hover:bg-violet-700 hover:shadow-violet-600/20 text-white flex-1 md:h-11 h-11 text-xs md:text-sm gap-2 font-bold`}
                       >
                         <Sparkles size={16} className={translatingCode === selectedCode ? 'animate-spin' : ''} />
@@ -212,6 +230,20 @@ const TranslationModal = ({
                       </Button>
                     )}
 
+                    {!isDefaultLang && (
+                      <Button
+                        type="button"
+                        onClick={handleSetDefaultClick}
+                        disabled={translatingCode !== null || changingDefaultCode !== null}
+                        variant="outline"
+                        className={`${secondaryActionButtonClasses} flex-1 md:h-11 h-11 text-xs md:text-sm font-bold`}
+                      >
+                        {changingDefaultCode === selectedCode
+                          ? t('menuEditor.translationModal.updatingDefault', 'Updating...')
+                          : t('menuEditor.translationModal.btnSetDefault', 'Set as original')}
+                      </Button>
+                    )}
+
                     {isCurrentEditorLang ? (
                       <div className="text-center md:text-left text-xs text-muted-foreground font-semibold py-3 flex-1 flex items-center justify-center bg-secondary/15 rounded-xl border border-border/40 select-none">
                         {t('menuEditor.translationModal.alreadyActive', 'Editor is set to this language')}
@@ -220,7 +252,7 @@ const TranslationModal = ({
                       <Button
                         type="button"
                         onClick={handleSelectLangToEdit}
-                        disabled={translatingCode !== null}
+                        disabled={translatingCode !== null || changingDefaultCode !== null}
                         variant="outline"
                         className={`${secondaryActionButtonClasses} flex-1 md:h-11 h-11 text-xs md:text-sm font-bold`}
                       >

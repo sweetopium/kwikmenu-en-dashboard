@@ -33,3 +33,7 @@ class MenuListItemResponse(StrictModel):
 class MenuUpdateRequest(StrictModel):
     payload: MenuPayload
     status: str | None = Field(default=None, max_length=32)
+
+
+class MenuDefaultLanguageUpdateRequest(StrictModel):
+    defaultLanguage: str = Field(min_length=2, max_length=16)
