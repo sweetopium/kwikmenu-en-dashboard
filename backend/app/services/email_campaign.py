@@ -145,7 +145,7 @@ class EmailCampaignService:
         user_context = {
             "name": user.name or "",
             "email": user.email,
-            "dashboard_url": settings.admin_frontend_origin or "http://localhost:5174",
+            "dashboard_url": settings.menu_import_frontend_origin.rstrip("/") or "https://app.kwikme.nu",
         }
 
         try:

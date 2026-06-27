@@ -35,6 +35,8 @@ import {
 } from '../lib/adminApi';
 import { formatDateTime } from '../lib/formatters';
 
+const CUSTOMER_DASHBOARD_URL = (import.meta.env.VITE_CUSTOMER_DASHBOARD_URL || 'https://app.kwikme.nu').replace(/\/$/, '');
+
 const EmailCampaignsPage = () => {
   const [activeTab, setActiveTab] = useState('steps'); // 'steps' | 'logs' | 'stats'
   const [steps, setSteps] = useState([]);
@@ -244,7 +246,7 @@ const EmailCampaignsPage = () => {
     if (!html) return '';
     return html
       .replace(/{{name}}/g, 'Константин')
-      .replace(/{{dashboard_url}}/g, window.location.origin);
+      .replace(/{{dashboard_url}}/g, CUSTOMER_DASHBOARD_URL);
   };
 
   return (
