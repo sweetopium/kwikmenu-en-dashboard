@@ -31,8 +31,8 @@ class Settings(BaseSettings):
     menu_normalization_max_completion_tokens: int = 24000
     menu_import_request_timeout_seconds: int = 180
     menu_import_page_parse_attempts: int = 3
-    menu_import_task_soft_time_limit_seconds: int = 60
-    menu_import_task_hard_time_limit_seconds: int = 70
+    menu_import_task_soft_time_limit_seconds: int = 600
+    menu_import_task_hard_time_limit_seconds: int = 660
     menu_import_max_items_per_single_category: int = 40
 
     menu_import_frontend_origin: str = "https://app.kwikme.nu"

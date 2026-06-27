@@ -155,8 +155,8 @@ def process_menu_import_job(job_id: str) -> None:
             job_id=job_id,
             status=MenuImportStatus.timed_out,
             error_message=(
-                "The menu could not be parsed within 1 minute. Try uploading a clearer PDF or photos, "
-                "splitting the menu into several files, or repeating the link import."
+                "Menu recognition took too long and was stopped. Try uploading fewer pages, "
+                "splitting the menu into several files, or repeating the import later."
             ),
         )
         logger.exception("Menu import job timed out job_id=%s", job_id)
