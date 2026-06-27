@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from pathlib import Path
+import re
 from uuid import uuid4
 
 import boto3
@@ -24,6 +25,12 @@ class PresignedUpload:
     public_url: str
     object_key: str
     headers: dict[str, str]
+
+
+@dataclass
+class StoredObject:
+    public_url: str
+    object_key: str
 
 
 class ObjectStorageClient:
@@ -78,6 +85,39 @@ class ObjectStorageClient:
             headers={"Content-Type": normalized_content_type},
         )
 
+    def upload_menu_import_source(
+        self,
+        *,
+        job_id: str,
+        file_path: Path,
+        content_type: str | None,
+    ) -> StoredObject:
+        self.ensure_configured()
+
+        safe_name = self._sanitize_object_filename(file_path.name)
+        object_key = f"menu-imports/{job_id}/originals/{uuid4().hex}-{safe_name}"
+        extra_args: dict[str, str] = {}
+        if content_type:
+            extra_args["ContentType"] = content_type.strip().lower()
+
+        if extra_args:
+            self._client.upload_file(
+                str(file_path),
+                self.settings.media_storage_bucket,
+                object_key,
+                ExtraArgs=extra_args,
+            )
+        else:
+            self._client.upload_file(
+                str(file_path),
+                self.settings.media_storage_bucket,
+                object_key,
+            )
+        return StoredObject(
+            public_url=self._build_public_url(object_key),
+            object_key=object_key,
+        )
+
     @property
     def _client(self):
         return boto3.client(
@@ -105,3 +145,8 @@ class ObjectStorageClient:
                 detail="Public media URL is not configured.",
             )
         return f"{endpoint}/{bucket}/{object_key}"
+
+    def _sanitize_object_filename(self, filename: str) -> str:
+        raw_name = Path(filename or "menu-source").name
+        safe_name = re.sub(r"[^A-Za-z0-9._-]+", "-", raw_name).strip(".-")
+        return safe_name or "menu-source"

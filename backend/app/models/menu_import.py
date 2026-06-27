@@ -41,5 +41,7 @@ class MenuImportSource(UUIDPrimaryKeyMixin, Base):
     kind: Mapped[str] = mapped_column(String(32), nullable=False)
     mime_type: Mapped[str | None] = mapped_column(String(255), nullable=True)
     size_bytes: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    storage_key: Mapped[str | None] = mapped_column(Text, nullable=True)
+    public_url: Mapped[str | None] = mapped_column(Text, nullable=True)
 
     job: Mapped[MenuImportJob] = relationship(back_populates="sources")

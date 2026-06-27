@@ -734,6 +734,18 @@ def list_admin_imports(
                 "documentCount": job.document_count,
                 "error": job.error,
                 "warningsCount": len(job.warnings or []),
+                "sources": [
+                    {
+                        "id": source.id,
+                        "name": source.name,
+                        "kind": source.kind,
+                        "mimeType": source.mime_type,
+                        "sizeBytes": source.size_bytes,
+                        "storageKey": source.storage_key,
+                        "publicUrl": source.public_url,
+                    }
+                    for source in job.sources
+                ],
                 "user": {"id": user.id, "email": user.email, "name": user.name},
                 "venue": {"id": venue.id, "name": venue.name} if venue else None,
                 "startedAt": job.started_at,

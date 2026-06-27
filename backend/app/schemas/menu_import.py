@@ -20,6 +20,8 @@ class UploadedSource(StrictModel):
     kind: str
     mimeType: str | None = None
     sizeBytes: int | None = None
+    storageKey: str | None = None
+    publicUrl: str | None = None
 
 
 class MenuImportAcceptedResponse(StrictModel):

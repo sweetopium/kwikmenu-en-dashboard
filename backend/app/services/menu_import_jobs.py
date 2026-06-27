@@ -62,6 +62,8 @@ def process_menu_import_job(job_id: str) -> None:
                 kind=source.kind,
                 mimeType=source.mime_type,
                 sizeBytes=source.size_bytes,
+                storageKey=source.storage_key,
+                publicUrl=source.public_url,
             )
             for source in job.sources
         ]
@@ -184,6 +186,8 @@ def serialize_job(job: MenuImportJob) -> MenuImportJobResponse:
                     kind=source.kind,
                     mimeType=source.mime_type,
                     sizeBytes=source.size_bytes,
+                    storageKey=source.storage_key,
+                    publicUrl=source.public_url,
                 )
                 for source in job.sources
             ],

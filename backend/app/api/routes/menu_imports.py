@@ -20,6 +20,7 @@ from app.schemas.menu_import import (
 )
 from app.services.billing import assert_can_create_menu_import
 from app.services.menu_import_jobs import serialize_job
+from app.services.object_storage import ObjectStorageClient
 from app.services.pdf_link_downloader import PdfLinkDownloadError, download_pdf_from_url
 from app.services.page_normalizer import IMAGE_EXTENSIONS, PDF_EXTENSION
 from app.services.product_analytics import record_product_event
@@ -86,6 +87,11 @@ async def create_menu_import(
                 kind="pdf",
                 mime_type=downloaded_pdf.mime_type,
                 size_bytes=downloaded_pdf.size_bytes,
+                **_archive_import_source(
+                    job_id=job.id,
+                    file_path=upload_dir / downloaded_pdf.file_name,
+                    content_type=downloaded_pdf.mime_type,
+                ),
             )
         )
 
@@ -114,6 +120,11 @@ async def create_menu_import(
                 kind=kind,
                 mime_type=uploaded_file.content_type,
                 size_bytes=size_bytes,
+                **_archive_import_source(
+                    job_id=job.id,
+                    file_path=target_path,
+                    content_type=uploaded_file.content_type,
+                ),
             )
         )
 
@@ -182,6 +193,29 @@ def _sha256_file(path: Path) -> str:
         for chunk in iter(lambda: source.read(1024 * 1024), b""):
             digest.update(chunk)
     return digest.hexdigest()
+
+
+def _archive_import_source(*, job_id: str, file_path: Path, content_type: str | None) -> dict[str, str | None]:
+    storage = ObjectStorageClient()
+    if not storage.enabled:
+        return {"storage_key": None, "public_url": None}
+
+    try:
+        stored = storage.upload_menu_import_source(
+            job_id=job_id,
+            file_path=file_path,
+            content_type=content_type,
+        )
+    except Exception as exc:  # noqa: BLE001
+        logger.warning(
+            "Failed to archive menu import source to object storage job_id=%s file=%s error=%s",
+            job_id,
+            file_path.name,
+            exc,
+        )
+        return {"storage_key": None, "public_url": None}
+
+    return {"storage_key": stored.object_key, "public_url": stored.public_url}
 
 
 def _resolve_venue_id(db: Session, *, user_id: str, requested_venue_id: str | None) -> str | None:

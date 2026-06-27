@@ -98,6 +98,24 @@ def send_help_request_to_telegram(help_request: HelpRequest) -> tuple[bool, int 
     )
 
 
+def _format_import_source_names(job: MenuImportJob) -> str:
+    source_names = ", ".join(source.name for source in job.sources[:4])
+    if len(job.sources) > 4:
+        source_names = f"{source_names} and {len(job.sources) - 4} more"
+    return source_names
+
+
+def _format_import_source_links(job: MenuImportJob) -> str:
+    linked_sources = [source for source in job.sources if source.public_url]
+    source_links = [
+        f"<a href=\"{_escape(source.public_url)}\">{_escape(source.name)}</a>"
+        for source in linked_sources[:4]
+    ]
+    if len(linked_sources) > 4:
+        source_links.append(f"and {len(linked_sources) - 4} more")
+    return ", ".join(source_links)
+
+
 def build_menu_import_success_telegram_message(
     *,
     job: MenuImportJob,
@@ -105,9 +123,8 @@ def build_menu_import_success_telegram_message(
     venue: Venue | None,
 ) -> str:
     settings = get_settings()
-    source_names = ", ".join(_escape(source.name) for source in job.sources[:4])
-    if len(job.sources) > 4:
-        source_names = f"{source_names} and {len(job.sources) - 4} more"
+    source_names = _format_import_source_names(job)
+    source_links = _format_import_source_links(job)
     flow = _escape((job.context or {}).get("flow") or "unknown")
     public_menu_url = None
     if venue and job.menu_id:
@@ -127,6 +144,8 @@ def build_menu_import_success_telegram_message(
     ]
     if source_names:
         parts.append(f"📎 <b>File names:</b> {_escape(source_names)}")
+    if source_links:
+        parts.append(f"📂 <b>Source files:</b> {source_links}")
     if job.used_fallback:
         parts.append("⚠️ <b>Fallback template was used</b>")
     if job.warnings:
@@ -144,9 +163,8 @@ def build_menu_import_failure_telegram_message(
     error_message: str,
 ) -> str:
     flow = _escape((job.context or {}).get("flow") or "unknown")
-    source_names = ", ".join(_escape(source.name) for source in job.sources[:4])
-    if len(job.sources) > 4:
-        source_names = f"{source_names} and {len(job.sources) - 4} more"
+    source_names = _format_import_source_names(job)
+    source_links = _format_import_source_links(job)
     parts = [
         "🔴 <b>Menu import failed</b>",
         "",
@@ -160,6 +178,8 @@ def build_menu_import_failure_telegram_message(
     ]
     if source_names:
         parts.append(f"📎 <b>File names:</b> {_escape(source_names)}")
+    if source_links:
+        parts.append(f"📂 <b>Source files:</b> {source_links}")
     return "\n".join(parts)
 
 
