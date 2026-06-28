@@ -10,9 +10,11 @@ from sqlalchemy.orm import Session
 
 from app.api.deps import get_db
 from app.api.routes.admin import AdminAccess
+from app.core.config import get_settings
 from app.models.auth import User
 from app.models.email_campaign import EmailCampaignStep, ScheduledEmail
 from app.services.email_campaign import email_campaign_service
+from app.services.unisender import unisender_service
 
 logger = logging.getLogger(__name__)
 
@@ -45,6 +47,14 @@ def _serialize_step(step: EmailCampaignStep) -> dict[str, Any]:
         "created_at": step.created_at,
         "updated_at": step.updated_at,
     }
+
+
+def _configured_unisender_webhook_url() -> str:
+    settings = get_settings()
+    return (
+        (settings.unisender_webhook_url or "").strip()
+        or f"{settings.menu_import_api_url.rstrip('/')}/api/webhooks/unisender"
+    )
 
 
 @router.get("/steps")
@@ -182,6 +192,36 @@ def delete_step(
     db.delete(step)
     db.commit()
     return Response(status_code=status.HTTP_204_NO_CONTENT)
+
+
+@router.get("/webhook")
+def get_webhook_config(
+    _: None = AdminAccess,
+) -> dict[str, Any]:
+    return {
+        "webhook_url": _configured_unisender_webhook_url(),
+        "method": "GET/POST",
+        "status": "not_checked",
+    }
+
+
+@router.post("/webhook/setup")
+def setup_webhook(
+    _: None = AdminAccess,
+) -> dict[str, Any]:
+    try:
+        result = unisender_service.configure_go_webhook(_configured_unisender_webhook_url())
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    except Exception as exc:
+        logger.exception("Failed to configure Unisender Go webhook")
+        raise HTTPException(status_code=502, detail=f"Failed to configure Unisender Go webhook: {exc}") from exc
+
+    return {
+        "status": "configured",
+        "webhook_url": result["webhook_url"],
+        "unisender_response": result["response"],
+    }
 
 
 @router.get("/logs")

@@ -107,6 +107,7 @@ class Settings(BaseSettings):
     unisender_sender_name: str | None = None
     unisender_service_type: str = "go"  # "go" or "classic"
     unisender_classic_list_id: int | None = None
+    unisender_webhook_url: str | None = None
 
     @field_validator("unisender_classic_list_id", "unitpay_project_id", mode="before")
     @classmethod

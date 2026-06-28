@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import logging
 from typing import Any
 from fastapi import APIRouter, Depends, Request, Response, status
@@ -13,31 +14,63 @@ logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/webhooks", tags=["webhooks"])
 
 
+def _parse_metadata(value: Any) -> dict[str, Any]:
+    if isinstance(value, dict):
+        return value
+    if isinstance(value, str) and value.strip():
+        try:
+            parsed = json.loads(value)
+        except json.JSONDecodeError:
+            return {}
+        return parsed if isinstance(parsed, dict) else {}
+    return {}
+
+
+def _event_details(event: dict[str, Any]) -> dict[str, Any]:
+    details = event.get("event_data")
+    return details if isinstance(details, dict) else event
+
+
+def _event_status(event: dict[str, Any], details: dict[str, Any]) -> str:
+    event_type = event.get("event_name") or event.get("event") or details.get("status")
+    event_str = str(event_type or "").lower().strip()
+    if event_str == "transactional_email_status":
+        event_str = str(details.get("status") or "").lower().strip()
+    return event_str
+
+
+def _delivery_error(details: dict[str, Any]) -> str | None:
+    delivery_info = details.get("delivery_info")
+    if not isinstance(delivery_info, dict):
+        return None
+
+    parts = [
+        delivery_info.get("delivery_status"),
+        delivery_info.get("destination_response"),
+    ]
+    message = " | ".join(str(part) for part in parts if part)
+    return message or None
+
+
 def _process_single_event(db: Session, event: dict[str, Any]) -> None:
     """
     Helper to process a single event from Unisender Go callback.
     """
     # If the payload is from UniOne/Unisender Go, it nests fields under "event_data"
-    details = event.get("event_data") if isinstance(event.get("event_data"), dict) else event
-    
-    event_type = event.get("event_name") or event.get("event") or details.get("status")
+    details = _event_details(event)
+    event_str = _event_status(event, details)
     email_addr = details.get("email") or details.get("to")
-    unisender_msg_id = details.get("job_id") or details.get("email_id")
-    metadata = details.get("metadata") or {}
-    
-    # If metadata is string (some APIs encode metadata as JSON string), try to parse it
-    if isinstance(metadata, str):
-        try:
-            import json
-            metadata = json.loads(metadata)
-        except Exception:
-            metadata = {}
-            
-    scheduled_email_id = metadata.get("scheduled_email_id")
+    unisender_msg_id = details.get("job_id") or event.get("job_id") or details.get("email_id")
+    metadata = _parse_metadata(details.get("metadata") or event.get("metadata"))
+    scheduled_email_id = (
+        metadata.get("scheduled_email_id")
+        or metadata.get("scheduledEmailId")
+        or metadata.get("scheduled_email")
+    )
 
     logger.info(
         "Received Unisender webhook event: type=%s email=%s msg_id=%s scheduled_email_id=%s",
-        event_type, email_addr, unisender_msg_id, scheduled_email_id
+        event_str, email_addr, unisender_msg_id, scheduled_email_id
     )
 
     scheduled_email = None
@@ -60,10 +93,6 @@ def _process_single_event(db: Session, event: dict[str, Any]) -> None:
     # Normalize event type to our delivery_status enum values
     # events: delivered, opened, clicked, soft_bounced, hard_bounced, spam, unsubscribed
     normalized_status = "none"
-    event_str = str(event_type).lower().strip()
-    
-    if event_str == "transactional_email_status":
-        event_str = str(details.get("status") or "").lower().strip()
 
     if event_str == "delivered":
         normalized_status = "delivered"
@@ -79,6 +108,8 @@ def _process_single_event(db: Session, event: dict[str, Any]) -> None:
     # Update only if state changes
     if normalized_status != "none" and scheduled_email.delivery_status != normalized_status:
         scheduled_email.delivery_status = normalized_status
+        if normalized_status in ("bounce", "spam"):
+            scheduled_email.error_message = _delivery_error(details) or f"Unisender status: {event_str}"
         db.add(scheduled_email)
         logger.info("Updated ScheduledEmail id=%s delivery_status=%s", scheduled_email.id, normalized_status)
 

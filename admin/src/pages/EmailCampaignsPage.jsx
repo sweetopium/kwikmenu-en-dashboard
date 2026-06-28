@@ -30,6 +30,8 @@ import {
   updateCampaignStep,
   deleteCampaignStep,
   fetchCampaignLogs,
+  fetchCampaignWebhook,
+  setupCampaignWebhook,
   sendCampaignEmailNow,
   cancelCampaignEmail,
 } from '../lib/adminApi';
@@ -41,6 +43,9 @@ const EmailCampaignsPage = () => {
   const [activeTab, setActiveTab] = useState('steps'); // 'steps' | 'logs' | 'stats'
   const [steps, setSteps] = useState([]);
   const [logs, setLogs] = useState({ items: [], total: 0, stats: {} });
+  const [webhook, setWebhook] = useState(null);
+  const [isWebhookSubmitting, setIsWebhookSubmitting] = useState(false);
+  const [webhookMessage, setWebhookMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   
@@ -87,11 +92,20 @@ const EmailCampaignsPage = () => {
       .catch((err) => setError(err.message));
   };
 
+  const loadWebhook = () => {
+    fetchCampaignWebhook()
+      .then(setWebhook)
+      .catch((err) => setError(err.message));
+  };
+
   useEffect(() => {
     if (activeTab === 'steps') {
       loadSteps();
     } else {
       loadLogs();
+      if (activeTab === 'stats') {
+        loadWebhook();
+      }
     }
   }, [activeTab, logsPage, statusFilter]);
 
@@ -238,6 +252,22 @@ const EmailCampaignsPage = () => {
       loadLogs();
     } catch (err) {
       setError(err.message);
+    }
+  };
+
+  const handleSetupWebhook = async () => {
+    setIsWebhookSubmitting(true);
+    setWebhookMessage('');
+    setError('');
+    try {
+      const result = await setupCampaignWebhook();
+      setWebhook(result);
+      setWebhookMessage('Webhook настроен в Unisender Go.');
+      loadLogs();
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setIsWebhookSubmitting(false);
     }
   };
 
@@ -713,8 +743,45 @@ const EmailCampaignsPage = () => {
           <div className="rounded-2xl border border-border bg-card p-6 shadow-sm">
             <h3 className="text-lg font-black text-foreground mb-1">Конверсия рассылок (Unisender Go Webhooks)</h3>
             <p className="text-xs text-muted-foreground mb-6">
-              Конверсия рассчитывается на основе успешно отправленных писем. Подключите публичный адрес вебхука в личном кабинете Unisender Go: <code>/api/webhooks/unisender</code>
+              Конверсия считается по событиям UniSender Go. Webhook должен быть публично доступен и отвечать 200 OK на GET и POST.
             </p>
+
+            <div className="mb-6 flex flex-col gap-3 rounded-2xl border border-border/70 bg-secondary/25 p-4 lg:flex-row lg:items-center lg:justify-between">
+              <div className="min-w-0">
+                <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Webhook URL</span>
+                <div className="mt-1 flex items-center gap-2">
+                  <code className="truncate rounded-lg bg-background px-2 py-1 text-xs font-semibold text-foreground">
+                    {webhook?.webhook_url || 'Загрузка...'}
+                  </code>
+                  {webhook?.webhook_url && (
+                    <a
+                      href={webhook.webhook_url}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="text-muted-foreground transition-colors hover:text-brand-purple"
+                      title="Открыть GET-проверку webhook"
+                    >
+                      <ExternalLink size={15} />
+                    </a>
+                  )}
+                </div>
+                {webhookMessage ? (
+                  <p className="mt-2 flex items-center gap-1.5 text-xs font-bold text-green-600">
+                    <CheckCircle size={14} />
+                    {webhookMessage}
+                  </p>
+                ) : null}
+              </div>
+              <Button
+                type="button"
+                onClick={handleSetupWebhook}
+                disabled={isWebhookSubmitting || !webhook?.webhook_url}
+                className="w-full lg:w-auto"
+              >
+                {isWebhookSubmitting ? <Loader2 size={16} className="animate-spin" /> : <RefreshCw size={16} />}
+                Настроить webhook
+              </Button>
+            </div>
 
             <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
               {/* Delivery Rate */}

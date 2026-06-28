@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import logging
 import requests
+from typing import Any
 
 from app.core.config import get_settings
 
@@ -73,29 +74,38 @@ class UnisenderService:
         headers = {
             "X-API-KEY": settings.unisender_api_key,
             "Content-Type": "application/json",
+            "Accept": "application/json",
+        }
+        metadata = {
+            "scheduled_email_id": scheduled_email_id,
+            "source": "kwikmenu_onboarding",
         }
         payload = {
             "message": {
                 "recipients": [
                     {
                         "email": to_email,
-                        "metadata": {
-                            "scheduled_email_id": scheduled_email_id
-                        }
+                        "metadata": metadata,
                     }
                 ],
+                "global_metadata": metadata,
                 "body": {
                     "html": body_html
                 },
                 "subject": subject,
                 "from_email": settings.unisender_sender_email,
                 "from_name": settings.unisender_sender_name,
+                "reply_to": settings.unisender_sender_email,
+                "track_links": 1,
+                "track_read": 1,
+                "template_engine": "none",
+                "tags": ["kwikmenu_onboarding"],
             }
         }
 
         logger.info("Sending transactional email via Unisender Go to %s", to_email)
         response = requests.post(url, json=payload, headers=headers, timeout=15)
-        response_json = response.json()
+        response_json = self._response_json(response)
 
         if response.status_code != 200 or response_json.get("status") == "error":
             error_code = response_json.get("code")
@@ -114,6 +124,57 @@ class UnisenderService:
             raise ValueError(f"Unisender Go returned success but job_id is missing from response: {response_json}")
 
         return str(job_id)
+
+    def configure_go_webhook(self, webhook_url: str | None = None) -> dict[str, Any]:
+        settings = get_settings()
+        if not settings.unisender_api_key:
+            raise ValueError("Unisender API key is not configured.")
+
+        target_url = (webhook_url or settings.unisender_webhook_url or "").strip()
+        if not target_url:
+            target_url = f"{settings.menu_import_api_url.rstrip('/')}/api/webhooks/unisender"
+
+        url = f"{settings.unisender_go_api_url.rstrip('/')}/webhook/set.json"
+        headers = {
+            "X-API-KEY": settings.unisender_api_key,
+            "Content-Type": "application/json",
+            "Accept": "application/json",
+        }
+        payload = {
+            "url": target_url,
+            "status": "active",
+            "event_format": "json_post",
+            "delivery_info": 1,
+            "single_event": 0,
+            "max_parallel": 10,
+            "events": {
+                "spam_block": ["*"],
+                "email_status": [
+                    "delivered",
+                    "opened",
+                    "clicked",
+                    "unsubscribed",
+                    "subscribed",
+                    "soft_bounced",
+                    "hard_bounced",
+                    "spam",
+                ],
+            },
+        }
+
+        logger.info("Configuring Unisender Go webhook: %s", target_url)
+        response = requests.post(url, json=payload, headers=headers, timeout=15)
+        response_json = self._response_json(response)
+        if response.status_code != 200 or response_json.get("status") == "error":
+            error_code = response_json.get("code")
+            error_msg = response_json.get("message")
+            logger.error("Unisender Go webhook error: code=%s message=%s", error_code, error_msg)
+            raise ValueError(f"Unisender Go webhook error: {error_msg} (code: {error_code})")
+
+        return {
+            "webhook_url": target_url,
+            "response": response_json,
+        }
 
     def _send_classic(
         self,
@@ -140,7 +201,7 @@ class UnisenderService:
 
         logger.info("Sending transactional email via Unisender Classic to %s", to_email)
         response = requests.post(url, data=payload, timeout=15)
-        response_json = response.json()
+        response_json = self._response_json(response)
 
         if "error" in response_json:
             error_msg = response_json.get("error")
@@ -155,6 +216,19 @@ class UnisenderService:
             return "classic_success"
 
         return str(email_id)
+
+    @staticmethod
+    def _response_json(response: requests.Response) -> dict[str, Any]:
+        try:
+            data = response.json()
+        except ValueError:
+            text = response.text[:500] if response.text else ""
+            raise ValueError(f"Unisender returned non-JSON response: status={response.status_code} body={text}")
+
+        if not isinstance(data, dict):
+            raise ValueError(f"Unisender returned unexpected JSON response: {data}")
+
+        return data
 
 
 # Global singleton instance

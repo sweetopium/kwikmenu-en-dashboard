@@ -192,7 +192,10 @@ export const sendCampaignEmailNow = (id) => adminFetch(`/email-campaigns/logs/${
 export const cancelCampaignEmail = (id) => adminFetch(`/email-campaigns/logs/${id}/cancel`, {
   method: 'POST',
 });
-
+export const fetchCampaignWebhook = () => adminFetch('/email-campaigns/webhook');
+export const setupCampaignWebhook = () => adminFetch('/email-campaigns/webhook/setup', {
+  method: 'POST',
+});
 
 
 
