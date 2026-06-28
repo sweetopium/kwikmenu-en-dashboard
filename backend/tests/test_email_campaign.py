@@ -6,6 +6,7 @@ from app.services.email_campaign import EmailCampaignService
 from app.models.auth import User
 from app.models.venue import Venue
 from app.models.menu import Menu
+from app.models.email_campaign import EmailCampaignStep, ScheduledEmail
 
 
 class EmailCampaignTests(unittest.TestCase):
@@ -39,7 +40,7 @@ class EmailCampaignTests(unittest.TestCase):
         settings = MagicMock()
         settings.unisender_api_key = "test_key"
         settings.unisender_service_type = "go"
-        settings.unisender_go_api_url = "https://goapi.unisender.ru"
+        settings.unisender_go_api_url = "https://goapi.unisender.ru/ru/transactional/api/v1/"
         settings.unisender_sender_email = "no-reply@kwikmenu.ru"
         settings.unisender_sender_name = "KwikMenu"
         settings.unisender_custom_backend_id = 32625
@@ -66,7 +67,10 @@ class EmailCampaignTests(unittest.TestCase):
         self.assertEqual(job_id, "12345")
         mock_post.assert_called_once()
         args, kwargs = mock_post.call_args
-        self.assertEqual(args[0], "https://goapi.unisender.ru/email/send.json")
+        self.assertEqual(
+            args[0],
+            "https://goapi.unisender.ru/ru/transactional/api/v1/email/send.json",
+        )
         self.assertEqual(
             kwargs["json"]["message"]["recipients"][0]["email"],
             "test@example.com",
@@ -78,6 +82,51 @@ class EmailCampaignTests(unittest.TestCase):
         self.assertEqual(
             kwargs["json"]["message"]["options"]["custom_backend_id"], 32625
         )
+
+    def test_go_api_url_accepts_host_without_path(self) -> None:
+        settings = MagicMock()
+        settings.unisender_go_api_url = "https://goapi.unisender.ru"
+
+        service = UnisenderService()
+
+        self.assertEqual(
+            service._go_api_url(settings, "webhook/set.json"),
+            "https://goapi.unisender.ru/ru/transactional/api/v1/webhook/set.json",
+        )
+
+    @patch("app.services.unisender.requests.post")
+    @patch("app.services.unisender.get_settings")
+    def test_configure_go_webhook_uses_transactional_endpoint(
+        self, mock_get_settings, mock_post
+    ) -> None:
+        settings = MagicMock()
+        settings.unisender_api_key = "test_key"
+        settings.unisender_go_api_url = "https://goapi.unisender.ru"
+        settings.unisender_webhook_url = ""
+        settings.menu_import_api_url = "https://app.kwikme.nu"
+        mock_get_settings.return_value = settings
+
+        mock_response = MagicMock()
+        mock_response.status_code = 200
+        mock_response.json.return_value = {"status": "success", "object": {"id": 1}}
+        mock_post.return_value = mock_response
+
+        service = UnisenderService()
+        result = service.configure_go_webhook(
+            "https://app.kwikme.nu/api/webhooks/unisender"
+        )
+
+        self.assertEqual(
+            result["webhook_url"],
+            "https://app.kwikme.nu/api/webhooks/unisender",
+        )
+        args, kwargs = mock_post.call_args
+        self.assertEqual(
+            args[0],
+            "https://goapi.unisender.ru/ru/transactional/api/v1/webhook/set.json",
+        )
+        self.assertEqual(kwargs["json"]["event_format"], "json_post")
+        self.assertEqual(kwargs["json"]["events"]["spam_block"], ["*"])
 
     @patch("app.services.unisender.requests.post")
     @patch("app.services.unisender.get_settings")
@@ -158,9 +207,52 @@ class EmailCampaignTests(unittest.TestCase):
         db_mock.query().filter().count.return_value = 2
         self.assertFalse(service.evaluate_condition(db_mock, user, "no_menu"))
 
+    @patch("app.services.email_campaign.unisender_service.send_email")
+    @patch("app.services.email_campaign.get_settings")
+    def test_send_scheduled_email_force_bypasses_condition(self, mock_get_settings, mock_send_email) -> None:
+        service = EmailCampaignService()
+        step = EmailCampaignStep(
+            id="step_123",
+            name="Reminder",
+            step_number=1,
+            delay_hours=24,
+            subject="Hello",
+            body_html="Body",
+            condition_rule="no_menu",
+            is_active=True,
+        )
+        scheduled_email = ScheduledEmail(
+            id="sched_123",
+            user_id="user_123",
+            step_id="step_123",
+            step=step,
+            status="pending",
+            delivery_status="none",
+        )
+        user = User(id="user_123", email="alice@example.com", name="Alice", is_active=True)
+
+        scheduled_query = MagicMock()
+        scheduled_query.filter().first.return_value = scheduled_email
+        user_query = MagicMock()
+        user_query.filter().first.return_value = user
+        db_mock = MagicMock()
+        db_mock.query.side_effect = [scheduled_query, user_query]
+
+        settings = MagicMock()
+        settings.menu_import_frontend_origin = "https://app.kwikme.nu"
+        mock_get_settings.return_value = settings
+        mock_send_email.return_value = "msg_123"
+
+        with patch.object(service, "evaluate_condition", return_value=False) as mock_evaluate:
+            service.send_scheduled_email(db_mock, scheduled_email.id, force=True)
+
+        mock_evaluate.assert_not_called()
+        mock_send_email.assert_called_once()
+        self.assertEqual(scheduled_email.status, "sent")
+        self.assertEqual(scheduled_email.unisender_message_id, "msg_123")
+
     def test_webhook_process_single_event(self) -> None:
         from app.api.routes.unisender_webhook import _process_single_event
-        from app.models.email_campaign import ScheduledEmail
 
         db_mock = MagicMock()
         scheduled_email = ScheduledEmail(

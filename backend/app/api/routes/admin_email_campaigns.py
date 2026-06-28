@@ -311,7 +311,7 @@ def send_now(
     db.add(log)
     db.commit()
 
-    email_campaign_service.send_scheduled_email(db, log.id)
+    email_campaign_service.send_scheduled_email(db, log.id, force=True)
     db.refresh(log)
 
     return {

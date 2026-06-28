@@ -10,6 +10,8 @@ logger = logging.getLogger(__name__)
 
 
 class UnisenderService:
+    GO_API_PATH = "/ru/transactional/api/v1"
+
     @staticmethod
     def compile_template(text: str, context: dict) -> str:
         """
@@ -22,6 +24,16 @@ class UnisenderService:
             placeholder = f"{{{{{key}}}}}"
             compiled = compiled.replace(placeholder, str(value or ""))
         return compiled
+
+    @classmethod
+    def _go_api_url(cls, settings, method_path: str) -> str:
+        """
+        Build a Unisender Go endpoint URL from either the API host or full API base.
+        """
+        base_url = (settings.unisender_go_api_url or "https://goapi.unisender.ru").rstrip("/")
+        if not base_url.endswith(cls.GO_API_PATH):
+            base_url = f"{base_url}{cls.GO_API_PATH}"
+        return f"{base_url}/{method_path.lstrip('/')}"
 
     def send_email(
         self,
@@ -70,7 +82,7 @@ class UnisenderService:
         body_html: str,
         scheduled_email_id: str,
     ) -> str:
-        url = f"{settings.unisender_go_api_url.rstrip('/')}/email/send.json"
+        url = self._go_api_url(settings, "email/send.json")
         headers = {
             "X-API-KEY": settings.unisender_api_key,
             "Content-Type": "application/json",
@@ -138,7 +150,7 @@ class UnisenderService:
         if not target_url:
             target_url = f"{settings.menu_import_api_url.rstrip('/')}/api/webhooks/unisender"
 
-        url = f"{settings.unisender_go_api_url.rstrip('/')}/webhook/set.json"
+        url = self._go_api_url(settings, "webhook/set.json")
         headers = {
             "X-API-KEY": settings.unisender_api_key,
             "Content-Type": "application/json",

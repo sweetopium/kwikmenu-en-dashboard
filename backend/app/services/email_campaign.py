@@ -94,7 +94,7 @@ class EmailCampaignService:
         logger.warning("Unknown condition rule: %s. Defaulting to True.", condition_rule)
         return True
 
-    def send_scheduled_email(self, db: Session, scheduled_email_id: str) -> None:
+    def send_scheduled_email(self, db: Session, scheduled_email_id: str, *, force: bool = False) -> None:
         """
         Executes sending of a single scheduled email. Evaluates triggers,
         checks conditions, renders templates, and invokes Unisender API.
@@ -131,10 +131,12 @@ class EmailCampaignService:
             logger.info("Skipped email %s: step is inactive/deleted.", scheduled_email_id)
             return
 
-        # Check sending condition dynamically
-        should_send = self.evaluate_condition(db, user, step.condition_rule)
+        # Check sending condition dynamically for automated sends. Admin "send now"
+        # is used for manual tests and intentionally bypasses campaign conditions.
+        should_send = force or self.evaluate_condition(db, user, step.condition_rule)
         if not should_send:
             scheduled_email.status = "skipped"
+            scheduled_email.error_message = f"Condition {step.condition_rule} was not met."
             db.add(scheduled_email)
             db.commit()
             logger.info("Skipped email %s: condition %s not met.", scheduled_email_id, step.condition_rule)
