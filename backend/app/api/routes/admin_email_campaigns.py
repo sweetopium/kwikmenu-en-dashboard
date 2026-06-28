@@ -306,6 +306,8 @@ def send_now(
     # Force send now by resetting status to pending and running service
     log.status = "pending"
     log.scheduled_at = datetime.now(timezone.utc)
+    log.error_message = None
+    log.delivery_status = "none"
     db.add(log)
     db.commit()
 

@@ -108,8 +108,9 @@ class Settings(BaseSettings):
     unisender_service_type: str = "go"  # "go" or "classic"
     unisender_classic_list_id: int | None = None
     unisender_webhook_url: str | None = None
+    unisender_custom_backend_id: int | None = None
 
-    @field_validator("unisender_classic_list_id", "unitpay_project_id", mode="before")
+    @field_validator("unisender_classic_list_id", "unisender_custom_backend_id", "unitpay_project_id", mode="before")
     @classmethod
     def empty_str_to_none(cls, v):
         if v == "":

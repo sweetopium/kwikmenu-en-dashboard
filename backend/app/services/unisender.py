@@ -102,6 +102,10 @@ class UnisenderService:
                 "tags": ["kwikmenu_onboarding"],
             }
         }
+        if settings.unisender_custom_backend_id:
+            payload["message"]["options"] = {
+                "custom_backend_id": settings.unisender_custom_backend_id,
+            }
 
         logger.info("Sending transactional email via Unisender Go to %s", to_email)
         response = requests.post(url, json=payload, headers=headers, timeout=15)

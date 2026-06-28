@@ -42,6 +42,7 @@ class EmailCampaignTests(unittest.TestCase):
         settings.unisender_go_api_url = "https://goapi.unisender.ru"
         settings.unisender_sender_email = "no-reply@kwikmenu.ru"
         settings.unisender_sender_name = "KwikMenu"
+        settings.unisender_custom_backend_id = 32625
         mock_get_settings.return_value = settings
 
         # Mock requests response
@@ -73,6 +74,9 @@ class EmailCampaignTests(unittest.TestCase):
         self.assertEqual(kwargs["json"]["message"]["subject"], "Hello Alice")
         self.assertEqual(
             kwargs["json"]["message"]["body"]["html"], "Link: http://dashboard"
+        )
+        self.assertEqual(
+            kwargs["json"]["message"]["options"]["custom_backend_id"], 32625
         )
 
     @patch("app.services.unisender.requests.post")

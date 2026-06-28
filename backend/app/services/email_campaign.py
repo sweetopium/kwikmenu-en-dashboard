@@ -149,6 +149,7 @@ class EmailCampaignService:
         }
 
         try:
+            scheduled_email.error_message = None
             unisender_msg_id = unisender_service.send_email(
                 to_email=user.email,
                 subject=step.subject,
@@ -159,6 +160,7 @@ class EmailCampaignService:
             scheduled_email.status = "sent"
             scheduled_email.sent_at = datetime.now(timezone.utc)
             scheduled_email.unisender_message_id = unisender_msg_id
+            scheduled_email.error_message = None
             logger.info("Successfully sent email id=%s to=%s msg_id=%s", scheduled_email.id, user.email, unisender_msg_id)
         except Exception as exc:
             scheduled_email.status = "failed"
