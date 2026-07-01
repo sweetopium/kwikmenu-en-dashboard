@@ -1,4 +1,4 @@
-import {useState} from "react";
+import {useRef, useState} from "react";
 import {Link, useNavigate} from "react-router-dom";
 import {Loader2} from "lucide-react";
 import {FcGoogle} from "react-icons/fc";
@@ -25,6 +25,19 @@ const RegisterPage = () => {
   const [errors, setErrors] = useState({});
   const [submitError, setSubmitError] = useState("");
   const [pending, setPending] = useState(false);
+  const legalSectionRef = useRef(null);
+  const legalCheckboxRef = useRef(null);
+
+  const showLegalRequiredError = () => {
+    setSubmitError(t('register.errAgreeRequired'));
+    requestAnimationFrame(() => {
+      legalSectionRef.current?.scrollIntoView({
+        behavior: "smooth",
+        block: "center",
+      });
+      legalCheckboxRef.current?.focus({preventScroll: true});
+    });
+  };
 
   const validate = () => {
     const nextErrors = {};
@@ -66,7 +79,7 @@ const RegisterPage = () => {
 
   const handleProviderClick = (provider) => {
     if (!agreeLegal) {
-      setSubmitError(t('register.errAgreeRequired'));
+      showLegalRequiredError();
       return;
     }
 
@@ -79,6 +92,7 @@ const RegisterPage = () => {
       return;
     }
     if (!agreeLegal) {
+      showLegalRequiredError();
       return;
     }
 
@@ -164,13 +178,23 @@ const RegisterPage = () => {
             />
           </div>
 
-          <div className="flex items-start gap-3 mt-1 select-none">
+          <div ref={legalSectionRef} className="flex items-start gap-3 mt-1 scroll-mt-8 select-none">
             <input
+              ref={legalCheckboxRef}
               id="agree-legal"
               type="checkbox"
               checked={agreeLegal}
-              onChange={(e) => setAgreeLegal(e.target.checked)}
-              className="mt-1 h-4 w-4 shrink-0 rounded border-border text-brand-purple focus:ring-brand-purple/30 accent-brand-purple cursor-pointer"
+              aria-invalid={Boolean(submitError && !agreeLegal)}
+              aria-describedby={submitError && !agreeLegal ? "register-submit-error" : undefined}
+              onChange={(e) => {
+                setAgreeLegal(e.target.checked);
+                if (e.target.checked) {
+                  setSubmitError("");
+                }
+              }}
+              className={`mt-1 h-4 w-4 shrink-0 rounded border-border text-brand-purple focus:ring-brand-purple/30 accent-brand-purple cursor-pointer ${
+                submitError && !agreeLegal ? "ring-4 ring-destructive/20" : ""
+              }`}
             />
             <label htmlFor="agree-legal" className="text-xs text-muted-foreground leading-normal cursor-pointer text-left mt-[4px]">
               {t('register.agreeLabel')}{' '}
@@ -195,7 +219,7 @@ const RegisterPage = () => {
           </div>
 
           {submitError ? (
-            <div className="rounded-2xl border border-destructive/15 bg-destructive/8 px-4 py-3 text-sm text-destructive">
+            <div id="register-submit-error" className="rounded-2xl border border-destructive/15 bg-destructive/8 px-4 py-3 text-sm text-destructive">
               {submitError}
             </div>
           ) : null}
