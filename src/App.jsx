@@ -20,6 +20,8 @@ import { ProtectedRoute, PublicOnlyRoute } from "./components/auth/AuthGuards.js
 import RegistrationConversionTracker from "./components/auth/RegistrationConversionTracker.jsx";
 import ActiveVenueQrRedirect from "./components/venue/ActiveVenueQrRedirect.jsx";
 import PublicVenueMenuPage from "./pages/PublicVenueMenuPage.jsx";
+import MagicDemoPage from "./pages/MagicDemoPage.jsx";
+import TemporaryMenuPage from "./pages/TemporaryMenuPage.jsx";
 
 function App() {
     return (
@@ -32,6 +34,8 @@ function App() {
                 <Route path="/register" element={<PublicOnlyRoute><OnboardingLayout><RegisterPage/></OnboardingLayout></PublicOnlyRoute>}/>
                 <Route path="/onboarding/help" element={<ProtectedRoute><OnboardingLayout><HelpPage/></OnboardingLayout></ProtectedRoute>}/>
                 <Route path="/onboarding/upload" element={<ProtectedRoute><OnboardingLayout><UploadPage/></OnboardingLayout></ProtectedRoute>}/>
+                <Route path="/magic" element={<OnboardingLayout><MagicDemoPage/></OnboardingLayout>}/>
+                <Route path="/tmp/:id" element={<TemporaryMenuPage/>}/>
                 <Route path="/m/:venueId" element={<PublicVenueMenuPage/>}/>
                 <Route path="/:venueId" element={<PublicVenueMenuPage/>}/>
 

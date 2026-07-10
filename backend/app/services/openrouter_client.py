@@ -13,12 +13,16 @@ from urllib import error, request
 import certifi
 
 from app.core.config import get_settings
-from app.schemas.menu import MenuPayload
+from app.schemas.menu import MenuPayload, StrictModel
 from app.schemas.menu_extract import ExtractedPage
 from app.schemas.menu_translation import TranslatableMenu
 
 
 logger = logging.getLogger(__name__)
+
+
+class VenueDescriptionResult(StrictModel):
+    description: str
 
 
 class OpenRouterClient:
@@ -364,6 +368,85 @@ class OpenRouterClient:
         raw_content = response_payload["choices"][0]["message"]["content"]
         structured = self._decode_structured_content(raw_content, operation="menu translation")
         return TranslatableMenu.model_validate(structured)
+
+    def generate_venue_description(
+        self,
+        *,
+        menu: MenuPayload,
+        venue_name: str | None,
+        city: str | None,
+        country: str | None,
+    ) -> str:
+        if not self.enabled:
+            raise RuntimeError("OPENROUTER_API_KEY is not configured")
+
+        menu_summary = {
+            "venueName": venue_name or menu.venue.name,
+            "city": city,
+            "country": country,
+            "menuName": menu.menuMeta.name,
+            "currency": menu.currency,
+            "categories": [
+                {
+                    "name": category.name,
+                    "items": [
+                        {
+                            "name": item.name,
+                            "description": item.description,
+                            "price": item.price,
+                            "tags": item.tags,
+                        }
+                        for item in category.items[:8]
+                    ],
+                }
+                for category in menu.categories[:8]
+            ],
+        }
+
+        payload: dict[str, Any] = {
+            "model": self.settings.menu_import_model,
+            "temperature": 0.35,
+            "max_completion_tokens": 500,
+            "messages": [
+                {
+                    "role": "system",
+                    "content": (
+                        "You write concise, polished restaurant descriptions for digital menu previews. "
+                        "Return only structured JSON following the provided schema."
+                    ),
+                },
+                {
+                    "role": "user",
+                    "content": [
+                        {
+                            "type": "text",
+                            "text": (
+                                "Write a short venue description in the same language as the menu items when obvious; "
+                                "otherwise use English. Use 2-3 sentences. Be specific to the menu, venue name, city, "
+                                "and country. Do not mention AI, OCR, uploaded files, temporary links, or that this is a demo. "
+                                "Do not invent awards, history, chef names, delivery, reservations, opening hours, or facts not implied by the menu.\n"
+                                f"Input:\n{json.dumps(menu_summary, ensure_ascii=False)}"
+                            ),
+                        }
+                    ],
+                },
+            ],
+            "response_format": {
+                "type": "json_schema",
+                "json_schema": {
+                    "name": "kwikmenu_venue_description",
+                    "strict": True,
+                    "schema": VenueDescriptionResult.model_json_schema(),
+                },
+            },
+            "stream": False,
+        }
+
+        response_payload = self._post_json(payload)
+        raw_content = response_payload["choices"][0]["message"]["content"]
+        structured = self._decode_structured_content(raw_content, operation="venue description")
+        result = VenueDescriptionResult.model_validate(structured)
+        return re.sub(r"\s+", " ", result.description).strip()
 
 
     def _decode_structured_content(self, raw_content: Any, *, operation: str) -> Any:

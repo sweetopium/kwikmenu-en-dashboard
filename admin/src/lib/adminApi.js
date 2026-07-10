@@ -104,6 +104,7 @@ export const updateMenu = (id, payload) => adminFetch(`/menus/${id}`, {
   body: JSON.stringify(payload),
 });
 export const fetchImports = () => adminFetch('/imports?limit=100');
+export const fetchTemporaryMenus = () => adminFetch('/temporary-menus?limit=100');
 export const fetchHelpRequests = () => adminFetch('/help-requests?limit=100');
 export const fetchPublicMenuAnalytics = (period = '7d') => adminFetch(`/analytics/public-menu?period=${period}`);
 export const fetchProductEventAnalytics = (period = '7d') => adminFetch(`/analytics/product-events?period=${period}`);
@@ -196,6 +197,5 @@ export const fetchCampaignWebhook = () => adminFetch('/email-campaigns/webhook')
 export const setupCampaignWebhook = () => adminFetch('/email-campaigns/webhook/setup', {
   method: 'POST',
 });
-
 
 

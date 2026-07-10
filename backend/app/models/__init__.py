@@ -4,6 +4,7 @@ from app.models.auth import AuthAccount, SessionModel, User
 from app.models.help_request import HelpRequest
 from app.models.menu import Menu
 from app.models.menu_import import MenuImportJob, MenuImportSource
+from app.models.temporary_menu import TemporaryMenuImport, TemporaryMenuImportSource
 from app.models.venue import Venue, VenueSettings
 from app.models.promo_page import PromoPage
 from app.models.email_campaign import EmailCampaignStep, ScheduledEmail
@@ -17,6 +18,8 @@ __all__ = [
     "Menu",
     "MenuImportJob",
     "MenuImportSource",
+    "TemporaryMenuImport",
+    "TemporaryMenuImportSource",
     "PaymentTransaction",
     "SessionModel",
     "SubscriptionPlan",
@@ -28,4 +31,3 @@ __all__ = [
     "EmailCampaignStep",
     "ScheduledEmail",
 ]
-

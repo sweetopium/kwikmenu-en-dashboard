@@ -27,6 +27,7 @@ const navItems = [
   { to: '/venues', label: 'Заведения', icon: Building2 },
   { to: '/menus', label: 'Меню', icon: MenuSquare },
   { to: '/imports', label: 'Импорты', icon: UploadCloud },
+  { to: '/temporary-menus', label: 'Временные меню', icon: UtensilsCrossed },
   { to: '/help-requests', label: 'Заявки', icon: CircleHelp },
   { to: '/analytics', label: 'Аналитика', icon: BarChart3 },
   { to: '/events', label: 'Product events', icon: Activity },

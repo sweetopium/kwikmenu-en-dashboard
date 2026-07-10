@@ -4,6 +4,10 @@ Frontend on Vite/React and backend on FastAPI for menu import and normalization.
 
 Menu imports are processed asynchronously via Celery + Redis. The API only creates a job and the worker processes it in the background.
 
+## Magic demo
+
+The seller demo is available at `/magic`. It uses `DEMO_MAGIC_TOKEN` on the backend; the frontend stores the token in localStorage and sends it as `X-Demo-Token`. Completed demo menus are public at `/tmp/:id`.
+
 ## Local dev
 
 Backend:

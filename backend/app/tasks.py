@@ -1,6 +1,7 @@
 from app.celery_app import celery_app
 from app.core.config import get_settings
 from app.services.menu_import_jobs import process_menu_import_job
+from app.services.temporary_menu_jobs import process_temporary_menu_import_job
 
 
 settings = get_settings()
@@ -13,6 +14,15 @@ settings = get_settings()
 )
 def process_menu_import_job_task(job_id: str) -> None:
     process_menu_import_job(job_id)
+
+
+@celery_app.task(
+    name="temporary_menu_import.process_job",
+    soft_time_limit=settings.menu_import_task_soft_time_limit_seconds,
+    time_limit=settings.menu_import_task_hard_time_limit_seconds,
+)
+def process_temporary_menu_import_job_task(job_id: str) -> None:
+    process_temporary_menu_import_job(job_id)
 
 
 @celery_app.task(
@@ -31,5 +41,4 @@ def send_scheduled_email_task(self, scheduled_email_id: str) -> None:
         if not scheduled_email:
             raise self.retry(exc=ValueError(f"Scheduled email {scheduled_email_id} not found in DB yet."))
         email_campaign_service.send_scheduled_email(db, scheduled_email_id)
-
 

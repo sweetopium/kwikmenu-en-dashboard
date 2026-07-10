@@ -10,6 +10,7 @@ import MenusPage from '../pages/MenusPage';
 import OverviewPage from '../pages/OverviewPage';
 import ProductEventsPage from '../pages/ProductEventsPage';
 import SystemPage from '../pages/SystemPage';
+import TemporaryMenusPage from '../pages/TemporaryMenusPage';
 import UserDetailPage from '../pages/UserDetailPage';
 import UsersPage from '../pages/UsersPage';
 import VenueDetailPage from '../pages/VenueDetailPage';
@@ -39,6 +40,7 @@ const App = () => (
         <Route path="/menus" element={<MenusPage />} />
         <Route path="/menus/:id/edit" element={<MenuEditorPage />} />
         <Route path="/imports" element={<ImportsPage />} />
+        <Route path="/temporary-menus" element={<TemporaryMenusPage />} />
         <Route path="/help-requests" element={<HelpRequestsPage />} />
         <Route path="/analytics" element={<AnalyticsPage />} />
         <Route path="/events" element={<ProductEventsPage />} />

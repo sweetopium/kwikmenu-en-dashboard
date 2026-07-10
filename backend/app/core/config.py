@@ -43,6 +43,9 @@ class Settings(BaseSettings):
     admin_api_key: str | None = None
     admin_allowed_ips: str = "*"
     n8n_webhook_token: str | None = None
+    demo_magic_token: str | None = None
+    demo_magic_max_files: int = 10
+    demo_magic_max_total_upload_mb: int = 25
 
     auth_session_cookie_name: str = "kwikmenu_session"
     auth_session_ttl_hours: int = 720

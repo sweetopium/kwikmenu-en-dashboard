@@ -20,6 +20,7 @@ from app.models import (
     PublicMenuEvent,
     SessionModel,
     SubscriptionPlan,
+    TemporaryMenuImport,
     User,
     Venue,
     VenueSettings,
@@ -185,6 +186,7 @@ def get_admin_overview(
     menus_total = db.query(Menu).count()
     active_menus_total = db.query(Menu).filter(Menu.status.in_(("active", "published"))).count()
     imports_total = db.query(MenuImportJob).count()
+    temporary_imports_total = db.query(TemporaryMenuImport).count()
     help_requests_total = db.query(HelpRequest).count()
     public_views_total = db.query(PublicMenuEvent).count()
     product_events_total = db.query(ProductEvent).count()
@@ -224,6 +226,7 @@ def get_admin_overview(
             "menus": menus_total,
             "activeMenus": active_menus_total,
             "imports": imports_total,
+            "temporaryImports": temporary_imports_total,
             "helpRequests": help_requests_total,
             "publicViews": public_views_total,
             "productEvents": product_events_total,
@@ -753,6 +756,62 @@ def list_admin_imports(
                 "createdAt": job.created_at,
             }
             for job, user, venue in rows
+        ],
+    }
+
+
+@router.get("/temporary-menus")
+def list_admin_temporary_menus(
+    status_filter: str | None = Query(default=None, alias="status"),
+    limit: int = Query(default=50, ge=1, le=200),
+    offset: int = Query(default=0, ge=0),
+    _: None = AdminAccess,
+    db: Session = Depends(get_db),
+) -> dict:
+    query = db.query(TemporaryMenuImport)
+    if status_filter:
+        query = query.filter(TemporaryMenuImport.status == status_filter)
+    total = query.count()
+    jobs = query.order_by(TemporaryMenuImport.created_at.desc()).offset(offset).limit(limit).all()
+
+    return {
+        "total": total,
+        "items": [
+            {
+                "id": job.id,
+                "status": job.status,
+                "restaurantName": job.restaurant_name,
+                "contactPhone": job.contact_phone,
+                "city": job.city,
+                "country": job.country,
+                "currency": job.currency,
+                "menuSource": job.menu_source,
+                "publicPath": f"/tmp/{job.id}",
+                "usedFallback": job.used_fallback,
+                "categoryCount": job.category_count,
+                "itemCount": job.item_count,
+                "documentCount": job.document_count,
+                "error": job.error,
+                "warningsCount": len(job.warnings or []),
+                "combinedPdfName": job.combined_pdf_name,
+                "sources": [
+                    {
+                        "id": source.id,
+                        "name": source.name,
+                        "kind": source.kind,
+                        "mimeType": source.mime_type,
+                        "sizeBytes": source.size_bytes,
+                        "storageKey": source.storage_key,
+                        "publicUrl": source.public_url,
+                        "isGenerated": source.is_generated,
+                    }
+                    for source in job.sources
+                ],
+                "startedAt": job.started_at,
+                "completedAt": job.completed_at,
+                "createdAt": job.created_at,
+            }
+            for job in jobs
         ],
     }
 
