@@ -270,11 +270,11 @@ const MagicDemoPage = () => {
                 </div>
               </div>
               <div className="mt-6 flex w-full max-w-xl flex-col gap-3 sm:flex-row">
-                <Link to={job.publicPath} className={`${primaryActionButtonClasses} flex h-12 flex-1 items-center justify-center gap-2`}>
+                <Link to={job.publicPath} className={`${primaryActionButtonClasses} flex !h-12 !min-h-12 flex-1 items-center justify-center gap-2 px-5 text-sm leading-none sm:text-base`}>
                   Open temporary menu
                   <ArrowRight size={17} />
                 </Link>
-                <button type="button" onClick={handleReset} className={`${secondaryActionButtonClasses} h-12 flex-1`}>
+                <button type="button" onClick={handleReset} className={`${secondaryActionButtonClasses} !h-12 !min-h-12 flex-1 px-5 text-sm leading-none sm:text-base`}>
                   Digitize another
                 </button>
               </div>
