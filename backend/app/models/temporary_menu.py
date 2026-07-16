@@ -34,6 +34,7 @@ class TemporaryMenuImport(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     sources: Mapped[list["TemporaryMenuImportSource"]] = relationship(
         back_populates="job",
         cascade="all, delete-orphan",
+        order_by="TemporaryMenuImportSource.name",
     )
 
 

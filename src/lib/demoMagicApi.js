@@ -1,6 +1,14 @@
 const DEMO_API_BASE_URL = import.meta.env.VITE_DEMO_API_BASE_URL || '/api/demo';
 const DEMO_TOKEN_STORAGE_KEY = 'kwikmenu-demo-token';
 
+export class DemoApiError extends Error {
+  constructor(message, status) {
+    super(message);
+    this.name = 'DemoApiError';
+    this.status = status;
+  }
+}
+
 export const getStoredDemoToken = () => {
   if (typeof window === 'undefined') {
     return '';
@@ -23,17 +31,17 @@ export const storeDemoToken = (token) => {
 const parseApiError = async (response, fallbackMessage) => {
   const text = await response.text().catch(() => '');
   if (!text) {
-    throw new Error(fallbackMessage);
+    throw new DemoApiError(fallbackMessage, response.status);
   }
 
   let payload;
   try {
     payload = JSON.parse(text);
   } catch {
-    throw new Error(text);
+    throw new DemoApiError(text, response.status);
   }
 
-  throw new Error(payload.detail || payload.message || fallbackMessage);
+  throw new DemoApiError(payload.detail || payload.message || fallbackMessage, response.status);
 };
 
 export const verifyDemoToken = async (token) => {

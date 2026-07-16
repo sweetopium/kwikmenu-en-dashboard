@@ -6,7 +6,6 @@ import secrets
 import shutil
 from pathlib import Path
 
-import fitz
 from fastapi import APIRouter, Depends, File, Form, Header, HTTPException, Request, UploadFile, status
 from sqlalchemy.orm import Session
 
@@ -99,10 +98,9 @@ async def create_temporary_menu_import(
             )
         )
 
-    saved_image_paths: list[Path] = []
-    has_pdf_upload = False
-    for uploaded_file in uploaded_files:
-        safe_name = Path(uploaded_file.filename or "upload").name
+    for file_index, uploaded_file in enumerate(uploaded_files, start=1):
+        original_name = Path(uploaded_file.filename or "upload").name
+        safe_name = _ordered_upload_name(file_index, original_name)
         target_path = upload_dir / safe_name
         with target_path.open("wb") as buffer:
             shutil.copyfileobj(uploaded_file.file, buffer)
@@ -113,9 +111,6 @@ async def create_temporary_menu_import(
             raise HTTPException(status_code=400, detail=f"Total upload size must be under {settings.demo_magic_max_total_upload_mb} MB.")
 
         kind = _detect_source_kind(target_path)
-        has_pdf_upload = has_pdf_upload or kind == "pdf"
-        if kind == "image":
-            saved_image_paths.append(target_path)
 
         logger.info(
             "Saved temporary menu upload job_id=%s file=%s kind=%s size=%s sha256=%s ip=%s",
@@ -134,22 +129,6 @@ async def create_temporary_menu_import(
                 mime_type=uploaded_file.content_type,
                 size_bytes=size_bytes,
                 **_archive_source(job_id=job.id, file_path=target_path, content_type=uploaded_file.content_type),
-            )
-        )
-
-    if len(saved_image_paths) > 1 and not has_pdf_upload:
-        combined_pdf_path = upload_dir / "combined-menu.pdf"
-        _combine_images_to_pdf(saved_image_paths, combined_pdf_path)
-        job.combined_pdf_name = combined_pdf_path.name
-        db.add(
-            TemporaryMenuImportSource(
-                job_id=job.id,
-                name=combined_pdf_path.name,
-                kind="pdf",
-                mime_type="application/pdf",
-                size_bytes=combined_pdf_path.stat().st_size,
-                is_generated=True,
-                **_archive_source(job_id=job.id, file_path=combined_pdf_path, content_type="application/pdf"),
             )
         )
 
@@ -233,23 +212,12 @@ def _detect_source_kind(path: Path) -> str:
     return "file"
 
 
-def _combine_images_to_pdf(image_paths: list[Path], output_path: Path) -> None:
-    document = fitz.open()
-    try:
-        for image_path in image_paths:
-            image_doc = fitz.open(image_path)
-            try:
-                pdf_bytes = image_doc.convert_to_pdf()
-            finally:
-                image_doc.close()
-            image_pdf = fitz.open("pdf", pdf_bytes)
-            try:
-                document.insert_pdf(image_pdf)
-            finally:
-                image_pdf.close()
-        document.save(output_path)
-    finally:
-        document.close()
+def _ordered_upload_name(file_index: int, original_name: str) -> str:
+    prefix = f"{file_index:03d}-"
+    suffix = Path(original_name).suffix
+    stem_limit = 255 - len(prefix) - len(suffix)
+    stem = Path(original_name).stem[:stem_limit] or "upload"
+    return f"{prefix}{stem}{suffix}"
 
 
 def _archive_source(*, job_id: str, file_path: Path, content_type: str | None) -> dict[str, str | None]:

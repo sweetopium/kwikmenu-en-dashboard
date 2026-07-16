@@ -20,6 +20,21 @@ import {
 } from '../lib/demoMagicApi';
 
 const POLL_INTERVAL_MS = 1800;
+const MAX_CONSECUTIVE_POLL_FAILURES = 20;
+
+const waitForNextPoll = (signal, delay = POLL_INTERVAL_MS) => new Promise((resolve, reject) => {
+  const timeoutId = window.setTimeout(resolve, delay);
+  signal.addEventListener('abort', () => {
+    window.clearTimeout(timeoutId);
+    reject(new DOMException('Aborted', 'AbortError'));
+  }, { once: true });
+});
+
+const isRetryablePollError = (error) => (
+  error instanceof TypeError
+  || error?.status === 429
+  || error?.status >= 500
+);
 
 const COUNTRY_CURRENCY = {
   us: 'USD',
@@ -88,8 +103,23 @@ const MagicDemoPage = () => {
   };
 
   const waitForCompletion = async (jobId, signal) => {
+    let consecutivePollFailures = 0;
+
     while (!signal.aborted) {
-      const nextJob = await pollDemoMenuImport(jobId, { token, signal });
+      let nextJob;
+      try {
+        nextJob = await pollDemoMenuImport(jobId, { token, signal });
+        consecutivePollFailures = 0;
+      } catch (pollError) {
+        if (!isRetryablePollError(pollError) || consecutivePollFailures >= MAX_CONSECUTIVE_POLL_FAILURES) {
+          throw pollError;
+        }
+
+        consecutivePollFailures += 1;
+        await waitForNextPoll(signal, Math.min(POLL_INTERVAL_MS * consecutivePollFailures, 5000));
+        continue;
+      }
+
       setJob(nextJob);
 
       if (nextJob.status === 'completed') {
@@ -101,13 +131,7 @@ const MagicDemoPage = () => {
         throw new Error(nextJob.error || 'Could not digitize this menu.');
       }
 
-      await new Promise((resolve, reject) => {
-        const timeoutId = window.setTimeout(resolve, POLL_INTERVAL_MS);
-        signal.addEventListener('abort', () => {
-          window.clearTimeout(timeoutId);
-          reject(new DOMException('Aborted', 'AbortError'));
-        }, { once: true });
-      });
+      await waitForNextPoll(signal);
     }
   };
 
@@ -229,7 +253,7 @@ const MagicDemoPage = () => {
                 {stage === 'uploading' ? 'Uploading source files' : 'Digitizing the menu'}
               </h1>
               <p className="mt-2 max-w-md text-sm leading-relaxed text-muted-foreground">
-                Photos are prepared as one document when needed. The result will open as a temporary digital menu.
+                Each photo is recognized as a page and then merged into one temporary digital menu.
               </p>
               <div className="mt-8 grid w-full max-w-xl gap-3">
                 {['Files saved', 'AI recognition', 'Temporary page'].map((label, index) => {
