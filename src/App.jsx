@@ -22,10 +22,12 @@ import ActiveVenueQrRedirect from "./components/venue/ActiveVenueQrRedirect.jsx"
 import PublicVenueMenuPage from "./pages/PublicVenueMenuPage.jsx";
 import MagicDemoPage from "./pages/MagicDemoPage.jsx";
 import TemporaryMenuPage from "./pages/TemporaryMenuPage.jsx";
+import GoogleAnalyticsTracker from "./components/analytics/GoogleAnalyticsTracker.jsx";
 
 function App() {
     return (
         <BrowserRouter>
+            <GoogleAnalyticsTracker />
             <RegistrationConversionTracker />
             <Routes>
                 {/* Onboarding Flow */}
