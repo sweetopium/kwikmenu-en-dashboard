@@ -100,20 +100,26 @@ const SafeImage = ({ src, alt, className }) => {
   const [loaded, setLoaded] = useState(false);
   const [failed, setFailed] = useState(false);
 
+  // SVG 4:3 placeholder (warm beige color match)
+  const placeholderSvg = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 4 3'><rect width='4' height='3' fill='%23eae4d8' opacity='0.5'/></svg>";
+
   if (!src || failed) {
-    return <div className={`${className} bg-gradient-to-br from-stone-200 to-stone-100`} aria-hidden="true" />;
+    return <img src={placeholderSvg} alt="" className={className} />;
   }
 
   return (
-    <div className="relative w-full h-full">
+    <div className={`${className} relative`}>
       {!loaded && (
-        <div className={`${className} absolute inset-0 bg-gradient-to-br from-stone-200 to-stone-100 animate-pulse`} aria-hidden="true" />
+        <img
+          src={placeholderSvg}
+          alt=""
+          className="absolute inset-0 w-full h-full object-cover animate-pulse z-0"
+        />
       )}
       <img
         src={src}
         alt={alt}
-        className={`${className} ${loaded ? 'opacity-100' : 'opacity-0'} transition-opacity duration-300`}
-        loading="lazy"
+        className={`w-full h-full object-cover absolute inset-0 ${loaded ? 'opacity-100 z-10' : 'opacity-0 z-0'} transition-opacity duration-300`}
         decoding="async"
         onLoad={() => setLoaded(true)}
         onError={() => setFailed(true)}
@@ -399,7 +405,7 @@ const BrandedPublicMenuTemplate = ({ venue, menu, accentColor = '#25392f', activ
     return (
       <button key={item.id} onClick={() => handleSelectItem(item)} className="h-full flex flex-col overflow-hidden rounded-[20px] bg-white text-left shadow-sm transition-all duration-300 active:scale-[0.97] hover:-translate-y-0.5">
         <div className="relative aspect-[4/3] overflow-hidden shrink-0">
-          <SafeImage src={item.imageUrl} alt={name} className="h-full w-full object-cover transition-transform duration-500 hover:scale-[1.03]" />
+          <SafeImage src={item.imageUrl} alt={name} className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 hover:scale-[1.03]" />
           {item.badge ? <span className="absolute left-2.5 top-2.5 rounded-full bg-white/92 px-2.5 py-1 text-[9px] font-black uppercase tracking-[0.12em]" style={{ color: ink }}>{item.badge.replace('-', ' ')}</span> : null}
         </div>
         <span className="flex-1 flex flex-col justify-between p-3.5">
@@ -612,7 +618,7 @@ const BrandedPublicMenuTemplate = ({ venue, menu, accentColor = '#25392f', activ
       </main>
 
       {/* Item Details modal with Variant picker & Quantity Selector & Add to Order action */}
-      <Sheet open={Boolean(selectedItem)} onClose={() => setSelectedItem(null)} labelledBy="branded-item-title">{selectedItem ? <><div className="relative aspect-[5/4] overflow-hidden bg-stone-100"><SafeImage src={selectedItem.imageUrl} alt="" className="h-full w-full object-cover" /><button aria-label={labelFor(language, 'close')} onClick={() => setSelectedItem(null)} className="absolute right-4 top-4 flex h-10 w-10 items-center justify-center rounded-full bg-white/90 shadow transition-all duration-200 active:scale-90"><X size={19} /></button></div><div className="p-6 pb-9">
+      <Sheet open={Boolean(selectedItem)} onClose={() => setSelectedItem(null)} labelledBy="branded-item-title">{selectedItem ? <><div className="relative aspect-[5/4] overflow-hidden bg-stone-100"><SafeImage src={selectedItem.imageUrl} alt="" className="absolute inset-0 h-full w-full object-cover" /><button aria-label={labelFor(language, 'close')} onClick={() => setSelectedItem(null)} className="absolute right-4 top-4 flex h-10 w-10 items-center justify-center rounded-full bg-white/90 shadow transition-all duration-200 active:scale-90"><X size={19} /></button></div><div className="p-6 pb-9">
               <div className="flex flex-col gap-2">
                 <h2 id="branded-item-title" className="font-serif text-[30px] font-bold leading-tight" style={{ color: ink }}>
                   {getLocalizedField(selectedItem, 'name', language, defaultLanguage)}
