@@ -97,11 +97,29 @@ const Price = ({ item, currency, language, compact = false, color }) => {
 };
 
 const SafeImage = ({ src, alt, className }) => {
+  const [loaded, setLoaded] = useState(false);
   const [failed, setFailed] = useState(false);
+
   if (!src || failed) {
     return <div className={`${className} bg-gradient-to-br from-stone-200 to-stone-100`} aria-hidden="true" />;
   }
-  return <img src={src} alt={alt} className={className} loading="lazy" decoding="async" onError={() => setFailed(true)} />;
+
+  return (
+    <div className="relative w-full h-full">
+      {!loaded && (
+        <div className={`${className} absolute inset-0 bg-gradient-to-br from-stone-200 to-stone-100 animate-pulse`} aria-hidden="true" />
+      )}
+      <img
+        src={src}
+        alt={alt}
+        className={`${className} ${loaded ? 'opacity-100' : 'opacity-0'} transition-opacity duration-300`}
+        loading="lazy"
+        decoding="async"
+        onLoad={() => setLoaded(true)}
+        onError={() => setFailed(true)}
+      />
+    </div>
+  );
 };
 
 const InstagramIcon = ({ size = 18 }) => (
