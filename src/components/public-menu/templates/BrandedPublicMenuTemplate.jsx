@@ -380,9 +380,9 @@ const BrandedPublicMenuTemplate = ({ venue, menu, accentColor = '#25392f', activ
     }
     return (
       <button key={item.id} onClick={() => handleSelectItem(item)} className="h-full flex flex-col overflow-hidden rounded-[20px] bg-white text-left shadow-sm transition-all duration-300 active:scale-[0.97] hover:-translate-y-0.5">
-        <div className="relative w-full h-0 pb-[75%] overflow-hidden shrink-0">
-          <SafeImage src={item.imageUrl} alt={name} className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 hover:scale-[1.03]" />
-          {item.badge ? <span className="absolute left-2.5 top-2.5 z-10 rounded-full bg-white/92 px-2.5 py-1 text-[9px] font-black uppercase tracking-[0.12em]" style={{ color: ink }}>{item.badge.replace('-', ' ')}</span> : null}
+        <div className="relative aspect-[4/3] overflow-hidden shrink-0">
+          <SafeImage src={item.imageUrl} alt={name} className="h-full w-full object-cover transition-transform duration-500 hover:scale-[1.03]" />
+          {item.badge ? <span className="absolute left-2.5 top-2.5 rounded-full bg-white/92 px-2.5 py-1 text-[9px] font-black uppercase tracking-[0.12em]" style={{ color: ink }}>{item.badge.replace('-', ' ')}</span> : null}
         </div>
         <span className="flex-1 flex flex-col justify-between p-3.5">
           <span className="block text-[13px] font-bold leading-tight line-clamp-2" style={{ color: ink }}>{name}</span>

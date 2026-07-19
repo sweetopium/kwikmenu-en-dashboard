@@ -106,7 +106,8 @@ const PublicVenueMenuPage = () => {
 
   // Preload critical images to prevent layout shift (CLS) under bad network conditions
   useEffect(() => {
-    if (!dataLoaded || !data || imagesLoaded) return undefined;
+    const activeMenuId = searchParams.get('menu');
+    if (!dataLoaded || !data || imagesLoaded || (data.menus?.length > 0 && !activeMenuId)) return undefined;
 
     const urlsToPreload = new Set();
 
@@ -116,7 +117,6 @@ const PublicVenueMenuPage = () => {
     if (data.venue?.design?.logoUrl) urlsToPreload.add(data.venue.design.logoUrl);
 
     // 2. Active menu promo banner image
-    const activeMenuId = searchParams.get('menu');
     const activeMenu = data.menus?.find((m) => m.id === activeMenuId) || data.menus?.[0];
     if (activeMenu?.payload?.settings?.promo?.imageUrl) {
       urlsToPreload.add(activeMenu.payload.settings.promo.imageUrl);
