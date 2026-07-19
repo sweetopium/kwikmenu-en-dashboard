@@ -13,6 +13,7 @@ import {
   LayoutTemplate,
   Palette,
   Globe,
+  Plus,
 } from 'lucide-react';
 
 import { Button } from "../components/ui/button";
@@ -751,14 +752,16 @@ const VenuePage = () => {
                       />
                     ))}
 
-                    <label className="w-9 h-9 rounded-full border-2 border-border/60 overflow-hidden cursor-pointer shadow-sm relative">
+                    <label className="w-9 h-9 rounded-full border-2 border-border/60 overflow-hidden cursor-pointer shadow-sm relative flex items-center justify-center bg-muted hover:scale-110 transition-transform shrink-0">
                       <input
                         type="color"
                         value={designData.accentColor}
                         onChange={(e) => setDesignData({ ...designData, accentColor: e.target.value })}
-                        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
                       />
-                      <div className="w-full h-full" style={{ backgroundColor: designData.accentColor }} />
+                      <div className="w-full h-full flex items-center justify-center relative" style={{ backgroundColor: designData.accentColor }}>
+                        <Plus size={16} className="text-white mix-blend-difference" />
+                      </div>
                     </label>
                   </div>
                 </div>
