@@ -125,9 +125,17 @@ const InstagramIcon = ({ size = 18 }) => (
 const Sheet = ({ open, onClose, children, labelledBy }) => {
   useEffect(() => {
     if (!open) return undefined;
+
+    const originalOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+
     const onKey = (event) => event.key === 'Escape' && onClose();
     document.addEventListener('keydown', onKey);
-    return () => document.removeEventListener('keydown', onKey);
+
+    return () => {
+      document.removeEventListener('keydown', onKey);
+      document.body.style.overflow = originalOverflow;
+    };
   }, [open, onClose]);
   if (!open) return null;
   return (
@@ -153,6 +161,18 @@ const BrandedPublicMenuTemplate = ({ venue, menu, accentColor = '#25392f', activ
   const [query, setQuery] = useState('');
   const [passwordCopied, setPasswordCopied] = useState(false);
   const [cartOpen, setCartOpen] = useState(false);
+  
+  const searchInputRef = useRef(null);
+
+  useEffect(() => {
+    if (!searchOpen) return undefined;
+    const timer = setTimeout(() => {
+      if (searchInputRef.current) {
+        searchInputRef.current.focus();
+      }
+    }, 350);
+    return () => clearTimeout(timer);
+  }, [searchOpen]);
   
   // Virtual Cart State loaded from/saved to localStorage with 24h expiration
   const [cart, setCart] = useState(() => {
@@ -764,7 +784,7 @@ const BrandedPublicMenuTemplate = ({ venue, menu, accentColor = '#25392f', activ
           <div className="flex items-center gap-3">
             <div className="flex h-12 flex-1 items-center gap-2 rounded-2xl bg-black/[0.05] px-4">
               <Search size={17} />
-              <input autoFocus value={query} onChange={(event) => setQuery(event.target.value)} placeholder={labelFor(language, 'search')} className="w-full bg-transparent text-sm outline-none" />
+              <input ref={searchInputRef} value={query} onChange={(event) => setQuery(event.target.value)} placeholder={labelFor(language, 'search')} className="w-full bg-transparent text-sm outline-none" />
             </div>
             <button onClick={() => setSearchOpen(false)} className="flex h-10 w-10 items-center justify-center rounded-full bg-black/[0.05] transition-all duration-200 active:scale-90"><X size={18} /></button>
           </div>
