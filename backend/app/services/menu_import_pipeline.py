@@ -59,34 +59,42 @@ class MenuImportPipeline:
         if not pages:
             raise ValueError("No pages were prepared for parsing.")
 
+        from concurrent.futures import ThreadPoolExecutor, as_completed
+
         warnings: list[str] = []
         used_fallback = False
         extracted_pages: list[ExtractedPage] = []
-        previous_section_headings: list[str] = []
 
-        for page in pages:
-            try:
-                normalized_page, page_warnings, fallback_used = self._parse_page(
+        max_workers = self.settings.menu_import_page_parse_concurrency
+
+        with ThreadPoolExecutor(max_workers=max_workers) as executor:
+            futures = {
+                executor.submit(
+                    self._parse_page,
                     page=page,
                     context=context,
-                    previous_section_headings=previous_section_headings,
-                )
-                warnings.extend(page_warnings)
-                used_fallback = used_fallback or fallback_used
-                extracted_pages.append(normalized_page)
-                previous_section_headings = [
-                    section.heading.strip()
-                    for section in normalized_page.sections
-                    if section.heading and section.heading.strip()
-                ]
-            except ValueError as exc:
-                if self._is_skippable_page_error(exc):
-                    warnings.append(str(exc))
-                    continue
-                raise
+                    previous_section_headings=[],
+                ): page
+                for page in pages
+            }
+
+            for future in as_completed(futures):
+                page = futures[future]
+                try:
+                    normalized_page, page_warnings, fallback_used = future.result()
+                    warnings.extend(page_warnings)
+                    used_fallback = used_fallback or fallback_used
+                    extracted_pages.append(normalized_page)
+                except ValueError as exc:
+                    if self._is_skippable_page_error(exc):
+                        warnings.append(str(exc))
+                        continue
+                    raise
 
         if not extracted_pages:
             raise ValueError("Parser did not find any menu sections in the provided files.")
+
+        extracted_pages.sort(key=lambda p: p.pageNumber)
 
         menu_payload = self._merge_pages(extracted_pages=extracted_pages, context=context)
         menu_payload = self._repair_missing_measure_units(menu_payload)
