@@ -413,7 +413,7 @@ const BrandedPublicMenuTemplate = ({ venue, menu, accentColor = '#25392f', activ
             {venueDescription ? (
               <button
                 onClick={() => setAboutOpen(true)}
-                className="mt-3 max-w-[330px] text-left text-sm leading-relaxed text-white/75 line-clamp-3 hover:text-white transition-colors active:opacity-80 block"
+                className="mt-3 max-w-[330px] text-left text-sm leading-relaxed text-white/75 line-clamp-3 hover:text-white transition-colors active:opacity-80"
               >
                 {venueDescription}
               </button>
