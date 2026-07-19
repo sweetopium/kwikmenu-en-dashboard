@@ -447,7 +447,65 @@ const BrandedPublicMenuTemplate = ({ venue, menu, accentColor = '#25392f', activ
           </div>
         ) : null}
 
-        {config.showPromo !== false && promo.enabled && promoTitle ? <button onClick={() => promo.targetCategoryId && scrollToCategory(promo.targetCategoryId)} className="relative mx-4 mt-5 flex min-h-[145px] w-[calc(100%-2rem)] overflow-hidden rounded-[24px] p-5 text-left text-white shadow-sm transition-all duration-300 active:scale-[0.99] hover:brightness-[1.03]" style={{ backgroundColor: accentColor }}><div className="relative z-10 max-w-[62%]"><span className="text-[9px] font-black uppercase tracking-[0.2em] text-white/65">{promoEyebrow || 'Special'}</span><span className="mt-2 block font-serif text-[25px] font-bold leading-[1.02]">{promoTitle}</span>{promoDescription ? <span className="mt-2 line-clamp-2 block text-xs leading-relaxed text-white/70">{promoDescription}</span> : null}<span className="mt-3 flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider">Explore <ArrowRight size={13} /></span></div>{promo.imageUrl ? <><SafeImage src={promo.imageUrl} alt="" className="absolute inset-y-0 right-0 h-full w-[48%] object-cover" /><div className="absolute inset-y-0 right-[35%] w-[20%] bg-gradient-to-r from-[var(--promo)] to-transparent" style={{ '--promo': accentColor }} /></> : <div className="absolute -right-8 -top-8 h-36 w-36 rounded-full opacity-50" style={{ backgroundColor: secondary }} />}</button> : null}
+        {config.showPromo !== false && promo.enabled && promoTitle ? (
+          <button 
+            onClick={() => promo.targetCategoryId && scrollToCategory(promo.targetCategoryId)} 
+            className="group relative mx-4 mt-5 flex min-h-[160px] w-[calc(100%-2rem)] flex-col justify-between overflow-hidden rounded-[24px] p-6 text-left text-white shadow-lg transition-all duration-300 active:scale-[0.98] hover:shadow-xl hover:brightness-[1.05]"
+            style={{ backgroundColor: accentColor }}
+          >
+            {/* Background Image - Full bleed with hover zoom */}
+            {promo.imageUrl ? (
+              <div className="absolute inset-0 z-0 h-full w-full overflow-hidden">
+                <SafeImage 
+                  src={promo.imageUrl} 
+                  alt="" 
+                  className="h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-105" 
+                />
+                {/* Gradient overlay - fades from dark to transparent */}
+                <div 
+                  className="absolute inset-0 bg-gradient-to-r from-black/85 via-black/40 to-transparent z-10" 
+                />
+                {/* Accent Color overlay tint for integration */}
+                <div 
+                  className="absolute inset-0 bg-gradient-to-r opacity-50 mix-blend-multiply z-10"
+                  style={{ backgroundImage: `linear-gradient(to right, ${accentColor}, transparent)` }}
+                />
+              </div>
+            ) : (
+              <div 
+                className="absolute inset-0 z-0 opacity-40" 
+                style={{ background: `radial-gradient(circle at 78% 18%, ${secondary} 0, transparent 40%), linear-gradient(145deg, ${accentColor}, #000)` }} 
+              />
+            )}
+
+            {/* Content (relative z-20 to stay above background & overlays) */}
+            <div className="relative z-20 flex h-full flex-col justify-between gap-4 max-w-[65%]">
+              <div>
+                {/* Glassmorphic eyebrow badge */}
+                <span className="inline-block rounded-full bg-white/10 px-2.5 py-0.5 text-[9px] font-black uppercase tracking-[0.15em] text-white/90 backdrop-blur-md border border-white/10">
+                  {promoEyebrow || labelFor(language, 'specialOffer') || 'Special'}
+                </span>
+                
+                <span className="mt-3 block font-serif text-[24px] font-bold leading-tight tracking-tight text-white">
+                  {promoTitle}
+                </span>
+                
+                {promoDescription ? (
+                  <span className="mt-1.5 line-clamp-2 block text-xs leading-relaxed text-white/75">
+                    {promoDescription}
+                  </span>
+                ) : null}
+              </div>
+
+              {/* Clean CTA Pill Button */}
+              <div className="mt-2">
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-white/95 px-3.5 py-1.5 text-[10px] font-bold uppercase tracking-wider text-black shadow-sm transition-all duration-300 group-hover:bg-white group-hover:translate-x-0.5">
+                  Explore <ArrowRight size={12} className="transition-transform duration-300 group-hover:translate-x-0.5" />
+                </span>
+              </div>
+            </div>
+          </button>
+        ) : null}
 
         <div className="sticky top-0 z-30 mt-5 border-y border-black/[0.06] bg-[#f6f1e9]/95 py-3 backdrop-blur-xl">
           <div className="flex items-center gap-2 px-4">
@@ -594,8 +652,30 @@ const BrandedPublicMenuTemplate = ({ venue, menu, accentColor = '#25392f', activ
       </main>
 
       {/* Item Details modal with Variant picker & Quantity Selector & Add to Order action */}
-      <Sheet open={Boolean(selectedItem)} onClose={() => setSelectedItem(null)} labelledBy="branded-item-title">{selectedItem ? <><div className="relative w-full aspect-[5/4] overflow-hidden bg-stone-100"><SafeImage src={selectedItem.imageUrl} alt="" className="h-full w-full object-cover" /><button aria-label={labelFor(language, 'close')} onClick={() => setSelectedItem(null)} className="absolute right-4 top-4 flex h-10 w-10 items-center justify-center rounded-full bg-white/90 shadow transition-all duration-200 active:scale-90"><X size={19} /></button></div><div className="p-6 pb-9">
-              <div className="flex flex-col gap-2">
+      <Sheet open={Boolean(selectedItem)} onClose={() => setSelectedItem(null)} labelledBy="branded-item-title">{selectedItem ? <>
+            {selectedItem.imageUrl ? (
+              <div className="relative w-full aspect-[5/4] overflow-hidden bg-stone-100">
+                <SafeImage src={selectedItem.imageUrl} alt="" className="h-full w-full object-cover" />
+                <button 
+                  aria-label={labelFor(language, 'close')} 
+                  onClick={() => setSelectedItem(null)} 
+                  className="absolute right-4 top-4 flex h-10 w-10 items-center justify-center rounded-full bg-white/90 shadow transition-all duration-200 active:scale-90"
+                >
+                  <X size={19} />
+                </button>
+              </div>
+            ) : null}
+            <div className="p-6 pb-9 relative">
+              {!selectedItem.imageUrl ? (
+                <button 
+                  aria-label={labelFor(language, 'close')} 
+                  onClick={() => setSelectedItem(null)} 
+                  className="absolute right-6 top-6 flex h-10 w-10 items-center justify-center rounded-full bg-black/[0.05] transition-all duration-200 active:scale-90"
+                >
+                  <X size={18} />
+                </button>
+              ) : null}
+              <div className={`flex flex-col gap-2 ${!selectedItem.imageUrl ? 'pr-12' : ''}`}>
                 <h2 id="branded-item-title" className="font-serif text-[30px] font-bold leading-tight" style={{ color: ink }}>
                   {getLocalizedField(selectedItem, 'name', language, defaultLanguage)}
                 </h2>
