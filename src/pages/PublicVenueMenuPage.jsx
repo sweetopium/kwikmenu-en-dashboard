@@ -24,7 +24,6 @@ const PublicVenueMenuPage = () => {
   const [data, setData] = useState(null);
   const [dataLoaded, setDataLoaded] = useState(false);
   const [fontsLoaded, setFontsLoaded] = useState(false);
-  const [imagesLoaded, setImagesLoaded] = useState(false);
   const [error, setError] = useState('');
   const [lastKnownTemplateType, setLastKnownTemplateType] = useState(() => getStoredTemplateType(venueId));
 
@@ -104,78 +103,7 @@ const PublicVenueMenuPage = () => {
     };
   }, [dataLoaded]);
 
-  // Preload critical images to prevent layout shift (CLS) under bad network conditions
-  useEffect(() => {
-    const activeMenuId = searchParams.get('menu');
-    if (!dataLoaded || !data || imagesLoaded || (data.menus?.length > 0 && !activeMenuId)) return undefined;
-
-    const urlsToPreload = new Set();
-
-    // 1. Venue cover image and logos
-    if (data.venue?.coverImageUrl) urlsToPreload.add(data.venue.coverImageUrl);
-    if (data.venue?.logoUrl) urlsToPreload.add(data.venue.logoUrl);
-    if (data.venue?.design?.logoUrl) urlsToPreload.add(data.venue.design.logoUrl);
-
-    // 2. Active menu promo banner image
-    const activeMenu = data.menus?.find((m) => m.id === activeMenuId) || data.menus?.[0];
-    if (activeMenu?.payload?.settings?.promo?.imageUrl) {
-      urlsToPreload.add(activeMenu.payload.settings.promo.imageUrl);
-    }
-
-    // 3. Item images from all categories in the active menu
-    if (activeMenu?.payload?.categories) {
-      activeMenu.payload.categories.forEach((category) => {
-        if (category.items) {
-          category.items.forEach((item) => {
-            if (item.imageUrl && item.isAvailable !== false) {
-              urlsToPreload.add(item.imageUrl);
-            }
-          });
-        }
-      });
-    }
-
-    const uniqueUrls = Array.from(urlsToPreload).filter((url) => typeof url === 'string' && url.trim());
-
-    if (uniqueUrls.length === 0) {
-      setImagesLoaded(true);
-      return undefined;
-    }
-
-    let loadedCount = 0;
-    let active = true;
-
-    // Failsafe timeout: if connection is slow, show page after 15s anyway and load the rest lazily
-    const failsafeTimeout = setTimeout(() => {
-      if (active) {
-        setImagesLoaded(true);
-      }
-    }, 15000);
-
-    const handleLoadComplete = () => {
-      loadedCount++;
-      if (loadedCount >= uniqueUrls.length) {
-        clearTimeout(failsafeTimeout);
-        if (active) {
-          setImagesLoaded(true);
-        }
-      }
-    };
-
-    uniqueUrls.forEach((url) => {
-      const img = new Image();
-      img.src = url;
-      img.onload = handleLoadComplete;
-      img.onerror = handleLoadComplete; // Count failed loads to avoid hanging
-    });
-
-    return () => {
-      active = false;
-      clearTimeout(failsafeTimeout);
-    };
-  }, [dataLoaded, data, searchParams, imagesLoaded]);
-
-  const isLoading = !error && (!dataLoaded || !fontsLoaded || !imagesLoaded);
+  const isLoading = !error && (!dataLoaded || !fontsLoaded);
   const menus = data?.menus || [];
   const requestedMenuId = searchParams.get('menu');
   const activeMenu = useMemo(() => {
