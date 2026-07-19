@@ -145,12 +145,12 @@ const PublicVenueMenuPage = () => {
     let loadedCount = 0;
     let active = true;
 
-    // Failsafe timeout: if connection is slow, show page after 2.5s anyway and load the rest lazily
+    // Failsafe timeout: if connection is slow, show page after 15s anyway and load the rest lazily
     const failsafeTimeout = setTimeout(() => {
       if (active) {
         setImagesLoaded(true);
       }
-    }, 2500);
+    }, 15000);
 
     const handleLoadComplete = () => {
       loadedCount++;
