@@ -65,6 +65,44 @@ const COPY = {
     addToOrder: 'Добавить в заказ',
     clearOrder: 'Очистить заказ'
   },
+  tr: { 
+    menu: 'Menü', 
+    featured: 'Önerilenler', 
+    search: 'Menüde ara', 
+    noResults: 'Sonuç bulunamadı', 
+    about: 'Hakkında', 
+    contacts: 'İletişim', 
+    wifi: 'Misafir Wi-Fi', 
+    copied: 'Kopyalandı', 
+    share: 'Paylaş', 
+    from: 'itibaren', 
+    close: 'Kapat', 
+    powered: 'KwikMenu tarafından desteklenmektedir',
+    cartTitle: 'Siparişim',
+    cartEmpty: 'Siparişiniz boş',
+    waiterMessage: 'Sipariş vermek için bu listeyi garsona gösterin',
+    addToOrder: 'Siparişe Ekle',
+    clearOrder: 'Siparişi Temizle'
+  },
+  es: { 
+    menu: 'Menú', 
+    featured: 'Recomendado', 
+    search: 'Buscar en el menú', 
+    noResults: 'No se encontraron resultados', 
+    about: 'Acerca de', 
+    contacts: 'Contactos', 
+    wifi: 'Wi-Fi para invitados', 
+    copied: 'Copiado', 
+    share: 'Compartir', 
+    from: 'desde', 
+    close: 'Cerrar', 
+    powered: 'Desarrollado por KwikMenu',
+    cartTitle: 'Mi Pedido',
+    cartEmpty: 'Tu pedido está vacío',
+    waiterMessage: 'Muestra esta lista al camarero para realizar tu pedido',
+    addToOrder: 'Añadir al pedido',
+    clearOrder: 'Limpiar pedido'
+  },
 };
 
 const labelFor = (language, key) => COPY[String(language || 'en').split('-')[0]]?.[key] || COPY.en[key];
