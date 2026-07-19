@@ -379,7 +379,7 @@ const BrandedPublicMenuTemplate = ({ venue, menu, accentColor = '#25392f', activ
       );
     }
     return (
-      <button key={item.id} onClick={() => handleSelectItem(item)} className="h-full flex flex-col overflow-hidden rounded-[20px] bg-white text-left shadow-sm transition-all duration-300 active:scale-[0.97] hover:-translate-y-0.5">
+      <button key={item.id} onClick={() => handleSelectItem(item)} className="w-full h-full flex flex-col overflow-hidden rounded-[20px] bg-white text-left shadow-sm transition-all duration-300 active:scale-[0.97] hover:-translate-y-0.5">
         <div className="relative w-full aspect-[4/3] overflow-hidden shrink-0 bg-stone-100">
           <SafeImage src={item.imageUrl} alt={name} className="h-full w-full object-cover transition-transform duration-500 hover:scale-[1.03]" />
           {item.badge ? <span className="absolute left-2.5 top-2.5 rounded-full bg-white/92 px-2.5 py-1 text-[9px] font-black uppercase tracking-[0.12em]" style={{ color: ink }}>{item.badge.replace('-', ' ')}</span> : null}
