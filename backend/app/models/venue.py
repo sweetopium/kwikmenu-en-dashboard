@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from sqlalchemy import Boolean, ForeignKey, String, Text
+from sqlalchemy import Boolean, ForeignKey, JSON, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base import Base, TimestampMixin, UUIDPrimaryKeyMixin
@@ -16,6 +16,9 @@ class Venue(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     city: Mapped[str | None] = mapped_column(String(128), nullable=True)
     description: Mapped[str | None] = mapped_column(Text, nullable=True)
     instagram_url: Mapped[str | None] = mapped_column(String(512), nullable=True)
+    website_url: Mapped[str | None] = mapped_column(String(512), nullable=True)
+    address_line: Mapped[str | None] = mapped_column(String(512), nullable=True)
+    business_hours_text: Mapped[str | None] = mapped_column(String(255), nullable=True)
 
     menus: Mapped[list["Menu"]] = relationship(back_populates="venue", cascade="all, delete-orphan")
     import_jobs: Mapped[list["MenuImportJob"]] = relationship(back_populates="venue")
@@ -39,6 +42,7 @@ class VenueSettings(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     design_template: Mapped[str] = mapped_column(String(32), nullable=False, default="classic")
     design_accent_color: Mapped[str] = mapped_column(String(16), nullable=False, default="#6d67eb")
     design_logo_url: Mapped[str | None] = mapped_column(Text, nullable=True)
+    design_config: Mapped[dict] = mapped_column(JSON, nullable=False, default=dict)
 
     qr_style: Mapped[str] = mapped_column(String(32), nullable=False, default="rounded")
     qr_color: Mapped[str] = mapped_column(String(16), nullable=False, default="#863bff")

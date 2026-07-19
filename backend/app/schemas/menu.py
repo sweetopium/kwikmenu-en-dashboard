@@ -69,6 +69,8 @@ class LocalizedContent(StrictModel):
     name: str | None = None
     description: str | None = None
     label: str | None = None
+    title: str | None = None
+    eyebrow: str | None = None
 
 
 class MenuLanguage(StrictModel):
@@ -76,6 +78,16 @@ class MenuLanguage(StrictModel):
     shortLabel: str
     nativeName: str
     flag: str | None = None
+
+
+class MenuPromo(StrictModel):
+    enabled: bool = False
+    eyebrow: str | None = Field(default=None, max_length=80)
+    title: str | None = Field(default=None, max_length=120)
+    description: str | None = Field(default=None, max_length=240)
+    imageUrl: str | None = None
+    targetCategoryId: str | None = None
+    translations: dict[str, LocalizedContent] = Field(default_factory=dict)
 
 
 class MenuSettings(StrictModel):
@@ -86,6 +98,7 @@ class MenuSettings(StrictModel):
     variantsLayout: str = "rows"
     showVariantPrices: bool = True
     addonsMode: str = "separate-category"
+    promo: MenuPromo = Field(default_factory=MenuPromo)
 
 
 class MenuMeta(StrictModel):

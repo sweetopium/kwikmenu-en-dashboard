@@ -508,7 +508,7 @@
       "templates": {
         "classic": "Classic",
         "minimal": "Advanced",
-        "accent": "Premium"
+        "accent": "Branded"
       },
       "colorLabel": "Accent color",
       "colorDesc": "Used for buttons, active states, and links.",

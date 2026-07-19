@@ -40,6 +40,7 @@ import {
   updateVenueWifi,
 } from "../lib/venuesApi";
 import { trackProductEvent } from "../lib/productAnalytics";
+import { createImageUploadUrl, uploadFileToPresignedUrl } from "../lib/mediaApi";
 
 const VENUE_TABS = [
   { id: 'profile', label: 'Profile', mobileLabel: 'Profile', icon: Store },
@@ -55,6 +56,9 @@ const EMPTY_VENUE = {
   city: '',
   country: '',
   instagramUrl: '',
+  websiteUrl: '',
+  addressLine: '',
+  businessHoursText: '',
   currency: 'USD',
   publicUrl: '',
 };
@@ -69,6 +73,15 @@ const EMPTY_DESIGN = {
   template: 'classic',
   accentColor: '#6d67eb',
   logoUrl: null,
+  branded: {
+    coverImageUrl: null,
+    secondaryColor: '#d49a5b',
+    showPromo: true,
+    showFeatured: true,
+    showSearch: true,
+    showAbout: true,
+    showKwikMenuBranding: true,
+  },
 };
 
 const EMPTY_QR = {
@@ -83,14 +96,6 @@ const EMPTY_QR = {
   publicPath: '',
   publicUrl: '',
 };
-
-const fileToDataUrl = (file) =>
-  new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => resolve(typeof reader.result === 'string' ? reader.result : null);
-    reader.onerror = reject;
-    reader.readAsDataURL(file);
-  });
 
 const DEFAULT_PHONE_COUNTRY = COUNTRIES[0];
 
@@ -155,7 +160,7 @@ const VenuePage = () => {
       },
       {
         id: 'accent',
-        label: t('venues.design.templates.accent', 'Premium'),
+        label: t('venues.design.templates.accent', 'Branded'),
         demoUrl: null,
       },
     ],
@@ -197,6 +202,9 @@ const VenuePage = () => {
       city: venue.city || '',
       country: venue.country || '',
       instagramUrl: venue.instagramUrl || '',
+      websiteUrl: venue.websiteUrl || '',
+      addressLine: venue.addressLine || '',
+      businessHoursText: venue.businessHoursText || '',
       currency: venue.currency || settings?.currency || 'USD',
       publicUrl: venue.publicUrl || settings?.qr?.publicUrl || '',
     });
@@ -214,6 +222,7 @@ const VenuePage = () => {
         template: settings.design?.template || 'classic',
         accentColor: settings.design?.accentColor || '#6d67eb',
         logoUrl: settings.design?.logoUrl || null,
+        branded: { ...EMPTY_DESIGN.branded, ...(settings.design?.branded || {}) },
       });
       setQrData({
         venueId: settings.venueId || venue.id,
@@ -277,6 +286,9 @@ const VenuePage = () => {
         city: venueData.city || null,
         country: venueData.country || null,
         instagramUrl: venueData.instagramUrl || null,
+        websiteUrl: venueData.websiteUrl || null,
+        addressLine: venueData.addressLine || null,
+        businessHoursText: venueData.businessHoursText || null,
         currency: venueData.currency || 'USD',
       });
       const phoneParts = resolvePhoneParts(venue.phone);
@@ -288,6 +300,9 @@ const VenuePage = () => {
         city: venue.city || '',
         country: venue.country || '',
         instagramUrl: venue.instagramUrl || '',
+        websiteUrl: venue.websiteUrl || '',
+        addressLine: venue.addressLine || '',
+        businessHoursText: venue.businessHoursText || '',
         currency: venue.currency || 'USD',
         publicUrl: venue.publicUrl || current.publicUrl,
       }));
@@ -338,11 +353,13 @@ const VenuePage = () => {
         template: designData.template,
         accentColor: designData.accentColor,
         logoUrl: designData.logoUrl || null,
+        branded: designData.branded,
       });
       setDesignData({
         template: settings.design?.template || 'classic',
         accentColor: settings.design?.accentColor || '#6d67eb',
         logoUrl: settings.design?.logoUrl || null,
+        branded: { ...EMPTY_DESIGN.branded, ...(settings.design?.branded || {}) },
       });
     } catch (nextError) {
       setError(nextError.message || t('venues.errors.saveDesignFailed', 'Failed to save menu appearance.'));
@@ -393,13 +410,38 @@ const VenuePage = () => {
 
   const handleDesignLogoUpload = async (event) => {
     const file = event.target.files?.[0];
-    if (!file) {
-      return;
+    if (!file) return;
+    setSaving('design', true);
+    setError('');
+    try {
+      const target = await createImageUploadUrl({ filename: file.name, contentType: file.type, assetType: 'venue-logo' });
+      await uploadFileToPresignedUrl({ uploadUrl: target.uploadUrl, headers: target.headers, file });
+      setDesignData((current) => ({ ...current, logoUrl: target.publicUrl }));
+    } catch (nextError) {
+      setError(nextError.message || 'Failed to upload logo.');
+    } finally {
+      setSaving('design', false);
+      event.target.value = '';
     }
+  };
 
-    const dataUrl = await fileToDataUrl(file);
-    if (dataUrl) {
-      setDesignData((current) => ({ ...current, logoUrl: dataUrl }));
+  const handleCoverUpload = async (event) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    setSaving('design', true);
+    setError('');
+    try {
+      const uploadTarget = await createImageUploadUrl({ filename: file.name, contentType: file.type, assetType: 'venue-cover' });
+      await uploadFileToPresignedUrl({ uploadUrl: uploadTarget.uploadUrl, headers: uploadTarget.headers, file });
+      setDesignData((current) => ({
+        ...current,
+        branded: { ...current.branded, coverImageUrl: uploadTarget.publicUrl },
+      }));
+    } catch (nextError) {
+      setError(nextError.message || 'Failed to upload cover image.');
+    } finally {
+      setSaving('design', false);
+      event.target.value = '';
     }
   };
 
@@ -530,6 +572,12 @@ const VenuePage = () => {
                   </div>
                 </div>
 
+                <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+                  <div className="space-y-2"><Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Website</Label><Input value={venueData.websiteUrl} onChange={(event) => setVenueData({ ...venueData, websiteUrl: event.target.value })} className={formFieldClasses} placeholder="https://restaurant.com" /></div>
+                  <div className="space-y-2"><Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Opening hours</Label><Input value={venueData.businessHoursText} onChange={(event) => setVenueData({ ...venueData, businessHoursText: event.target.value })} className={formFieldClasses} placeholder="Daily 09:00–23:00" /></div>
+                </div>
+                <div className="space-y-2"><Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Full address</Label><Input value={venueData.addressLine} onChange={(event) => setVenueData({ ...venueData, addressLine: event.target.value })} className={formFieldClasses} placeholder="Street, building, district" /></div>
+
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 border-t border-border/50 pt-6">
                   <div className="space-y-2">
                     <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">{t('venues.fields.city', 'City')}</Label>
@@ -645,7 +693,7 @@ const VenuePage = () => {
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                     {templateOptions.map((template) => (
                       (() => {
-                        const isDisabled = template.id === 'accent';
+                        const isDisabled = false;
                         const isSelected = designData.template === template.id;
 
                         return (
@@ -715,13 +763,44 @@ const VenuePage = () => {
                   </div>
                 </div>
 
+                {designData.template === 'accent' ? (
+                  <div className="pt-6 border-t border-border/50 space-y-6">
+                    <div>
+                      <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Branded hero cover</Label>
+                      <p className="mt-1 text-sm text-muted-foreground">Wide restaurant photo shown behind the name. If empty, the brand colors create the hero.</p>
+                    </div>
+                    <input id="branded-cover-input" type="file" accept="image/png,image/jpeg,image/webp" onChange={handleCoverUpload} className="hidden" />
+                    <label htmlFor="branded-cover-input" className="relative flex aspect-[16/7] w-full cursor-pointer items-center justify-center overflow-hidden rounded-2xl border-2 border-dashed border-input bg-secondary/30 hover:bg-secondary/50">
+                      {designData.branded.coverImageUrl ? <img src={designData.branded.coverImageUrl} alt="Branded cover" className="h-full w-full object-cover" /> : <span className="flex items-center gap-2 text-sm font-bold text-muted-foreground"><ImageIcon size={20} />Choose cover image</span>}
+                    </label>
+                    {designData.branded.coverImageUrl ? <Button type="button" variant="outline" size="sm" onClick={() => setDesignData((current) => ({ ...current, branded: { ...current.branded, coverImageUrl: null } }))}>Remove cover</Button> : null}
+
+                    <div className="space-y-3">
+                      <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Secondary brand color</Label>
+                      <div className="flex items-center gap-3">
+                        <input type="color" value={designData.branded.secondaryColor} onChange={(event) => setDesignData((current) => ({ ...current, branded: { ...current.branded, secondaryColor: event.target.value } }))} className="h-10 w-14 cursor-pointer rounded-lg border border-input bg-transparent p-1" />
+                        <Input value={designData.branded.secondaryColor} onChange={(event) => setDesignData((current) => ({ ...current, branded: { ...current.branded, secondaryColor: event.target.value } }))} className={`${formFieldClasses} max-w-36`} />
+                      </div>
+                    </div>
+
+                    <div className="space-y-3">
+                      {[['showPromo', 'Promo banner'], ['showFeatured', 'Recommended dishes'], ['showSearch', 'Menu search'], ['showAbout', 'About & contacts'], ['showKwikMenuBranding', 'KwikMenu footer credit']].map(([key, label]) => (
+                        <div key={key} className="flex items-center justify-between rounded-xl border border-border/60 bg-secondary/20 px-4 py-3">
+                          <Label htmlFor={`branded-${key}`} className="text-sm font-semibold">{label}</Label>
+                          <Switch id={`branded-${key}`} checked={designData.branded[key]} onCheckedChange={(checked) => setDesignData((current) => ({ ...current, branded: { ...current.branded, [key]: checked } }))} />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ) : null}
+
                 <div className="pt-6 border-t border-border/50 space-y-4">
                   <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">{t('venues.design.logoLabel', 'Venue logo in menu')}</Label>
                   <div className="flex items-center gap-6">
                     <input
                       id="venue-logo-input"
                       type="file"
-                      accept="image/png,image/jpeg,image/jpg,image/webp,image/svg+xml"
+                      accept="image/png,image/jpeg,image/jpg,image/webp"
                       onChange={handleDesignLogoUpload}
                       className="hidden"
                     />
@@ -737,7 +816,7 @@ const VenuePage = () => {
                     </label>
                     <div className="space-y-1">
                       <p className="text-sm font-bold">{t('venues.design.logoUploadTitle', 'Upload a square logo')}</p>
-                      <p className="text-xs text-muted-foreground">{t('venues.design.logoUploadDesc', 'Recommended size 512x512px, PNG or SVG')}</p>
+                      <p className="text-xs text-muted-foreground">{t('venues.design.logoUploadDesc', 'Recommended size 512x512px, PNG or WEBP')}</p>
                       <Button
                         asChild
                         variant="outline"

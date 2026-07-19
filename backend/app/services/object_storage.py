@@ -55,6 +55,9 @@ class ObjectStorageClient:
         )
 
     def generate_menu_item_upload(self, *, user_id: str, filename: str, content_type: str) -> PresignedUpload:
+        return self.generate_image_upload(user_id=user_id, filename=filename, content_type=content_type, asset_type="menu-item")
+
+    def generate_image_upload(self, *, user_id: str, filename: str, content_type: str, asset_type: str) -> PresignedUpload:
         self.ensure_configured()
 
         normalized_content_type = content_type.strip().lower()
@@ -67,7 +70,17 @@ class ObjectStorageClient:
 
         suffix = Path(filename).suffix.lower()
         object_extension = extension if extension == ".webp" else suffix or extension
-        object_key = f"menu-items/{user_id}/{uuid4().hex}{object_extension}"
+        asset_prefixes = {
+            "menu-item": "menu-items",
+            "category": "menu-categories",
+            "promo": "menu-promos",
+            "venue-cover": "venue-covers",
+            "venue-logo": "venue-logos",
+        }
+        prefix = asset_prefixes.get(asset_type)
+        if prefix is None:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Unsupported media asset type.")
+        object_key = f"{prefix}/{user_id}/{uuid4().hex}{object_extension}"
         upload_url = self._client.generate_presigned_url(
             "put_object",
             Params={

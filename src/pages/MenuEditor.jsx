@@ -54,6 +54,7 @@ const MenuEditor = () => {
   const [editingCategory, setEditingCategory] = useState(null);
   const [editingItem, setEditingItem] = useState(null);
   const [editingMenuMeta, setEditingMenuMeta] = useState(null);
+  const [editingPromo, setEditingPromo] = useState(null);
   const [modalMode, setModalMode] = useState('edit');
   const [originalCategoryId, setOriginalCategoryId] = useState(null);
   const [targetCategoryId, setTargetCategoryId] = useState(null);
@@ -195,11 +196,21 @@ const MenuEditor = () => {
 
   const handleEditMenuMeta = () => {
     setEditingMenuMeta(JSON.parse(JSON.stringify(menu.menuMeta)));
+    setEditingPromo(JSON.parse(JSON.stringify(menu.settings?.promo || {
+      enabled: false,
+      eyebrow: '',
+      title: '',
+      description: '',
+      imageUrl: null,
+      targetCategoryId: null,
+      translations: {},
+    })));
   };
 
   const handleSaveMenuMeta = () => {
-    setMenu({ ...menu, menuMeta: editingMenuMeta });
+    setMenu({ ...menu, menuMeta: editingMenuMeta, settings: { ...menu.settings, promo: editingPromo } });
     setEditingMenuMeta(null);
+    setEditingPromo(null);
   };
 
   const handleSaveCategory = () => {
@@ -800,10 +811,13 @@ const MenuEditor = () => {
 
       <MenuMetaModal
         menuMeta={editingMenuMeta}
+        promo={editingPromo}
+        categories={menu.categories}
         language={editorLanguage}
         defaultLanguage={menu.defaultLanguage}
         onChange={setEditingMenuMeta}
-        onCancel={() => setEditingMenuMeta(null)}
+        onPromoChange={setEditingPromo}
+        onCancel={() => { setEditingMenuMeta(null); setEditingPromo(null); }}
         onSave={handleSaveMenuMeta}
       />
 

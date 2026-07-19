@@ -1,17 +1,39 @@
+import { useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { X } from 'lucide-react';
+import { Image as ImageIcon, Upload, X } from 'lucide-react';
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
 import { formFieldClasses, formTextareaClasses, primaryActionButtonClasses, secondaryActionButtonClasses } from "../../lib/uiStyles";
 import { getLocalizedField, setLocalizedField } from "./menuEditorUtils";
+import { createImageUploadUrl, uploadFileToPresignedUrl } from "../../lib/mediaApi";
 
 const CategoryModal = ({ category, language, defaultLanguage, onChange, onCancel, onSave }) => {
   const { t } = useTranslation();
+  const [imageError, setImageError] = useState('');
+  const [isUploading, setIsUploading] = useState(false);
+  const fileInputRef = useRef(null);
   if (!category) return null;
 
   const localizedName = getLocalizedField(category, 'name', language, defaultLanguage);
   const localizedDescription = getLocalizedField(category, 'description', language, defaultLanguage);
+
+  const handleImageUpload = async (event) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    setIsUploading(true);
+    setImageError('');
+    try {
+      const target = await createImageUploadUrl({ filename: file.name, contentType: file.type, assetType: 'category' });
+      await uploadFileToPresignedUrl({ uploadUrl: target.uploadUrl, headers: target.headers, file });
+      onChange({ ...category, imageUrl: target.publicUrl });
+    } catch (error) {
+      setImageError(error instanceof Error ? error.message : 'Could not upload category image.');
+    } finally {
+      setIsUploading(false);
+      event.target.value = '';
+    }
+  };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-black/40 backdrop-blur-sm animate-in fade-in duration-200">
@@ -66,12 +88,12 @@ const CategoryModal = ({ category, language, defaultLanguage, onChange, onCancel
               {t('menuEditor.categoryModal.imageLabel', 'Category image')}
             </Label>
 
-            <Input
-              value={category.imageUrl || ''}
-              onChange={(event) => onChange({ ...category, imageUrl: event.target.value || null })}
-              className={formFieldClasses}
-              placeholder="https://..."
-            />
+            <div className="flex items-center gap-3 rounded-2xl border border-border/60 bg-secondary/15 p-3">
+              <div className="flex h-16 w-20 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-background">{category.imageUrl ? <img src={category.imageUrl} alt="" className="h-full w-full object-cover" /> : <ImageIcon size={20} className="text-muted-foreground" />}</div>
+              <div className="min-w-0 flex-1 space-y-2"><input ref={fileInputRef} type="file" accept="image/jpeg,image/png,image/webp" className="hidden" onChange={handleImageUpload} /><Button type="button" variant="outline" size="sm" onClick={() => fileInputRef.current?.click()} disabled={isUploading}><Upload size={14} className="mr-2" />{isUploading ? 'Uploading...' : 'Upload image'}</Button>{category.imageUrl ? <button type="button" onClick={() => onChange({ ...category, imageUrl: null })} className="ml-2 text-xs font-semibold text-destructive">Remove</button> : null}</div>
+            </div>
+            {imageError ? <p className="text-xs font-medium text-destructive">{imageError}</p> : null}
+            <Input value={category.imageUrl || ''} onChange={(event) => onChange({ ...category, imageUrl: event.target.value || null })} className={formFieldClasses} placeholder="Or paste https://..." />
           </div>
 
           <div className="grid grid-cols-2 gap-4">

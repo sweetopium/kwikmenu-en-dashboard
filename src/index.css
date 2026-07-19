@@ -1,3 +1,4 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap');
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
@@ -8,6 +9,7 @@
 @theme inline {
     --font-heading: var(--font-sans);
     --font-sans: 'Geist Variable', sans-serif;
+    --font-serif: 'Playfair Display', Georgia, Cambria, "Times New Roman", Times, serif;
 
     /* Custom brand accent color for AI features and icons */
     --color-brand-purple: var(--brand-purple);

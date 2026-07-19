@@ -88,6 +88,9 @@ def get_public_venue_menus(
             city=venue.city,
             country=venue.country,
             instagramUrl=venue.instagram_url,
+            websiteUrl=venue.website_url,
+            addressLine=venue.address_line,
+            businessHoursText=venue.business_hours_text,
             currency=venue_settings.currency,
             publicPath=build_public_path(venue),
             publicUrl=build_public_url(venue),
@@ -95,6 +98,7 @@ def get_public_venue_menus(
                 template=venue_settings.design_template,
                 accentColor=venue_settings.design_accent_color,
                 logoUrl=venue_settings.design_logo_url,
+                branded=venue_settings.design_config or {},
             ),
             wifi=PublicVenueWifiResponse(
                 enabled=venue_settings.wifi_enabled,
@@ -193,5 +197,3 @@ def get_public_promo_page(
         "title": page.title,
         "content": page.content,
     }
-
-

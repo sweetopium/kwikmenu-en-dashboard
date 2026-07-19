@@ -22,7 +22,8 @@ const PublicVenueMenuPage = () => {
   const { venueId } = useParams();
   const [searchParams, setSearchParams] = useSearchParams();
   const [data, setData] = useState(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [dataLoaded, setDataLoaded] = useState(false);
+  const [fontsLoaded, setFontsLoaded] = useState(false);
   const [error, setError] = useState('');
   const [lastKnownTemplateType, setLastKnownTemplateType] = useState(() => getStoredTemplateType(venueId));
 
@@ -31,11 +32,11 @@ const PublicVenueMenuPage = () => {
 
     if (!venueId) {
       setError(t('publicVenueMenu.errors.invalidLink'));
-      setIsLoading(false);
+      setDataLoaded(true);
       return undefined;
     }
 
-    setIsLoading(true);
+    setDataLoaded(false);
     setError('');
     getPublicVenueMenus(venueId)
       .then((payload) => {
@@ -55,7 +56,7 @@ const PublicVenueMenuPage = () => {
       })
       .finally(() => {
         if (!isCancelled) {
-          setIsLoading(false);
+          setDataLoaded(true);
         }
       });
 
@@ -64,6 +65,45 @@ const PublicVenueMenuPage = () => {
     };
   }, [venueId, t]);
 
+  useEffect(() => {
+    if (!dataLoaded) return undefined;
+
+    let active = true;
+    const failsafeTimeout = setTimeout(() => {
+      if (active) {
+        setFontsLoaded(true);
+      }
+    }, 850);
+
+    if (typeof document !== 'undefined' && document.fonts) {
+      Promise.all([
+        document.fonts.load('1em "Playfair Display"'),
+        document.fonts.load('1em "Geist Variable"'),
+      ])
+        .then(() => {
+          clearTimeout(failsafeTimeout);
+          if (active) {
+            setFontsLoaded(true);
+          }
+        })
+        .catch(() => {
+          clearTimeout(failsafeTimeout);
+          if (active) {
+            setFontsLoaded(true);
+          }
+        });
+    } else {
+      clearTimeout(failsafeTimeout);
+      setFontsLoaded(true);
+    }
+
+    return () => {
+      active = false;
+      clearTimeout(failsafeTimeout);
+    };
+  }, [dataLoaded]);
+
+  const isLoading = !error && (!dataLoaded || !fontsLoaded);
   const menus = data?.menus || [];
   const requestedMenuId = searchParams.get('menu');
   const activeMenu = useMemo(() => {

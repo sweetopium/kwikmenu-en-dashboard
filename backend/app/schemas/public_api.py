@@ -1,12 +1,16 @@
 from __future__ import annotations
 
+from pydantic import Field
+
 from app.schemas.menu import MenuPayload, StrictModel
+from app.schemas.venue_api import BrandedDesignConfig
 
 
 class PublicVenueDesignResponse(StrictModel):
     template: str = "classic"
     accentColor: str = "#6d67eb"
     logoUrl: str | None = None
+    branded: BrandedDesignConfig = Field(default_factory=BrandedDesignConfig)
 
 
 class PublicVenueWifiResponse(StrictModel):
@@ -34,6 +38,9 @@ class PublicVenueResponse(StrictModel):
     city: str | None = None
     country: str | None = None
     instagramUrl: str | None = None
+    websiteUrl: str | None = None
+    addressLine: str | None = None
+    businessHoursText: str | None = None
     currency: str = "USD"
     publicPath: str
     publicUrl: str

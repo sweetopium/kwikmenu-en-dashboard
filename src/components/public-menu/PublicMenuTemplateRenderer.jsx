@@ -1,11 +1,12 @@
 import SimplePublicMenuTemplate from './templates/SimplePublicMenuTemplate.jsx';
 import ExtendedPublicMenuTemplate from './templates/ExtendedPublicMenuTemplate.jsx';
+import BrandedPublicMenuTemplate from './templates/BrandedPublicMenuTemplate.jsx';
 import { normalizeTemplateType } from '../../lib/publicMenuUtils';
 
 const TEMPLATE_COMPONENTS = {
   simple: SimplePublicMenuTemplate,
   extended: ExtendedPublicMenuTemplate,
-  premium: SimplePublicMenuTemplate,
+  premium: BrandedPublicMenuTemplate,
 };
 
 const PublicMenuTemplateRenderer = (props) => {

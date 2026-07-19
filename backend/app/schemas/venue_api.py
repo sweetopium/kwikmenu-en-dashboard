@@ -15,6 +15,9 @@ class VenueCreateRequest(StrictModel):
     description: str | None = None
     currency: str | None = Field(default=None, max_length=8)
     instagramUrl: str | None = Field(default=None, max_length=512)
+    websiteUrl: str | None = Field(default=None, max_length=512)
+    addressLine: str | None = Field(default=None, max_length=512)
+    businessHoursText: str | None = Field(default=None, max_length=255)
 
 
 class VenueProfileUpdateRequest(StrictModel):
@@ -25,6 +28,9 @@ class VenueProfileUpdateRequest(StrictModel):
     description: str | None = None
     currency: str | None = Field(default=None, max_length=8)
     instagramUrl: str | None = Field(default=None, max_length=512)
+    websiteUrl: str | None = Field(default=None, max_length=512)
+    addressLine: str | None = Field(default=None, max_length=512)
+    businessHoursText: str | None = Field(default=None, max_length=255)
 
 
 class VenueWifiSettingsUpdateRequest(StrictModel):
@@ -33,10 +39,21 @@ class VenueWifiSettingsUpdateRequest(StrictModel):
     password: str | None = Field(default=None, max_length=255)
 
 
+class BrandedDesignConfig(StrictModel):
+    coverImageUrl: str | None = None
+    secondaryColor: str = Field(default="#d49a5b", min_length=4, max_length=16)
+    showPromo: bool = True
+    showFeatured: bool = True
+    showSearch: bool = True
+    showAbout: bool = True
+    showKwikMenuBranding: bool = True
+
+
 class VenueDesignSettingsUpdateRequest(StrictModel):
     template: str = Field(min_length=2, max_length=32)
     accentColor: str = Field(min_length=4, max_length=16)
     logoUrl: str | None = None
+    branded: BrandedDesignConfig = Field(default_factory=BrandedDesignConfig)
 
 
 class VenueQrSettingsUpdateRequest(StrictModel):
@@ -59,6 +76,7 @@ class VenueDesignSettingsResponse(StrictModel):
     template: str = "classic"
     accentColor: str = "#6d67eb"
     logoUrl: str | None = None
+    branded: BrandedDesignConfig = Field(default_factory=BrandedDesignConfig)
 
 
 class VenueQrSettingsResponse(StrictModel):
@@ -92,6 +110,9 @@ class VenueResponse(StrictModel):
     city: str | None = None
     description: str | None = None
     instagramUrl: str | None = None
+    websiteUrl: str | None = None
+    addressLine: str | None = None
+    businessHoursText: str | None = None
     currency: str = "USD"
     publicPath: str
     publicUrl: str

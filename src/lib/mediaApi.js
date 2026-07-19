@@ -32,6 +32,19 @@ export const createMenuItemImageUploadUrl = async ({ filename, contentType }) =>
   return response.json();
 };
 
+export const createImageUploadUrl = async ({ filename, contentType, assetType }) => {
+  const response = await fetch('/api/media/image/upload-url', {
+    method: 'POST',
+    credentials: 'include',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ filename, contentType, assetType }),
+  });
+  if (!response.ok) {
+    await parseApiError(response, `Media request failed with status ${response.status}`);
+  }
+  return response.json();
+};
+
 export const uploadFileToPresignedUrl = async ({ uploadUrl, headers, file }) => {
   const response = await fetch(uploadUrl, {
     method: 'PUT',
