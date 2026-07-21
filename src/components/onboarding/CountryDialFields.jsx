@@ -148,13 +148,16 @@ export const CountryField = ({
   onCountryChange,
   label,
   required = false,
+  labelClassName = 'text-foreground font-medium ml-1 text-[11px] sm:text-xs sm:text-sm',
+  selectClassName = inputBaseClasses,
 }) => {
   const { t } = useTranslation();
   const displayLabel = label !== undefined ? label : t('common.country', { defaultValue: 'Country' });
+  const hasKnownCountry = COUNTRIES.some((country) => country.id === selectedCountry);
 
   return (
     <div className="space-y-1.5 sm:space-y-2">
-      <Label htmlFor="country" className="text-foreground font-medium ml-1 text-[11px] sm:text-xs sm:text-sm">
+      <Label htmlFor="country" className={labelClassName}>
         {displayLabel} {required && <span className="text-red-500">*</span>}
       </Label>
       <div className="relative">
@@ -162,8 +165,14 @@ export const CountryField = ({
           id="country"
           value={selectedCountry}
           onChange={(e) => onCountryChange(e.target.value)}
-          className={`${inputBaseClasses} pr-10 cursor-pointer text-[11px] sm:text-base`}
+          className={`${selectClassName} appearance-none pr-10 cursor-pointer text-[11px] sm:text-base`}
         >
+          {!selectedCountry && (
+            <option value="" disabled>{t('common.selectCountry', { defaultValue: 'Select country' })}</option>
+          )}
+          {selectedCountry && !hasKnownCountry && (
+            <option value={selectedCountry}>{selectedCountry}</option>
+          )}
           {COUNTRIES.map((country) => (
             <option key={country.id} value={country.id}>
               {country.flag} {t(`countries.${country.id}`, { defaultValue: country.name })}

@@ -77,11 +77,13 @@ const UploadPage = () => {
 
   const handleStep1Submit = async (e) => {
     e.preventDefault();
+    const country = COUNTRIES.find((item) => item.id === selectedCountry);
     const venue = await createVenue({
       name: restaurant,
       phone: `${selectedDial} ${phone}`.trim(),
       city,
       country: selectedCountry,
+      currency: country?.currency || 'USD',
     });
 
     if (typeof window !== 'undefined') {

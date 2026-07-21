@@ -21,7 +21,7 @@ import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
 import { Switch } from "../components/ui/switch";
 import { Textarea } from "../components/ui/textarea";
-import { DialPhoneField, formatPhoneByDial, stripPhoneDigits } from "../components/onboarding/CountryDialFields";
+import { CountryField, DialPhoneField, formatPhoneByDial, stripPhoneDigits } from "../components/onboarding/CountryDialFields";
 import { COUNTRIES } from "../components/onboarding/countries";
 import SettingsPageHeader from "../components/settings/SettingsPageHeader";
 import VenueQrSection from "../components/venue/VenueQrSection";
@@ -176,6 +176,21 @@ const VenuePage = () => {
   const handlePhoneDialChange = (nextDial) => {
     setPhoneDial(nextDial);
     setPhoneLocalNumber((currentPhone) => formatPhoneByDial(currentPhone, nextDial));
+  };
+
+  const handleVenueCountryChange = (countryId) => {
+    const country = COUNTRIES.find((item) => item.id === countryId);
+    if (!country) {
+      return;
+    }
+
+    setVenueData((current) => ({
+      ...current,
+      country: country.id,
+      currency: country.currency,
+    }));
+    setPhoneCountryId(country.id);
+    handlePhoneDialChange(country.dial);
   };
 
   const handleTabChange = (tabId) => {
@@ -579,7 +594,7 @@ const VenuePage = () => {
                 </div>
                 <div className="space-y-2"><Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Full address</Label><Input value={venueData.addressLine} onChange={(event) => setVenueData({ ...venueData, addressLine: event.target.value })} className={formFieldClasses} placeholder="Street, building, district" /></div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 border-t border-border/50 pt-6">
+                <div className="grid grid-cols-1 gap-6 border-t border-border/50 pt-6 sm:grid-cols-2 lg:grid-cols-3">
                   <div className="space-y-2">
                     <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">{t('venues.fields.city', 'City')}</Label>
                     <div className="relative">
@@ -591,6 +606,13 @@ const VenuePage = () => {
                       />
                     </div>
                   </div>
+                  <CountryField
+                    selectedCountry={venueData.country}
+                    onCountryChange={handleVenueCountryChange}
+                    label={t('venues.fields.country', 'Country')}
+                    labelClassName="text-xs font-semibold text-muted-foreground uppercase tracking-wider"
+                    selectClassName={formSelectClasses}
+                  />
                   <div className="space-y-2">
                     <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">{t('venues.fields.currency', 'Menu currency')}</Label>
                     <div className="relative">

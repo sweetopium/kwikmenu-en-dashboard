@@ -36,28 +36,6 @@ const isRetryablePollError = (error) => (
   || error?.status >= 500
 );
 
-const COUNTRY_CURRENCY = {
-  us: 'USD',
-  gb: 'GBP',
-  ca: 'CAD',
-  au: 'AUD',
-  ie: 'EUR',
-  ru: 'RUB',
-  by: 'BYN',
-  kz: 'KZT',
-  ae: 'AED',
-  de: 'EUR',
-  fr: 'EUR',
-  es: 'EUR',
-  it: 'EUR',
-  nl: 'EUR',
-  pt: 'EUR',
-  tr: 'TRY',
-  sg: 'SGD',
-  hk: 'HKD',
-  in: 'USD',
-};
-
 const MagicDemoPage = () => {
   const [token, setToken] = useState(() => getStoredDemoToken());
   const [tokenInput, setTokenInput] = useState(() => getStoredDemoToken());
@@ -194,10 +172,7 @@ const MagicDemoPage = () => {
     const country = COUNTRIES.find((item) => item.id === countryId);
     if (country) {
       setSelectedDial(country.dial);
-    }
-    const nextCurrency = COUNTRY_CURRENCY[countryId];
-    if (nextCurrency) {
-      setCurrency(nextCurrency);
+      setCurrency(country.currency);
     }
   };
 

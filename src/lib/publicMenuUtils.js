@@ -33,6 +33,9 @@ const CURRENCY_SYMBOLS = {
   AZN: '₼',
   CNY: '¥',
   JPY: '¥',
+  IDR: 'Rp',
+  THB: '฿',
+  VND: '₫',
 };
 
 export const normalizeTemplateType = (value) => {
@@ -222,13 +225,14 @@ export const formatCurrency = (price, currencyCode = 'USD') => {
 
   const rawPrice = String(price).trim();
   const configuredSymbol = getCurrencySymbol(currencyCode);
-  const symbolMatch = rawPrice.match(/[₽$€£¥₺₾֏₼]|so'm|DH|Br|KGS/iu);
+  const symbolMatch = rawPrice.match(/[₽$€£¥₺₾֏₼฿₫]|so'm|DH|Br|KGS|Rp/iu);
   const amount = rawPrice
-    .replace(/[₽$€£¥₺₾֏₼]/g, '')
+    .replace(/[₽$€£¥₺₾֏₼฿₫]/g, '')
     .replace(/so'm/giu, '')
     .replace(/DH/giu, '')
     .replace(/Br/giu, '')
     .replace(/KGS/giu, '')
+    .replace(/Rp/giu, '')
     .trim();
 
   return {

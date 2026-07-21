@@ -11,6 +11,9 @@ export const TOP_CURRENCIES = [
   { code: 'SGD', flag: '🇸🇬', label: 'Singapore Dollar', symbol: 'S$' },
   { code: 'HKD', flag: '🇭🇰', label: 'Hong Kong Dollar', symbol: 'HK$' },
   { code: 'TRY', flag: '🇹🇷', label: 'Turkish Lira', symbol: '₺' },
+  { code: 'IDR', flag: '🇮🇩', label: 'Indonesian Rupiah', symbol: 'Rp' },
+  { code: 'THB', flag: '🇹🇭', label: 'Thai Baht', symbol: '฿' },
+  { code: 'VND', flag: '🇻🇳', label: 'Vietnamese Dong', symbol: '₫' },
   { code: 'CNY', flag: '🇨🇳', label: 'Chinese Yuan', symbol: '¥' },
   { code: 'JPY', flag: '🇯🇵', label: 'Japanese Yen', symbol: '¥' },
 ];
